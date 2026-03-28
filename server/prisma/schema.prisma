@@ -179,3 +179,9 @@ model Transaction {
   @@index([status])
   @@index([txHash])
 }
+
+/// Tracks email addresses that have opted out of the daily digest.
+model DigestUnsubscribe {
+  email     String   @id
+  createdAt DateTime @default(now())
+}

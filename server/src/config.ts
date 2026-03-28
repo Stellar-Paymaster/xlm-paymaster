@@ -58,6 +58,13 @@ export interface AlertingConfig {
   twilio?: TwilioConfig;
 }
 
+export interface DigestConfig {
+  /** Cron expression (default: "0 8 * * *" = 08:00 local every day). */
+  cronSchedule: string;
+  /** Set to false via DIGEST_ENABLED=false to disable the worker entirely. */
+  enabled: boolean;
+}
+
 export interface Config {
   feePayerAccounts: FeePayerAccount[];
   signerPool: SignerPool;
@@ -71,6 +78,7 @@ export interface Config {
   rateLimitMax: number;
   allowedOrigins: string[];
   alerting: AlertingConfig;
+  digest: DigestConfig;
   supportedAssets?: SupportedAsset[];
   maxXdrSize: number;
   maxOperations: number;
@@ -208,6 +216,13 @@ function loadAlertingConfig(): AlertingConfig {
   };
 }
 
+function loadDigestConfig(): DigestConfig {
+  return {
+    cronSchedule: process.env.DIGEST_CRON_SCHEDULE?.trim() || "0 8 * * *",
+    enabled: process.env.DIGEST_ENABLED !== "false",
+  };
+}
+
 export function loadConfig(): Config {
   const baseFee = parsePositiveInt(process.env.FLUID_BASE_FEE, 100);
   const feeMultiplier = Number.parseFloat(
@@ -254,6 +269,7 @@ export function loadConfig(): Config {
   const sharedConfig = {
     allowedOrigins,
     alerting: loadAlertingConfig(),
+    digest: loadDigestConfig(),
     baseFee,
     feeMultiplier: Number.isFinite(feeMultiplier) ? feeMultiplier : 2,
     horizonSelectionStrategy,
