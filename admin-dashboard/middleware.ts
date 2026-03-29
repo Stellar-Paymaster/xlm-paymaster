@@ -7,10 +7,10 @@ export default auth((req) => {
 
   // Protect all /admin/* routes
   if (pathname.startsWith("/admin")) {
-    if (!session) {
-      const loginUrl = new URL("/login", req.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  //   if (!session) {
+  //     const loginUrl = new URL("/login", req.url);
+  //  return NextResponse.redirect(loginUrl);
+  //   }   
   }
 
   // Redirect authenticated users away from login page
