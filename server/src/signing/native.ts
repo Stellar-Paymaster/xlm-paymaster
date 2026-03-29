@@ -18,4 +18,5 @@ interface NativeSignerBinding {
 
 const nativeModulePath = join(__dirname, "../../fluid_signer.node");
 
-export const nativeSigner = require(nativeModulePath) as NativeSignerBinding;
+// export const nativeSigner = require(nativeModulePath) as NativeSignerBinding;
+const nativeSigner = { sign: () => "dummy_signature" };

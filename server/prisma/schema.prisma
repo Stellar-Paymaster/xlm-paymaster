@@ -10,19 +10,17 @@ datasource db {
 }
 
 model Tenant {
-  id                 String            @id @default(uuid())
-  name               String
-  dailyQuotaStroops  BigInt            @default(1000000) // 0.1 XLM default
-  totalCredit        BigInt            @default(0) // Total purchased credit
-  webhookUrl         String?
-  webhookSecret      String?
-  webhookEventTypes  String?
-  apiKeys            ApiKey[]
-  webhookDeliveries  WebhookDelivery[]
-  quotaTopUps QuotaTopUp[]
-  payments           Payment[]
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  id                    String                 @id @default(uuid())
+  name                  String // Add this
+  dailyQuotaStroops     BigInt? // Add this
+  totalCredit           Decimal? // Add this
+  quotaTopUps           QuotaTopUp[]
+  payments              Payment[]
+  sponsoredTransactions SponsoredTransaction[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt // Add this
+  apiKeys               ApiKey[]
+  webhookDeliveries     WebhookDelivery[]
 }
 
 model ApiKey {
@@ -41,35 +39,30 @@ model ApiKey {
 }
 
 model WebhookDelivery {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
   url         String
   payload     String
-  status      String   @default("pending") // pending, success, failed
-  retryCount  Int      @default(0)
+  status      String    @default("pending") // pending, success, failed
+  retryCount  Int       @default(0)
   lastError   String?
   nextAttempt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([status])
   @@index([tenantId])
 }
 
 model QuotaTopUp {
-  id              String   @id @default(uuid())
-  tenantId        String
-  tenant          Tenant   @relation(fields: [tenantId], references: [id])
-  stripeSessionId String   @unique
-  amountCents     Int
-  quotaStroops    BigInt
-  status          String   @default("pending") // pending, fulfilled, failed
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([tenantId])
-  @@index([status])
+  id        Int      @id @default(autoincrement())
+  amount    Int
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id]) // This fixes the second error
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model SupportedAsset {
@@ -90,6 +83,7 @@ model SponsoredTransaction {
   feeStroops BigInt
   createdAt  DateTime @default(now())
 }
+
 model SignerSecret {
   id                String   @id @default(uuid())
   publicKey         String   @unique
@@ -98,4 +92,32 @@ model SignerSecret {
   authTag           String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model server_configs {
+  id           Int      @id @default(autoincrement())
+  config_key   String   @unique
+  config_value Decimal
+  updated_at   DateTime @default(now())
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  username String?
+
+  payments    Payment[]
+  quotaTopUps QuotaTopUp[]
+  createdAt   DateTime     @default(now())
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  amount    Decimal
+  status    String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  tenantId  String? // Add this
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id]) // Add this
+  createdAt DateTime @default(now())
 }

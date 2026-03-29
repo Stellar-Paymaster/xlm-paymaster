@@ -1,4 +1,5 @@
 import "dotenv/config"; 
+import { updateConfigsHandler } from "./handlers/adminConfigs";
 
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
@@ -52,20 +53,21 @@ import { getLedgerMonitor, initializeLedgerMonitor } from "./workers/ledgerMonit
 import { transactionStore } from "./workers/transactionStore";
 import { healthHandler } from "./handlers/health";
 
-// import { apiKeyMiddleware } from "./middleware/apiKeys";
-import { apiKeyRateLimit } from "./middleware/rateLimit";
-import { notFoundHandler, globalErrorHandler } from "./middleware/errorHandler";
-import { AppError } from "./errors/AppError";
-
-import { initializeLedgerMonitor } from "./workers/ledgerMonitor";
-import { transactionStore } from "./workers/transactionStore";
 import { authMiddleware } from "./middleware/auth";
+const PORT = process.env.PORT || 8000;
 
 const app = express();
 app.use(express.json());
 
 // Initialize config after dotenv has loaded the variables
 const config = loadConfig();
+const slackNotifier = new SlackNotifier(loadSlackNotifierOptionsFromEnv());
+const alertingConfig = {
+  slackNotifier,
+  checkIntervalMs: 60000,
+  cooldownMs: 300000,
+};
+const alertService = new AlertService(alertingConfig);
 
 // Rate limiter configuration
 const limiter = rateLimit({
@@ -138,6 +140,7 @@ app.get(
     void getWebhookSettingsHandler(req, res, next);
   },
 );
+app.patch("/admin/configs", updateConfigsHandler);
 
 app.patch(
   "/tenant/webhook-settings",
@@ -229,7 +232,7 @@ async function shutdown(signal: string): Promise<void> {
 }
 
 // --- Background Workers ---
-let ledgerMonitor: any = null;
+
 if (config.horizonUrl) {
   try {
     ledgerMonitor = initializeLedgerMonitor(config);

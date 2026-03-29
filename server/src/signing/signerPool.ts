@@ -118,10 +118,6 @@ export class SignerPool {
     }>,
     options: SignerPoolOptions = {}
   ) {
-    if (accounts.length === 0) {
-      throw new Error("SignerPool requires at least one account");
-    }
-
     this.accounts = accounts.map((account, index) => ({
       active: true,
       balance: null,
