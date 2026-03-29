@@ -56,7 +56,7 @@ export default function SettingsPage() {
           <div>
             <label className="block text-sm font-medium">Base Fee</label>
             <input 
-              {...register("baseFee")}
+              {...register("baseFee",{ valueAsNumber: true })}
               type="number"
               className="w-full p-2 border rounded mt-1"
             />
@@ -66,7 +66,7 @@ export default function SettingsPage() {
           <div>
             <label className="block text-sm font-medium">Fee Multiplier</label>
             <input 
-              {...register("feeMultiplier")}
+              {...register("feeMultiplier",{ valueAsNumber: true })}
               type="number"
               step="0.1"
               className="w-full p-2 border rounded mt-1"
@@ -81,7 +81,7 @@ export default function SettingsPage() {
           <div>
             <label className="block text-sm font-medium">Low Balance Threshold</label>
             <input 
-              {...register("lowBalanceThreshold")}
+              {...register("lowBalanceThreshold",{ valueAsNumber: true })}
               type="number"
               className="w-full p-2 border rounded mt-1"
             />
