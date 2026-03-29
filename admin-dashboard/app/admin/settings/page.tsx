@@ -6,27 +6,28 @@ import * as z from "zod";
 import { toast } from "sonner"; // Or react-hot-toast
 
 // 1. Validation Schema (Requirement: Multiplier >= 1)
+
 const settingsSchema = z.object({
-  baseFee: z.coerce.number().min(0, "Base fee cannot be negative"),
-  feeMultiplier: z.coerce.number().min(1, "Multiplier must be at least 1"),
-  lowBalanceThreshold: z.coerce.number().min(0, "Threshold cannot be negative"),
+  baseFee: z.number(),
+  feeMultiplier: z.number(),
+  lowBalanceThreshold: z.number(),
 });
 
 type SettingsValues = z.infer<typeof settingsSchema>;
 
 export default function SettingsPage() {
   const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<SettingsValues>({
-    resolver: zodResolver(settingsSchema),
-    defaultValues: {
-      baseFee: 10,
-      feeMultiplier: 1,
-      lowBalanceThreshold: 50,
-    },
-  });
+  register,
+  handleSubmit,
+  formState: { errors, isSubmitting },
+} = useForm<SettingsValues>({
+  resolver: zodResolver(settingsSchema),
+  defaultValues: {
+    baseFee: 10,
+    feeMultiplier: 1,
+    lowBalanceThreshold: 50,
+  },
+});
 
   const onSubmit = async (data: SettingsValues) => {
     try {
