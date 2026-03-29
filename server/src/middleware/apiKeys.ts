@@ -55,6 +55,15 @@ export function maskApiKey(apiKey: string): string {
   return `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`;
 }
 
+function touchApiKeyLastUsed(apiKey: string): void {
+  void prisma.apiKey
+    .update({
+      where: { key: apiKey },
+      data: { lastUsedAt: new Date() },
+    })
+    .catch(() => {});
+}
+
 export async function apiKeyMiddleware(
   req: Request,
   res: Response,
@@ -81,6 +90,7 @@ export async function apiKeyMiddleware(
       console.log("[Redis] Cache Hit for API key:", maskApiKey(apiKey));
 
       res.locals.apiKey = JSON.parse(cached) as ApiKeyConfig;
+      touchApiKeyLastUsed(apiKey);
       return next();
     }
   } catch (err) {
@@ -138,6 +148,7 @@ export async function apiKeyMiddleware(
       );
 
       res.locals.apiKey = apiKeyConfig;
+      touchApiKeyLastUsed(apiKey);
       return next();
     }
   } catch (err) {
@@ -155,6 +166,7 @@ export async function apiKeyMiddleware(
   setCachedApiKey(apiKey, JSON.stringify(apiKeyConfig), 300).catch(() => {});
 
   res.locals.apiKey = apiKeyConfig;
+  touchApiKeyLastUsed(apiKey);
   next();
 }
 

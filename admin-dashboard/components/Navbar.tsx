@@ -50,6 +50,12 @@ export function Navbar() {
                         SDKs
                     </Link>
                     <Link
+                        href="/usage"
+                        className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
+                    >
+                        Usage
+                    </Link>
+                    <Link
                         href="/partners"
                         className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
                     >

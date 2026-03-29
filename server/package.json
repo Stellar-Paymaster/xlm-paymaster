@@ -23,6 +23,7 @@
     "db:migrate:status": "prisma migrate status",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
+    "db:resolve:p3009-webhook": "bash scripts/resolve-failed-webhook-migrations.sh",
     "docs": "typedoc"
   },
   "prisma": {

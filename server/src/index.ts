@@ -105,6 +105,11 @@ import {
   exportSARReportsHandler
 } from "./handlers/adminSAR";
 import { getSpendForecastHandler } from "./handlers/adminAnalytics";
+import {
+  getTenantUsageChartHandler,
+  getTenantUsageSummaryHandler,
+  getTenantUsageTransactionsHandler,
+} from "./handlers/tenantUsage";
 import { getFeeMultiplierHandler } from "./handlers/adminFeeMultiplier";
 import { estimateFeeHandler } from "./handlers/estimate";
 import { exportAuditLogHandler } from "./handlers/adminAuditLog";
@@ -341,6 +346,31 @@ app.post(
   limiter,
   (req: Request, res: Response, next: NextFunction) => {
     feeBumpBatchHandler(req, res, next, config);
+  },
+);
+
+app.get(
+  "/v1/usage/summary",
+  apiKeyMiddleware,
+  apiKeyRateLimit,
+  (req: Request, res: Response) => {
+    void getTenantUsageSummaryHandler(req, res);
+  },
+);
+app.get(
+  "/v1/usage/chart",
+  apiKeyMiddleware,
+  apiKeyRateLimit,
+  (req: Request, res: Response) => {
+    void getTenantUsageChartHandler(req, res);
+  },
+);
+app.get(
+  "/v1/usage/transactions",
+  apiKeyMiddleware,
+  apiKeyRateLimit,
+  (req: Request, res: Response) => {
+    void getTenantUsageTransactionsHandler(req, res);
   },
 );
 

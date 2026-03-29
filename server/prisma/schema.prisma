@@ -65,6 +65,7 @@ model ApiKey {
   sandboxFeePayerSecret String?
   sandboxLastResetAt    DateTime?
   allowedChains         String    @default("stellar") // comma-separated: stellar,evm,solana,cosmos
+  lastUsedAt            DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

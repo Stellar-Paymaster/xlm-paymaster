@@ -100,6 +100,9 @@ export function DeveloperPortalLanding() {
                 <Link href="/login">Get API Key</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
+                <Link href="/usage">Usage dashboard</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
                 <a href={docs} target="_blank" rel="noopener noreferrer">
                   Read the docs
                 </a>
