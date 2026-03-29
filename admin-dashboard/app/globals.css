@@ -156,6 +156,7 @@
   html.dark {
     color-scheme: dark;
   }
+}
 /* ─── Base styles ─────────────────────────────────────────────────────────── */
 
 @layer base {
