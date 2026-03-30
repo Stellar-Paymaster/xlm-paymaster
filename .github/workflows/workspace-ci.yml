@@ -1,0 +1,62 @@
+name: Workspace CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "turbo.json"
+      - "server/**"
+      - "client/**"
+      - "admin-dashboard/**"
+      - "frontend/**"
+      - ".github/workflows/workspace-ci.yml"
+  pull_request:
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "turbo.json"
+      - "server/**"
+      - "client/**"
+      - "admin-dashboard/**"
+      - "frontend/**"
+      - ".github/workflows/workspace-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      AUTH_SECRET: 01234567890123456789012345678901
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD_HASH: $2b$12$C6UzMDM.H6dfI/f/IKcEeO.QR4EIX66vepQP9en5ZaY1f3T5iAGKa
+      NEXTAUTH_URL: http://localhost:3001
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build workspace
+        run: npm run build
+
+      - name: Lint workspace
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Test workspace
+        run: npm run test

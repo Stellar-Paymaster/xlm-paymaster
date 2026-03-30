@@ -16,6 +16,6 @@ interface NativeSignerBinding {
   preflightSoroban(rpcUrl: string, transactionXdr: string): Promise<string>;
 }
 
-const nativeModulePath = join(__dirname, "../../fluid_signer.node");
+const nativeModulePath = join(__dirname, "../../build/native/fluid_signer.node");
 
 export const nativeSigner = require(nativeModulePath) as NativeSignerBinding;

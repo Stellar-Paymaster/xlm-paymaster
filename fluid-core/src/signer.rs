@@ -189,10 +189,7 @@ impl Signer for Ed25519Signer {
 
     fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
         use ed25519_dalek::Signer as DalekSigner;
-        let signature = self
-            .signing_key
-            .sign(payload)
-            .to_bytes();
+        let signature = self.signing_key.sign(payload).to_bytes();
 
         Ok(signature)
     }
@@ -327,10 +324,7 @@ impl Signer for TestSigner {
 
     fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
         use ed25519_dalek::Signer as DalekSigner;
-        let signature = self
-            .signing_key
-            .sign(payload)
-            .to_bytes();
+        let signature = self.signing_key.sign(payload).to_bytes();
 
         Ok(signature)
     }
@@ -363,7 +357,10 @@ impl MultiSigner {
     /// # Returns
     ///
     /// A vector of decorated signatures, one from each signer.
-    pub fn sign_hash_multi(&self, hash: &TransactionHash) -> Vec<Result<DecoratedSignature, FluidError>> {
+    pub fn sign_hash_multi(
+        &self,
+        hash: &TransactionHash,
+    ) -> Vec<Result<DecoratedSignature, FluidError>> {
         self.signers
             .iter()
             .map(|signer| signer.sign_hash(hash))

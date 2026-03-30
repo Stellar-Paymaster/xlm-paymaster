@@ -7,8 +7,8 @@
 //! their own key management systems (HSM, cloud KMS, passkey, etc.).
 
 use fluid_core::{
-    DecoratedSignature, FluidError, PublicKey, Signer, TransactionHash,
-    TransactionBuilder, NetworkPassphrase,
+    DecoratedSignature, FluidError, NetworkPassphrase, PublicKey, Signer, TransactionBuilder,
+    TransactionHash,
 };
 use std::sync::{Arc, Mutex};
 
@@ -115,7 +115,10 @@ impl RemoteSigner {
 
     fn call_remote_api(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
         println!("   [Remote] Calling signing service at: {}", self.endpoint);
-        println!("   [Remote] API token: {}...", &self.api_token[..8.min(self.api_token.len())]);
+        println!(
+            "   [Remote] API token: {}...",
+            &self.api_token[..8.min(self.api_token.len())]
+        );
         println!("   [Remote] Payload: {} bytes", payload.len());
 
         // In production, this would:
@@ -161,7 +164,10 @@ fn main() -> Result<(), FluidError> {
     let hsm_public = PublicKey::new([0xa1; 32]);
     let hsm_signer = HsmSigner::new(hsm_public.clone(), "key-12345".to_string());
 
-    println!("   Created HSM signer for key: {:02x?}", hsm_public.as_bytes());
+    println!(
+        "   Created HSM signer for key: {:02x?}",
+        hsm_public.as_bytes()
+    );
     println!("   Key ID: key-12345");
 
     // Sign a transaction hash
@@ -169,7 +175,10 @@ fn main() -> Result<(), FluidError> {
     println!("\n   Signing transaction hash...");
     let sig1 = hsm_signer.sign_hash(&hash1)?;
     println!("   Signature hint: {:02x?}", sig1.hint());
-    println!("   Signature (first 8 bytes): {:02x?}", &sig1.signature()[..8]);
+    println!(
+        "   Signature (first 8 bytes): {:02x?}",
+        &sig1.signature()[..8]
+    );
 
     // Sign another hash
     let hash2 = TransactionHash::new([0xc3; 32]);
@@ -177,7 +186,10 @@ fn main() -> Result<(), FluidError> {
     let sig2 = hsm_signer.sign_hash(&hash2)?;
     println!("   Signature hint: {:02x?}", sig2.hint());
 
-    println!("\n   Total HSM operations: {}", hsm_signer.operation_count());
+    println!(
+        "\n   Total HSM operations: {}",
+        hsm_signer.operation_count()
+    );
 
     // Example 2: Remote Signer
     println!("\n2. Testing Remote Signer");
@@ -190,7 +202,10 @@ fn main() -> Result<(), FluidError> {
         "sk_live_abc123xyz789".to_string(),
     );
 
-    println!("   Created remote signer for key: {:02x?}", remote_public.as_bytes());
+    println!(
+        "   Created remote signer for key: {:02x?}",
+        remote_public.as_bytes()
+    );
 
     let hash3 = TransactionHash::new([0xe5; 32]);
     println!("\n   Signing via remote API...");

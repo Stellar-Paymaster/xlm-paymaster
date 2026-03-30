@@ -3,9 +3,9 @@
 //! These tests use only the public API to verify the crate's functionality.
 
 use fluid_core::{
-    AsyncSigner, DecoratedSignature, Ed25519Signer, FeeConfig, FeePayerAccount, FluidError,
-    Keypair, MultiSigner, NetworkPassphrase, PublicKey, SecretKey, Signer, TestSigner,
-    TransactionBuilder, TransactionHash, validate_not_fee_bump,
+    validate_not_fee_bump, AsyncSigner, DecoratedSignature, Ed25519Signer, FeeConfig,
+    FeePayerAccount, FluidError, Keypair, MultiSigner, NetworkPassphrase, PublicKey, SecretKey,
+    Signer, TestSigner, TransactionBuilder, TransactionHash,
 };
 
 // ============================================================================
@@ -63,8 +63,12 @@ fn test_keypair_signature_hint() {
 
 #[test]
 fn test_account_id() {
-    let account = fluid_core::AccountId::new("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    assert_eq!(account.as_str(), "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    let account =
+        fluid_core::AccountId::new("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    assert_eq!(
+        account.as_str(),
+        "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    );
 }
 
 #[test]
@@ -73,10 +77,16 @@ fn test_network_passphrase_defaults() {
     assert_eq!(testnet.as_str(), "Test SDF Network ; September 2015");
 
     let mainnet = NetworkPassphrase::mainnet();
-    assert_eq!(mainnet.as_str(), "Public Global Stellar Network ; September 2015");
+    assert_eq!(
+        mainnet.as_str(),
+        "Public Global Stellar Network ; September 2015"
+    );
 
     let futurenet = NetworkPassphrase::futurenet();
-    assert_eq!(futurenet.as_str(), "Test SDF Future Network ; December 2024");
+    assert_eq!(
+        futurenet.as_str(),
+        "Test SDF Future Network ; December 2024"
+    );
 }
 
 #[test]
@@ -218,10 +228,7 @@ fn test_multi_signer() {
     let signer1 = TestSigner::new();
     let signer2 = TestSigner::new();
 
-    let multi = MultiSigner::new(vec![
-        Box::new(signer1),
-        Box::new(signer2),
-    ]);
+    let multi = MultiSigner::new(vec![Box::new(signer1), Box::new(signer2)]);
 
     let hash = TransactionHash::new([0x22; 32]);
     let results = multi.sign_hash_multi(&hash);
@@ -241,7 +248,10 @@ fn test_transaction_builder_default() {
 
     assert_eq!(config.base_fee(), 100);
     assert_eq!(config.multiplier(), 1.0);
-    assert_eq!(builder.network().as_str(), "Test SDF Network ; September 2015");
+    assert_eq!(
+        builder.network().as_str(),
+        "Test SDF Network ; September 2015"
+    );
 }
 
 #[test]
@@ -254,14 +264,15 @@ fn test_transaction_builder_chaining() {
     let config = builder.fee_config();
     assert_eq!(config.base_fee(), 200);
     assert_eq!(config.multiplier(), 2.5);
-    assert_eq!(builder.network().as_str(), "Public Global Stellar Network ; September 2015");
+    assert_eq!(
+        builder.network().as_str(),
+        "Public Global Stellar Network ; September 2015"
+    );
 }
 
 #[test]
 fn test_transaction_builder_fee_calculation() {
-    let builder = TransactionBuilder::new()
-        .base_fee(100)
-        .fee_multiplier(2.0);
+    let builder = TransactionBuilder::new().base_fee(100).fee_multiplier(2.0);
 
     // (1 + 1) * 100 * 2.0 = 400
     assert_eq!(builder.calculate_fee(1), 400);
@@ -290,8 +301,7 @@ fn test_transaction_builder_add_signatures() {
 
 #[test]
 fn test_transaction_builder_validation_missing_inner() {
-    let builder = TransactionBuilder::new()
-        .fee_payer(PublicKey::new([2u8; 32]));
+    let builder = TransactionBuilder::new().fee_payer(PublicKey::new([2u8; 32]));
 
     // Missing inner transaction - should return InvalidTransaction
     let result = builder.validate();
@@ -327,7 +337,10 @@ fn test_transaction_builder_build_success() {
     assert_eq!(fee_bump_tx.fee(), 800);
     assert_eq!(fee_bump_tx.fee_payer().as_bytes(), &[2u8; 32]);
     assert_eq!(fee_bump_tx.inner_signatures().len(), 1);
-    assert_eq!(fee_bump_tx.network_passphrase().as_str(), "Test SDF Network ; September 2015");
+    assert_eq!(
+        fee_bump_tx.network_passphrase().as_str(),
+        "Test SDF Network ; September 2015"
+    );
 }
 
 #[test]
@@ -387,7 +400,12 @@ fn test_full_fee_bump_flow() {
     let user_public = [0x12; 32];
     let inner_hash = TransactionHash::new([0x34; 32]);
     let user_signature = DecoratedSignature::new(
-        [user_public[28], user_public[29], user_public[30], user_public[31]],
+        [
+            user_public[28],
+            user_public[29],
+            user_public[30],
+            user_public[31],
+        ],
         [0x56; 64],
     );
 
@@ -414,7 +432,10 @@ fn test_full_fee_bump_flow() {
 
     // 6. Verify fee-bump signature
     let fee_bump_sig = fee_bump_tx.fee_bump_signature();
-    assert_eq!(fee_bump_sig.hint(), fee_payer_signer.public_key().signature_hint());
+    assert_eq!(
+        fee_bump_sig.hint(),
+        fee_payer_signer.public_key().signature_hint()
+    );
     assert_eq!(fee_bump_sig.signature().len(), 64);
 }
 
@@ -433,7 +454,11 @@ fn test_fee_payer_round_robin_simulation() {
 
     for round in 0..6 {
         let selected = &fee_payers[rr_index % fee_payers.len()];
-        println!("Round {}: Selected fee payer with public key {:02x?}", round, selected.public_key().as_bytes()[0]);
+        println!(
+            "Round {}: Selected fee payer with public key {:02x?}",
+            round,
+            selected.public_key().as_bytes()[0]
+        );
 
         rr_index = (rr_index + 1) % fee_payers.len();
     }

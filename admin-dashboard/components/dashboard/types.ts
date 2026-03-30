@@ -127,6 +127,57 @@ export interface WebhookDlqItem {
   expiresAt: string;
 }
 
+export type WebhookDeliveryStatus =
+  | "success"
+  | "failed"
+  | "pending"
+  | "retrying";
+
+export type WebhookDeliverySort =
+  | "time_desc"
+  | "time_asc"
+  | "status_asc"
+  | "status_desc"
+  | "attempts_desc"
+  | "attempts_asc";
+
+export interface WebhookDeliveryLog {
+  id: string;
+  tenantId: string;
+  tenantName: string | null;
+  eventType: WebhookEventType;
+  webhookUrl: string;
+  status: WebhookDeliveryStatus;
+  attempts: number;
+  maxAttempts: number;
+  responseCode: number | null;
+  responseMessage: string | null;
+  payload: {
+    event: WebhookEventType;
+    data: Record<string, unknown>;
+  };
+  createdAt: string;
+  updatedAt: string;
+  nextRetryAt: string | null;
+}
+
+export interface WebhookDeliveryQuery {
+  page: number;
+  pageSize: number;
+  search: string;
+  sort: WebhookDeliverySort;
+  statusFilter: WebhookDeliveryStatus[];
+  eventTypeFilter: WebhookEventType[];
+  tenantFilter: string[];
+}
+
+export interface WebhookDeliveryPageData extends WebhookDeliveryQuery {
+  rows: WebhookDeliveryLog[];
+  totalRows: number;
+  totalPages: number;
+  source: "live" | "sample";
+}
+
 export type TransactionHistorySort =
   | "time_desc"
   | "time_asc"

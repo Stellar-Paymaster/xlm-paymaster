@@ -45,6 +45,29 @@ FLUID_ALLOWED_ORIGINS=
 PORT=3000
 ```
 
+## Monorepo Tasks
+
+The JavaScript and TypeScript packages now run through a root Turborepo workspace:
+
+```bash
+npm ci
+npm run build
+npm run lint
+npm run test
+npm run docs
+```
+
+Remote caching can be enabled by setting `TURBO_TEAM` and `TURBO_TOKEN`. Leave them unset to use the local Turbo cache only.
+
+Timing and workflow validation notes for the Turbo migration are documented in `docs/turborepo-issue-217.md`.
+
+The current workspace covers:
+
+- `server/` for the legacy Node.js parity server's native signer build
+- `client/` for the TypeScript SDK
+- `admin-dashboard/` for the Next.js admin UI
+- `frontend/` for the Vite frontend
+
 ## API
 
 The Rust server handles:

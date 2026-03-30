@@ -14,6 +14,9 @@ permissions:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,22 +34,7 @@ jobs:
         run: npm ci
 
       - name: Generate Client Docs
-        run: |
-          cd client
-          npm install
-          npm run docs
-
-      - name: Generate Server Docs
-        run: |
-          cd server
-          npm install
-          npm run docs
-
-      - name: Generate Dashboard Docs
-        run: |
-          cd admin-dashboard
-          npm install
-          npm run docs
+        run: npm run docs
 
       - name: Generate Rust Docs
         run: cargo doc --workspace --no-deps

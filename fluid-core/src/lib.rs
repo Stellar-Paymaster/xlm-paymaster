@@ -45,33 +45,16 @@ pub mod types;
 // Re-exports for convenient access
 pub use error::FluidError;
 
-pub use signer::{
-    AsyncSigner,
-    Ed25519Signer,
-    MultiSigner,
-    Signer,
-    TestSigner,
-};
+pub use signer::{AsyncSigner, Ed25519Signer, MultiSigner, Signer, TestSigner};
 
 pub use transaction_builder::{
-    compute_transaction_hash,
-    parse_inner_tx,
-    validate_not_fee_bump,
-    FeeBumpTransaction,
-    InnerTransaction,
-    TransactionBuilder,
+    compute_transaction_hash, parse_inner_tx, validate_not_fee_bump, FeeBumpTransaction,
+    InnerTransaction, TransactionBuilder,
 };
 
 pub use types::{
-    AccountId,
-    DecoratedSignature,
-    FeeConfig,
-    FeePayerAccount,
-    Keypair,
-    NetworkPassphrase,
-    PublicKey,
-    SecretKey,
-    TransactionHash,
+    AccountId, DecoratedSignature, FeeConfig, FeePayerAccount, Keypair, NetworkPassphrase,
+    PublicKey, SecretKey, TransactionHash,
 };
 
 // Re-export Zeroizing for users who need it

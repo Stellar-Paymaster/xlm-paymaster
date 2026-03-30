@@ -24,8 +24,8 @@
 //! ```
 
 use crate::error::FluidError;
-use crate::types::{DecoratedSignature, FeeConfig, NetworkPassphrase, PublicKey, TransactionHash};
 use crate::signer::Signer;
+use crate::types::{DecoratedSignature, FeeConfig, NetworkPassphrase, PublicKey, TransactionHash};
 
 /// A builder for constructing fee-bump transactions.
 ///
@@ -333,14 +333,16 @@ impl TransactionBuilder {
         self.validate()?;
 
         let fee = self.calculate_fee(operation_count);
-        let fee_payer = self.fee_payer.clone().ok_or_else(|| {
-            FluidError::invalid_tx("fee payer not set")
-        })?;
+        let fee_payer = self
+            .fee_payer
+            .clone()
+            .ok_or_else(|| FluidError::invalid_tx("fee payer not set"))?;
 
         // Get the inner transaction hash for signing
-        let inner_hash = self.inner_hash.clone().ok_or_else(|| {
-            FluidError::invalid_tx("inner transaction hash not set")
-        })?;
+        let inner_hash = self
+            .inner_hash
+            .clone()
+            .ok_or_else(|| FluidError::invalid_tx("inner transaction hash not set"))?;
 
         // Sign the inner transaction hash with the fee payer
         let fee_bump_signature = signer.sign_hash(&inner_hash)?;

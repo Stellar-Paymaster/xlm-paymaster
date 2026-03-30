@@ -1,22 +1,29 @@
 use std::fmt;
 use std::str::FromStr;
+#[cfg(not(target_arch = "wasm32"))]
 mod blocklist;
+#[cfg(not(target_arch = "wasm32"))]
 mod heuristics;
 
+#[cfg(not(target_arch = "wasm32"))]
 use blocklist::Blocklist;
+#[cfg(not(target_arch = "wasm32"))]
 use heuristics::RequestTracker;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::{SystemTime, UNIX_EPOCH};
 
+#[cfg(not(target_arch = "wasm32"))]
 static mut BLOCKLIST: Option<Blocklist> = None;
+#[cfg(not(target_arch = "wasm32"))]
 static mut TRACKER: Option<RequestTracker> = None;
 
+#[cfg(not(target_arch = "wasm32"))]
 fn now() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs()
 }
-
 
 use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
@@ -29,14 +36,12 @@ use stellar_xdr::curr::{
 };
 use wasm_bindgen::prelude::*;
 
-
 // These modules are primarily used by the native server binary.
 // We expose them from the library so unit tests + coverage tools can exercise them.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod config;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod error;
-
 
 const MAX_SIGNATURES: usize = 20;
 
@@ -150,47 +155,58 @@ pub fn sign_transaction_xdr_internal(
     network_passphrase: &str,
 ) -> Result<SigningResult, Box<dyn std::error::Error>> {
     let signer = signer_context(secret_key)?;
+    let public_key = signer.public_key.clone();
+    enforce_request_guards(&public_key)?;
 
+    let mut envelope = parse_transaction_envelope(unsigned_xdr)?;
+    let tx_hash = transaction_hash(&envelope, network_passphrase)?;
+    let signed_envelope = append_signature(&mut envelope, &signer, &tx_hash)?;
 
-//  
-let public_key = signer.public_key.clone();
-
-unsafe {
-    if BLOCKLIST.is_none() {
-        BLOCKLIST = Some(Blocklist::new());
-    }
-    if TRACKER.is_none() {
-        TRACKER = Some(RequestTracker::new());
-    }
-
-    let blocklist = BLOCKLIST.as_mut().unwrap();
-    let tracker = TRACKER.as_mut().unwrap();
-
-    if blocklist.is_blocked(&public_key, now()) {
-        return Err("Account is blocked".into());
-    }
-
-    if tracker.is_suspicious(&public_key, now()) {
-        blocklist.add(
-    public_key.clone(),
-    "Suspicious activity detected".to_string(),
-    now(),
-);
-        return Err("Account flagged and blocked".into());
-    }
+    Ok(SigningResult {
+        signed_xdr: signed_envelope,
+        signer_public_key: signer.public_key,
+        transaction_hash_hex: hex::encode(tx_hash),
+        signature_count: envelope_signature_count(&envelope),
+    })
 }
-//  END BLOCK
 
-let mut envelope = parse_transaction_envelope(unsigned_xdr)?;
-let tx_hash = transaction_hash(&envelope, network_passphrase)?;
-let signed_envelope = append_signature(&mut envelope, &signer, &tx_hash)?;
+#[cfg(not(target_arch = "wasm32"))]
+fn enforce_request_guards(public_key: &str) -> Result<(), Box<dyn std::error::Error>> {
+    unsafe {
+        if BLOCKLIST.is_none() {
+            BLOCKLIST = Some(Blocklist::new());
+        }
+        if TRACKER.is_none() {
+            TRACKER = Some(RequestTracker::new());
+        }
 
-Ok(SigningResult {
-    signed_xdr: signed_envelope,
-    signer_public_key: signer.public_key,
-    transaction_hash_hex: hex::encode(tx_hash),
-    signature_count: envelope_signature_count(&envelope),
-})
+        let blocklist = BLOCKLIST
+            .as_mut()
+            .ok_or_else(|| "blocklist is unavailable".to_string())?;
+        let tracker = TRACKER
+            .as_mut()
+            .ok_or_else(|| "request tracker is unavailable".to_string())?;
+
+        if blocklist.is_blocked(public_key, now()) {
+            return Err("Account is blocked".into());
+        }
+
+        if tracker.is_suspicious(public_key, now()) {
+            blocklist.add(
+                public_key.to_string(),
+                "Suspicious activity detected".to_string(),
+                now(),
+            );
+            return Err("Account flagged and blocked".into());
+        }
+    }
+
+    Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+fn enforce_request_guards(_public_key: &str) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
 }
 
 #[derive(Debug)]

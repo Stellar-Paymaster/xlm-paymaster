@@ -13,7 +13,6 @@ use std::sync::Once;
 use reqwest::Client;
 use std::time::Duration;
 use stellar_xdr::curr::{Limits, ReadXdr, TransactionEnvelope, WriteXdr, SorobanTransactionData};
-use base64::{engine::general_purpose, Engine as _};
 
 static TOKIO_INIT: Once = Once::new();
 
@@ -62,11 +61,11 @@ fn initialize_optimized_tokio_runtime() {
                     if let Ok(cpu_id) = std::env::var("FLUID_TOKIO_CPU_PINNING") {
                         if let Ok(core_id) = cpu_id.parse::<usize>() {
                             if
-                                let Err(e) = core_affinity::set_for_current(core_affinity::CoreId {
+                                !core_affinity::set_for_current(core_affinity::CoreId {
                                     id: core_id,
                                 })
                             {
-                                eprintln!("Failed to set CPU affinity: {}", e);
+                                eprintln!("Failed to set CPU affinity for core {}", core_id);
                             }
                         }
                     }

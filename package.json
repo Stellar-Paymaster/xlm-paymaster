@@ -3,6 +3,21 @@
   "version": "1.20.0",
   "private": true,
   "description": "Fluid - Stellar fee sponsorship platform",
+  "packageManager": "npm@11.7.0",
+  "workspaces": [
+    "server",
+    "client",
+    "admin-dashboard",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "dev": "turbo run dev --parallel",
+    "docs": "turbo run docs",
+    "format:check": "turbo run format:check"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Stellar-Fluid/fluid.git"
@@ -13,6 +28,7 @@
     "@commitlint/config-conventional": "^19.8.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "semantic-release": "^24.2.3"
+    "semantic-release": "^24.2.3",
+    "turbo": "^2.5.6"
   }
 }

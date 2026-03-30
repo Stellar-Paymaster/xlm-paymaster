@@ -282,7 +282,7 @@ export function WebhookDeliveryLogTable({
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex items-center gap-2">
-                        <CopyButton text={row.id} label="Copy ID" />
+                        <CopyButton value={row.id} label="Copy ID" />
                         <Button
                           variant="outline"
                           size="sm"

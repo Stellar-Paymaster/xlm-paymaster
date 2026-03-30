@@ -6,8 +6,8 @@
 //! all configuration options and the complete builder chain.
 
 use fluid_core::{
-    Ed25519Signer, FeeConfig, FeePayerAccount, Keypair, NetworkPassphrase, PublicKey,
-    TransactionBuilder, TransactionHash, DecoratedSignature, FluidError,
+    DecoratedSignature, Ed25519Signer, FeeConfig, FeePayerAccount, FluidError, Keypair,
+    NetworkPassphrase, PublicKey, TransactionBuilder, TransactionHash,
 };
 
 fn main() -> Result<(), FluidError> {
@@ -71,7 +71,10 @@ fn main() -> Result<(), FluidError> {
     println!("   Base fee: 500 stroops (for complex ops)");
     println!("   Multiplier: 1.2x");
     println!("   Network: Futurenet");
-    println!("   Fee: {} stroops for 5 ops", custom_builder.calculate_fee(5));
+    println!(
+        "   Fee: {} stroops for 5 ops",
+        custom_builder.calculate_fee(5)
+    );
 
     // Example 4: FeeConfig utility
     println!("\n4. Using FeeConfig Directly");
@@ -84,7 +87,12 @@ fn main() -> Result<(), FluidError> {
 
     for ops in [1, 2, 3, 5, 10] {
         let fee = config.calculate_fee(ops);
-        let formula = format!("({}+1) * {} * {}", ops, config.base_fee(), config.multiplier());
+        let formula = format!(
+            "({}+1) * {} * {}",
+            ops,
+            config.base_fee(),
+            config.multiplier()
+        );
         println!("     {} ops: {} stroops  [formula: {}]", ops, fee, formula);
     }
 
@@ -110,12 +118,20 @@ fn main() -> Result<(), FluidError> {
 
     // User's signature on the inner transaction
     let user_signature = DecoratedSignature::new(
-        [user_public[28], user_public[29], user_public[30], user_public[31]],
+        [
+            user_public[28],
+            user_public[29],
+            user_public[30],
+            user_public[31],
+        ],
         [0xcc; 64],
     );
 
     println!("   Inner transaction received:");
-    println!("     XDR preview: {}...", &inner_transaction_xdr[..15.min(inner_transaction_xdr.len())]);
+    println!(
+        "     XDR preview: {}...",
+        &inner_transaction_xdr[..15.min(inner_transaction_xdr.len())]
+    );
     println!("     Hash: {:02x?}", inner_transaction_hash.as_bytes());
     println!("     User signature hint: {:02x?}", user_signature.hint());
 
@@ -142,9 +158,18 @@ fn main() -> Result<(), FluidError> {
 
     println!("\n   Fee-bump transaction created:");
     println!("     Total fee: {} stroops", fee_bump_tx.fee());
-    println!("     Fee payer: {:02x?}", fee_bump_tx.fee_payer().as_bytes());
-    println!("     Fee-bump signature hint: {:02x?}", fee_bump_tx.fee_bump_signature().hint());
-    println!("     Inner signatures preserved: {}", fee_bump_tx.inner_signatures().len());
+    println!(
+        "     Fee payer: {:02x?}",
+        fee_bump_tx.fee_payer().as_bytes()
+    );
+    println!(
+        "     Fee-bump signature hint: {:02x?}",
+        fee_bump_tx.fee_bump_signature().hint()
+    );
+    println!(
+        "     Inner signatures preserved: {}",
+        fee_bump_tx.inner_signatures().len()
+    );
 
     // Example 7: Multiple signatures
     println!("\n7. Transaction with Multiple Inner Signatures");
@@ -162,7 +187,10 @@ fn main() -> Result<(), FluidError> {
 
     let multi_sig_tx = multi_sig_builder.build(&signer, 2)?;
     println!("   Added 3 inner signatures");
-    println!("   Total signatures in envelope: {}", multi_sig_tx.inner_signatures().len() + 1);
+    println!(
+        "   Total signatures in envelope: {}",
+        multi_sig_tx.inner_signatures().len() + 1
+    );
 
     // Example 8: Error handling demonstration
     println!("\n8. Error Handling Examples");
@@ -206,8 +234,14 @@ fn main() -> Result<(), FluidError> {
     );
 
     println!("   FeePayerAccount created:");
-    println!("     Public key: {:02x?}", fee_payer_account.public_key_bytes());
-    println!("     Secret available: {}", !fee_payer_account.secret.is_empty());
+    println!(
+        "     Public key: {:02x?}",
+        fee_payer_account.public_key_bytes()
+    );
+    println!(
+        "     Secret available: {}",
+        !fee_payer_account.secret.is_empty()
+    );
     println!("     Has keypair: true");
 
     println!("\n=== Example completed successfully ===");

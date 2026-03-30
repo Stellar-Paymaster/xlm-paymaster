@@ -8,8 +8,8 @@
 //! - Building and signing a fee-bump wrapper
 
 use fluid_core::{
-    Ed25519Signer, FeeConfig, Keypair, NetworkPassphrase, PublicKey, Signer,
-    TransactionBuilder, TransactionHash, DecoratedSignature, FluidError,
+    DecoratedSignature, Ed25519Signer, FeeConfig, FluidError, Keypair, NetworkPassphrase,
+    PublicKey, Signer, TransactionBuilder, TransactionHash,
 };
 
 fn main() -> Result<(), FluidError> {
@@ -22,7 +22,10 @@ fn main() -> Result<(), FluidError> {
     let fee_payer_public = [0xcd; 32]; // Example public key
     let fee_payer_keypair = Keypair::from_raw_keys(fee_payer_secret, fee_payer_public);
     let signer = Ed25519Signer::new(fee_payer_keypair.clone());
-    println!("   Created signer with public key: {:02x?}", fee_payer_public);
+    println!(
+        "   Created signer with public key: {:02x?}",
+        fee_payer_public
+    );
 
     // Step 2: Configure the transaction builder
     println!("\n2. Configuring transaction builder...");
@@ -60,7 +63,7 @@ fn main() -> Result<(), FluidError> {
     // Simulate an inner transaction signature
     let user_signature = DecoratedSignature::new(
         [0x12, 0x34, 0x56, 0x78], // Signature hint (last 4 bytes of user's public key)
-        [0xaa; 64],                  // 64-byte signature (placeholder)
+        [0xaa; 64],               // 64-byte signature (placeholder)
     );
 
     // Build the fee-bump transaction
@@ -72,14 +75,23 @@ fn main() -> Result<(), FluidError> {
     println!("   Fee-bump transaction built successfully!");
     println!("   Fee amount: {} stroops", fee_bump_tx.fee());
     println!("   Fee payer: {:02x?}", fee_bump_tx.fee_payer().as_bytes());
-    println!("   Inner signatures: {}", fee_bump_tx.inner_signatures().len());
-    println!("   Fee-bump signature hint: {:02x?}", fee_bump_tx.fee_bump_signature().hint());
+    println!(
+        "   Inner signatures: {}",
+        fee_bump_tx.inner_signatures().len()
+    );
+    println!(
+        "   Fee-bump signature hint: {:02x?}",
+        fee_bump_tx.fee_bump_signature().hint()
+    );
 
     // Step 5: Sign a raw payload (low-level signing)
     println!("\n5. Demonstrating raw payload signing...");
     let test_payload = b"Hello, Stellar!";
     let raw_signature = signer.sign_payload(test_payload)?;
-    println!("   Signed payload: {:?}", std::str::from_utf8(test_payload).unwrap());
+    println!(
+        "   Signed payload: {:?}",
+        std::str::from_utf8(test_payload).unwrap()
+    );
     println!("   Signature (first 8 bytes): {:02x?}", &raw_signature[..8]);
 
     println!("\n=== Example completed successfully ===");

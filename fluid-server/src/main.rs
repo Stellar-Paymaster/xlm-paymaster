@@ -7,16 +7,7 @@ mod state;
 mod stellar;
 mod xdr;
 
-
 mod ai_query;
-
-use axum::{
-    routing::{get, post},
-    Json, Router,
-};
-use serde::Serialize;
-use std::net::SocketAddr;
-use tracing::info;
 
 use axum::{
     extract::{ConnectInfo, Extension, Request, State},
@@ -43,7 +34,7 @@ use tower_http::cors::{AllowHeaders, AllowOrigin, CorsLayer};
 use tracing::{error, info};
 use xdr::summarize_transaction;
 
-use ai_query::{handle_ai_query, QueryRequest, QueryFilters};
+use ai_query::{handle_ai_query, QueryFilters, QueryRequest};
 
 #[derive(Serialize)]
 struct HealthResponse {
@@ -193,12 +184,6 @@ async fn main() {
         )
         .init();
 
-
-    // ADD ROUTE HERE
-    let app = Router::new()
-        .route("/health", get(health))
-        .route("/ai/query", post(ai_query_handler));
-
     if let Err(error) = run().await {
         error!("{}", error.message);
         std::process::exit(1);
@@ -230,7 +215,6 @@ async fn run() -> Result<(), AppError> {
         });
     }
 
-
     let app = Router::new()
         .route("/", get(dashboard))
         .route("/dashboard", get(dashboard))
@@ -259,11 +243,6 @@ async fn run() -> Result<(), AppError> {
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("Fluid server (Rust) listening on {addr}");
 
-
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
-}
-
     let listener = tokio::net::TcpListener::bind(addr).await.map_err(|error| {
         AppError::new(
             axum::http::StatusCode::INTERNAL_SERVER_ERROR,
@@ -283,7 +262,9 @@ async fn run() -> Result<(), AppError> {
             "INTERNAL_ERROR",
             format!("Rust server exited unexpectedly: {error}"),
         )
-    })
+    })?;
+
+    Ok(())
 }
 
 fn build_cors_layer(allowed_origins: &[String]) -> CorsLayer {
@@ -762,4 +743,3 @@ const DASHBOARD_HTML: &str = r#"<!doctype html>
     </script>
   </body>
 </html>"#;
-
