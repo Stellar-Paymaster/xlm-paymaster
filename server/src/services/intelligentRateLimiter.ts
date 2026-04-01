@@ -46,6 +46,7 @@ export class IntelligentRateLimiter {
     try {
       // Get all tenants with their current tiers
       const tenants = await prisma.tenant.findMany({
+        where: { deletedAt: null },
         include: {
           subscriptionTier: true,
         },

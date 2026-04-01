@@ -16,6 +16,7 @@ export async function listSubscriptionTiersHandler(req: Request, res: Response) 
         orderBy: { priceMonthly: "asc" },
       }),
       prisma.tenant.findMany({
+        where: { deletedAt: null },
         orderBy: { name: "asc" },
         include: { subscriptionTier: true },
       }),

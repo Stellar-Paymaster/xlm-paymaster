@@ -25,6 +25,8 @@ model SubscriptionTier {
 model Tenant {
   id                 String            @id @default(uuid())
   name               String
+  contactEmail       String?
+  region             String            @default("US") // Data residency region: "US" | "EU"
   subscriptionTierId String
   subscriptionTier   SubscriptionTier  @relation(fields: [subscriptionTierId], references: [id])
   dailyQuotaStroops  BigInt            @default(1000000) // 0.1 XLM default
@@ -32,6 +34,9 @@ model Tenant {
   webhookUrl         String?
   webhookSecret      String?
   webhookEventTypes  String?
+  deletedAt          DateTime?
+  erasureRequestedAt DateTime?
+  scheduledPurgeAt   DateTime?
   apiKeys                ApiKey[]
   webhookDeliveries      WebhookDelivery[]
   webhookDlqEntries      WebhookDlq[]
@@ -47,6 +52,9 @@ model Tenant {
   updatedAt          DateTime          @updatedAt
 
   @@index([subscriptionTierId])
+  @@index([contactEmail])
+  @@index([deletedAt])
+  @@index([scheduledPurgeAt])
 }
 
 model ApiKey {
@@ -196,11 +204,11 @@ model PendingRegistration {
 }
 
 model Transaction {
-  id          String      @id @default(uuid())
-  txHash      String?     // The hash of the fee-bump transaction
-  innerTxHash String      // The hash of the original transaction
-  tenantId    String
-  status      String      // PENDING, SUCCESS, FAILED
+  id          String   @id @default(uuid())
+  txHash      String?  // The hash of the fee-bump transaction
+  innerTxHash String   // The hash of the original transaction
+  tenantId    String?
+  status      String   // PENDING, SUCCESS, FAILED
   costStroops BigInt
   category    String      @default("Other")
   chain       String      @default("stellar") // stellar, evm, solana, cosmos
@@ -253,16 +261,15 @@ model StatusSubscription {
 
   @@index([active])
 }
-/// Tracks email addresses that have opted out of the daily digest.
 model DigestUnsubscribe {
   email     String   @id
   createdAt DateTime @default(now())
 }
 
-// Audit log — records admin and system actions with optional AI-generated summaries.
-// Merges legacy eventType/payload format with the newer action/metadata/aiSummary format.
+// Audit log — supports both legacy event exports and newer admin summaries.
 model AuditLog {
   id        String   @id @default(uuid())
+  eventType String?
   actor     String   // user ID, "system", or service name
   // Legacy format fields (auditLogger.ts)
   eventType String?
@@ -271,13 +278,17 @@ model AuditLog {
   // Newer format fields (auditLog.ts)
   action    String?  // e.g. "tenant.create", "apikey.revoke", "signer.add"
   target    String?  // affected resource ID
+  payload   Json?
   metadata  String?  // JSON blob with extra context
   aiSummary String?  // One-line AI-generated summary
+  timestamp DateTime @default(now())
   createdAt DateTime @default(now())
 
+  @@index([eventType])
   @@index([actor])
   @@index([eventType])
   @@index([action])
+  @@index([timestamp])
   @@index([createdAt])
   @@index([timestamp])
 }
@@ -480,4 +491,24 @@ model CrossChainSync {
 
   @@index([status])
   @@index([sourceTxHash])
+}
+
+// Monitor cross-chain settlement operations and tracking timeouts/stalls.
+model CrossChainSettlement {
+  id              String   @id @default(uuid())
+  sourceChain     String   // e.g. "ethereum", "stellar"
+  targetChain     String
+  sourceTxHash    String   @unique
+  targetTxHash    String?
+  amount          BigInt   // Amount in base units
+  asset           String   // e.g. "USDC", "XLM"
+  status          String   @default("PENDING") // PENDING, COMPLETED, FAILED, STALLED, REFUNDED
+  timeoutAt       DateTime
+  error           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([sourceTxHash])
+  @@index([timeoutAt])
 }

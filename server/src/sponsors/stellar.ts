@@ -13,6 +13,7 @@ import { FeeSponsor, SponsorResponse } from "./base";
 import { screenAddresses, logScreeningResult } from "../services/ofacScreening";
 import { extractAddresses } from "../utils/stellarAddressExtractor";
 import { evaluateSARRules } from "../services/sarService";
+import { signTransaction, signTransactionWithVault } from "../signing";
 
 export interface StellarSponsorParams {
   xdr: string;
@@ -114,7 +115,44 @@ export class StellarFeeSponsor implements FeeSponsor {
         config.networkPassphrase
       );
 
-      feeBumpTx.sign(feePayerAccount.keypair);
+      switch (feePayerAccount.secretSource.type) {
+        case "vault":
+          if (!config.vault) {
+            throw new AppError(
+              "Vault-backed fee payer selected but VAULT_* configuration is missing",
+              500,
+              "INTERNAL_ERROR",
+            );
+          }
+
+          await signTransactionWithVault(
+            feeBumpTx as unknown as {
+              addDecoratedSignature(signature: unknown): void;
+              hash(): Buffer;
+            },
+            feePayerAccount.publicKey,
+            config.vault,
+            feePayerAccount.secretSource.secretPath,
+            config,
+          );
+          break;
+        case "env":
+          await signTransaction(
+            feeBumpTx as unknown as {
+              addDecoratedSignature(signature: unknown): void;
+              hash(): Buffer;
+            },
+            feePayerAccount.secretSource.secret,
+            config,
+          );
+          break;
+        default:
+          throw new AppError(
+            `Unsupported fee payer secret source: ${feePayerAccount.secretSource.type}`,
+            500,
+            "INTERNAL_ERROR",
+          );
+      }
       await recordSponsoredTransaction(tenant.id, Number(feeAmount));
 
       // Evaluate SAR rules synchronously during fee-bump (fire-and-forget to avoid blocking)

@@ -269,7 +269,10 @@ export async function verifyRegistration(token: string): Promise<VerifyResult> {
 
     // Find tenant by project name + email (best-effort; unique by email in practice)
     const tenant = await tenantModel.findFirst({
-      where: { name: record.projectName },
+      where: {
+        name: record.projectName,
+        contactEmail: record.email,
+      },
     });
     const apiKey = tenant
       ? await apiKeyModel.findFirst({ where: { tenantId: tenant.id, active: true } })
@@ -323,6 +326,7 @@ export async function verifyRegistration(token: string): Promise<VerifyResult> {
   const tenant = await tenantModel.create({
     data: {
       name: record.projectName,
+      contactEmail: record.email,
       subscriptionTierId: freeTier.id,
       dailyQuotaStroops: BigInt(freeTier.txLimit * 100), // rough default
     },

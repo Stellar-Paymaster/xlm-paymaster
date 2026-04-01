@@ -1,3 +1,17 @@
+# [1.21.0](https://github.com/Stellar-Fluid/fluid/compare/v1.20.0...v1.21.0) (2026-03-30)
+
+
+### Bug Fixes
+
+* remove duplicate base64 dependency in fluid-server Cargo.toml ([816e856](https://github.com/Stellar-Fluid/fluid/commit/816e8565831cb9a695b87ecfa47a307cceb9be89))
+
+
+### Features
+
+* add multi-chain treasury overview ([e160098](https://github.com/Stellar-Fluid/fluid/commit/e1600985bec3e25f78b8d7f3e9c1f463c6e8ca43))
+* data residency configuration for multi-region deployments ([870cfc2](https://github.com/Stellar-Fluid/fluid/commit/870cfc2f1c036051d69940d480258310d00fb499)), closes [#211](https://github.com/Stellar-Fluid/fluid/issues/211)
+* implement bridge monitoring and stall alerting ([1931c9b](https://github.com/Stellar-Fluid/fluid/commit/1931c9bc04c332e86323d25300726e1e7ad30449))
+
 # [1.20.0](https://github.com/Stellar-Fluid/fluid/compare/v1.19.0...v1.20.0) (2026-03-29)
 
 

@@ -55,6 +55,11 @@ Optional:
 - `FLUID_RATE_LIMIT_WINDOW_MS` - Rate limit window in milliseconds (default: 60000)
 - `FLUID_RATE_LIMIT_MAX` - Max requests per window per IP (default: 5)
 - `FLUID_ALLOWED_ORIGINS` - Comma-separated CORS allowlist
+- `FLUID_GRPC_ENGINE_ADDRESS` - Internal Rust gRPC signer target such as `127.0.0.1:50051`
+- `FLUID_GRPC_ENGINE_TLS_SERVER_NAME` - Expected Rust engine TLS server name / SAN (default: `fluid-grpc-engine.internal`)
+- `FLUID_GRPC_ENGINE_CLIENT_CA_PATH` - PEM bundle for the pinned internal CA trust anchor
+- `FLUID_GRPC_ENGINE_CLIENT_CERT_PATH` / `FLUID_GRPC_ENGINE_CLIENT_KEY_PATH` - Node API client certificate and private key used for mTLS
+- `FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for the Rust engine server certificate; include both old and new values during rotation
 - `LOW_BALANCE_ALERT_XLM` - Primary low balance threshold env var for fee payer balances
 - `FLUID_LOW_BALANCE_THRESHOLD_XLM` - Backward-compatible low balance threshold env var
 - `LOW_BALANCE_ALERT_CHECK_INTERVAL_MS` / `FLUID_LOW_BALANCE_CHECK_INTERVAL_MS` - Balance polling interval (default: 300000 / 5 minutes)
@@ -74,6 +79,13 @@ Optional:
 - `FLUID_ALERT_EMAIL_FROM` / `FLUID_ALERT_EMAIL_TO` - Email sender and comma-separated recipients
 - `RESEND_API_KEY` / `RESEND_EMAIL_FROM` / `RESEND_EMAIL_TO` - Optional Resend API transport for low-balance alerts
 - `FLUID_ALERT_DASHBOARD_URL` - Dashboard link included in low-balance emails
+
+Rust gRPC engine env vars:
+
+- `FLUID_GRPC_ENGINE_LISTEN_ADDR` - Bind address for the Rust signer engine (default: `127.0.0.1:50051`)
+- `FLUID_GRPC_ENGINE_TLS_CERT_PATH` / `FLUID_GRPC_ENGINE_TLS_KEY_PATH` - Rust engine server certificate and private key
+- `FLUID_GRPC_ENGINE_TLS_CLIENT_CA_PATH` - PEM bundle used by the Rust engine to verify Node API client certificates
+- `FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for allowed Node API client certificates
 
 Mock API keys for local development:
 
@@ -270,7 +282,18 @@ That request still goes through because the limit is tracked separately per API 
 - Express.js - HTTP server framework
 - TypeScript - Type-safe code
 - @stellar/stellar-sdk - Stellar SDK for transaction handling
-- Rust + `ed25519-dalek` - Non-blocking fee-payer signature generation through a native N-API module
+- Rust + `ed25519-dalek` - Non-blocking fee-payer signature generation through a native N-API module or the internal mTLS gRPC signer engine
+
+## Internal gRPC mTLS
+
+The Node API can delegate fee-payer signatures to the Rust signer engine over an internal gRPC channel protected by mutual TLS.
+
+- The Node API presents its own client certificate and verifies the Rust engine certificate against a dedicated internal CA bundle.
+- The Rust engine requires a client certificate signed by the configured CA bundle and can additionally pin exact client certificate SHA-256 fingerprints.
+- The Node API can additionally pin exact server certificate SHA-256 fingerprints.
+- TLS material is loaded from PEM files, and the Node gRPC client recreates its channel automatically when those files change.
+
+Local developer flow and production rotation guidance are documented in [docs/grpc-mtls.md](../docs/grpc-mtls.md).
 
 ## Development
 

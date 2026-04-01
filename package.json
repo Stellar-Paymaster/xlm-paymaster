@@ -1,6 +1,6 @@
 {
   "name": "fluid",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "private": true,
   "description": "Fluid - Stellar fee sponsorship platform",
   "packageManager": "npm@11.7.0",
@@ -28,7 +28,14 @@
     "@commitlint/config-conventional": "^19.8.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
+    "nx": "22.6.3",
     "semantic-release": "^24.2.3",
-    "turbo": "^2.5.6"
+    "turbo": "^2.5.6",
+    "@nx/eslint": "22.6.3",
+    "@nx/playwright": "22.6.3",
+    "@nx/next": "22.6.3",
+    "@nx/vite": "22.6.3",
+    "@nx/vitest": "22.6.3",
+    "@nx/docker": "22.6.3"
   }
 }

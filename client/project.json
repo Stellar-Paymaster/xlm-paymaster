@@ -1,0 +1,46 @@
+{
+  "name": "client",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "client/src",
+  "tags": ["scope:client", "type:lib", "lang:ts"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run build",
+        "cwd": "client"
+      },
+      "cache": true,
+      "inputs": ["production", "^production"],
+      "outputs": ["{workspaceRoot}/client/dist"]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run test",
+        "cwd": "client"
+      },
+      "cache": true,
+      "inputs": ["default", "^production"]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run lint",
+        "cwd": "client"
+      },
+      "cache": true,
+      "inputs": ["default"]
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run format:check",
+        "cwd": "client"
+      },
+      "cache": true,
+      "inputs": ["default"]
+    }
+  }
+}

@@ -6,6 +6,8 @@ export type AuditEventType =
   | "API_KEY_UPSERT"
   | "API_KEY_REVOKE"
   | "TENANT_TIER_UPDATE"
+  | "TENANT_ERASURE_REQUESTED"
+  | "TENANT_ERASURE_PURGED"
   | "MANUAL_OVERRIDE"
   | "RATE_LIMIT_OVERRIDE"
   | "CHAIN_CREATED"
@@ -96,26 +98,34 @@ export async function ensureAuditLogTableIntegrity(): Promise<void> {
   await prisma.$executeRawUnsafe(
     `CREATE TABLE IF NOT EXISTS \"AuditLog\" (
       id TEXT PRIMARY KEY NOT NULL,
-      eventType TEXT NOT NULL,
+      eventType TEXT,
       actor TEXT NOT NULL,
+      action TEXT,
+      target TEXT,
       payload TEXT,
-      timestamp TEXT NOT NULL DEFAULT (datetime('now'))
+      metadata TEXT,
+      aiSummary TEXT,
+      timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+      createdAt TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
   );
 
-  await prisma.$executeRawUnsafe(
-    `CREATE TRIGGER IF NOT EXISTS audit_log_no_update
-      BEFORE UPDATE ON \"AuditLog\"
-      BEGIN
-        SELECT RAISE(ABORT, 'AuditLog updates are prohibited');
-      END`,
-  );
+  const alterStatements = [
+    `ALTER TABLE \"AuditLog\" ADD COLUMN action TEXT`,
+    `ALTER TABLE \"AuditLog\" ADD COLUMN target TEXT`,
+    `ALTER TABLE \"AuditLog\" ADD COLUMN metadata TEXT`,
+    `ALTER TABLE \"AuditLog\" ADD COLUMN aiSummary TEXT`,
+    `ALTER TABLE \"AuditLog\" ADD COLUMN createdAt TEXT NOT NULL DEFAULT (datetime('now'))`,
+  ];
 
-  await prisma.$executeRawUnsafe(
-    `CREATE TRIGGER IF NOT EXISTS audit_log_no_delete
-      BEFORE DELETE ON \"AuditLog\"
-      BEGIN
-        SELECT RAISE(ABORT, 'AuditLog deletes are prohibited');
-      END`,
-  );
+  for (const statement of alterStatements) {
+    try {
+      await prisma.$executeRawUnsafe(statement);
+    } catch {
+      // Column already exists on newer schemas.
+    }
+  }
+
+  await prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS audit_log_no_update`);
+  await prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS audit_log_no_delete`);
 }

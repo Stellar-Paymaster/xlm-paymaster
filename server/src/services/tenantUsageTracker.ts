@@ -221,6 +221,7 @@ export class TenantUsageTracker {
    */
   async updateDailyStats(): Promise<void> {
     const tenants = await prisma.tenant.findMany({
+      where: { deletedAt: null },
       select: { id: true },
     });
 
@@ -266,6 +267,7 @@ export class TenantUsageTracker {
    */
   async getUpgradeCandidates(minScore: number = 80): Promise<UsageScoreResult[]> {
     const tenants = await prisma.tenant.findMany({
+      where: { deletedAt: null },
       select: { id: true },
     });
 

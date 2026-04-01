@@ -22,6 +22,8 @@ import { getFeeMultiplierData } from "@/lib/fee-multiplier-data";
 import { FeeEstimatorWidget } from "@/components/dashboard/FeeEstimatorWidget";
 import { MultiChainDashboard } from "@/components/dashboard/MultiChainDashboard";
 import { getMultiChainData } from "@/lib/multi-chain-data";
+import { ExpenseBreakdown } from "@/components/dashboard/ExpenseBreakdown";
+import { getExpenseBreakdownData } from "@/lib/expense-breakdown-data";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -32,6 +34,7 @@ export default async function AdminDashboard() {
   const spendForecast = await getSpendForecastData();
   const feeMultiplier = await getFeeMultiplierData();
   const multiChainData = await getMultiChainData();
+  const expenseBreakdown = await getExpenseBreakdownData();
   const firstActiveKey =
     apiKeys.find((k) => k.active)?.key ?? "your-api-key-here";
 
@@ -119,9 +122,10 @@ export default async function AdminDashboard() {
           <MultiChainDashboard data={multiChainData} />
         </section>
 
-        {/* Spend Analytics Chart */}
-        <section className="mt-6">
+        {/* Spend Analytics Charts */}
+        <section className="mt-6 grid gap-6 lg:grid-cols-2">
           <SpendChart forecast={spendForecast} />
+          <ExpenseBreakdown data={expenseBreakdown} />
         </section>
 
         <section className="mt-6">

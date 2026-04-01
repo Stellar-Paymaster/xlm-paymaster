@@ -75,6 +75,9 @@ describe("feeBumpHandler - Slippage Protection", () => {
       maxRequests: 100,
       windowMs: 60000,
       dailyQuotaStroops: 1000000,
+      isSandbox: false,
+      allowedChains: ["stellar"] as any,
+      region: "US" as const,
     };
 
     mockReq = { body: {}, headers: {}, method: "POST", url: "/fee-bump" };

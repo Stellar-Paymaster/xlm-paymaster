@@ -1,0 +1,86 @@
+name: Nx CI – Remote Caching
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # When set, Nx will push/pull cache artefacts from Nx Cloud.
+  # Configure NX_CLOUD_AUTH_TOKEN as a GitHub Actions secret:
+  # Settings → Secrets and variables → Actions → New repository secret
+  NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
+
+jobs:
+  nx-ci:
+    name: Nx Build & Lint (with remote cache)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch enough history so Nx can compare against the base branch.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      # ── Record timing BEFORE (used for the benchmark artifact) ──────────────
+      - name: Record CI start time
+        id: ci_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      # ── Lint all projects (affected only on PRs, all on main) ───────────────
+      - name: Lint affected projects
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npx nx affected --target=lint --base=origin/${{ github.base_ref }} --head=HEAD
+          else
+            npx nx run-many --target=lint --all
+          fi
+
+      # ── Format-check all projects ───────────────────────────────────────────
+      - name: Format check affected projects
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npx nx affected --target=format:check --base=origin/${{ github.base_ref }} --head=HEAD
+          else
+            npx nx run-many --target=format:check --all
+          fi
+
+      # ── Record timing AFTER ─────────────────────────────────────────────────
+      - name: Record CI end time & report
+        if: always()
+        id: ci_end
+        run: |
+          END=$(date +%s)
+          START=${{ steps.ci_start.outputs.start }}
+          ELAPSED=$((END - START))
+          echo "Nx CI completed in ${ELAPSED}s"
+          echo "elapsed=${ELAPSED}" >> "$GITHUB_OUTPUT"
+
+      # ── Print Nx Cloud cache summary ────────────────────────────────────────
+      - name: Nx Cache Summary
+        if: always()
+        run: |
+          echo "──────────────────────────────────────────"
+          echo " Nx Remote Cache Summary"
+          echo "──────────────────────────────────────────"
+          if [ -n "$NX_CLOUD_AUTH_TOKEN" ]; then
+            echo " ✅  NX_CLOUD_AUTH_TOKEN is configured."
+            echo "     Cache hits/misses are visible in the Nx Cloud dashboard:"
+            echo "     https://cloud.nx.app"
+          else
+            echo " ⚠️   NX_CLOUD_AUTH_TOKEN is NOT set."
+            echo "     Add it as a repository secret to enable remote caching."
+          fi
+          echo "──────────────────────────────────────────"

@@ -65,13 +65,13 @@ describe("auditLogger", () => {
     expect(csv).toContain("API_KEY_REVOKE");
   });
 
-  it("ensures audit log table and triggers are created for sqlite", async () => {
+  it("ensures audit log table structure is created for sqlite", async () => {
     await ensureAuditLogTableIntegrity();
 
-    expect(prisma.$executeRawUnsafe).toHaveBeenCalledTimes(3);
+    expect(prisma.$executeRawUnsafe).toHaveBeenCalledTimes(8);
     expect((prisma.$executeRawUnsafe as any).mock.calls[0][0]).toContain("CREATE TABLE IF NOT EXISTS \"AuditLog\"");
-    expect((prisma.$executeRawUnsafe as any).mock.calls[1][0]).toContain("CREATE TRIGGER IF NOT EXISTS audit_log_no_update");
-    expect((prisma.$executeRawUnsafe as any).mock.calls[2][0]).toContain("CREATE TRIGGER IF NOT EXISTS audit_log_no_delete");
+    expect((prisma.$executeRawUnsafe as any).mock.calls[6][0]).toContain("DROP TRIGGER IF EXISTS audit_log_no_update");
+    expect((prisma.$executeRawUnsafe as any).mock.calls[7][0]).toContain("DROP TRIGGER IF EXISTS audit_log_no_delete");
   });
 
   it("logs an audit event without throwing", async () => {

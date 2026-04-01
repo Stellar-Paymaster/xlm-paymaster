@@ -6,13 +6,15 @@ export type SlackAlertType =
   | "low_balance"
   | "server_error"
   | "server_lifecycle"
-  | "failed_transaction";
+  | "failed_transaction"
+  | "bridge_stall";
 
 export interface SlackAlertToggles {
   lowBalance: boolean;
   serverError: boolean;
   serverLifecycle: boolean;
   failedTransaction: boolean;
+  bridgeStall: boolean;
 }
 
 export interface SlackNotifierOptions {
@@ -53,6 +55,16 @@ export interface FailedTransactionSlackPayload {
   transactionHash: string;
 }
 
+export interface BridgeStallSlackPayload {
+  id: string;
+  sourceChain: string;
+  targetChain: string;
+  sourceTxHash: string;
+  amount: string;
+  asset: string;
+  stalledAt: Date;
+}
+
 interface SlackBlockText {
   type: "mrkdwn" | "plain_text";
   text: string;
@@ -71,6 +83,7 @@ const defaultToggles: SlackAlertToggles = {
   lowBalance: true,
   serverError: true,
   serverLifecycle: true,
+  bridgeStall: true,
 };
 
 function parseBooleanEnv(
@@ -119,6 +132,10 @@ export function loadSlackNotifierOptionsFromEnv(
         env.SLACK_ALERT_SERVER_LIFECYCLE_ENABLED,
         defaultToggles.serverLifecycle,
       ),
+      bridgeStall: parseBooleanEnv(
+        env.SLACK_ALERT_BRIDGE_STALL_ENABLED,
+        defaultToggles.bridgeStall,
+      ),
     },
   };
 }
@@ -132,6 +149,7 @@ export interface SlackNotifierLike {
   notifyLowBalance(payload: LowBalanceSlackPayload): Promise<boolean>;
   notifyServerError(payload: ServerErrorSlackPayload): Promise<boolean>;
   notifyServerLifecycle(payload: ServerLifecycleSlackPayload): Promise<boolean>;
+  notifyBridgeStall(payload: BridgeStallSlackPayload): Promise<boolean>;
 }
 
 export class SlackNotifier implements SlackNotifierLike {
@@ -168,6 +186,8 @@ export class SlackNotifier implements SlackNotifierLike {
         return this.toggles.serverError;
       case "server_lifecycle":
         return this.toggles.serverLifecycle;
+      case "bridge_stall":
+        return this.toggles.bridgeStall;
       default:
         return false;
     }
@@ -240,6 +260,24 @@ export class SlackNotifier implements SlackNotifierLike {
       ],
       [payload.detail],
       payload.timestamp,
+    );
+  }
+
+  async notifyBridgeStall(payload: BridgeStallSlackPayload): Promise<boolean> {
+    return this.send(
+      "bridge_stall",
+      "⏳",
+      "Bridge settlement stalled",
+      [
+        `*Settlement ID*\n\`${payload.id}\``,
+        `*Route*\n${payload.sourceChain} ➔ ${payload.targetChain}`,
+        `*Source Hash*\n\`${payload.sourceTxHash}\``,
+        `*Amount*\n${payload.amount} ${payload.asset}`,
+      ],
+      [
+        "This cross-chain settlement has exceeded its timeout window and requires manual intervention.",
+      ],
+      payload.stalledAt,
     );
   }
 

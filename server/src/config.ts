@@ -24,6 +24,15 @@ export interface VaultConfig {
   secretField: string;
 }
 
+export interface GrpcEngineConfig {
+  address: string;
+  pinnedServerCertSha256: string[];
+  serverName: string;
+  tlsCaPath: string;
+  tlsCertPath: string;
+  tlsKeyPath: string;
+}
+
 export interface SupportedAsset {
   code: string;
   issuer?: string;
@@ -86,6 +95,8 @@ export interface Config {
   vault?: VaultConfig;
   ipAllowlist: string[];
   ipDenylist: string[];
+  grpcEngine?: GrpcEngineConfig;
+  crossChainSettlementTimeoutMinutes: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,6 +110,17 @@ function parseCommaSeparatedList(value: string | undefined): string[] {
       .map((item) => item.trim())
       .filter(Boolean) ?? []
   );
+}
+
+function parseRequiredPath(
+  value: string | undefined,
+  name: string,
+): string {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    throw new Error(`${name} is required when gRPC engine mode is enabled`);
+  }
+  return trimmed;
 }
 
 function parsePositiveInt(value: string | undefined, fallback: number): number {
@@ -152,6 +174,37 @@ function loadVaultConfig(): VaultConfig | undefined {
     kvMount: process.env.VAULT_KV_MOUNT?.trim() || "secret",
     kvVersion: process.env.VAULT_KV_VERSION === "1" ? 1 : 2,
     secretField: process.env.VAULT_SECRET_FIELD?.trim() || "secret",
+  };
+}
+
+function loadGrpcEngineConfig(): GrpcEngineConfig | undefined {
+  const address = process.env.FLUID_GRPC_ENGINE_ADDRESS?.trim();
+  if (!address) {
+    return undefined;
+  }
+
+  return {
+    address,
+    pinnedServerCertSha256: parseCommaSeparatedList(
+      process.env.FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256,
+    ).map((value) =>
+      value.replace(/^sha256:/i, "").replace(/[^a-fA-F0-9]/g, "").toLowerCase(),
+    ),
+    serverName:
+      process.env.FLUID_GRPC_ENGINE_TLS_SERVER_NAME?.trim() ||
+      "fluid-grpc-engine.internal",
+    tlsCaPath: parseRequiredPath(
+      process.env.FLUID_GRPC_ENGINE_CLIENT_CA_PATH,
+      "FLUID_GRPC_ENGINE_CLIENT_CA_PATH",
+    ),
+    tlsCertPath: parseRequiredPath(
+      process.env.FLUID_GRPC_ENGINE_CLIENT_CERT_PATH,
+      "FLUID_GRPC_ENGINE_CLIENT_CERT_PATH",
+    ),
+    tlsKeyPath: parseRequiredPath(
+      process.env.FLUID_GRPC_ENGINE_CLIENT_KEY_PATH,
+      "FLUID_GRPC_ENGINE_CLIENT_KEY_PATH",
+    ),
   };
 }
 
@@ -264,6 +317,7 @@ export function loadConfig(): Config {
     100,
   );
   const vault = loadVaultConfig();
+  const grpcEngine = loadGrpcEngineConfig();
   const supportedAssets = parseSupportedAssets(
     process.env.FLUID_SUPPORTED_ASSETS,
   );
@@ -290,6 +344,11 @@ export function loadConfig(): Config {
     vault,
     ipAllowlist,
     ipDenylist,
+    grpcEngine,
+    crossChainSettlementTimeoutMinutes: parsePositiveInt(
+      process.env.CROSS_CHAIN_SETTLEMENT_TIMEOUT_MINUTES,
+      10,
+    ),
   };
 
   // ---- Vault mode ----------------------------------------------------------

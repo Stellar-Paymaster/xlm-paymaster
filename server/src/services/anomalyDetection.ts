@@ -268,6 +268,7 @@ export async function runAnomalyDetection(): Promise<void> {
   try {
     const tenants = await prisma.tenant.findMany({
       where: {
+        deletedAt: null,
         // Only check tenants with recent activity
         sponsoredTransactions: {
           some: {

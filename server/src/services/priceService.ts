@@ -7,12 +7,16 @@ const COINGECKO_API_URL = "https://api.coingecko.com/api/v3";
 
 const TOKEN_TO_COINGECKO_ID: Record<string, string> = {
   XLM: "stellar",
+  ETH: "ethereum",
+  SOL: "solana",
+  ATOM: "cosmos",
   USDC: "usd-coin",
 };
 
 interface CachedPrice {
   price: Decimal;
   fetchedAt: number;
+  lastUpdatedAt: number | null;
 }
 
 const CACHE_TTL_MS = parseInt(process.env.PRICE_CACHE_TTL_MS || "60000", 10);
@@ -27,7 +31,10 @@ class PriceService {
     return xlmPrice.div(usdcPrice);
   }
 
-  async getTokenPriceUsd(token: string): Promise<Decimal> {
+  async getTokenPriceQuoteUsd(token: string): Promise<{
+    price: Decimal;
+    lastUpdatedAt: number | null;
+  }> {
     const upperToken = token.toUpperCase();
     const cached = this.cache.get(upperToken);
 
@@ -36,7 +43,7 @@ class PriceService {
         { token: upperToken, price: cached.price.toString(), cache: "hit" },
         "Returning cached price"
       );
-      return cached.price;
+      return { price: cached.price, lastUpdatedAt: cached.lastUpdatedAt };
     }
 
     const coingeckoId = TOKEN_TO_COINGECKO_ID[upperToken];
@@ -46,7 +53,7 @@ class PriceService {
 
     try {
       const response = await fetch(
-        `${COINGECKO_API_URL}/simple/price?ids=${coingeckoId}&vs_currencies=usd`,
+        `${COINGECKO_API_URL}/simple/price?ids=${coingeckoId}&vs_currencies=usd&include_last_updated_at=true`,
         {
           headers: { Accept: "application/json" },
           signal: AbortSignal.timeout(5000),
@@ -59,6 +66,10 @@ class PriceService {
 
       const data = await response.json();
       const priceValue = data[coingeckoId]?.usd;
+      const lastUpdatedAt =
+        typeof data[coingeckoId]?.last_updated_at === "number"
+          ? data[coingeckoId].last_updated_at
+          : null;
 
       if (typeof priceValue !== "number" || priceValue <= 0) {
         throw new Error(`Invalid price data for ${upperToken}`);
@@ -66,24 +77,33 @@ class PriceService {
 
       const price = new Decimal(priceValue);
 
-      this.cache.set(upperToken, { price, fetchedAt: Date.now() });
+      this.cache.set(upperToken, {
+        price,
+        fetchedAt: Date.now(),
+        lastUpdatedAt,
+      });
 
       logger.info(
         { token: upperToken, price: price.toString(), cache: "miss" },
         "Fetched fresh price from CoinGecko"
       );
 
-      return price;
+      return { price, lastUpdatedAt };
     } catch (error) {
       if (cached) {
         logger.warn(
           { token: upperToken, error, staleness_ms: Date.now() - cached.fetchedAt },
           "CoinGecko fetch failed, using stale cached price"
         );
-        return cached.price;
+        return { price: cached.price, lastUpdatedAt: cached.lastUpdatedAt };
       }
       throw error;
     }
+  }
+
+  async getTokenPriceUsd(token: string): Promise<Decimal> {
+    const quote = await this.getTokenPriceQuoteUsd(token);
+    return quote.price;
   }
 
   calculateRequiredTokenAmount(

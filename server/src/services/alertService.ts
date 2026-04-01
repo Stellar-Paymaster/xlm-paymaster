@@ -47,6 +47,16 @@ export interface LowBalanceAlertPayload {
   checkedAt: Date;
 }
 
+export interface BridgeStallAlertPayload {
+  id: string;
+  sourceChain: string;
+  targetChain: string;
+  sourceTxHash: string;
+  amount: string;
+  asset: string;
+  stalledAt: Date;
+}
+
 export interface AlertServiceOptions {
   emailTransport?: EmailTransportConfig;
   fetchImpl?: typeof fetch;
@@ -284,6 +294,15 @@ export class AlertService {
     return true;
   }
 
+  async sendBridgeStallAlert(payload: BridgeStallAlertPayload): Promise<boolean> {
+    if (!this.isEnabled()) {
+      return false;
+    }
+
+    await this.notifyAdminsOfStall(payload);
+    return true;
+  }
+
   markBalanceRecovered(accountPublicKey: string): void {
     const existing = this.state.get(accountPublicKey);
     if (!existing) {
@@ -392,6 +411,44 @@ export class AlertService {
     }).catch((err) =>
       console.error("[AlertService] Failed to persist dashboard notification:", err)
     );
+  }
+
+  private async notifyAdminsOfStall(payload: BridgeStallAlertPayload): Promise<void> {
+    const tasks: Array<Promise<void>> = [];
+
+    if (this.slackNotifier.isEnabled("bridge_stall")) {
+      tasks.push(
+        this.slackNotifier.notifyBridgeStall(payload).then((sent) => {
+          if (!sent) {
+            throw new Error("Slack bridge-stall alert could not be delivered.");
+          }
+        }),
+      );
+    }
+
+    // Persist as AdminNotification
+    createNotification({
+      type: "critical",
+      title: `Bridge settlement stalled: ${payload.id.slice(0, 8)}…`,
+      message: `Cross-chain settlement from ${payload.sourceChain} to ${payload.targetChain} has stalled. Intervention required.`,
+      metadata: {
+        settlementId: payload.id,
+        sourceChain: payload.sourceChain,
+        targetChain: payload.targetChain,
+        sourceTxHash: payload.sourceTxHash,
+        amount: payload.amount,
+        asset: payload.asset,
+        stalledAt: payload.stalledAt.toISOString(),
+      },
+    }).catch((err) =>
+      console.error("[AlertService] Failed to persist dashboard notification for stall:", err)
+    );
+
+    if (tasks.length === 0) {
+      return;
+    }
+
+    await Promise.allSettled(tasks);
   }
 
   private async sendEmailAlert(

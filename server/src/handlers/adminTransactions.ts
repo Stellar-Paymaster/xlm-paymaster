@@ -43,7 +43,7 @@ export async function listTransactionsHandler(req: Request, res: Response): Prom
         hash: transaction.txHash ?? transaction.innerTxHash,
         txHash: transaction.txHash,
         innerTxHash: transaction.innerTxHash,
-        tenantId: transaction.tenantId,
+        tenantId: transaction.tenantId ?? null,
         status: transaction.status.toLowerCase(),
         costStroops: Number(transaction.costStroops),
         category: transaction.category,
