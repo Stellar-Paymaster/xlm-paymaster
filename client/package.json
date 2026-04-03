@@ -59,7 +59,7 @@
     "vue": ">=3"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^25.5.2",
     "@types/react": "^18.3.18",
     "msw": "^2.12.14",
     "rollup-plugin-visualizer": "^7.0.1",
