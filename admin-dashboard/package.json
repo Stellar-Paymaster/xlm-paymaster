@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "@storybook/nextjs": "^8.6.12",
+    "@storybook/nextjs": "^10.3.5",
     "@storybook/addon-themes": "^8.6.12",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
