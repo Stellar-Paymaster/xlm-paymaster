@@ -35,8 +35,8 @@
     "next": "15.5.14",
     "next-auth": "5.0.0-beta.20",
     "next-themes": "^0.4.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
     "react-markdown": "^10.1.0",
     "recharts": "^3.8.1",
     "rss": "^1.2.2",
@@ -53,14 +53,14 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "chromatic": "^16.2.0",
+    "chromatic": "^16.3.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.14",
     "playwright": "^1.58.2",
-    "puppeteer": "^24.40.0",
+    "puppeteer": "^24.41.0",
     "storybook": "^8.6.12",
     "tailwindcss": "^4",
-    "typedoc": "^0.28.18",
+    "typedoc": "^0.28.19",
     "typescript": "^5"
   }
 }
