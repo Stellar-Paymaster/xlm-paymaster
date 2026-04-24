@@ -94,6 +94,7 @@ import {
 } from "./handlers/adminChains";
 import {
   adminLoginHandler,
+  changeAdminPasswordHandler,
   listAdminUsersHandler,
   createAdminUserHandler,
   updateAdminUserRoleHandler,
@@ -119,7 +120,7 @@ import { TreasuryRebalancer } from "./services/treasuryRebalancer";
 import { initializeFeeManager } from "./services/feeManager";
 import { initializeOFACScreening, stopOFACScreening } from "./services/ofacScreening";
 import { initializeRegionalDbs, DEFAULT_REGION } from "./services/regionRouter";
-import { requirePermission } from "./utils/adminAuth";
+import { requireAuthenticatedAdmin, requirePermission } from "./utils/adminAuth";
 import { ensureAuditLogTableIntegrity } from "./services/auditLogger";
 import { ipFilterMiddleware } from "./middleware/ipFilter";
 import { deleteCurrentTenantHandler, deleteTenantByAdminHandler } from "./handlers/tenantErasure";
@@ -359,6 +360,7 @@ app.post(
 );
 
 app.post("/admin/auth/login", adminLoginHandler);
+app.post("/admin/auth/change-password", requireAuthenticatedAdmin(), changeAdminPasswordHandler);
 app.get("/admin/users", requirePermission("manage_users"), listAdminUsersHandler);
 app.post("/admin/users", requirePermission("manage_users"), createAdminUserHandler);
 app.patch("/admin/users/:id/role", requirePermission("manage_users"), updateAdminUserRoleHandler);

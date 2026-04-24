@@ -305,7 +305,8 @@ async fn accept_tls_connections(
                 }
             };
 
-            let tls_stream = match TlsAcceptor::from(server_config).accept(socket).await {
+            let acceptor = TlsAcceptor::from(Arc::clone(&server_config));
+            let tls_stream = match acceptor.accept(socket).await {
                 Ok(tls_stream) => tls_stream,
                 Err(error) => {
                     warn!(%remote_addr, %error, "gRPC mTLS handshake failed");
@@ -340,6 +341,8 @@ async fn accept_tls_connections(
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let _ = rustls::crypto::ring::default_provider().install_default();
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()

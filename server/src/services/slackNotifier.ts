@@ -7,7 +7,8 @@ export type SlackAlertType =
   | "server_error"
   | "server_lifecycle"
   | "failed_transaction"
-  | "bridge_stall";
+  | "bridge_stall"
+  | "treasury_rebalance_failure";
 
 export interface SlackAlertToggles {
   lowBalance: boolean;
@@ -15,6 +16,7 @@ export interface SlackAlertToggles {
   serverLifecycle: boolean;
   failedTransaction: boolean;
   bridgeStall: boolean;
+  treasuryRebalanceFailure: boolean;
 }
 
 export interface SlackNotifierOptions {
@@ -65,6 +67,14 @@ export interface BridgeStallSlackPayload {
   stalledAt: Date;
 }
 
+export interface TreasuryRebalanceFailureSlackPayload {
+  accountPublicKey: string;
+  balanceXlm: number;
+  detail: string;
+  failedAt: Date;
+  thresholdXlm: number;
+}
+
 interface SlackBlockText {
   type: "mrkdwn" | "plain_text";
   text: string;
@@ -84,6 +94,7 @@ const defaultToggles: SlackAlertToggles = {
   serverError: true,
   serverLifecycle: true,
   bridgeStall: true,
+  treasuryRebalanceFailure: true,
 };
 
 function parseBooleanEnv(
@@ -136,6 +147,10 @@ export function loadSlackNotifierOptionsFromEnv(
         env.SLACK_ALERT_BRIDGE_STALL_ENABLED,
         defaultToggles.bridgeStall,
       ),
+      treasuryRebalanceFailure: parseBooleanEnv(
+        env.SLACK_ALERT_TREASURY_REBALANCE_FAILURE_ENABLED,
+        defaultToggles.treasuryRebalanceFailure,
+      ),
     },
   };
 }
@@ -150,6 +165,9 @@ export interface SlackNotifierLike {
   notifyServerError(payload: ServerErrorSlackPayload): Promise<boolean>;
   notifyServerLifecycle(payload: ServerLifecycleSlackPayload): Promise<boolean>;
   notifyBridgeStall(payload: BridgeStallSlackPayload): Promise<boolean>;
+  notifyTreasuryRebalanceFailure(
+    payload: TreasuryRebalanceFailureSlackPayload,
+  ): Promise<boolean>;
 }
 
 export class SlackNotifier implements SlackNotifierLike {
@@ -188,6 +206,8 @@ export class SlackNotifier implements SlackNotifierLike {
         return this.toggles.serverLifecycle;
       case "bridge_stall":
         return this.toggles.bridgeStall;
+      case "treasury_rebalance_failure":
+        return this.toggles.treasuryRebalanceFailure;
       default:
         return false;
     }
@@ -278,6 +298,27 @@ export class SlackNotifier implements SlackNotifierLike {
         "This cross-chain settlement has exceeded its timeout window and requires manual intervention.",
       ],
       payload.stalledAt,
+    );
+  }
+
+  async notifyTreasuryRebalanceFailure(
+    payload: TreasuryRebalanceFailureSlackPayload,
+  ): Promise<boolean> {
+    return this.send(
+      "treasury_rebalance_failure",
+      "🚨",
+      "Treasury rebalancing failed",
+      [
+        `*Hot wallet*\n\`${payload.accountPublicKey}\``,
+        `*Current balance*\n${payload.balanceXlm.toFixed(7)} XLM`,
+        `*Threshold*\n${payload.thresholdXlm.toFixed(7)} XLM`,
+        `*Service*\n${this.serviceName}`,
+      ],
+      [
+        payload.detail,
+        "Hot wallet top-up did not complete and requires operator intervention.",
+      ],
+      payload.failedAt,
     );
   }
 

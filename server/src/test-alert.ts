@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import fs from "fs";
 import path from "path";
 import type { AlertingConfig, Config } from "./config";
 import { SignerPool } from "./signing";
@@ -13,7 +13,11 @@ import {
   loadSlackNotifierOptionsFromEnv,
 } from "./services/slackNotifier";
 
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// Load .env explicitly
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+
+console.log("ENV TEST:", process.env.SMTP_HOST);
 
 async function main(): Promise<void> {
   const config = buildTestConfig();
@@ -39,9 +43,13 @@ async function main(): Promise<void> {
     );
   }
 
-  await alertService.sendTestAlert(config);
-  console.log("Test alert sent successfully. Check Slack or your inbox now.");
-}
+  try {
+    const result = await sendLowBalanceAlert({
+      accountId,
+      currentBalance: simulatedBalance,
+      threshold,
+      network: "testnet",
+    });
 
 function buildTestConfig(): Config {
   const lowBalanceThresholdXlm = resolveLowBalanceThresholdXlm(
@@ -113,21 +121,6 @@ function parsePositiveInt(value: string | undefined, fallback: number): number {
   if (!value) {
     return fallback;
   }
-
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
-function parseOptionalNumber(value: string | undefined): number | undefined {
-  if (!value) {
-    return undefined;
-  }
-
-  const parsed = Number.parseFloat(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
-}
-
-main().catch((error) => {
-  console.error("Failed to send test alert:", error);
-  process.exit(1);
-});
+main();

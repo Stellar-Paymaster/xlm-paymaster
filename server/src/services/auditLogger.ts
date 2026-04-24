@@ -18,6 +18,15 @@ export type AuditEventType =
   | "OFAC_SCREENING_PASSED";
 
 export function getAuditActor(req: Request): string {
+  const adminAuth = (req as Request & {
+    adminAuth?: { userId: string; email: string; authType: string };
+  }).adminAuth;
+  if (adminAuth) {
+    return adminAuth.authType === "static-token"
+      ? "admin-token"
+      : `admin:${adminAuth.email || adminAuth.userId}`;
+  }
+
   const adminUser = req.header("x-admin-user");
   if (adminUser) {
     return `admin:${adminUser}`;

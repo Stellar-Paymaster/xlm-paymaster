@@ -1,27 +1,38 @@
+<<<<<<< HEAD
+import nodemailer from "nodemailer";
+=======
 import type { AlertEmailConfig, AlertingConfig, Config } from "../config";
 import { SlackNotifier, type SlackNotifierLike } from "./slackNotifier";
 import type { FcmNotifierLike } from "./fcmNotifier";
 import { TwilioNotifier, type TwilioNotifierLike } from "./twilioNotifier";
 import { createNotification } from "./notificationService";
 import type { TreasuryRebalancer } from "./treasuryRebalancer";
+>>>>>>> upstream/main
 
-type NodeMailerModule = {
-  createTransport: (config: {
-    host: string;
-    port: number;
-    secure: boolean;
-    auth?: { user: string; pass: string };
-  }) => {
-    sendMail: (message: {
-      from: string;
-      to: string;
-      subject: string;
-      text: string;
-      html: string;
-    }) => Promise<unknown>;
-  };
-};
+let lastAlertTime: Record<string, number> = {};
 
+<<<<<<< HEAD
+export function resetCooldown(accountId: string) {
+  delete lastAlertTime[accountId];
+}
+
+export async function sendLowBalanceAlert({
+  accountId,
+  currentBalance,
+  threshold,
+  network,
+}: {
+  accountId: string;
+  currentBalance: number;
+  threshold: number;
+  network: string;
+}) {
+  const now = Date.now();
+  const cooldown = parseInt(process.env.FLUID_LOW_BALANCE_ALERT_COOLDOWN_MS || "0");
+
+  if (lastAlertTime[accountId] && now - lastAlertTime[accountId] < cooldown) {
+    return { slackSent: false, emailSent: false, errors: [] };
+=======
 interface SmtpTransportConfig extends AlertEmailConfig {
   dashboardUrl?: string;
   kind: "smtp";
@@ -55,6 +66,14 @@ export interface BridgeStallAlertPayload {
   amount: string;
   asset: string;
   stalledAt: Date;
+}
+
+export interface TreasuryRebalanceFailureAlertPayload {
+  accountPublicKey: string;
+  balanceXlm: number;
+  detail: string;
+  failedAt: Date;
+  thresholdXlm: number;
 }
 
 export interface AlertServiceOptions {
@@ -260,13 +279,19 @@ export class AlertService {
       Boolean(this.fcmNotifier?.isConfigured()) ||
       Boolean(this.twilioNotifier?.isConfigured())
     );
+>>>>>>> upstream/main
   }
 
-  async sendLowBalanceAlert(payload: LowBalanceAlertPayload): Promise<boolean> {
-    if (!this.isEnabled()) {
-      return false;
-    }
+  lastAlertTime[accountId] = now;
 
+<<<<<<< HEAD
+  const errors: string[] = [];
+  let emailSent = false;
+  let slackSent = false;
+
+  // ✅ EMAIL (SMTP)
+  if (process.env.SMTP_HOST) {
+=======
     const alertState = this.state.get(payload.accountPublicKey) ?? {
       currentlyLow: false,
     };
@@ -301,6 +326,40 @@ export class AlertService {
 
     await this.notifyAdminsOfStall(payload);
     return true;
+  }
+
+  async sendTreasuryRebalanceFailureAlert(
+    payload: TreasuryRebalanceFailureAlertPayload,
+  ): Promise<boolean> {
+    if (!this.isEnabled()) {
+      await this.persistTreasuryRebalanceFailure(payload);
+      return false;
+    }
+
+    const tasks: Array<Promise<void>> = [];
+
+    if (this.slackNotifier.isEnabled("treasury_rebalance_failure")) {
+      tasks.push(
+        this.slackNotifier
+          .notifyTreasuryRebalanceFailure(payload)
+          .then((sent) => {
+            if (!sent) {
+              throw new Error(
+                "Slack treasury rebalancing alert could not be delivered.",
+              );
+            }
+          }),
+      );
+    }
+
+    await this.persistTreasuryRebalanceFailure(payload);
+
+    if (tasks.length === 0) {
+      return false;
+    }
+
+    const results = await Promise.allSettled(tasks);
+    return results.some((result) => result.status === "fulfilled");
   }
 
   markBalanceRecovered(accountPublicKey: string): void {
@@ -451,6 +510,28 @@ export class AlertService {
     await Promise.allSettled(tasks);
   }
 
+  private async persistTreasuryRebalanceFailure(
+    payload: TreasuryRebalanceFailureAlertPayload,
+  ): Promise<void> {
+    await createNotification({
+      type: "critical",
+      title: "Treasury rebalancing failed",
+      message: `Hot wallet ${payload.accountPublicKey.slice(0, 8)}... could not be topped up after dropping to ${payload.balanceXlm.toFixed(2)} XLM.`,
+      metadata: {
+        accountPublicKey: payload.accountPublicKey,
+        balanceXlm: payload.balanceXlm,
+        detail: payload.detail,
+        failedAt: payload.failedAt.toISOString(),
+        thresholdXlm: payload.thresholdXlm,
+      },
+    }).catch((err) =>
+      console.error(
+        "[AlertService] Failed to persist treasury rebalancing alert:",
+        err,
+      )
+    );
+  }
+
   private async sendEmailAlert(
     payload: LowBalanceAlertPayload,
     transportConfig: EmailTransportConfig,
@@ -508,29 +589,55 @@ export class AlertService {
   }
 
   private loadNodeMailer(): NodeMailerModule {
+>>>>>>> upstream/main
     try {
-      return require("nodemailer") as NodeMailerModule;
-    } catch (error) {
-      throw new Error(
-        "Email alerting requires the 'nodemailer' package to be installed.",
-      );
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+        secure: process.env.SMTP_SECURE === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: process.env.EMAIL_TO,
+        subject: "⚠️ Low Balance Alert",
+        text: `Account ${accountId} is low on balance.
+Current: ${currentBalance} XLM
+Threshold: ${threshold} XLM
+Network: ${network}`,
+      });
+
+      emailSent = true;
+    } catch (err: any) {
+      errors.push("Email failed: " + err.message);
     }
   }
 
-  private buildPlainTextMessage(payload: LowBalanceAlertPayload): string {
-    const lines = [
-      "Fluid low balance alert",
-      "",
-      `Fee payer: ${payload.accountPublicKey}`,
-      `Current balance: ${payload.balanceXlm.toFixed(7)} XLM`,
-      `Threshold: ${payload.thresholdXlm.toFixed(7)} XLM`,
-      `Network: ${payload.networkPassphrase}`,
-      `Checked at: ${payload.checkedAt.toISOString()}`,
-    ];
+  // ✅ SLACK (optional)
+  if (process.env.SLACK_WEBHOOK_URL) {
+    try {
+      await fetch(process.env.SLACK_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: `⚠️ Low Balance Alert\nAccount: ${accountId}\nBalance: ${currentBalance} XLM`,
+        }),
+      });
 
-    if (payload.horizonUrl) {
-      lines.push(`Horizon: ${payload.horizonUrl}`);
+      slackSent = true;
+    } catch (err: any) {
+      errors.push("Slack failed: " + err.message);
     }
+<<<<<<< HEAD
+  }
+
+  return { slackSent, emailSent, errors };
+}
+=======
 
     if (this.dashboardUrl) {
       lines.push(`Dashboard: ${this.dashboardUrl}`);
@@ -570,3 +677,4 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+>>>>>>> upstream/main

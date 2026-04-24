@@ -1,6 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { getAuditActor, logAuditEvent } from "../services/auditLogger";
+import prisma from "./db";
 import {
   AdminRole,
   Permission,
@@ -9,34 +10,56 @@ import {
 } from "./permissions";
 
 export interface AdminJwtPayload {
-  sub: string;   // AdminUser id
+  sub: string;
   email: string;
   role: AdminRole;
+  sessionVersion?: number;
   iat?: number;
   exp?: number;
 }
+
+export interface AuthenticatedAdminContext {
+  authType: "jwt" | "static-token";
+  userId: string;
+  email: string;
+  role: AdminRole;
+  sessionVersion: number;
+}
+
+const adminUserModel = (prisma as any).adminUser as {
+  findUnique: (args: any) => Promise<any | null>;
+};
 
 function getJwtSecret(): string {
   return process.env.FLUID_ADMIN_JWT_SECRET ?? "dev-admin-jwt-secret";
 }
 
-// ── JWT helpers ──────────────────────────────────────────────────────────────
-
 export function signAdminJwt(payload: Omit<AdminJwtPayload, "iat" | "exp">): string {
-  return jwt.sign(payload, getJwtSecret(), { expiresIn: "8h" });
+  return jwt.sign(
+    {
+      ...payload,
+      sessionVersion: payload.sessionVersion ?? 0,
+    },
+    getJwtSecret(),
+    { expiresIn: "8h" },
+  );
 }
 
 export function verifyAdminJwt(token: string): AdminJwtPayload | null {
   try {
     const decoded = jwt.verify(token, getJwtSecret()) as AdminJwtPayload;
-    if (!isValidRole(decoded.role)) return null;
-    return decoded;
+    if (!isValidRole(decoded.role)) {
+      return null;
+    }
+
+    return {
+      ...decoded,
+      sessionVersion: decoded.sessionVersion ?? 0,
+    };
   } catch {
     return null;
   }
 }
-
-// ── Legacy static-token helpers (backward compat) ────────────────────────────
 
 export function isAdminTokenAuthority(req: Request): boolean {
   const token = req.header("x-admin-token");
@@ -58,51 +81,85 @@ export function requireAdminToken(req: Request, res: Response): boolean {
   return true;
 }
 
-// ── Role resolution ───────────────────────────────────────────────────────────
+function attachAdminAuth(req: Request, context: AuthenticatedAdminContext): void {
+  (req as Request & { adminAuth?: AuthenticatedAdminContext }).adminAuth = context;
+}
 
-/**
- * Resolve the admin role for an incoming request.
- *
- * Priority:
- *   1. x-admin-jwt header → verified JWT → role from payload
- *   2. x-admin-token matches FLUID_ADMIN_TOKEN → SUPER_ADMIN (backward compat)
- *   3. No valid auth → null
- */
-export function resolveAdminRole(req: Request): AdminRole | null {
+export function getAuthenticatedAdmin(req: Request): AuthenticatedAdminContext | null {
+  return (req as Request & { adminAuth?: AuthenticatedAdminContext }).adminAuth ?? null;
+}
+
+export async function resolveAdminRole(req: Request): Promise<AdminRole | null> {
+  const context = await resolveAdminAuthContext(req);
+  return context?.role ?? null;
+}
+
+export async function resolveAdminAuthContext(
+  req: Request,
+): Promise<AuthenticatedAdminContext | null> {
   const jwtHeader = req.header("x-admin-jwt");
   if (jwtHeader) {
-    // JWT header present — must be valid; do NOT fall through to static token
-    // so a tampered JWT can't be silently upgraded to SUPER_ADMIN.
     const payload = verifyAdminJwt(jwtHeader);
-    return payload ? payload.role : null;
+    if (!payload) {
+      return null;
+    }
+
+    if (payload.sub === "env-admin") {
+      return {
+        authType: "jwt",
+        userId: payload.sub,
+        email: payload.email,
+        role: payload.role,
+        sessionVersion: payload.sessionVersion ?? 0,
+      };
+    }
+
+    const user = await adminUserModel.findUnique({ where: { id: payload.sub } });
+    if (!user || !user.active || !isValidRole(user.role)) {
+      return null;
+    }
+
+    const currentSessionVersion = user.sessionVersion ?? 0;
+    if (currentSessionVersion !== (payload.sessionVersion ?? 0)) {
+      return null;
+    }
+
+    return {
+      authType: "jwt",
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      sessionVersion: currentSessionVersion,
+    };
   }
 
-  if (isAdminTokenAuthority(req)) return "SUPER_ADMIN";
+  if (isAdminTokenAuthority(req)) {
+    return {
+      authType: "static-token",
+      userId: "static-admin",
+      email: "static-admin",
+      role: "SUPER_ADMIN",
+      sessionVersion: 0,
+    };
+  }
 
   return null;
 }
 
-// ── requirePermission middleware factory ──────────────────────────────────────
-
-/**
- * Express middleware that enforces a specific permission.
- *
- * Usage:
- *   app.post("/admin/api-keys", requirePermission("manage_api_keys"), handler)
- */
 export function requirePermission(permission: Permission) {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const role = resolveAdminRole(req);
-
-    if (!role) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const context = await resolveAdminAuthContext(req);
+    if (!context) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    if (!hasPermission(role, permission)) {
+    attachAdminAuth(req, context);
+
+    if (!hasPermission(context.role, permission)) {
       res.status(403).json({
         error: "Forbidden",
-        detail: `Role '${role}' does not have permission '${permission}'`,
+        detail: `Role '${context.role}' does not have permission '${permission}'`,
       });
       return;
     }
@@ -110,10 +167,23 @@ export function requirePermission(permission: Permission) {
     void logAuditEvent("ADMIN_LOGIN", getAuditActor(req), {
       path: req.path,
       method: req.method,
-      role,
+      role: context.role,
       permission,
     });
 
+    next();
+  };
+}
+
+export function requireAuthenticatedAdmin() {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const context = await resolveAdminAuthContext(req);
+    if (!context) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    attachAdminAuth(req, context);
     next();
   };
 }

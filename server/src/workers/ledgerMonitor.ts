@@ -13,6 +13,7 @@ export class LedgerMonitor {
   private readonly webhookService: WebhookService;
   private pollInterval: NodeJS.Timeout | null = null;
   private readonly POLL_INTERVAL_MS = 30000;
+  private readonly batchSize: number;
 
   constructor(
     config: Config,
@@ -28,6 +29,7 @@ export class LedgerMonitor {
 
     this.client = client || HorizonFailoverClient.fromConfig(config);
     this.webhookService = webhookService;
+    this.batchSize = config.workers?.ledgerMonitorConcurrency ?? 5;
   }
 
   start(): void {
@@ -65,16 +67,18 @@ export class LedgerMonitor {
       }
 
       logger.info(
-        { pending_transactions: pendingTransactions.length },
+        {
+          ledger_monitor_concurrency: this.batchSize,
+          pending_transactions: pendingTransactions.length,
+        },
         "Processing pending transactions",
       );
 
-      const batchSize = 5;
-      for (let i = 0; i < pendingTransactions.length; i += batchSize) {
-        const batch = pendingTransactions.slice(i, i + batchSize);
+      for (let i = 0; i < pendingTransactions.length; i += this.batchSize) {
+        const batch = pendingTransactions.slice(i, i + this.batchSize);
         await Promise.all(batch.map((tx) => this.checkTransaction(tx)));
 
-        if (i + batchSize < pendingTransactions.length) {
+        if (i + this.batchSize < pendingTransactions.length) {
           await this.delay(1000);
         }
       }

@@ -59,4 +59,30 @@ describe("LedgerMonitor", () => {
       }),
     );
   });
+
+  it("uses the configured ledger monitor concurrency as the batch size", () => {
+    const config = {
+      horizonSelectionStrategy: "priority",
+      horizonUrls: ["https://horizon-testnet.stellar.org"],
+      workers: {
+        ledgerMonitorConcurrency: 12,
+      },
+    } as any;
+    const webhookService = {
+      dispatch: vi.fn().mockResolvedValue(undefined),
+    };
+    const client = {
+      getNodeStatuses: vi.fn().mockReturnValue([]),
+      getTransaction: vi.fn(),
+    };
+
+    const monitor = new LedgerMonitor(
+      config,
+      webhookService as any,
+      undefined,
+      client as any,
+    );
+
+    expect((monitor as any).batchSize).toBe(12);
+  });
 });

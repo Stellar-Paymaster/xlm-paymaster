@@ -34,7 +34,14 @@ export class TreasuryRebalancer {
   }
 
   async checkAndRebalance(accountPublicKey: string, currentBalanceXlm: number): Promise<void> {
-    if (!this.bridgeService) return;
+    if (!this.bridgeService) {
+      await this.sendRebalanceFailureAlert(
+        accountPublicKey,
+        currentBalanceXlm,
+        "Wormhole bridge service is not configured.",
+      );
+      return;
+    }
 
     if (currentBalanceXlm < REBALANCE_THRESHOLD_XLM) {
       logger.info(
@@ -64,6 +71,16 @@ export class TreasuryRebalancer {
           // Track in background
           this.bridgeService.trackAndRedeem(sourceTxHash).catch(err => {
             logger.error({ ...serializeError(err), sourceTxHash }, "Failed to track and redeem bridge transfer");
+            this.sendRebalanceFailureAlert(
+              accountPublicKey,
+              currentBalanceXlm,
+              `Bridge transfer ${sourceTxHash} failed during VAA tracking or redemption: ${err.message}`,
+            ).catch((alertError) =>
+              logger.error(
+                { ...serializeError(alertError), sourceTxHash },
+                "Failed to alert on treasury rebalance tracking failure",
+              ),
+            );
             createNotification({
               type: "critical",
               title: "Cross-chain rebalancing failed",
@@ -76,10 +93,40 @@ export class TreasuryRebalancer {
             { evmBalance: evmBalance.toString(), required: MIN_EVM_SURPLUS_USDC.toString() },
             "EVM treasury does not have sufficient surplus for rebalancing"
           );
+          await this.sendRebalanceFailureAlert(
+            accountPublicKey,
+            currentBalanceXlm,
+            `EVM treasury surplus ${evmBalance.toString()} is below required ${MIN_EVM_SURPLUS_USDC.toString()} base units.`,
+          );
         }
       } catch (error) {
         logger.error({ ...serializeError(error) }, "Error during treasury rebalancing check");
+        await this.sendRebalanceFailureAlert(
+          accountPublicKey,
+          currentBalanceXlm,
+          error instanceof Error
+            ? error.message
+            : "Unknown treasury rebalancing error",
+        );
       }
     }
+  }
+
+  private async sendRebalanceFailureAlert(
+    accountPublicKey: string,
+    currentBalanceXlm: number,
+    detail: string,
+  ): Promise<void> {
+    if (currentBalanceXlm >= REBALANCE_THRESHOLD_XLM || !this.alertService) {
+      return;
+    }
+
+    await this.alertService.sendTreasuryRebalanceFailureAlert({
+      accountPublicKey,
+      balanceXlm: currentBalanceXlm,
+      detail,
+      failedAt: new Date(),
+      thresholdXlm: REBALANCE_THRESHOLD_XLM,
+    });
   }
 }

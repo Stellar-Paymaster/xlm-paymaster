@@ -86,6 +86,14 @@ export default async function AdminDashboard() {
             })} XLM`}
             delta={spendForecast.runwayMessage}
             icon={Wallet}
+            action={
+              <Link
+                href="/admin/billing"
+                className="rounded-full bg-primary px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground transition hover:scale-105 hover:shadow-lg active:scale-95"
+              >
+                Top-up
+              </Link>
+            }
           />
           <StatCard
             title="Dynamic Fee Multiplier"
@@ -107,7 +115,12 @@ export default async function AdminDashboard() {
 
         {/* Tables */}
         <section className="mt-6 space-y-6">
-          <div className="flex flex-wrap justify-end gap-3">
+            <Link
+              href="/admin/billing"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-primary/30 bg-primary/10 px-6 text-sm font-black text-primary transition hover:shadow-lg hover:-translate-y-0.5"
+            >
+              Billing & Quota
+            </Link>
             <Link
               href="/admin/webhooks"
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-border/50 glass  px-6 text-sm font-black text-foreground transition hover:shadow-lg hover:-translate-y-0.5"

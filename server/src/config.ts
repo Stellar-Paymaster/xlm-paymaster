@@ -26,6 +26,7 @@ export interface VaultConfig {
 
 export interface GrpcEngineConfig {
   address: string;
+  secondaryAddress?: string;
   pinnedServerCertSha256: string[];
   serverName: string;
   tlsCaPath: string;
@@ -84,6 +85,18 @@ export interface EvmSettlementConfig {
   refundFromAddress?: string;
 }
 
+export interface KycConfig {
+  enabled: boolean;
+  endpointUrl?: string;
+  apiKey?: string;
+  timeoutMs: number;
+  failClosed: boolean;
+}
+
+export interface WorkerConfig {
+  ledgerMonitorConcurrency: number;
+}
+
 export interface Config {
   allowedOrigins: string[];
   alerting: AlertingConfig;
@@ -108,7 +121,9 @@ export interface Config {
   supportedAssets?: SupportedAsset[];
   vault?: VaultConfig;
   evmSettlement?: EvmSettlementConfig;
+  kyc: KycConfig;
   treasury: TreasuryConfig;
+  workers: WorkerConfig;
 }
 
 export interface TreasuryConfig {
@@ -158,6 +173,34 @@ function parseOptionalNumber(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
+function parseBoolean(
+  value: string | undefined,
+  fallback: boolean,
+): boolean {
+  if (!value) {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+  if (["0", "false", "no", "off"].includes(normalized)) {
+    return false;
+  }
+  return fallback;
+}
+
+function parseBoundedPositiveInt(
+  value: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+): number {
+  const parsed = parsePositiveInt(value, fallback);
+  return Math.min(Math.max(parsed, min), max);
+}
+
 function parseSupportedAssets(value: string | undefined): SupportedAsset[] {
   if (!value) {
     return [];
@@ -205,6 +248,7 @@ function loadGrpcEngineConfig(): GrpcEngineConfig | undefined {
 
   return {
     address,
+    secondaryAddress: process.env.FLUID_GRPC_ENGINE_SECONDARY_ADDRESS?.trim(),
     pinnedServerCertSha256: parseCommaSeparatedList(
       process.env.FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256,
     ).map((value) =>
@@ -330,6 +374,21 @@ function loadEvmSettlementConfig(): EvmSettlementConfig | undefined {
   };
 }
 
+function loadKycConfig(): KycConfig {
+  return {
+    enabled: parseBoolean(process.env.FLUID_KYC_ENABLED, false),
+    endpointUrl: process.env.FLUID_KYC_ENDPOINT_URL?.trim() || undefined,
+    apiKey: process.env.FLUID_KYC_API_KEY?.trim() || undefined,
+    timeoutMs: parseBoundedPositiveInt(
+      process.env.FLUID_KYC_TIMEOUT_MS,
+      2_000,
+      250,
+      30_000,
+    ),
+    failClosed: parseBoolean(process.env.FLUID_KYC_FAIL_CLOSED, true),
+  };
+}
+
 function loadTreasuryConfig(): TreasuryConfig {
   return {
     coldWallet: process.env.TREASURY_COLD_WALLET?.trim() || "",
@@ -339,6 +398,18 @@ function loadTreasuryConfig(): TreasuryConfig {
     ),
     cronSchedule: process.env.TREASURY_SWEEP_CRON_SCHEDULE?.trim() || "0 0 * * *",
     enabled: process.env.TREASURY_SWEEP_ENABLED !== "false",
+  };
+}
+
+function loadWorkerConfig(): WorkerConfig {
+  return {
+    ledgerMonitorConcurrency: parseBoundedPositiveInt(
+      process.env.FLUID_LEDGER_MONITOR_CONCURRENCY ??
+        process.env.LEDGER_MONITOR_THREADS,
+      5,
+      1,
+      64,
+    ),
   };
 }
 
@@ -406,6 +477,7 @@ export function loadConfig(): Config {
     maxXdrSize,
     networkPassphrase,
     evmSettlement: loadEvmSettlementConfig(),
+    kyc: loadKycConfig(),
     rateLimitMax,
     rateLimitWindowMs,
     stellarRpcUrl: process.env.STELLAR_RPC_URL?.trim() || undefined,
@@ -419,6 +491,7 @@ export function loadConfig(): Config {
       10,
     ),
     treasury: loadTreasuryConfig(),
+    workers: loadWorkerConfig(),
   };
 
   // ---- Vault mode ----------------------------------------------------------

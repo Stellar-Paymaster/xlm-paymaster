@@ -11,6 +11,8 @@ export type {
   SignerPoolOptions,
   SignerSelectionStrategy,
 } from "./signerPool";
+export { NonceGuard, NonceReplayError } from "./nonceGuard";
+export type { NonceGuardSnapshotEntry } from "./nonceGuard";
 
 interface SignableTransaction {
   addDecoratedSignature(signature: unknown): void;

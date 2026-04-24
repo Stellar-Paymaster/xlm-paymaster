@@ -1,4 +1,5 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { encryptionExtension } from "./prismaEncryption";
 
 type PrismaClientLike = {
   [key: string]: any;
@@ -31,7 +32,7 @@ const PrismaClient = loadPrismaClient();
 const dbUrl = process.env.DATABASE_URL ?? "file:./dev.db";
 const adapter = new PrismaBetterSqlite3({ url: dbUrl });
 
-export const prisma =
+const basePrisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,
@@ -41,8 +42,10 @@ export const prisma =
         : ["error"],
   });
 
+export const prisma = typeof basePrisma.$extends === "function" ? basePrisma.$extends(encryptionExtension) : basePrisma;
+
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = basePrisma;
 }
 
 export default prisma;

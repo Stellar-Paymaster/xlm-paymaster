@@ -2,7 +2,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use napi::bindgen_prelude::Buffer;
 use tokio::runtime::Runtime;
 
-// Import our library
+// Import our libarary's sign
 use fluid_signer::sign_payload;
 
 fn create_optimized_runtime(worker_threads: usize, max_blocking: usize, stack_size: usize) -> Runtime {

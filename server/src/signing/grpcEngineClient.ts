@@ -107,32 +107,72 @@ function createClientConstructor() {
 const InternalSignerClientConstructor = createClientConstructor();
 
 export class GrpcEngineSignerClient {
-  private cached: CachedClientMaterial | null = null;
+  private primaryCached: CachedClientMaterial | null = null;
+  private secondaryCached: CachedClientMaterial | null = null;
+  private primaryDownUntil = 0;
 
   constructor(private readonly config: GrpcEngineConfig) {}
 
-  async health(): Promise<string> {
-    const client = this.getClient();
-    return new Promise((resolve, reject) => {
-      client.health({}, (error, response) => {
-        if (error) {
-          reject(error);
-          return;
+  private async executeWithFailover<T>(
+    operation: (client: InternalSignerClient) => Promise<T>
+  ): Promise<T> {
+    const now = Date.now();
+    const primaryIsDown = this.primaryDownUntil > now;
+
+    if (!primaryIsDown || !this.config.secondaryAddress) {
+      try {
+        const primaryClient = this.getClient(true);
+        const result = await operation(primaryClient);
+        
+        // If it succeeds, ensure we mark it as up
+        this.primaryDownUntil = 0;
+        return result;
+      } catch (primaryError) {
+        if (!this.config.secondaryAddress) {
+          throw primaryError;
         }
-        resolve(response.status);
+        
+        console.warn("[GrpcEngineSignerClient] Primary signer failed, failing over to secondary", primaryError instanceof Error ? primaryError.message : primaryError);
+        // Trip circuit breaker for 30 seconds
+        this.primaryDownUntil = Date.now() + 30000;
+        
+        // Fallthrough to try secondary
+      }
+    }
+
+    try {
+      const secondaryClient = this.getClient(false);
+      return await operation(secondaryClient);
+    } catch (secondaryError) {
+      console.error("[GrpcEngineSignerClient] Secondary signer failed", secondaryError instanceof Error ? secondaryError.message : secondaryError);
+      throw secondaryError;
+    }
+  }
+
+  async health(): Promise<string> {
+    return this.executeWithFailover((client) => {
+      return new Promise((resolve, reject) => {
+        client.health({}, (error, response) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve(response.status);
+        });
       });
     });
   }
 
   async signPayload(secret: string, payload: Buffer): Promise<Buffer> {
-    const client = this.getClient();
-    return new Promise((resolve, reject) => {
-      client.signPayload({ payload, secret }, (error, response) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve(Buffer.from(response.signature));
+    return this.executeWithFailover((client) => {
+      return new Promise((resolve, reject) => {
+        client.signPayload({ payload, secret }, (error, response) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve(Buffer.from(response.signature));
+        });
       });
     });
   }
@@ -142,51 +182,62 @@ export class GrpcEngineSignerClient {
     feePayerSecretPath: string,
     payload: Buffer,
   ): Promise<Buffer> {
-    const client = this.getClient();
-    return new Promise((resolve, reject) => {
-      client.signPayloadFromVault(
-        {
-          approle_role_id: vaultConfig.appRole?.roleId ?? "",
-          approle_secret_id: vaultConfig.appRole?.secretId ?? "",
-          kv_mount: vaultConfig.kvMount,
-          kv_version: vaultConfig.kvVersion,
-          payload,
-          secret_field: vaultConfig.secretField,
-          secret_path: feePayerSecretPath,
-          vault_addr: vaultConfig.addr,
-          vault_token: vaultConfig.token ?? "",
-        },
-        (error, response) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-          resolve(Buffer.from(response.signature));
-        },
-      );
+    return this.executeWithFailover((client) => {
+      return new Promise((resolve, reject) => {
+        client.signPayloadFromVault(
+          {
+            approle_role_id: vaultConfig.appRole?.roleId ?? "",
+            approle_secret_id: vaultConfig.appRole?.secretId ?? "",
+            kv_mount: vaultConfig.kvMount,
+            kv_version: vaultConfig.kvVersion,
+            payload,
+            secret_field: vaultConfig.secretField,
+            secret_path: feePayerSecretPath,
+            vault_addr: vaultConfig.addr,
+            vault_token: vaultConfig.token ?? "",
+          },
+          (error, response) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(Buffer.from(response.signature));
+          },
+        );
+      });
     });
   }
 
   close(): void {
-    this.cached?.client.close();
-    this.cached = null;
+    this.primaryCached?.client.close();
+    this.secondaryCached?.client.close();
+    this.primaryCached = null;
+    this.secondaryCached = null;
+    this.primaryDownUntil = 0;
   }
 
-  private getClient(): InternalSignerClient {
+  private getClient(isPrimary: boolean): InternalSignerClient {
+    const address = isPrimary ? this.config.address : this.config.secondaryAddress;
+    if (!address) {
+      throw new Error("Target address is not configured");
+    }
+
     const ca = readFileSync(this.config.tlsCaPath);
     const cert = readFileSync(this.config.tlsCertPath);
     const key = readFileSync(this.config.tlsKeyPath);
 
+    const cached = isPrimary ? this.primaryCached : this.secondaryCached;
+
     if (
-      this.cached &&
-      this.cached.ca.equals(ca) &&
-      this.cached.cert.equals(cert) &&
-      this.cached.key.equals(key)
+      cached &&
+      cached.ca.equals(ca) &&
+      cached.cert.equals(cert) &&
+      cached.key.equals(key)
     ) {
-      return this.cached.client;
+      return cached.client;
     }
 
-    this.cached?.client.close();
+    cached?.client.close();
 
     const credentials = grpc.credentials.createSsl(ca, key, cert, {
       checkServerIdentity: (_host, peerCertificate) => {
@@ -214,7 +265,7 @@ export class GrpcEngineSignerClient {
     });
 
     const client = new InternalSignerClientConstructor(
-      this.config.address,
+      address,
       credentials,
       {
         "grpc.default_authority": this.config.serverName,
@@ -222,12 +273,12 @@ export class GrpcEngineSignerClient {
       },
     );
 
-    this.cached = {
-      ca,
-      cert,
-      client,
-      key,
-    };
+    const newCache = { ca, cert, client, key };
+    if (isPrimary) {
+      this.primaryCached = newCache;
+    } else {
+      this.secondaryCached = newCache;
+    }
 
     return client;
   }

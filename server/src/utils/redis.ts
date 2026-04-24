@@ -77,4 +77,77 @@ export async function incrWithExpiry(
   }
 }
 
+// Define GCRA (Generic Cell Rate Algorithm) Leaky Bucket Lua script
+redis.defineCommand("gcraLeakyBucket", {
+  numberOfKeys: 1,
+  lua: `
+local key = KEYS[1]
+local capacity = tonumber(ARGV[1])
+local windowMs = tonumber(ARGV[2])
+local now = tonumber(ARGV[3])
+
+local emission_interval = windowMs / capacity
+local tat = tonumber(redis.call("GET", key) or now)
+
+tat = math.max(tat, now)
+local new_tat = tat + emission_interval
+
+if new_tat - now > windowMs then
+  -- Rejected: Bucket overflow
+  local remaining = 0
+  local retry_after = math.ceil(new_tat - now - windowMs)
+  local reset = math.ceil(tat - now)
+  return { 0, remaining, retry_after, reset }
+else
+  -- Accepted
+  redis.call("SET", key, new_tat, "PX", math.ceil(new_tat - now))
+  local remaining = math.floor((windowMs - (new_tat - now)) / emission_interval)
+  local reset = math.ceil(new_tat - now)
+  return { 1, remaining, 0, reset }
+end
+  `,
+});
+
+// Extend Redis type to include our custom command
+declare module "ioredis" {
+  interface Redis {
+    gcraLeakyBucket(
+      key: string,
+      capacity: number,
+      windowMs: number,
+      now: number,
+    ): Promise<[number, number, number, number]>;
+  }
+}
+
+export interface LeakyBucketResult {
+  allowed: boolean;
+  remaining: number;
+  retryAfterMs: number;
+  resetMs: number;
+}
+
+export async function consumeLeakyBucket(
+  key: string,
+  capacity: number,
+  windowMs: number,
+): Promise<LeakyBucketResult | null> {
+  try {
+    const now = Date.now();
+    const result = await redis.gcraLeakyBucket(key, capacity, windowMs, now);
+    return {
+      allowed: result[0] === 1,
+      remaining: result[1],
+      retryAfterMs: result[2],
+      resetMs: result[3],
+    };
+  } catch (err) {
+    console.error(
+      "[Redis] consumeLeakyBucket error:",
+      err instanceof Error ? err.message : err,
+    );
+    return null;
+  }
+}
+
 export default redis;

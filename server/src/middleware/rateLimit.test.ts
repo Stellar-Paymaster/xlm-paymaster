@@ -3,7 +3,7 @@ import { apiKeyRateLimit } from "./rateLimit";
 import type { ApiKeyConfig } from "./apiKeys";
 
 vi.mock("../utils/redis", () => ({
-  incrWithExpiry: vi.fn().mockResolvedValue(null),
+  consumeLeakyBucket: vi.fn().mockResolvedValue(null),
 }));
 
 function buildApiKeyConfig(overrides: Partial<ApiKeyConfig> = {}): ApiKeyConfig {
@@ -53,7 +53,7 @@ describe("apiKeyRateLimit", () => {
     vi.useRealTimers();
   });
 
-  it("uses the tier rate limit when deciding whether to reject requests", async () => {
+  it("uses the tier rate limit when deciding whether to reject requests (fallback)", async () => {
     const apiKey = buildApiKeyConfig({ rateLimit: 1, maxRequests: 50 });
     const next = vi.fn();
 
@@ -69,6 +69,49 @@ describe("apiKeyRateLimit", () => {
       tier: "free",
       tierName: "Free",
       limit: 1,
+    });
+  });
+
+  it("uses the Redis leaky bucket when available and allows request", async () => {
+    const apiKey = buildApiKeyConfig({ rateLimit: 10 });
+    const next = vi.fn();
+    
+    const { consumeLeakyBucket } = await import("../utils/redis");
+    vi.mocked(consumeLeakyBucket).mockResolvedValueOnce({
+      allowed: true,
+      remaining: 9,
+      retryAfterMs: 0,
+      resetMs: 6000
+    });
+
+    const res = buildResponse(apiKey);
+    await apiKeyRateLimit({} as never, res as never, next);
+    
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.getHeader("X-RateLimit-Remaining")).toBe("9");
+    expect(Number(res.getHeader("X-RateLimit-Reset"))).toBeGreaterThan(Date.now() / 1000);
+  });
+
+  it("uses the Redis leaky bucket when available and rejects request", async () => {
+    const apiKey = buildApiKeyConfig({ rateLimit: 10 });
+    const next = vi.fn();
+    
+    const { consumeLeakyBucket } = await import("../utils/redis");
+    vi.mocked(consumeLeakyBucket).mockResolvedValueOnce({
+      allowed: false,
+      remaining: 0,
+      retryAfterMs: 5000,
+      resetMs: 60000
+    });
+
+    const res = buildResponse(apiKey);
+    await apiKeyRateLimit({} as never, res as never, next);
+    
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(429);
+    expect(res.body).toMatchObject({
+      limit: 10,
+      retryAfterSeconds: 5,
     });
   });
 });

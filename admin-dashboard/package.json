@@ -7,8 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "format:check": "echo \"No format check configured\"",
-    "test": "node --test --experimental-test-isolation=none --experimental-strip-types providers/QueryProvider.test.ts lib/query-keys.test.ts hooks/useNotifications.test.ts",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/portal-links.test.ts lib/theme.test.ts",
+    "test:integration": "node --test --experimental-test-isolation=none --experimental-strip-types lib/theme.integration.test.ts",
     "test:e2e": "playwright test",
     "docs": "typedoc",
     "storybook": "storybook dev -p 6006",
@@ -46,6 +50,9 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@playwright/test": "^1.58.2",
     "@storybook/nextjs": "^8.6.12",
     "@storybook/addon-themes": "^8.6.12",
@@ -58,11 +65,13 @@
     "chromatic": "^16.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.14",
+    "jsdom": "^27.0.1",
     "playwright": "^1.58.2",
     "puppeteer": "^24.40.0",
     "storybook": "^8.6.12",
     "tailwindcss": "^4",
     "typedoc": "^0.28.18",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.7"
   }
 }

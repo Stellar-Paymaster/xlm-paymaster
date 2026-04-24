@@ -1,4 +1,5 @@
 import StellarSdk, { Transaction } from "@stellar/stellar-sdk";
+import { createHash } from "crypto";
 import { Config, FeePayerAccount, pickFeePayerAccount } from "../config";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
@@ -20,6 +21,10 @@ import {
   getCrossChainSettlementService,
   SettlementExecutor,
 } from "../services/crossChainSettlement";
+import { enforceKycForFeeSponsorship } from "../services/kycService";
+import { SponsorFactory } from "../sponsors/factory";
+import { StellarFeeSponsor } from "../sponsors/stellar";
+import { nativeSigner } from "../signing/native";
 
 /**
  * @openapi
@@ -258,6 +263,12 @@ function prepareFeeBump(xdr: string, config: Config): PreparedFeeBump {
   };
 }
 
+function fingerprintSponsorshipRequest(value: unknown): string {
+  const serialized =
+    typeof value === "string" ? value : JSON.stringify(value ?? null);
+  return createHash("sha256").update(serialized).digest("hex");
+}
+
 async function createPendingTransactionRecord(
   tenantId: string,
   prepared: PreparedFeeBump,
@@ -445,6 +456,15 @@ export async function feeBumpHandler(
     const feePayerAccount = pickFeePayerAccount(config)
     let params: any = { ...body, config, tenant, feePayerAccount }
 
+    await enforceKycForFeeSponsorship(config, {
+      chainId,
+      requestId: req.header("x-request-id") ?? undefined,
+      tenant,
+      transactionHash: fingerprintSponsorshipRequest(
+        body.xdr ?? body.userOp ?? body.transactionB64,
+      ),
+    });
+
     if (chainId === "stellar") {
       if (!body.xdr) {
         throw new AppError("Stellar requires xdr field", 400, "INVALID_XDR")
@@ -513,8 +533,6 @@ export async function feeBumpHandler(
         }
       }
     }
-
-    const response = await sponsor.buildSponsoredTx(params)
 
     if (body.evmSettlement) {
       if (!config.evmSettlement?.enabled) {
@@ -602,6 +620,18 @@ export async function feeBumpHandler(
       return;
     }
 
+    if (chainId !== "stellar") {
+      const sponsored = await sponsor.buildSponsoredTx(params);
+      res.json({
+        xdr: sponsored.tx,
+        status: sponsored.status,
+        hash: sponsored.hash,
+        fee_payer: sponsored.feePayer,
+        submitted_via: sponsored.submittedVia,
+      } satisfies FeeBumpResponse);
+      return;
+    }
+
     const response = await processFeeBump(
       body.xdr,
       body.submit || false,
@@ -646,6 +676,17 @@ export async function feeBumpBatchHandler(
     const tenant = syncTenantFromApiKey(apiKeyConfig)
     const feePayerAccount = pickFeePayerAccount(config)
     const stellarSponsor = new StellarFeeSponsor()
+
+    await Promise.all(
+      body.xdrs.map((xdr) =>
+        enforceKycForFeeSponsorship(config, {
+          chainId: "stellar",
+          requestId: req.header("x-request-id") ?? undefined,
+          tenant,
+          transactionHash: fingerprintSponsorshipRequest(xdr),
+        }),
+      ),
+    )
 
     const results = await Promise.all(
       body.xdrs.map((xdr) =>
