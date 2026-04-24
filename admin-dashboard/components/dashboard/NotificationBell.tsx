@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Bell, X, CheckCheck, AlertTriangle, Info, Zap, ShieldAlert } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
-// ── Types ──────────────────────────────────────────────────────────────────
-
-interface Notification {
-  id: string;
-  type: "low_balance" | "incident" | "info" | "warning" | "critical";
-  title: string;
-  message: string;
-  read: boolean;
-  metadata?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import { queryKeys } from "@/lib/query-keys";
+import {
+  useMarkAllNotificationsReadMutation,
+  useMarkNotificationReadMutation,
+  useNotificationsQuery,
+  type Notification,
+} from "@/hooks/useNotifications";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -49,73 +45,63 @@ function NotifIcon({ type }: { type: Notification["type"] }) {
 // ── Component ──────────────────────────────────────────────────────────────
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: notifications = [], isLoading: loading } = useNotificationsQuery();
+  const markReadMutation = useMarkNotificationReadMutation();
+  const markAllReadMutation = useMarkAllNotificationsReadMutation();
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // ── Fetch initial list ─────────────────────────────────────────────────
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const res = await fetch("/api/notifications", { cache: "no-store" });
-      if (!res.ok) return;
-      const data = await res.json();
-      if (Array.isArray(data.notifications)) {
-        setNotifications(data.notifications);
-      }
-    } catch {
-      // silently ignore — non-critical UI feature
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   // ── Server-Sent Events ─────────────────────────────────────────────────
+  //
+  // SSE pushes bypass the HTTP cache; we patch the React Query cache directly
+  // so the UI updates without a refetch round-trip. Stale-while-revalidate
+  // still governs the underlying /api/notifications query.
 
   useEffect(() => {
-    fetchNotifications();
-
     const es = new EventSource("/api/notifications/sse");
     eventSourceRef.current = es;
 
     es.addEventListener("notification", (evt) => {
       try {
         const notif: Notification = JSON.parse(evt.data);
-        setNotifications((prev) => {
-          // Avoid duplicates
-          if (prev.some((n) => n.id === notif.id)) return prev;
-          return [notif, ...prev].slice(0, 20);
-        });
+        queryClient.setQueryData<Notification[]>(
+          queryKeys.notifications.list(),
+          (current) => {
+            const prev = current ?? [];
+            if (prev.some((n) => n.id === notif.id)) return prev;
+            return [notif, ...prev].slice(0, 20);
+          },
+        );
       } catch {
         // ignore malformed event
       }
     });
 
     es.addEventListener("read-all", () => {
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      queryClient.setQueryData<Notification[]>(
+        queryKeys.notifications.list(),
+        (current) => (current ?? []).map((n) => ({ ...n, read: true })),
+      );
     });
 
     return () => {
       es.close();
       eventSourceRef.current = null;
     };
-  }, [fetchNotifications]);
+  }, [queryClient]);
 
   // ── Actions ────────────────────────────────────────────────────────────
 
-  const markRead = async (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-    await fetch(`/api/notifications/${id}/read`, { method: "PATCH" }).catch(() => {});
+  const markRead = (id: string) => {
+    markReadMutation.mutate(id);
   };
 
-  const markAllRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    await fetch("/api/notifications/read-all", { method: "PATCH" }).catch(() => {});
+  const markAllRead = () => {
+    markAllReadMutation.mutate();
   };
 
   // ── Render ─────────────────────────────────────────────────────────────
