@@ -8,6 +8,7 @@ if (typeof process !== "undefined" && process.env) {
 export * from "./FluidClient";
 export * from "./errors";
 export * from "./soroban";
+export * from "./flutter";
 export {
   collectTelemetry,
   createTelemetryCollector,
