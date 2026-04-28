@@ -145,6 +145,10 @@ import {
   initializePartitionMaintenanceWorker,
   PartitionMaintenanceWorker,
 } from "./workers/partitionMaintenanceWorker";
+import { enterpriseWhiteLabelHandler } from "./handlers/enterpriseWhiteLabel";
+import { fiatToFeeGatewayHandler } from "./handlers/fiatToFeeGateway";
+import { enhancedWebhooksV2Handler } from "./handlers/enhancedWebhooksV2";
+
 
 const logger = createLogger({ component: "server" });
 const config = loadConfig();
@@ -529,6 +533,10 @@ app.get("/admin/sar/:id", (req: Request, res: Response) => {
 app.patch("/admin/sar/:id/review", (req: Request, res: Response) => {
   void reviewSARReportHandler(req, res);
 });
+
+app.post("/admin/enterprise/white-label", enterpriseWhiteLabelHandler);
+app.post("/fiat-to-fee/top-up", fiatToFeeGatewayHandler);
+app.post("/webhooks/v2", enhancedWebhooksV2Handler);
 
 app.use(notFoundHandler);
 app.use(createGlobalErrorHandler(slackNotifier));

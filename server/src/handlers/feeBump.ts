@@ -30,6 +30,7 @@ import {
   feeBumpQueueEvents,
   FeeBumpJobData,
 } from "../queues/feeBumpQueue";
+import { getFcmNotifier } from "../services/fcmNotifier";
 
 const FEEBUMP_JOB_TIMEOUT_MS = parseInt(
   process.env.FEEBUMP_JOB_TIMEOUT_MS ?? "30000",
@@ -340,6 +341,15 @@ async function executePreparedFeeBump(
             txHash: submissionResult.hash,
           },
         });
+
+        const fcm = getFcmNotifier();
+        if (fcm) {
+          fcm.notifyTransactionSuccess({
+            transactionHash: submissionResult.hash,
+            tenantId,
+            detail: "Transaction successfully sponsored and submitted.",
+          }).catch(console.error);
+        }
 
         return {
           xdr: feeBumpXdr,
