@@ -73,7 +73,7 @@
     "vue": ">=3"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^25.6.2",
     "@types/react": "^18.3.18",
     "jsdom": "^29.1.1",
     "msw": "^2.12.14",
