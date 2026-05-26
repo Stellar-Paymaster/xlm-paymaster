@@ -137,6 +137,8 @@ import { initializeRegionalDbs, DEFAULT_REGION } from "./services/regionRouter";
 import { requireAuthenticatedAdmin, requirePermission } from "./utils/adminAuth";
 import { ensureAuditLogTableIntegrity } from "./services/auditLogger";
 import { ipFilterMiddleware } from "./middleware/ipFilter";
+import { cspMiddleware } from "./middleware/csp";
+
 import {
   deleteCurrentTenantHandler,
   deleteTenantByAdminHandler,
@@ -203,6 +205,7 @@ treasuryRebalancer.setAlertService(alertService);
 const app = express();
 
 app.use(ipFilterMiddleware);
+app.use(cspMiddleware());
 app.use(express.json());
 app.use(soc2RequestLogger);
 

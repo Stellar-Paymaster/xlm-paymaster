@@ -39,3 +39,5 @@ export {
 
 export * from "./testUtils/FluidMockClient";
 export * as ReactNative from "./react-native";
+export * from "./context/FluidContext";
+
