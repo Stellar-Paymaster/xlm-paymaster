@@ -534,6 +534,38 @@ async fn process_fee_bump_request(
         ));
     }
 
+    // #697 – Configurable Maximum Operations Limit
+    // Validate operation count before acquiring a signer lease to avoid
+    // holding a resource slot while performing a cheap structural check.
+    {
+        use stellar_xdr::curr::{Limits, ReadXdr, TransactionEnvelope};
+        use base64::{engine::general_purpose::STANDARD, Engine as _};
+
+        let op_count: Option<usize> = STANDARD
+            .decode(xdr.trim())
+            .ok()
+            .and_then(|bytes| TransactionEnvelope::from_xdr(bytes, Limits::none()).ok())
+            .map(|env| match &env {
+                TransactionEnvelope::Tx(e) => e.tx.operations.len(),
+                TransactionEnvelope::TxV0(e) => e.tx.operations.len(),
+                TransactionEnvelope::TxFeeBump(_) => 0,
+            });
+
+        if let Some(count) = op_count {
+            let limit = state.config.max_operations_per_envelope;
+            if count > limit {
+                return Err(AppError::new(
+                    axum::http::StatusCode::BAD_REQUEST,
+                    "TOO_MANY_OPERATIONS",
+                    format!(
+                        "Transaction contains {count} operations, which exceeds the configured \
+                         maximum of {limit} per envelope (FLUID_MAX_OPERATIONS_PER_ENVELOPE)."
+                    ),
+                ));
+            }
+        }
+    }
+
     let signer_lease = state.signer_pool.acquire().await?;
     let fee_payer = signer_lease.account.public_key.clone();
     let signer_index = signer_lease.index;

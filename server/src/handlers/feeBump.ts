@@ -88,7 +88,10 @@ function parseInnerTransaction(xdr: string, config: Config): Transaction {
     throw new AppError(`Invalid XDR: ${error.message}`, 400, "INVALID_XDR");
   }
 
-  if (!innerTransaction.signatures || innerTransaction.signatures.length === 0) {
+  if (
+    !innerTransaction.signatures ||
+    innerTransaction.signatures.length === 0
+  ) {
     throw new AppError(
       "Inner transaction must be signed before fee-bumping",
       400,
@@ -157,6 +160,7 @@ async function executePreparedFeeBump(
   tenantId: string,
   feePayerAccount: FeePayerAccount,
   transactionRecordId: string,
+  shadowMode?: boolean,
 ): Promise<FeeBumpResponse> {
   const innerTransaction = parseInnerTransaction(xdr, config);
   const dynamicFeeMultiplier =
@@ -166,6 +170,24 @@ async function executePreparedFeeBump(
     config.baseFee,
     dynamicFeeMultiplier,
   );
+  const innerTxHash = innerTransaction.hash().toString("hex");
+
+  if (shadowMode || process.env.SHADOW_MODE === "true") {
+    await prisma.transaction.update({
+      where: { id: transactionRecordId },
+      data: {
+        status: "SHADOW",
+        txHash: "shadow_" + innerTxHash,
+      },
+    });
+
+    return {
+      xdr: xdr,
+      status: submit ? "submitted" : "ready",
+      hash: "shadow_" + innerTxHash,
+      fee_payer: feePayerAccount.publicKey,
+    };
+  }
 
   try {
     const feeBumpTx = StellarSdk.TransactionBuilder.buildFeeBumpTransaction(
@@ -282,6 +304,7 @@ export async function processFeeBump(
   config: Config,
   tenant: Tenant,
   feePayerAccount: FeePayerAccount,
+  shadowMode?: boolean,
 ): Promise<FeeBumpResponse> {
   const prepared = prepareFeeBump(xdr, config);
   const quotaCheck = await checkTenantDailyQuota(tenant, prepared.feeAmount);
@@ -304,6 +327,7 @@ export async function processFeeBump(
     tenant.id,
     feePayerAccount,
     transactionRecord.id,
+    shadowMode,
   );
 }
 
@@ -332,7 +356,9 @@ export async function feeBumpHandler(
 
     const apiKeyConfig = res.locals.apiKey as ApiKeyConfig | undefined;
     if (!apiKeyConfig) {
-      res.status(500).json({ error: "Missing tenant context for fee sponsorship" });
+      res
+        .status(500)
+        .json({ error: "Missing tenant context for fee sponsorship" });
       return;
     }
 
@@ -349,6 +375,11 @@ export async function feeBumpHandler(
     const effectiveXdr = pluginCtx.xdr ?? body.xdr;
     const effectiveSubmit = pluginCtx.submit ?? body.submit;
 
+    const shadowMode =
+      req.headers["x-shadow-mode"] === "true" ||
+      req.body.shadowMode === true ||
+      process.env.SHADOW_MODE === "true";
+
     let params: any = {
       ...body,
       xdr: effectiveXdr,
@@ -356,6 +387,7 @@ export async function feeBumpHandler(
       config,
       tenant,
       feePayerAccount,
+      shadowMode,
     };
 
     await enforceKycForFeeSponsorship(config, {
@@ -395,9 +427,11 @@ export async function feeBumpHandler(
       }
 
       const isSoroban = innerTransaction.operations.some((op: any) =>
-        ["invokeHostFunction", "extendFootprintTtl", "restoreFootprint"].includes(
-          op.type,
-        ),
+        [
+          "invokeHostFunction",
+          "extendFootprintTtl",
+          "restoreFootprint",
+        ].includes(op.type),
       );
 
       if (isSoroban) {
@@ -478,7 +512,10 @@ export async function feeBumpHandler(
       }
 
       const prepared = prepareFeeBump(effectiveXdr, config);
-      const quotaCheck = await checkTenantDailyQuota(tenant, prepared.feeAmount);
+      const quotaCheck = await checkTenantDailyQuota(
+        tenant,
+        prepared.feeAmount,
+      );
       if (!quotaCheck.allowed) {
         return next(
           new AppError(
@@ -546,6 +583,7 @@ export async function feeBumpHandler(
       submit: params.submit ?? false,
       tenant,
       requestId: req.header("x-request-id") ?? undefined,
+      shadowMode: params.shadowMode,
     } satisfies FeeBumpJobData);
 
     let response: FeeBumpResponse;
@@ -593,7 +631,9 @@ export async function feeBumpBatchHandler(
     const body: FeeBumpBatchRequest = parsedBody.data;
     const apiKeyConfig = res.locals.apiKey as ApiKeyConfig | undefined;
     if (!apiKeyConfig) {
-      res.status(500).json({ error: "Missing tenant context for fee sponsorship" });
+      res
+        .status(500)
+        .json({ error: "Missing tenant context for fee sponsorship" });
       return;
     }
 
@@ -612,17 +652,60 @@ export async function feeBumpBatchHandler(
       ),
     );
 
-    const results = await Promise.all(
-      body.xdrs.map((xdr) =>
-        stellarSponsor.buildSponsoredTx({
-          config,
-          feePayerAccount,
-          submit: body.submit ?? false,
-          tenant,
-          xdr,
-        }),
-      ),
+    const preparedFeeBumps = body.xdrs.map((xdr) =>
+      prepareFeeBump(xdr, config),
     );
+    const totalFeeStroops = preparedFeeBumps.reduce(
+      (sum, prepared) => sum + prepared.feeAmount,
+      0,
+    );
+
+    const quotaCheck = await checkTenantDailyQuota(
+      tenant,
+      totalFeeStroops,
+      body.xdrs.length,
+    );
+
+    if (!quotaCheck.allowed) {
+      throw new AppError(
+        `Tier limit exceeded. Spend ${quotaCheck.currentSpendStroops}/${quotaCheck.dailyQuotaStroops} stroops and transactions ${quotaCheck.currentTxCount}/${quotaCheck.txLimit} today.`,
+        403,
+        "QUOTA_EXCEEDED",
+      );
+    }
+
+    if (body.token) {
+      const supportedAssets = config.supportedAssets ?? [];
+      const isWhitelisted = supportedAssets.some((asset) => {
+        const assetId = asset.issuer
+          ? `${asset.code}:${asset.issuer}`
+          : asset.code;
+        return body.token === assetId;
+      });
+
+      if (!isWhitelisted) {
+        throw new AppError(
+          `Whitelisting failed: Asset "${body.token}" is not accepted for fee sponsorship.`,
+          400,
+          "UNSUPPORTED_ASSET",
+        );
+      }
+    }
+
+    const results: Array<
+      Awaited<ReturnType<typeof stellarSponsor.buildSponsoredTx>>
+    > = [];
+    for (const xdr of body.xdrs) {
+      const result = await stellarSponsor.buildSponsoredTx({
+        config,
+        feePayerAccount,
+        submit: body.submit ?? false,
+        tenant,
+        xdr,
+        token: body.token,
+      });
+      results.push(result);
+    }
 
     res.json(results);
   } catch (error: any) {

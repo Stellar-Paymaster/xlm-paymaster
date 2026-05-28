@@ -1,6 +1,6 @@
 # Soroban Smart Contracts Verification Report
 
-This report summarizes the implementation and verification of four new Soroban smart contracts for the Fluid platform.
+This report summarizes the implementation and verification of five new Soroban smart contracts for the Fluid platform.
 
 ## Contracts Implemented
 
@@ -36,6 +36,19 @@ This report summarizes the implementation and verification of four new Soroban s
   ```
   running 1 test
   test tests::test_staking ... ok
+  ```
+
+### 5. Streaming Payments Contract (#610)
+- **Path**: `server/src/contracts/soroban/streaming-payments`
+- **Verification**: Unit tests passed. Verified stream creation, partial and full withdrawals, and linear vesting rate computations.
+- **Terminal Output Snippet**:
+  ```
+  running 5 tests
+  test tests::test_cancel_after_stop ... ok
+  test tests::test_cancel_before_start ... ok
+  test tests::test_cancel_stream_middle ... ok
+  test tests::test_create_stream ... ok
+  test tests::test_withdraw_stream_partial_and_full ... ok
   ```
 
 ## Standards Compliance
