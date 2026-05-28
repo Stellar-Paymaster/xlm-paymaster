@@ -140,7 +140,9 @@ services:
       - node-api
     networks:
       - fluid-network
+    
 
 networks:
   fluid-network:
     driver: bridge
+

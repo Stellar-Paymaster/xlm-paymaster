@@ -16,6 +16,7 @@ Implemented production-ready Flutter SDK support for the Fluid client package.
 - **FlutterFluidClientConfig** - Extended configuration interface
 
 **Key Features:**
+
 - Simplified API for Flutter developers
 - Automatic retry with exponential backoff (configurable)
 - Platform compatibility checks (WebSocket, Fetch, Promise, Worker)
