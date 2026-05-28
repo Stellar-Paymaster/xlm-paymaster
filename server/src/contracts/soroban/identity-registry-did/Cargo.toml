@@ -1,6 +1,6 @@
 [workspace]
 [package]
-name = "fluid-multi-asset-staking"
+name = "fluid-identity-registry-did"
 version = "0.1.0"
 edition = "2021"
 

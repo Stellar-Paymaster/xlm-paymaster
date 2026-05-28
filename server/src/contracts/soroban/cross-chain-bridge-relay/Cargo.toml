@@ -1,6 +1,6 @@
 [workspace]
 [package]
-name = "fluid-multi-asset-staking"
+name = "fluid-cross-chain-bridge-relay"
 version = "0.1.0"
 edition = "2021"
 
