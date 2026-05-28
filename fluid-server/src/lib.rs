@@ -48,6 +48,8 @@ pub mod error;
 pub mod grpc;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod logging;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod rate_limiter;
 
 const MAX_SIGNATURES: usize = 20;
 
