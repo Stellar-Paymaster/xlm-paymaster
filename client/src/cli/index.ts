@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 import { FluidClient } from "../FluidClient";
 import StellarSdk from "@stellar/stellar-sdk";
+import { simulateFeeBump, formatSimulationResult } from "./transactionSimulator";
+import { lookupByCode, searchErrorCodes, formatErrorHelp, listAllCodes } from "../errorCodes";
 
 export function createProgram() {
   const program = new Command();
@@ -93,8 +95,32 @@ export function createProgram() {
     .option("-s, --server <url>", "Fluid server URL", "http://localhost:3000")
     .option("-n, --network <passphrase>", "Stellar network passphrase", StellarSdk.Networks.TESTNET)
     .option("-j, --json", "Output the result as JSON", false)
+    .option("-l, --local", "Simulate locally offline without contacting the Fluid server", false)
+    .option("-f, --fee-payer <public-key>", "Fee payer public key (required/used for local simulation)")
+    .option("-b, --base-fee <fee>", "Base fee in stroops for local simulation", "100")
     .action(async (xdr, options) => {
       try {
+        if (options.local) {
+          if (!options.json) {
+            console.log(`🔍 Simulating fee-bump locally (offline)...`);
+          }
+          const result = simulateFeeBump({
+            innerXdr: xdr,
+            networkPassphrase: options.network,
+            feePayerPublicKey: options.feePayer,
+            baseFee: parseInt(options.baseFee, 10),
+          });
+          if (options.json) {
+            console.log(JSON.stringify(result, null, 2));
+          } else {
+            console.log(formatSimulationResult(result));
+          }
+          if (!result.success) {
+            process.exit(1);
+          }
+          return;
+        }
+
         if (!options.json) {
           console.log(`🔍 Simulating fee-bump for transaction...`);
           console.log(`   Server: ${options.server}`);
@@ -143,9 +169,59 @@ export function createProgram() {
       }
     });
 
+  program
+    .command("errors")
+    .description("Look up or search Fluid API error codes wiki")
+    .argument("[query]", "Error code (e.g., FLUID_001) or search query")
+    .option("-l, --list", "List all registered Fluid API error codes", false)
+    .option("-s, --search", "Treat the query as a free-text search query rather than a code", false)
+    .action((query, options) => {
+      if (options.list) {
+        console.log(listAllCodes());
+        return;
+      }
+
+      if (!query) {
+        console.error("❌ Error: A query or error code must be specified, or use --list to see all codes.");
+        process.exit(1);
+      }
+
+      if (options.search) {
+        const results = searchErrorCodes(query);
+        if (results.length === 0) {
+          console.log(`No error codes matched search query: "${query}"`);
+          return;
+        }
+        console.log(`Found ${results.length} matching error code(s):`);
+        for (const res of results) {
+          console.log(formatErrorHelp(res.code));
+          console.log("");
+        }
+        return;
+      }
+
+      // Default: look up by exact code, fall back to search if not found
+      const entry = lookupByCode(query);
+      if (entry) {
+        console.log(formatErrorHelp(entry.code));
+      } else {
+        const searchResults = searchErrorCodes(query);
+        if (searchResults.length > 0) {
+          console.log(`Code "${query}" not found. Showing ${searchResults.length} partial search match(es):`);
+          for (const res of searchResults) {
+            console.log(formatErrorHelp(res.code));
+            console.log("");
+          }
+        } else {
+          console.log(formatErrorHelp(query));
+        }
+      }
+    });
+
   return program;
 }
 
 if (require.main === module) {
   createProgram().parse();
 }
+

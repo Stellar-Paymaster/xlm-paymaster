@@ -1,6 +1,6 @@
 # CLI Transaction Simulator
 
-The Fluid CLI includes a `simulate` command that allows you to test fee-sponsorship requests directly from your terminal. This is useful for debugging transaction XDRs and verifying server configurations without broadcasting transactions to the Stellar network.
+The Fluid CLI includes a `simulate` command that allows you to test fee-sponsorship requests directly from your terminal. This is useful for debugging transaction XDRs and verifying configurations. With the latest update, you can run simulations both by communicating with a Fluid server, or completely offline locally using client-side checks.
 
 ## Usage
 
@@ -14,10 +14,13 @@ fluid simulate <INNER_TRANSACTION_XDR> [options]
 - `-s, --server <url>`: The URL of the Fluid server (default: `http://localhost:3000`).
 - `-n, --network <passphrase>`: The Stellar network passphrase (default: `Testnet`).
 - `-j, --json`: Output the response as a JSON object (useful for CI/CD or scripting).
+- `-l, --local`: Simulate locally offline without contacting the Fluid server.
+- `-f, --fee-payer <public-key>`: Specify a custom fee payer public key for offline local simulation.
+- `-b, --base-fee <fee>`: Specify base fee in stroops for offline local simulation (default: `100`).
 
 ## Examples
 
-### Human-Readable Output
+### Human-Readable Output (Server Simulation)
 
 ```bash
 fluid simulate AAAA... --server https://fluid.testnet.dev
@@ -39,6 +42,28 @@ AAAAA...
 --------------------------------------------------
 
 (Note: This transaction has NOT been submitted to the network)
+```
+
+### Local Offline Simulation
+
+```bash
+fluid simulate AAAA... --local --fee-payer GD... --base-fee 120
+```
+
+**Output:**
+```
+🔍 Simulating fee-bump locally (offline)...
+──────────────────────────────────────────────────
+✅  Simulation SUCCESSFUL
+──────────────────────────────────────────────────
+Inner Tx Hash : abcdef1234...
+Fee Account   : GD...
+Estimated Fee : 240 stroops
+Network       : Test SDF Network ; September 2015
+Fee-Bump XDR  :
+AAAAA...
+──────────────────────────────────────────────────
+(NOT submitted to the network)
 ```
 
 ### JSON Output
@@ -82,3 +107,4 @@ The CLI uses the same `FluidClient` underlying the SDK, meaning it inherits:
 - Automatic node failover if multiple servers are configured.
 - Configurable request timeouts.
 - Proper XDR serialization standards.
+

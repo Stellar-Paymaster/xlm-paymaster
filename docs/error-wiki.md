@@ -1,33 +1,73 @@
 # Fluid Error Wiki
 
-Welcome to the central repository for Fluid SDK error codes. This guide helps you understand why an error occurred and how to resolve it.
+Welcome to the central repository for Fluid SDK error codes. This guide helps you understand why an error occurred and how to resolve it. In addition to this static guide, you can use the interactive error lookup library in the client SDK or query them via the CLI.
 
-## Common Error Codes
+## Interactive CLI Lookup
 
-### [Configuration Error](https://docs.fluid.dev/errors#configuration) (`FluidConfigurationError`)
-**Description**: Occurs when the `FluidClient` is initialized with invalid parameters.
-**Resolution**: Check your `FluidClientConfig`. Ensure `networkPassphrase` is correct and at least one `serverUrl` is provided.
+You can query, search, and list all Fluid API error codes directly from the command line:
 
-### [Network Error](https://docs.fluid.dev/errors#network) (`FluidNetworkError`)
-**Description**: Failed to reach any Fluid server. This could be due to DNS issues, local connectivity, or a server timeout.
-**Resolution**: Verify your internet connection. If the issue persists, check the status of the Fluid servers or increase the `timeout` in your configuration.
+```bash
+# List all registered error codes
+fluid errors --list
 
-### [No Available Server](https://docs.fluid.dev/errors#no-available-server) (`FluidNoAvailableServerError`)
-**Description**: All configured server URLs have been tried and failed, or are currently in a "cool-down" state due to previous failures.
-**Resolution**: Check if the Fluid infrastructure is undergoing maintenance. If using multiple URLs, ensure they are all valid and reachable.
+# Look up details for a specific code
+fluid errors FLUID_001
 
-### [Server Error](https://docs.fluid.dev/errors#server) (`FluidServerError`)
-**Description**: The Fluid server received the request but rejected it with a specific status code (4xx or 5xx).
-**Common Sub-codes**:
-- `insufficient-funds`: The sponsor account does not have enough XLM to cover the fee-bump.
-- `unauthorized-transaction`: The transaction does not match the sponsor's whitelist or policy.
-- `rate-limit-exceeded`: You are making too many requests in a short period.
+# Search error codes by keyword (e.g. "limit" or "sequence")
+fluid errors "rate limit" --search
+```
 
-### [Wallet Error](https://docs.fluid.dev/errors#wallet) (`FluidWalletError`)
-**Description**: Issues related to signing or wallet interactions (e.g., user rejected a signing request).
-**Resolution**: Ensure the user has their wallet unlocked and has granted permission to the application.
+---
+
+## Central Error Code Registry
+
+The following error codes are registered in the Fluid platform:
+
+### `FLUID_001` - Invalid Transaction XDR
+- **HTTP Status**: 400
+- **Description**: The submitted transaction XDR could not be decoded or is malformed.
+- **Common Causes**: wrong network passphrase during encoding, corrupted XDR string.
+- **Remediation**: Re-build the transaction using the latest SDK and match the target network.
+
+### `FLUID_002` - Fee Below Minimum
+- **HTTP Status**: 400
+- **Description**: The fee set on the inner transaction is below the Stellar network minimum (100 stroops).
+- **Remediation**: Use `FluidClient.requestFeeBump()` which automatically handles compliance, or pass a baseFee ≥ 100.
+
+### `FLUID_003` - Missing or Invalid API Key
+- **HTTP Status**: 401
+- **Description**: The request did not include a valid Fluid API key in the headers.
+
+### `FLUID_004` - Tenant Quota Exceeded
+- **HTTP Status**: 403
+- **Description**: The tenant has exceeded their monthly fee-bump quota.
+
+### `FLUID_005` - Transaction Not Found
+- **HTTP Status**: 404
+- **Description**: No transaction matching the supplied hash was found on the network.
+
+### `FLUID_006` - Duplicate Transaction
+- **HTTP Status**: 409
+- **Description**: This transaction hash has already been processed by Fluid.
+
+### `FLUID_007` - Rate Limit Exceeded
+- **HTTP Status**: 429
+- **Description**: Too many requests were made to the Fluid API in a short window.
+
+### `FLUID_008` - Internal Server Error
+- **HTTP Status**: 500
+- **Description**: An unexpected error occurred on the Fluid server.
+
+### `FLUID_009` - Stellar Network Unavailable
+- **HTTP Status**: 503
+- **Description**: The Fluid server could not reach the Stellar Horizon or Soroban RPC endpoint.
+
+### `FLUID_010` - Invalid Soroban Contract Invocation
+- **HTTP Status**: 400
+- **Description**: The Soroban contract call included in the transaction is invalid or simulation failed.
 
 ---
 
 ## Need More Help?
 If your error isn't listed here, please visit our [Discord Community](https://discord.gg/fluid) or open a [Support Ticket](https://support.fluid.dev/tickets).
+
