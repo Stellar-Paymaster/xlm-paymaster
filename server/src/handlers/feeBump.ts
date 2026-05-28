@@ -157,6 +157,7 @@ async function executePreparedFeeBump(
   tenantId: string,
   feePayerAccount: FeePayerAccount,
   transactionRecordId: string,
+  shadowMode?: boolean,
 ): Promise<FeeBumpResponse> {
   const innerTransaction = parseInnerTransaction(xdr, config);
   const dynamicFeeMultiplier =
@@ -166,6 +167,24 @@ async function executePreparedFeeBump(
     config.baseFee,
     dynamicFeeMultiplier,
   );
+  const innerTxHash = innerTransaction.hash().toString("hex");
+
+  if (shadowMode || process.env.SHADOW_MODE === "true") {
+    await prisma.transaction.update({
+      where: { id: transactionRecordId },
+      data: {
+        status: "SHADOW",
+        txHash: "shadow_" + innerTxHash,
+      },
+    });
+
+    return {
+      xdr: xdr,
+      status: submit ? "submitted" : "ready",
+      hash: "shadow_" + innerTxHash,
+      fee_payer: feePayerAccount.publicKey,
+    };
+  }
 
   try {
     const feeBumpTx = StellarSdk.TransactionBuilder.buildFeeBumpTransaction(
@@ -282,6 +301,7 @@ export async function processFeeBump(
   config: Config,
   tenant: Tenant,
   feePayerAccount: FeePayerAccount,
+  shadowMode?: boolean,
 ): Promise<FeeBumpResponse> {
   const prepared = prepareFeeBump(xdr, config);
   const quotaCheck = await checkTenantDailyQuota(tenant, prepared.feeAmount);
@@ -304,6 +324,7 @@ export async function processFeeBump(
     tenant.id,
     feePayerAccount,
     transactionRecord.id,
+    shadowMode,
   );
 }
 
@@ -349,6 +370,11 @@ export async function feeBumpHandler(
     const effectiveXdr = pluginCtx.xdr ?? body.xdr;
     const effectiveSubmit = pluginCtx.submit ?? body.submit;
 
+    const shadowMode =
+      req.headers["x-shadow-mode"] === "true" ||
+      req.body.shadowMode === true ||
+      process.env.SHADOW_MODE === "true";
+
     let params: any = {
       ...body,
       xdr: effectiveXdr,
@@ -356,6 +382,7 @@ export async function feeBumpHandler(
       config,
       tenant,
       feePayerAccount,
+      shadowMode,
     };
 
     await enforceKycForFeeSponsorship(config, {
@@ -546,6 +573,7 @@ export async function feeBumpHandler(
       submit: params.submit ?? false,
       tenant,
       requestId: req.header("x-request-id") ?? undefined,
+      shadowMode: params.shadowMode,
     } satisfies FeeBumpJobData);
 
     let response: FeeBumpResponse;

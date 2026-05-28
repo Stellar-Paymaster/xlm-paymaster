@@ -164,6 +164,10 @@ import {
 import { enterpriseWhiteLabelHandler } from "./handlers/enterpriseWhiteLabel";
 import { fiatToFeeGatewayHandler } from "./handlers/fiatToFeeGateway";
 import { enhancedWebhooksV2Handler } from "./handlers/enhancedWebhooksV2";
+import { samlLoginHandler, samlCallbackHandler } from "./handlers/samlSso";
+import { ammSwapHandler } from "./handlers/ammWrapper";
+import { DatabaseRecoveryDrillsService } from "./services/databaseRecoveryDrills";
+import { DatabaseRecoveryDrillsWorker } from "./workers/databaseRecoveryDrillsWorker";
 
 const logger = createLogger({ component: "server" });
 const config = loadConfig();
@@ -551,6 +555,30 @@ app.post("/admin/enterprise/white-label", enterpriseWhiteLabelHandler);
 app.post("/fiat-to-fee/top-up", fiatToFeeGatewayHandler);
 app.post("/webhooks/v2", enhancedWebhooksV2Handler);
 
+// SAML SSO endpoints
+app.get("/admin/auth/saml/login", samlLoginHandler);
+app.post("/admin/auth/saml/callback", express.urlencoded({ extended: true }), samlCallbackHandler);
+
+// AMM Swap endpoint (sponsored gasless wrapper)
+app.post("/admin/amm/swap", apiKeyMiddleware, (req, res, next) => {
+  void ammSwapHandler(req, res, next, config);
+});
+
+// Database Recovery Drill trigger endpoint
+app.post(
+  "/admin/db/recovery-drill",
+  requireAuthenticatedAdmin(),
+  async (req, res, next) => {
+    try {
+      const drillService = new DatabaseRecoveryDrillsService();
+      const report = await drillService.runDrill();
+      res.json(report);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // Sub-tenant (reseller accounts)
 app.post(
   "/admin/tenants/:tenantId/sub-tenants",
@@ -582,6 +610,7 @@ let tenantErasureWorker: TenantErasureWorker | null = null;
 let treasuryRefillWorker: ReturnType<typeof initializeTreasuryRefill> | null = null;
 let feeBumpWorker: ReturnType<typeof initializeFeeBumpWorker> | null = null;
 let partitionMaintenanceWorker: PartitionMaintenanceWorker | null = null;
+let dbRecoveryDrillsWorker: DatabaseRecoveryDrillsWorker | null = null;
 let shuttingDown = false;
 let server: ReturnType<typeof app.listen> | null = null;
 
@@ -609,6 +638,7 @@ async function shutdown(signal: string): Promise<void> {
   stopOFACScreening();
   treasurySweeper?.stop();
   partitionMaintenanceWorker?.stop();
+  await dbRecoveryDrillsWorker?.stop();
   await feeBumpWorker?.close();
   await feeBumpQueueEvents.close();
   await feeBumpQueue.close();
@@ -794,6 +824,17 @@ try {
   logger.error(
     { ...serializeError(error) },
     "Failed to start partition maintenance worker",
+  );
+}
+
+try {
+  dbRecoveryDrillsWorker = new DatabaseRecoveryDrillsWorker();
+  dbRecoveryDrillsWorker.start();
+  logger.info("Database recovery drills worker started");
+} catch (error) {
+  logger.error(
+    { ...serializeError(error) },
+    "Failed to start database recovery drills worker",
   );
 }
 

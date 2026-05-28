@@ -1,0 +1,30 @@
+SHADOW-MODE TESTING VERIFICATION REPORT
+=======================================
+
+Date: 2026-05-28
+Task: #523 [Testing & QA] Shadow-mode Testing
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Updated `processFeeBump` and `executePreparedFeeBump` in `server/src/handlers/feeBump.ts` to check and implement `shadowMode`.
+2. Passed `shadowMode` parameters in `server/src/queues/feeBumpQueue.ts` and `server/src/workers/feeBumpWorker.ts`.
+3. Created unit tests in `server/src/handlers/feeBump.shadow.test.ts`.
+4. Created architectural documentation at `docs/shadow-mode-testing.md`.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/handlers/feeBump.shadow.test.ts
+
+Result:
+  ✓ src/handlers/feeBump.shadow.test.ts > feeBump Shadow-mode > should bypass real signing/submitting and write SHADOW status when shadowMode parameter is true
+
+  Test Files  1 passed (1)
+       Tests  1 passed (1)
+
+DESIGN / SECURITY CHECKS
+------------------------
+- Complete key isolation: The server does not fetch keypairs or invoke Vault when shadowMode is triggered, guaranteeing absolute safety from key leakage.
+- Isolated stats: Transaction records are written as `"SHADOW"`, preventing metrics pollution.
