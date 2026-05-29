@@ -10,6 +10,7 @@ base64 = "0.22"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
 sha2 = "0.10"
+subtle = "2"
 stellar-strkey = "0.0.16"
 stellar-xdr = { version = "26.0.0", features = ["base64", "curr"] }
 wasm-bindgen = "0.2.105"

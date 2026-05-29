@@ -29,6 +29,7 @@ use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
 use stellar_strkey::ed25519::{PrivateKey, PublicKey};
 use stellar_strkey::Strkey;
+use subtle::ConstantTimeEq;
 use stellar_xdr::curr::{
     DecoratedSignature, Hash, Limits, MuxedAccount, Preconditions, ReadXdr, Signature,
     SignatureHint, Transaction, TransactionEnvelope, TransactionExt, TransactionSignaturePayload,
@@ -362,6 +363,25 @@ fn sha256(input: impl AsRef<[u8]>) -> [u8; 32] {
     hash
 }
 
+/// Verify a presented developer API key against the expected key in constant time.
+///
+/// A plain `==` comparison on `&str`/`&[u8]` short-circuits at the first differing
+/// byte (and on a length mismatch), so the time it takes to reject a guess leaks
+/// how many leading bytes were correct. An attacker can exploit that signal to
+/// recover a valid key byte-by-byte ("timing attack").
+///
+/// To keep every comparison uniform regardless of input, both sides are reduced to
+/// a fixed-width SHA-256 digest — so the comparison is always over exactly 32 bytes
+/// and never depends on the secret's length — and the digests are compared with the
+/// `subtle` crate's constant-time equality primitive, which always inspects every
+/// byte before producing a result.
+pub fn verify_api_key(presented: &str, expected: &str) -> bool {
+    let presented = sha256(presented);
+    let expected = sha256(expected);
+    // Compare as byte slices: `<[u8]>::ct_eq` always inspects all 32 bytes.
+    presented[..].ct_eq(&expected[..]).into()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -492,6 +512,37 @@ mod tests {
             hex::encode(digest),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
+    }
+
+    #[test]
+    fn verify_api_key_accepts_an_exact_match() {
+        let key = "fluid-pro-demo-key";
+        assert!(verify_api_key(key, key));
+        assert!(verify_api_key(
+            "sk_live_0123456789abcdef",
+            "sk_live_0123456789abcdef"
+        ));
+    }
+
+    #[test]
+    fn verify_api_key_rejects_a_different_key() {
+        let expected = "sk_live_0123456789abcdef";
+        assert!(!verify_api_key("sk_live_0000000000000000", expected));
+        // Differs only in the final byte — still rejected.
+        assert!(!verify_api_key("sk_live_0123456789abcdee", expected));
+    }
+
+    #[test]
+    fn verify_api_key_rejects_length_variants() {
+        let expected = "sk_live_0123456789abcdef";
+        // Correct prefix but shorter/longer than the real key.
+        assert!(!verify_api_key("sk_live_0123456789abcde", expected));
+        assert!(!verify_api_key("sk_live_0123456789abcdef0", expected));
+        // Empty inputs on either side.
+        assert!(!verify_api_key("", expected));
+        assert!(!verify_api_key(expected, ""));
+        // Two empty strings are equal.
+        assert!(verify_api_key("", ""));
     }
 
     #[test]
