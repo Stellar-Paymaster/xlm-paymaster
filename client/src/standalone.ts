@@ -22,4 +22,7 @@ export type {
   XdrSerializableTransaction,
 } from "./FluidClient";
 
+// Universal wallet signing (WalletConnect standard bindings, SEP-43 adapters)
+export * from "./wallet";
+
 export const VERSION = "0.1.0";

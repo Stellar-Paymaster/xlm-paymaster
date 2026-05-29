@@ -740,7 +740,7 @@ fn extract_api_key(headers: &HeaderMap) -> Result<String, AppError> {
 fn find_api_key(api_key: &str) -> Result<ApiKeyConfig, AppError> {
     API_KEYS
         .iter()
-        .find(|candidate| candidate.key == api_key)
+        .find(|candidate| fluid_server::verify_api_key(candidate.key, api_key))
         .cloned()
         .ok_or_else(|| {
             AppError::new(

@@ -46,6 +46,7 @@
     "sandbox:ps": "docker compose -f src/sandbox/docker-compose.local.yml ps",
     "demo": "python -m http.server 8080",
     "demo:sac-transfer-xdr": "ts-node src/examples/sacTransferXdr.ts",
+    "demo:wallet-connect": "ts-node --project tsconfig.examples.json src/examples/walletConnectSigning.ts",
     "demo:wait-confirmation": "ts-node src/demo/waitForConfirmation.ts",
     "demo:wait-confirmation-only": "ts-node src/demo/waitForConfirmationOnly.ts",
     "test:compat": "ts-node test/stellarCompatibility.test.ts",

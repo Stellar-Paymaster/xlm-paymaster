@@ -2,11 +2,18 @@ import { AppError } from "../errors/AppError";
 import { deleteApiKey } from "../middleware/apiKeys";
 import { logAuditEvent } from "./auditLogger";
 import prisma from "../utils/db";
+import {
+  AUDIT_LOG_COLUMN_ALLOWLIST,
+  ERASURE_TABLE_ALLOWLIST,
+  quoteIdentifier,
+  quoteIdentifierList,
+} from "../db/sqlIdentifiers";
 import { createLogger, serializeError } from "../utils/logger";
 
 const logger = createLogger({ component: "tenant_erasure" });
 
 const AUDIT_LOG_TABLE = "AuditLog";
+const TENANT_ID_COLUMN = "tenantId";
 const PII_PLACEHOLDER = "[redacted]";
 const DELETED_TENANT_NAME = "Deleted tenant";
 const DEFAULT_RETENTION_DAYS = 30;
@@ -206,7 +213,7 @@ async function scrubAuditLogs(details: {
 }): Promise<void> {
   try {
     const columns = await prisma.$queryRawUnsafe(
-      `PRAGMA table_info("${AUDIT_LOG_TABLE}")`,
+      `PRAGMA table_info(${quoteIdentifier(AUDIT_LOG_TABLE)})`,
     ) as Array<{ name?: string }>;
     const columnSet = new Set(
       columns
@@ -226,8 +233,12 @@ async function scrubAuditLogs(details: {
       return;
     }
 
+    const selectColumns = quoteIdentifierList(
+      ["id", ...scrubCandidates],
+      AUDIT_LOG_COLUMN_ALLOWLIST,
+    );
     const rows = await prisma.$queryRawUnsafe(
-      `SELECT "id", ${scrubCandidates.map((column) => `"${column}"`).join(", ")} FROM "${AUDIT_LOG_TABLE}"`,
+      `SELECT ${selectColumns} FROM ${quoteIdentifier(AUDIT_LOG_TABLE)}`,
     ) as Array<Record<string, unknown>>;
 
     const secrets = [
@@ -252,7 +263,9 @@ async function scrubAuditLogs(details: {
           continue;
         }
 
-        assignments.push(`"${column}" = ?`);
+        assignments.push(
+          `${quoteIdentifier(column, AUDIT_LOG_COLUMN_ALLOWLIST)} = ?`,
+        );
         params.push(nextValue);
       }
 
@@ -262,7 +275,7 @@ async function scrubAuditLogs(details: {
 
       params.push(row.id);
       await prisma.$executeRawUnsafe(
-        `UPDATE "${AUDIT_LOG_TABLE}" SET ${assignments.join(", ")} WHERE "id" = ?`,
+        `UPDATE ${quoteIdentifier(AUDIT_LOG_TABLE)} SET ${assignments.join(", ")} WHERE ${quoteIdentifier("id")} = ?`,
         ...params,
       );
     }
@@ -434,7 +447,7 @@ async function deleteRowsByTenantId(
   }
 
   await prisma.$executeRawUnsafe(
-    `DELETE FROM "${tableName}" WHERE "tenantId" = ?`,
+    `DELETE FROM ${quoteIdentifier(tableName, ERASURE_TABLE_ALLOWLIST)} WHERE ${quoteIdentifier(TENANT_ID_COLUMN)} = ?`,
     tenantId,
   );
 }
@@ -470,7 +483,7 @@ export async function purgeExpiredTenantErasures(
 
     if (tables.has("Transaction")) {
       await prisma.$executeRawUnsafe(
-        `UPDATE "Transaction" SET "tenantId" = NULL WHERE "tenantId" = ?`,
+        `UPDATE ${quoteIdentifier("Transaction", ERASURE_TABLE_ALLOWLIST)} SET ${quoteIdentifier(TENANT_ID_COLUMN)} = NULL WHERE ${quoteIdentifier(TENANT_ID_COLUMN)} = ?`,
         tenant.id,
       );
     }

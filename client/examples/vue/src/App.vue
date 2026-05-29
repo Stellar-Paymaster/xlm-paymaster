@@ -1,47 +1,67 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import StellarSdk from "@stellar/stellar-sdk";
-import { FluidClient } from "fluid-client";
-import { useFluid } from "fluid-client/vue";
+import {
+  FluidClient,
+  KeypairSigner,
+  WalletConnectSigner,
+  buildStellarRequiredNamespaces,
+  STELLAR_CHAINS,
+  type WalletSigner,
+} from "fluid-client";
+
+const NETWORK = StellarSdk.Networks.TESTNET;
 
 // Initialize Fluid client
 const client = new FluidClient({
   serverUrl: "http://localhost:3000",
-  networkPassphrase: StellarSdk.Networks.TESTNET,
+  networkPassphrase: NETWORK,
   horizonUrl: "https://horizon-testnet.stellar.org",
 });
-
-// Use the Fluid composable
-const { requestFeeBump, isLoading, error, result } = useFluid(client);
 
 // Local state for the example
 const transactionXdr = ref("");
 const statusMessage = ref("");
+const isLoading = ref(false);
+const error = ref<Error | null>(null);
+const result = ref<{ status: string; xdr: string; hash?: string } | null>(null);
 
-// Create a sample transaction on mount
+// Signer selection: which wallet binding produces the signature.
+const signerType = ref<"keypair" | "walletconnect">("keypair");
+const walletAddress = ref("");
+
+// The unsigned transaction we will hand to the wallet for universal signing.
+let unsignedTransaction: StellarSdk.Transaction | null = null;
+// The in-process keypair backing the "keypair" signer in this demo.
+let demoKeypair: StellarSdk.Keypair | null = null;
+
+// The namespaces an app requests when opening a real WalletConnect session.
+const requiredNamespaces = buildStellarRequiredNamespaces({
+  chains: [STELLAR_CHAINS.TESTNET],
+});
+
+// Create a sample (unsigned) transaction on mount.
 onMounted(async () => {
   try {
-    // Generate a random keypair for demo purposes
-    const userKeypair = StellarSdk.Keypair.random();
-    console.log("User wallet:", userKeypair.publicKey());
+    demoKeypair = StellarSdk.Keypair.random();
+    walletAddress.value = demoKeypair.publicKey();
+    console.log("User wallet:", demoKeypair.publicKey());
 
     // Fund the wallet (only on testnet)
     statusMessage.value = "Funding wallet...";
-    await fetch(
-      `https://friendbot.stellar.org?addr=${userKeypair.publicKey()}`,
-    );
+    await fetch(`https://friendbot.stellar.org?addr=${demoKeypair.publicKey()}`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Load account
     const server = new StellarSdk.Horizon.Server(
       "https://horizon-testnet.stellar.org",
     );
-    const account = await server.loadAccount(userKeypair.publicKey());
+    const account = await server.loadAccount(demoKeypair.publicKey());
 
-    // Build a sample transaction
-    const transaction = new StellarSdk.TransactionBuilder(account, {
+    // Build a sample transaction (left UNSIGNED — the wallet signs it).
+    unsignedTransaction = new StellarSdk.TransactionBuilder(account, {
       fee: StellarSdk.BASE_FEE,
-      networkPassphrase: StellarSdk.Networks.TESTNET,
+      networkPassphrase: NETWORK,
     })
       .addOperation(
         StellarSdk.Operation.payment({
@@ -53,31 +73,78 @@ onMounted(async () => {
       .setTimeout(180)
       .build();
 
-    // Sign transaction
-    transaction.sign(userKeypair);
-
-    // Store the XDR
-    transactionXdr.value = transaction.toXDR();
-    statusMessage.value = "Transaction created and signed!";
+    transactionXdr.value = unsignedTransaction.toXDR();
+    statusMessage.value = "Unsigned transaction created. Pick a signer below.";
   } catch (err) {
     statusMessage.value = `Error creating transaction: ${err instanceof Error ? err.message : "Unknown error"}`;
     console.error("Error:", err);
   }
 });
 
-// Request fee bump
+/**
+ * Resolve the selected wallet binding to a universal `WalletSigner`.
+ *
+ * Both branches return the same interface, so the rest of the flow is
+ * identical regardless of how the user chooses to sign.
+ */
+function resolveSigner(): WalletSigner {
+  if (signerType.value === "walletconnect") {
+    // In a real app, open a WalletConnect session with `requiredNamespaces`
+    // above, then build the signer from the connected provider + session:
+    //
+    //   const signClient = await SignClient.init({ projectId });
+    //   const { uri, approval } = await signClient.connect({ requiredNamespaces });
+    //   const session = await approval();
+    //   return createWalletConnectSigner(signClient, session, {
+    //     networkPassphrase: NETWORK,
+    //   });
+    //
+    // A globally-wired provider/session is used here when available.
+    const provider = (window as any).fluidWalletConnectProvider;
+    const session = (window as any).fluidWalletConnectSession;
+    if (!provider || !session) {
+      throw new Error(
+        "No WalletConnect session wired. See requiredNamespaces and the inline " +
+          "instructions to connect a real wallet, or use the keypair signer.",
+      );
+    }
+    return new WalletConnectSigner({
+      provider,
+      topic: session.topic,
+      address: walletAddress.value,
+      networkPassphrase: NETWORK,
+    });
+  }
+
+  if (!demoKeypair) {
+    throw new Error("Demo keypair not ready");
+  }
+  return new KeypairSigner(demoKeypair, NETWORK);
+}
+
+// Sign with the selected wallet binding, then request a fee bump.
 async function handleRequestFeeBump() {
-  if (!transactionXdr.value) {
-    statusMessage.value = "No transaction XDR available";
+  if (!unsignedTransaction) {
+    statusMessage.value = "No transaction available";
     return;
   }
 
+  isLoading.value = true;
+  error.value = null;
   try {
-    statusMessage.value = "Requesting fee bump...";
-    await requestFeeBump(transactionXdr.value, false);
+    const signer = resolveSigner();
+    statusMessage.value = `Signing with "${signer.id}" and requesting fee bump...`;
+    result.value = await client.buildAndRequestFeeBumpWithWallet(
+      signer,
+      unsignedTransaction,
+      false,
+    );
     statusMessage.value = "Fee bump requested successfully!";
   } catch (err) {
-    statusMessage.value = `Error: ${err instanceof Error ? err.message : "Unknown error"}`;
+    error.value = err instanceof Error ? err : new Error("Unknown error");
+    statusMessage.value = `Error: ${error.value.message}`;
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>
@@ -91,7 +158,7 @@ async function handleRequestFeeBump() {
     </div>
 
     <div class="card">
-      <h2>Transaction XDR</h2>
+      <h2>Unsigned Transaction XDR</h2>
       <textarea
         v-model="transactionXdr"
         readonly
@@ -101,13 +168,38 @@ async function handleRequestFeeBump() {
     </div>
 
     <div class="card">
-      <h2>Request Fee Bump</h2>
+      <h2>Wallet Signer</h2>
+      <p>Pick which standard wallet binding signs this transaction:</p>
+      <label class="radio">
+        <input type="radio" value="keypair" v-model="signerType" />
+        In-process keypair (demo)
+      </label>
+      <label class="radio">
+        <input type="radio" value="walletconnect" v-model="signerType" />
+        WalletConnect
+      </label>
+      <p v-if="walletAddress" class="muted">
+        Signer address: <code>{{ walletAddress }}</code>
+      </p>
+    </div>
+
+    <div v-if="signerType === 'walletconnect'" class="card">
+      <h2>WalletConnect <code>requiredNamespaces</code></h2>
+      <p class="muted">
+        Pass this to <code>signClient.connect(...)</code> to open a Stellar
+        session, then build a <code>WalletConnectSigner</code> from the result.
+      </p>
+      <textarea readonly rows="8" :value="JSON.stringify(requiredNamespaces, null, 2)"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Sign &amp; Request Fee Bump</h2>
       <button
         @click="handleRequestFeeBump"
         :disabled="isLoading || !transactionXdr"
         class="btn"
       >
-        {{ isLoading ? "Requesting..." : "Request Fee Bump" }}
+        {{ isLoading ? "Signing & requesting..." : "Sign & Request Fee Bump" }}
       </button>
     </div>
 
@@ -190,6 +282,24 @@ textarea {
   border-left: 4px solid #007bff;
   padding: 15px;
   margin-bottom: 20px;
+}
+
+.radio {
+  display: block;
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+.muted {
+  color: #777;
+  font-size: 0.9em;
+}
+
+code {
+  background: #eaeaea;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
 }
 
 .loading {

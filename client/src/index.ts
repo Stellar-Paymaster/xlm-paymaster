@@ -27,6 +27,9 @@ export type { TelemetryConfig, TelemetryData } from "./telemetry";
 
 export { FluidQueue } from "./queue";
 export type { QueuedTransaction, FluidQueueCallbacks } from "./queue";
+
+// Universal wallet signing (WalletConnect standard bindings, SEP-43 adapters)
+export * from "./wallet";
 export {
   buildFeeBumpTransaction,
   createHorizonServer,
