@@ -8,6 +8,14 @@ use stellar_xdr::curr::{
 use tracing::info;
 use bytes::Bytes;
 
+/// Hard ceiling for the encoded XDR payload accepted by the server before
+/// any decode or XDR deserialization work is attempted.
+///
+/// The encoded length is capped rather than the decoded byte length so the
+/// server can reject oversized attacker-controlled input before allocating the
+/// base64 output buffer.
+pub const MAX_XDR_INPUT_BYTES: usize = 64 * 1024;
+
 /// Shared buffer pool for zero-copy base64 decoding
 thread_local! {
     static DECODE_BUFFER: std::cell::RefCell<Vec<u8>> = std::cell::RefCell::new(Vec::with_capacity(8192));
@@ -55,6 +63,8 @@ pub struct TransactionSummary {
 /// Errors produced by [`parse_xdr`].
 #[derive(Debug)]
 pub enum XdrError {
+    PayloadTooLarge { actual: usize, max: usize },
+    InvalidBase64(String),
     Base64(base64::DecodeError),
     Xdr(stellar_xdr::curr::Error),
 }
@@ -62,6 +72,11 @@ pub enum XdrError {
 impl std::fmt::Display for XdrError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            XdrError::PayloadTooLarge { actual, max } => write!(
+                f,
+                "XDR payload is {actual} bytes, which exceeds the maximum allowed size of {max} bytes"
+            ),
+            XdrError::InvalidBase64(message) => write!(f, "invalid base64 XDR payload: {message}"),
             XdrError::Base64(e) => write!(f, "base64 decode error: {e}"),
             XdrError::Xdr(e) => write!(f, "XDR parse error: {e}"),
         }
@@ -74,6 +89,44 @@ impl From<base64::DecodeError> for XdrError {
     fn from(e: base64::DecodeError) -> Self {
         XdrError::Base64(e)
     }
+}
+
+fn is_standard_base64_byte(byte: u8) -> bool {
+    matches!(
+        byte,
+        b'A'..=b'Z'
+            | b'a'..=b'z'
+            | b'0'..=b'9'
+            | b'+'
+            | b'/'
+            | b'='
+    )
+}
+
+/// Validates the shape of a base64-encoded XDR string before any decode work.
+///
+/// The returned slice is trimmed and safe to pass to the base64 decoder.
+pub fn validate_xdr_input(base64_string: &str) -> Result<&str, XdrError> {
+    let trimmed = base64_string.trim();
+
+    if trimmed.is_empty() {
+        return Err(XdrError::InvalidBase64("XDR payload is empty".to_string()));
+    }
+
+    if trimmed.len() > MAX_XDR_INPUT_BYTES {
+        return Err(XdrError::PayloadTooLarge {
+            actual: trimmed.len(),
+            max: MAX_XDR_INPUT_BYTES,
+        });
+    }
+
+    if !trimmed.bytes().all(is_standard_base64_byte) {
+        return Err(XdrError::InvalidBase64(
+            "XDR payload must contain only standard base64 characters".to_string(),
+        ));
+    }
+
+    Ok(trimmed)
 }
 
 impl From<stellar_xdr::curr::Error> for XdrError {
@@ -89,7 +142,8 @@ impl From<stellar_xdr::curr::Error> for XdrError {
 /// Returns [`XdrError`] on invalid base64 or malformed XDR.
 pub fn parse_xdr(base64_string: &str) -> Result<ParsedTransaction, XdrError> {
     // Zero-copy decode path: decode base64 into bytes, then parse XDR in-place.
-    let bytes = STANDARD.decode(base64_string.trim())?;
+    let trimmed = validate_xdr_input(base64_string)?;
+    let bytes = STANDARD.decode(trimmed)?;
     let envelope = TransactionEnvelope::from_xdr(bytes, Limits::none())?;
 
     let parsed = match envelope {
@@ -104,6 +158,19 @@ pub fn parse_xdr(base64_string: &str) -> Result<ParsedTransaction, XdrError> {
 /// Zero-copy XDR parsing using byte slice references.
 /// This version uses a thread-local buffer pool to minimize allocations.
 pub fn parse_xdr_zero_copy(base64_bytes: &[u8]) -> Result<ParsedTransaction, XdrError> {
+    if base64_bytes.len() > MAX_XDR_INPUT_BYTES {
+        return Err(XdrError::PayloadTooLarge {
+            actual: base64_bytes.len(),
+            max: MAX_XDR_INPUT_BYTES,
+        });
+    }
+
+    if !base64_bytes.iter().all(|byte| is_standard_base64_byte(*byte)) {
+        return Err(XdrError::InvalidBase64(
+            "XDR payload must contain only standard base64 characters".to_string(),
+        ));
+    }
+
     let decoded_bytes = ZeroCopyDecoder::decode_with_buffer(base64_bytes)?;
     let envelope = TransactionEnvelope::from_xdr(&decoded_bytes, Limits::none())?;
 
@@ -500,12 +567,77 @@ mod tests {
     fn test_empty_string_returns_error() {
         let result = parse_xdr("");
         assert!(result.is_err(), "empty string should return an error");
+    }
+
+    // ── Input validation tests ───────────────────────────────────────────────
+
+    #[test]
+    fn test_validate_xdr_input_rejects_oversized_payload() {
+        // Create a string that exceeds MAX_XDR_INPUT_BYTES (64 KB).
+        let oversized = "A".repeat(MAX_XDR_INPUT_BYTES + 1);
+        let result = validate_xdr_input(&oversized);
+        assert!(
+            matches!(result, Err(XdrError::PayloadTooLarge { .. })),
+            "expected PayloadTooLarge error, got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_validate_xdr_input_rejects_invalid_base64_chars() {
+        // Contains non-base64 characters.
+        let invalid = "SGVsbG8gV29ybGQ=@#$";
+        let result = validate_xdr_input(invalid);
+        assert!(
+            matches!(result, Err(XdrError::InvalidBase64(_))),
+            "expected InvalidBase64 error, got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_validate_xdr_input_rejects_empty_string() {
+        let result = validate_xdr_input("");
+        assert!(
+            matches!(result, Err(XdrError::InvalidBase64(_))),
+            "expected InvalidBase64 error, got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_validate_xdr_input_accepts_whitespace_padded_valid_base64() {
+        let valid = "  SGVsbG8gV29ybGQ=  \n";
+        let result = validate_xdr_input(valid);
+        assert!(result.is_ok(), "whitespace-padded valid base64 should be accepted");
+    }
+
+    #[test]
+    fn test_parse_xdr_with_oversized_payload() {
+        // Even if the base64 were valid, the server rejects it at the input gate.
+        let oversized = "A".repeat(MAX_XDR_INPUT_BYTES + 1);
+        let result = parse_xdr(&oversized);
+        assert!(
+            matches!(result, Err(XdrError::PayloadTooLarge { .. })),
+            "expected PayloadTooLarge error, got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_zero_copy_with_oversized_payload() {
+        let oversized = "A".repeat(MAX_XDR_INPUT_BYTES + 1);
+        let result = parse_xdr_zero_copy(oversized.as_bytes());
+        assert!(
+            matches!(result, Err(XdrError::PayloadTooLarge { .. })),
+            "expected PayloadTooLarge error, got {result:?}"
+        );
+    }
+
+    // ── Positive parsing tests ───────────────────────────────────────────────
+
     #[test]
     fn test_zero_copy_parsing() {
         let xdr = classic_v1_xdr();
         let result = parse_xdr_zero_copy(xdr.as_bytes());
         assert!(result.is_ok(), "zero-copy parsing should work");
-        
+
         if let Ok(ParsedTransaction::V1(tx)) = result {
             assert_eq!(tx.fee, 100);
             assert_eq!(tx.seq_num.0, 42);
@@ -520,7 +652,7 @@ mod tests {
         let decoded_bytes = STANDARD.decode(&xdr).unwrap();
         let result = parse_xdr_from_bytes(&decoded_bytes);
         assert!(result.is_ok(), "parsing from bytes should work");
-        
+
         if let Ok(ParsedTransaction::V1(tx)) = result {
             assert_eq!(tx.fee, 100);
             assert_eq!(tx.seq_num.0, 42);
@@ -532,13 +664,13 @@ mod tests {
     #[test]
     fn test_zero_copy_decoder() {
         use super::ZeroCopyDecoder;
-        
+
         let test_data = "SGVsbG8gV29ybGQ="; // "Hello World" in base64
         let result = ZeroCopyDecoder::decode_with_buffer(test_data.as_bytes());
         assert!(result.is_ok());
-        
+
         let decoded = result.unwrap();
         assert_eq!(decoded, b"Hello World");
     }
-    }
+}
 }
