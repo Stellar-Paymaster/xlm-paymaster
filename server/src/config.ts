@@ -26,6 +26,7 @@ export interface VaultConfig {
 
 export interface GrpcEngineConfig {
   address: string;
+  secondaryAddress?: string;
   pinnedServerCertSha256: string[];
   serverName: string;
   tlsCaPath: string;
@@ -84,6 +85,24 @@ export interface EvmSettlementConfig {
   refundFromAddress?: string;
 }
 
+export interface KycConfig {
+  enabled: boolean;
+  endpointUrl?: string;
+  apiKey?: string;
+  timeoutMs: number;
+  failClosed: boolean;
+}
+
+export interface WorkerConfig {
+  ledgerMonitorConcurrency: number;
+  memoryProfiling: {
+    enabled: boolean;
+    logIntervalMs: number;
+    heapSnapshotIntervalMs: number;
+    snapshotPath?: string;
+  };
+}
+
 export interface Config {
   allowedOrigins: string[];
   alerting: AlertingConfig;
@@ -106,15 +125,23 @@ export interface Config {
   signerPool: SignerPool;
   stellarRpcUrl?: string;
   supportedAssets?: SupportedAsset[];
-  vault?: VaultConfig;
   evmSettlement?: EvmSettlementConfig;
+  kyc: KycConfig;
   treasury: TreasuryConfig;
+  workers: WorkerConfig;
+  networkSimulation: NetworkSimulationConfig;
 }
 
 export interface TreasuryConfig {
   coldWallet: string;
   retentionLimitXlm: number;
   cronSchedule: string;
+  enabled: boolean;
+}
+
+export interface NetworkSimulationConfig {
+  latencyMs: number;
+  packetLossRate: number; // 0.0 to 1.0
   enabled: boolean;
 }
 
@@ -156,6 +183,34 @@ function parseOptionalNumber(value: string | undefined): number | undefined {
   }
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+function parseBoolean(
+  value: string | undefined,
+  fallback: boolean,
+): boolean {
+  if (!value) {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+  if (["0", "false", "no", "off"].includes(normalized)) {
+    return false;
+  }
+  return fallback;
+}
+
+function parseBoundedPositiveInt(
+  value: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+): number {
+  const parsed = parsePositiveInt(value, fallback);
+  return Math.min(Math.max(parsed, min), max);
 }
 
 function parseSupportedAssets(value: string | undefined): SupportedAsset[] {
@@ -205,6 +260,7 @@ function loadGrpcEngineConfig(): GrpcEngineConfig | undefined {
 
   return {
     address,
+    secondaryAddress: process.env.FLUID_GRPC_ENGINE_SECONDARY_ADDRESS?.trim(),
     pinnedServerCertSha256: parseCommaSeparatedList(
       process.env.FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256,
     ).map((value) =>
@@ -298,47 +354,31 @@ function loadDigestConfig(): DigestConfig {
   };
 }
 
-function loadEvmSettlementConfig(): EvmSettlementConfig | undefined {
-  if (process.env.FLUID_EVM_SETTLEMENT_ENABLED !== "true") {
-    return undefined;
-  }
-
-  const rpcUrl = process.env.FLUID_EVM_RPC_URL?.trim();
-  const tokenAddress = process.env.FLUID_EVM_TOKEN_ADDRESS?.trim();
-  const receiverAddress = process.env.FLUID_EVM_RECEIVER_ADDRESS?.trim();
-  const chainId = parsePositiveInt(process.env.FLUID_EVM_CHAIN_ID, 0);
-
-  if (!rpcUrl || !tokenAddress || !receiverAddress || chainId <= 0) {
-    return undefined;
-  }
-
+function loadWorkerConfig(): WorkerConfig {
   return {
-    enabled: true,
-    chainId,
-    rpcUrl,
-    tokenAddress,
-    receiverAddress,
-    confirmationsRequired: parsePositiveInt(
-      process.env.FLUID_EVM_CONFIRMATIONS_REQUIRED,
-      3,
+    ledgerMonitorConcurrency: parseBoundedPositiveInt(
+      process.env.FLUID_LEDGER_MONITOR_CONCURRENCY ??
+        process.env.LEDGER_MONITOR_THREADS,
+      5,
+      1,
+      64,
     ),
-    pollIntervalMs: parsePositiveInt(
-      process.env.FLUID_EVM_WATCH_POLL_INTERVAL_MS,
-      5_000,
-    ),
-    refundFromAddress: process.env.FLUID_EVM_REFUND_FROM_ADDRESS?.trim() || undefined,
+    memoryProfiling: {
+      enabled: parseBoolean(process.env.FLUID_MEMORY_PROFILING_ENABLED, false),
+      logIntervalMs: parsePositiveInt(process.env.FLUID_MEMORY_PROFILING_LOG_INTERVAL_MS, 60000),
+      heapSnapshotIntervalMs: parsePositiveInt(process.env.FLUID_MEMORY_PROFILING_SNAPSHOT_INTERVAL_MS, 3600000),
+      snapshotPath: process.env.FLUID_MEMORY_PROFILING_SNAPSHOT_PATH?.trim() || undefined,
+    },
   };
 }
 
-function loadTreasuryConfig(): TreasuryConfig {
+function loadNetworkSimulationConfig(): NetworkSimulationConfig {
   return {
-    coldWallet: process.env.TREASURY_COLD_WALLET?.trim() || "",
-    retentionLimitXlm: parsePositiveInt(
-      process.env.TREASURY_RETENTION_LIMIT_XLM,
-      1000,
+    latencyMs: parsePositiveInt(process.env.FLUID_NETWORK_LATENCY_MS, 0),
+    packetLossRate: Number.parseFloat(
+      process.env.FLUID_NETWORK_PACKET_LOSS_RATE || "0",
     ),
-    cronSchedule: process.env.TREASURY_SWEEP_CRON_SCHEDULE?.trim() || "0 0 * * *",
-    enabled: process.env.TREASURY_SWEEP_ENABLED !== "false",
+    enabled: process.env.FLUID_NETWORK_SIMULATION_ENABLED === "true",
   };
 }
 
@@ -406,6 +446,7 @@ export function loadConfig(): Config {
     maxXdrSize,
     networkPassphrase,
     evmSettlement: loadEvmSettlementConfig(),
+    kyc: loadKycConfig(),
     rateLimitMax,
     rateLimitWindowMs,
     stellarRpcUrl: process.env.STELLAR_RPC_URL?.trim() || undefined,
@@ -419,6 +460,8 @@ export function loadConfig(): Config {
       10,
     ),
     treasury: loadTreasuryConfig(),
+    workers: loadWorkerConfig(),
+    networkSimulation: loadNetworkSimulationConfig(),
   };
 
   // ---- Vault mode ----------------------------------------------------------

@@ -1,0 +1,90 @@
+{
+  "navigation": {
+    "dashboard": "Panel",
+    "transactions": "Transacciones",
+    "signers": "Firmantes",
+    "apiKeys": "Claves API",
+    "settings": "Configuración",
+    "referrals": "Referidos",
+    "plugins": "Complementos",
+    "sdk": "SDK"
+  },
+  "buttons": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "estimate": "Estimar",
+    "refresh": "Actualizar",
+    "submit": "Enviar"
+  },
+  "status": {
+    "operational": "Operativo",
+    "degraded": "Degradado",
+    "outage": "Interrupción",
+    "loading": "Cargando...",
+    "error": "Error al cargar datos"
+  },
+  "forms": {
+    "placeholder": {
+      "search": "Buscar...",
+      "email": "Ingrese su correo",
+      "description": "Ingrese descripción"
+    }
+  },
+  "labels": {
+    "latency": "Latencia",
+    "uptime": "Tiempo activo",
+    "lastChecked": "Última verificación",
+    "region": "Región",
+    "fee": "Tarifa",
+    "baseFee": "Tarifa Base",
+    "congestionLevel": "Nivel de Congestión",
+    "low": "Bajo",
+    "medium": "Medio",
+    "high": "Alto"
+  },
+  "errors": {
+    "generic": "Ocurrió un error",
+    "network": "Error de red, inténtelo de nuevo",
+    "invalidInput": "Entrada inválida",
+    "unknownRegion": "Región desconocida"
+  },
+  "fee": {
+    "estimatedFee": "Tarifa Estimada",
+    "estimatedStroops": "Stroops Estimados",
+    "estimatedXlm": "XLM Estimado",
+    "estimatedUsd": "USD Estimado",
+    "multiplierUsed": "Multiplicador Usado",
+    "operationCount": "Cuenta de Operaciones",
+    "operationTypes": "Tipos de Operaciones",
+    "source": "Fuente",
+    "openai": "OpenAI",
+    "fallback": "Reglas Alternativas",
+    "baseNetworkFee": "Tarifa de Red Base (stroops)",
+    "surgeMultiplier": "Multiplicador de Surge (Bump de Tarifa)"
+  },
+  "theme": {
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "highContrast": "Alto Contraste"
+  },
+  "table": {
+    "timestamp": "Marca de Tiempo",
+    "actor": "Actor",
+    "action": "Acción",
+    "details": "Detalles",
+    "amount": "Cantidad",
+    "asset": "Activo",
+    "status": "Estado",
+    "noResults": "No se encontraron resultados"
+  },
+  "time": {
+    "last24Hours": "Últimas 24 Horas",
+    "last7Days": "Últimos 7 Días",
+    "last30Days": "Últimos 30 Días",
+    "allTime": "Todo el Tiempo"
+  }
+}

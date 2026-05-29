@@ -1,0 +1,90 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "signers": "Signers",
+    "apiKeys": "API Keys",
+    "settings": "Settings",
+    "referrals": "Referrals",
+    "plugins": "Plugins",
+    "sdk": "SDK"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "estimate": "Estimate",
+    "refresh": "Refresh",
+    "submit": "Submit"
+  },
+  "status": {
+    "operational": "Operational",
+    "degraded": "Degraded",
+    "outage": "Outage",
+    "loading": "Loading...",
+    "error": "Error loading data"
+  },
+  "forms": {
+    "placeholder": {
+      "search": "Search...",
+      "email": "Enter your email",
+      "description": "Enter description"
+    }
+  },
+  "labels": {
+    "latency": "Latency",
+    "uptime": "Uptime",
+    "lastChecked": "Last checked",
+    "region": "Region",
+    "fee": "Fee",
+    "baseFee": "Base Fee",
+    "congestionLevel": "Congestion Level",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "network": "Network error, please try again",
+    "invalidInput": "Invalid input provided",
+    "unknownRegion": "Unknown region specified"
+  },
+  "fee": {
+    "estimatedFee": "Estimated Fee",
+    "estimatedStroops": "Estimated Stroops",
+    "estimatedXlm": "Estimated XLM",
+    "estimatedUsd": "Estimated USD",
+    "multiplierUsed": "Multiplier Used",
+    "operationCount": "Operation Count",
+    "operationTypes": "Operation Types",
+    "source": "Source",
+    "openai": "OpenAI",
+    "fallback": "Fallback Rules",
+    "baseNetworkFee": "Base Network Fee (stroops)",
+    "surgeMultiplier": "Surge Multiplier (Fee Bump)"
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "highContrast": "High Contrast"
+  },
+  "table": {
+    "timestamp": "Timestamp",
+    "actor": "Actor",
+    "action": "Action",
+    "details": "Details",
+    "amount": "Amount",
+    "asset": "Asset",
+    "status": "Status",
+    "noResults": "No results found"
+  },
+  "time": {
+    "last24Hours": "Last 24 Hours",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "allTime": "All Time"
+  }
+}

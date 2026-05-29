@@ -1,0 +1,90 @@
+{
+  "navigation": {
+    "dashboard": "Painel",
+    "transactions": "Transações",
+    "signers": "Signatários",
+    "apiKeys": "Chaves API",
+    "settings": "Configurações",
+    "referrals": "Referências",
+    "plugins": "Plugins",
+    "sdk": "SDK"
+  },
+  "buttons": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "estimate": "Estimar",
+    "refresh": "Atualizar",
+    "submit": "Enviar"
+  },
+  "status": {
+    "operational": "Operacional",
+    "degraded": "Degradado",
+    "outage": "Falha",
+    "loading": "Carregando...",
+    "error": "Erro ao carregar dados"
+  },
+  "forms": {
+    "placeholder": {
+      "search": "Pesquisar...",
+      "email": "Digite seu email",
+      "description": "Digite descrição"
+    }
+  },
+  "labels": {
+    "latency": "Latência",
+    "uptime": "Tempo ativo",
+    "lastChecked": "Última verificação",
+    "region": "Região",
+    "fee": "Taxa",
+    "baseFee": "Taxa Base",
+    "congestionLevel": "Nível de Congestionamento",
+    "low": "Baixo",
+    "medium": "Médio",
+    "high": "Alto"
+  },
+  "errors": {
+    "generic": "Ocorreu um erro",
+    "network": "Erro de rede, tente novamente",
+    "invalidInput": "Entrada inválida",
+    "unknownRegion": "Região desconhecida"
+  },
+  "fee": {
+    "estimatedFee": "Taxa Estimada",
+    "estimatedStroops": "Stroops Estimados",
+    "estimatedXlm": "XLM Estimado",
+    "estimatedUsd": "USD Estimado",
+    "multiplierUsed": "Multiplicador Usado",
+    "operationCount": "Contagem de Operações",
+    "operationTypes": "Tipos de Operações",
+    "source": "Fonte",
+    "openai": "OpenAI",
+    "fallback": "Regras Alternativas",
+    "baseNetworkFee": "Taxa de Rede Base (stroops)",
+    "surgeMultiplier": "Multiplicador de Surge (Fee Bump)"
+  },
+  "theme": {
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "highContrast": "Alto Contraste"
+  },
+  "table": {
+    "timestamp": "Data/Hora",
+    "actor": "Ator",
+    "action": "Ação",
+    "details": "Detalhes",
+    "amount": "Valor",
+    "asset": "Ativo",
+    "status": "Status",
+    "noResults": "Nenhum resultado encontrado"
+  },
+  "time": {
+    "last24Hours": "Últimas 24 Horas",
+    "last7Days": "Últimos 7 Dias",
+    "last30Days": "Últimos 30 Dias",
+    "allTime": "Todo o Tempo"
+  }
+}

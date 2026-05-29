@@ -1,5 +1,6 @@
 import { createLogger } from "../utils/logger";
 import { logAuditEvent } from "./auditLogger";
+import { buildBloomFilter, mightBeBlocked } from "./bloomFilterService";
 
 const logger = createLogger({ component: "ofac_screening" });
 
@@ -70,6 +71,7 @@ export async function refreshSDNList(): Promise<void> {
 
     sdnAddresses = parsed;
     lastRefresh = new Date();
+    buildBloomFilter(sdnAddresses);
     logger.info({ addressCount: sdnAddresses.size }, "OFAC SDN list refreshed");
   } catch (err) {
     logger.error({ err: String(err), url }, "Failed to refresh OFAC SDN list");
@@ -86,6 +88,9 @@ export async function refreshSDNList(): Promise<void> {
 export function initializeOFACScreening(): void {
   // Apply env blocklist immediately — no network call needed
   applyEnvBlocklist(sdnAddresses);
+
+  // Seed the filter from whatever is in the blocklist right now (env entries).
+  buildBloomFilter(sdnAddresses);
 
   // Non-blocking initial download
   refreshSDNList().catch(err =>
@@ -134,7 +139,11 @@ export function screenAddresses(addresses: string[]): ScreeningResult {
   }
 
   const upperAddresses = addresses.map(a => a.toUpperCase());
-  const matched = upperAddresses.filter(a => sdnAddresses.has(a));
+
+  // Fast O(1) Bloom-filter pre-check — if the filter says "definitely not",
+  // skip the Set lookup entirely.  False-positive rate < 0.1%.
+  const candidates = upperAddresses.filter(a => mightBeBlocked(a));
+  const matched = candidates.filter(a => sdnAddresses.has(a));
 
   return {
     screened: true,

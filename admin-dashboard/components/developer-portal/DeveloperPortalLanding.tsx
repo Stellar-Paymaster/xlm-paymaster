@@ -5,9 +5,16 @@ import { Box, Layers, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { getPortalLinks } from "@/lib/portal-links";
 import { cn } from "@/lib/utils";
+
+// Leaflet requires browser APIs — load without SSR
+const NodeNetworkMap = dynamic(
+  () => import("./NodeNetworkMap").then((m) => ({ default: m.NodeNetworkMap })),
+  { ssr: false },
+);
 
 const SDK_SNIPPET = `import { FluidClient } from "fluid-client";
 
@@ -128,6 +135,8 @@ export function DeveloperPortalLanding() {
           ))}
         </div>
       </section>
+
+      <NodeNetworkMap />
 
       <section
         className="border-y border-border bg-muted/30"

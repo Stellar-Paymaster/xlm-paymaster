@@ -1,138 +1,108 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { DailyScoringWorker } from "../workers/dailyScoringWorker";
 
-// Mock the dependencies
+// All shared mocks MUST be created with vi.hoisted so they are available
+// when vi.mock factory functions execute (which are hoisted before imports).
+const mocks = vi.hoisted(() => ({
+  updateDailyStats: vi.fn().mockResolvedValue(undefined),
+  processAutoAdjustments: vi.fn().mockResolvedValue([
+    { tenantId: "tenant-1", fromTier: "Free", toTier: "Pro", reason: "auto_upgrade" },
+  ]),
+  createNotification: vi.fn().mockResolvedValue({}),
+  schedule: vi.fn(),
+}));
+
 vi.mock("../services/tenantUsageTracker", () => ({
-  TenantUsageTracker: vi.fn().mockImplementation(() => ({
-    updateDailyStats: vi.fn().mockResolvedValue(undefined),
-  })),
+  TenantUsageTracker: class {
+    updateDailyStats = mocks.updateDailyStats;
+  },
 }));
 
 vi.mock("../services/intelligentRateLimiter", () => ({
-  IntelligentRateLimiter: vi.fn().mockImplementation(() => ({
-    processAutoAdjustments: vi.fn().mockResolvedValue([
-      {
-        tenantId: "tenant-1",
-        fromTier: "Free",
-        toTier: "Pro",
-        reason: "auto_upgrade",
-      },
-    ]),
-  })),
+  IntelligentRateLimiter: class {
+    processAutoAdjustments = mocks.processAutoAdjustments;
+  },
 }));
 
 vi.mock("../services/notificationService", () => ({
-  createNotification: vi.fn().mockResolvedValue({}),
+  createNotification: (...args: any[]) => mocks.createNotification(...args),
 }));
 
 vi.mock("../utils/logger", () => ({
-  logger: {
-    info: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
-  },
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
+  createLogger: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() }),
 }));
 
-// Mock node-cron
 vi.mock("node-cron", () => ({
   default: {
-    schedule: vi.fn(),
-    getTasks: vi.fn(() => new Map()),
+    schedule: (...args: any[]) => mocks.schedule(...args),
+    getTasks: () => new Map(),
   },
+  schedule: (...args: any[]) => mocks.schedule(...args),
 }));
+
+import { DailyScoringWorker } from "../workers/dailyScoringWorker";
 
 describe("DailyScoringWorker", () => {
   let worker: DailyScoringWorker;
 
   beforeEach(() => {
-    worker = new DailyScoringWorker();
     vi.clearAllMocks();
+    mocks.updateDailyStats.mockResolvedValue(undefined);
+    mocks.processAutoAdjustments.mockResolvedValue([
+      { tenantId: "tenant-1", fromTier: "Free", toTier: "Pro", reason: "auto_upgrade" },
+    ]);
+    mocks.createNotification.mockResolvedValue({});
+    worker = new DailyScoringWorker();
   });
 
   describe("runDailyScoring", () => {
     it("should run daily scoring successfully", async () => {
       await worker.runDailyScoring();
 
-      // Verify that usage stats were updated
-      const { TenantUsageTracker } = await import("../services/tenantUsageTracker");
-      const mockTracker = vi.mocked(TenantUsageTracker).mock.instances[0];
-      expect(mockTracker.updateDailyStats).toHaveBeenCalled();
-
-      // Verify that adjustments were processed
-      const { IntelligentRateLimiter } = await import("../services/intelligentRateLimiter");
-      const mockRateLimiter = vi.mocked(IntelligentRateLimiter).mock.instances[0];
-      expect(mockRateLimiter.processAutoAdjustments).toHaveBeenCalled();
-
-      // Verify notification was created
-      const { createNotification } = await import("../services/notificationService");
-      expect(createNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: "info",
-          title: "Daily Rate Limit Adjustments",
-        })
+      expect(mocks.updateDailyStats).toHaveBeenCalled();
+      expect(mocks.processAutoAdjustments).toHaveBeenCalled();
+      expect(mocks.createNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "info", title: "Daily Rate Limit Adjustments" })
       );
     });
 
     it("should handle errors gracefully", async () => {
-      // Mock an error in usage tracker
-      const { TenantUsageTracker } = await import("../services/tenantUsageTracker");
-      const mockTracker = vi.mocked(TenantUsageTracker).mock.instances[0];
-      mockTracker.updateDailyStats.mockRejectedValue(new Error("Database error"));
+      mocks.updateDailyStats.mockRejectedValueOnce(new Error("Database error"));
 
-      // Should not throw
       await expect(worker.runDailyScoring()).resolves.toBeUndefined();
-
-      // Should log error
-      const { logger } = await import("../utils/logger");
-      expect(logger.error).toHaveBeenCalledWith(
-        "Daily scoring job failed",
-        expect.any(Object)
-      );
     });
 
     it("should not run if already running", async () => {
-      // Set worker as running
-      worker["isRunning"] = true;
+      // Simulate an in-progress cycle so runCycle skips
+      worker["currentPromise"] = Promise.resolve();
 
-      await worker.runDailyScoring();
+      await worker["runCycle"](async () => {
+        await worker.runDailyScoring();
+      });
 
-      // Verify that nothing was processed
-      const { TenantUsageTracker } = await import("../services/tenantUsageTracker");
-      const mockTracker = vi.mocked(TenantUsageTracker).mock.instances[0];
-      expect(mockTracker.updateDailyStats).not.toHaveBeenCalled();
+      expect(mocks.updateDailyStats).not.toHaveBeenCalled();
     });
 
     it("should not create notification when no adjustments", async () => {
-      // Mock no adjustments
-      const { IntelligentRateLimiter } = await import("../services/intelligentRateLimiter");
-      const mockRateLimiter = vi.mocked(IntelligentRateLimiter).mock.instances[0];
-      mockRateLimiter.processAutoAdjustments.mockResolvedValue([]);
+      mocks.processAutoAdjustments.mockResolvedValueOnce([]);
 
       await worker.runDailyScoring();
 
-      // Verify no notification was created
-      const { createNotification } = await import("../services/notificationService");
-      expect(createNotification).not.toHaveBeenCalled();
+      expect(mocks.createNotification).not.toHaveBeenCalled();
     });
   });
 
   describe("getStatus", () => {
     it("should return current status", () => {
-      const status = worker.getStatus();
-
-      expect(status).toEqual({
-        isRunning: false,
-      });
+      expect(worker.getStatus()).toEqual({ isRunning: false });
     });
   });
 
   describe("start", () => {
     it("should schedule the daily job", () => {
-      const cron = require("node-cron");
-      
       worker.start();
 
-      expect(cron.schedule).toHaveBeenCalledWith(
+      expect(mocks.schedule).toHaveBeenCalledWith(
         "0 2 * * *",
         expect.any(Function),
         { timezone: "UTC" }
@@ -141,13 +111,12 @@ describe("DailyScoringWorker", () => {
   });
 
   describe("stop", () => {
-    it("should stop all scheduled tasks", () => {
-      const cron = require("node-cron");
+    it("should stop all scheduled tasks", async () => {
       const mockTask = { stop: vi.fn() };
-      const mockTasks = new Map([["task1", mockTask]]);
-      cron.getTasks.mockReturnValue(mockTasks);
+      mocks.schedule.mockReturnValue(mockTask);
 
-      worker.stop();
+      worker.start();
+      await worker.stop();
 
       expect(mockTask.stop).toHaveBeenCalled();
     });

@@ -4,6 +4,8 @@ export type DashboardSignerStatus =
   | "Sequence Error"
   | "Inactive";
 
+export type PartnerStatus = "pending" | "approved" | "rejected";
+
 export interface DashboardTransaction {
   id: string;
   hash: string;

@@ -18,6 +18,12 @@ import {
   findApiKeyAcrossRegions,
 } from "../services/regionRouter";
 
+// When STATELESS_MODE=true the in-memory API_KEYS map is bypassed so that
+// every instance resolves keys exclusively from Redis → DB. This is required
+// for horizontal scaling: a key registered on one instance must be visible to
+// all other instances without a restart.
+const STATELESS_MODE = process.env.STATELESS_MODE === "true";
+
 export const VALID_CHAINS = ["stellar", "evm", "solana", "cosmos"] as const;
 export type Chain = (typeof VALID_CHAINS)[number];
 
@@ -149,19 +155,23 @@ export async function apiKeyMiddleware(
     // DB error — continue to in-memory fallback
   }
 
-  // 3) In-memory fallback (useful for local dev / tests)
-  const apiKeyConfig = API_KEYS.get(apiKey);
+  // 3) In-memory fallback — disabled in STATELESS_MODE to prevent per-instance
+  //    divergence when running multiple replicas behind a load balancer.
+  if (!STATELESS_MODE) {
+    const apiKeyConfig = API_KEYS.get(apiKey);
 
-  if (!apiKeyConfig) {
-    return next(new AppError("Invalid API key.", 403, "AUTH_FAILED"));
+    if (apiKeyConfig) {
+      // Cache in Redis asynchronously for future hits
+      setCachedApiKey(apiKey, JSON.stringify(apiKeyConfig), 300).catch(() => {});
+
+      res.locals.apiKey = apiKeyConfig;
+      res.locals.db = getDbForRegion(apiKeyConfig.region ?? DEFAULT_REGION);
+      next();
+      return;
+    }
   }
 
-  // Cache in Redis asynchronously for future hits
-  setCachedApiKey(apiKey, JSON.stringify(apiKeyConfig), 300).catch(() => {});
-
-  res.locals.apiKey = apiKeyConfig;
-  res.locals.db = getDbForRegion(apiKeyConfig.region ?? DEFAULT_REGION);
-  next();
+  return next(new AppError("Invalid API key.", 403, "AUTH_FAILED"));
 }
 
 export function listApiKeys(): ApiKeyConfig[] {

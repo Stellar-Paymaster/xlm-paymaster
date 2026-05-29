@@ -1,0 +1,40 @@
+# Values for the prometheus-community/prometheus-adapter Helm chart.
+#
+# This file configures the Prometheus Adapter to expose
+# "http_requests_per_second" as a Kubernetes custom metric so that the Fluid
+# node-api HPA can scale on RPS in addition to CPU.
+#
+# Install the adapter once per cluster:
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm install prometheus-adapter prometheus-community/prometheus-adapter \
+#     --namespace monitoring --create-namespace \
+#     -f helm/fluid/prometheus-adapter-values.yaml
+#
+# Prerequisites:
+#   - Prometheus Operator or a standalone Prometheus scraping the nginx ingress controller.
+#   - The ingress-nginx controller deployed with --set controller.metrics.enabled=true.
+#   - The ServiceMonitor in templates/servicemonitor.yaml applied with
+#     serviceMonitor.enabled=true in values.yaml.
+
+prometheus:
+  # URL of your Prometheus instance. Adjust for your cluster.
+  url: http://prometheus-operated.monitoring.svc
+  port: 9090
+
+rules:
+  custom:
+    # Derive per-pod RPS for the fluid node-api from nginx ingress metrics.
+    # The metric name must match hpa.values.yaml -> hpa.rpsTargetPerPod metric name.
+    - seriesQuery: 'nginx_ingress_controller_requests{namespace!="",service!=""}'
+      resources:
+        overrides:
+          namespace:
+            resource: namespace
+          service:
+            resource: service
+      name:
+        matches: "^nginx_ingress_controller_requests$"
+        as: "http_requests_per_second"
+      metricsQuery: |
+        sum(rate(nginx_ingress_controller_requests{<<.LabelMatchers>>,service=~".*node-api.*"}[1m]))
+        by (<<.GroupBy>>)

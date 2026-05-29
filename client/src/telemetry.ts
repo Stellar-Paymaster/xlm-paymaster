@@ -26,16 +26,34 @@ export interface TelemetryConfig {
   enabled?: boolean;
   
   /**
+   * Enable or disable diagnostic bug reporting.
+   * Default: false (opt-in)
+   */
+  diagnosticsEnabled?: boolean;
+
+  /**
    * Custom telemetry endpoint URL.
    * Default: 'https://telemetry.fluid.dev/ping'
    */
   endpoint?: string;
+
+  /**
+   * Custom diagnostics endpoint URL.
+   * Default: 'https://telemetry.fluid.dev/report'
+   */
+  diagnosticsEndpoint?: string;
 }
 
 export interface TelemetryData {
   sdk_version: string;
   domain: string;
   timestamp: string;
+}
+
+export interface DiagnosticData extends TelemetryData {
+  message: string;
+  context?: any;
+  severity: "info" | "warning" | "error" | "critical";
 }
 
 const TELEMETRY_STORAGE_KEY = 'fluid_telemetry_last_ping';
@@ -49,7 +67,7 @@ function getSdkVersion(): string {
   try {
     // In a browser environment, we'll use a hardcoded version
     // In Node.js, we could read from package.json
-    return '0.1.0';
+    return '0.1.1';
   } catch {
     return 'unknown';
   }
@@ -114,7 +132,7 @@ function markTelemetryAsSent(): void {
  * @param endpoint The telemetry endpoint URL
  * @param data The telemetry data to send
  */
-function sendTelemetryData(endpoint: string, data: TelemetryData): void {
+function sendToCollector(endpoint: string, data: any): void {
   try {
     // Use navigator.sendBeacon if available (most reliable for fire-and-forget)
     if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
@@ -142,9 +160,10 @@ function sendTelemetryData(endpoint: string, data: TelemetryData): void {
     // Final fallback: pixel ping (1x1 transparent pixel)
     const img = new Image();
     const params = new URLSearchParams({
-      sdk_version: data.sdk_version,
-      domain: data.domain,
-      timestamp: data.timestamp,
+      v: getSdkVersion(),
+      d: getDomain(),
+      t: getUtcDate(),
+      data: JSON.stringify(data)
     });
     img.src = `${endpoint}?${params.toString()}`;
   } catch {
@@ -190,10 +209,41 @@ export function collectTelemetry(
   const endpoint = config.endpoint || 'https://telemetry.fluid.dev/ping';
 
   // Send telemetry data (fire-and-forget)
-  sendTelemetryData(endpoint, data);
+  sendToCollector(endpoint, data);
 
   // Mark as sent for today
   markTelemetryAsSent();
+}
+
+/**
+ * Reports a bug or diagnostic information to the telemetry server
+ * 
+ * @param config Telemetry configuration
+ * @param message The error or bug message
+ * @param severity Severity level
+ * @param context Additional context for the report
+ */
+export function reportDiagnostic(
+  config: TelemetryConfig,
+  message: string,
+  severity: DiagnosticData["severity"] = "error",
+  context?: any
+): void {
+  if (!config.diagnosticsEnabled) {
+    return;
+  }
+
+  const data: DiagnosticData = {
+    sdk_version: getSdkVersion(),
+    domain: getDomain(),
+    timestamp: new Date().toISOString(),
+    message,
+    severity,
+    context
+  };
+
+  const endpoint = config.diagnosticsEndpoint || 'https://telemetry.fluid.dev/report';
+  sendToCollector(endpoint, data);
 }
 
 /**
@@ -225,6 +275,9 @@ export function isTelemetryEnabled(config: TelemetryConfig): boolean {
 export function getTelemetryConfig(config?: Partial<TelemetryConfig>): TelemetryConfig {
   return {
     enabled: config?.enabled ?? false,
+    diagnosticsEnabled: config?.diagnosticsEnabled ?? false,
     endpoint: config?.endpoint ?? 'https://telemetry.fluid.dev/ping',
+    diagnosticsEndpoint: config?.diagnosticsEndpoint ?? 'https://telemetry.fluid.dev/report',
   };
 }
+

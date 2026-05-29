@@ -3,7 +3,8 @@ import {
   FeeBumpRequestInput,
   FeeBumpResponse,
   FluidClient,
-} from '../FluidClient';
+  FluidError,
+} from '../index';
 
 export interface UseFluidResult {
   requestFeeBump: (
@@ -11,13 +12,13 @@ export interface UseFluidResult {
     submit?: boolean
   ) => Promise<FeeBumpResponse>;
   isLoading: Ref<boolean>;
-  error: Ref<Error | null>;
+  error: Ref<FluidError | Error | null>;
   result: ShallowRef<FeeBumpResponse | null>;
 }
 
 export function useFluid(client: FluidClient): UseFluidResult {
   const isLoading = ref(false);
-  const error = ref<Error | null>(null);
+  const error = ref<FluidError | Error | null>(null);
   const result = shallowRef<FeeBumpResponse | null>(null);
 
   // Track in-flight requests for cleanup

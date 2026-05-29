@@ -30,6 +30,7 @@ pub struct HorizonSubmissionResult {
 }
 
 #[derive(Clone, Deserialize)]
+#[allow(dead_code)]
 pub struct HorizonTransactionResponse {
     pub successful: bool,
 }
@@ -194,6 +195,7 @@ impl HorizonCluster {
         ))
     }
 
+    #[allow(dead_code)]
     pub async fn get_transaction(
         &self,
         hash: &str,

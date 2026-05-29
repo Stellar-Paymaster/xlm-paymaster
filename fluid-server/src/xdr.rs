@@ -6,6 +6,34 @@ use stellar_xdr::curr::{
     Transaction, TransactionEnvelope, TransactionV0,
 };
 use tracing::info;
+use bytes::Bytes;
+
+/// Shared buffer pool for zero-copy base64 decoding
+thread_local! {
+    static DECODE_BUFFER: std::cell::RefCell<Vec<u8>> = std::cell::RefCell::new(Vec::with_capacity(8192));
+}
+
+/// Zero-copy base64 decoder that reuses thread-local buffers
+pub struct ZeroCopyDecoder;
+
+impl ZeroCopyDecoder {
+    /// Decode base64 bytes using a shared buffer to minimize allocations
+    pub fn decode_with_buffer(input: &[u8]) -> Result<Vec<u8>, base64::DecodeError> {
+        DECODE_BUFFER.with(|buffer| {
+            let mut buf = buffer.borrow_mut();
+            buf.clear();
+            
+            // Ensure capacity without reallocating if possible
+            let estimated_len = base64::decoded_len_estimate(input.len());
+            if buf.capacity() < estimated_len {
+                buf.reserve(estimated_len - buf.capacity());
+            }
+            
+            STANDARD.decode_vec(input, &mut buf)?;
+            Ok(buf.clone()) // Only clone the actual decoded data
+        })
+    }
+}
 
 /// A parsed Stellar transaction covering all envelope variants.
 #[derive(Debug)]
@@ -73,6 +101,33 @@ pub fn parse_xdr(base64_string: &str) -> Result<ParsedTransaction, XdrError> {
     Ok(parsed)
 }
 
+/// Zero-copy XDR parsing using byte slice references.
+/// This version uses a thread-local buffer pool to minimize allocations.
+pub fn parse_xdr_zero_copy(base64_bytes: &[u8]) -> Result<ParsedTransaction, XdrError> {
+    let decoded_bytes = ZeroCopyDecoder::decode_with_buffer(base64_bytes)?;
+    let envelope = TransactionEnvelope::from_xdr(&decoded_bytes, Limits::none())?;
+
+    let parsed = match envelope {
+        TransactionEnvelope::TxV0(env) => ParsedTransaction::V0(Box::new(env.tx)),
+        TransactionEnvelope::Tx(env) => ParsedTransaction::V1(Box::new(env.tx)),
+        TransactionEnvelope::TxFeeBump(env) => ParsedTransaction::FeeBump(Box::new(env.tx)),
+    };
+
+    Ok(parsed)
+}
+
+/// Parse XDR from pre-decoded bytes, avoiding base64 decoding entirely.
+pub fn parse_xdr_from_bytes(xdr_bytes: &[u8]) -> Result<ParsedTransaction, XdrError> {
+    let envelope = TransactionEnvelope::from_xdr(xdr_bytes, Limits::none())?;
+
+    let parsed = match envelope {
+        TransactionEnvelope::TxV0(env) => ParsedTransaction::V0(Box::new(env.tx)),
+        TransactionEnvelope::Tx(env) => ParsedTransaction::V1(Box::new(env.tx)),
+        TransactionEnvelope::TxFeeBump(env) => ParsedTransaction::FeeBump(Box::new(env.tx)),
+    };
+
+    Ok(parsed)
+}
 /// Emit structured `tracing` logs showing the full operation breakdown.
 ///
 /// Required per issue #41: logs must show each operation's type and index.
@@ -445,5 +500,45 @@ mod tests {
     fn test_empty_string_returns_error() {
         let result = parse_xdr("");
         assert!(result.is_err(), "empty string should return an error");
+    #[test]
+    fn test_zero_copy_parsing() {
+        let xdr = classic_v1_xdr();
+        let result = parse_xdr_zero_copy(xdr.as_bytes());
+        assert!(result.is_ok(), "zero-copy parsing should work");
+        
+        if let Ok(ParsedTransaction::V1(tx)) = result {
+            assert_eq!(tx.fee, 100);
+            assert_eq!(tx.seq_num.0, 42);
+        } else {
+            panic!("Expected V1 transaction");
+        }
+    }
+
+    #[test]
+    fn test_parse_from_bytes() {
+        let xdr = classic_v1_xdr();
+        let decoded_bytes = STANDARD.decode(&xdr).unwrap();
+        let result = parse_xdr_from_bytes(&decoded_bytes);
+        assert!(result.is_ok(), "parsing from bytes should work");
+        
+        if let Ok(ParsedTransaction::V1(tx)) = result {
+            assert_eq!(tx.fee, 100);
+            assert_eq!(tx.seq_num.0, 42);
+        } else {
+            panic!("Expected V1 transaction");
+        }
+    }
+
+    #[test]
+    fn test_zero_copy_decoder() {
+        use super::ZeroCopyDecoder;
+        
+        let test_data = "SGVsbG8gV29ybGQ="; // "Hello World" in base64
+        let result = ZeroCopyDecoder::decode_with_buffer(test_data.as_bytes());
+        assert!(result.is_ok());
+        
+        let decoded = result.unwrap();
+        assert_eq!(decoded, b"Hello World");
+    }
     }
 }

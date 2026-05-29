@@ -1,15 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* ─── Fluid Design System — CSS Variable Tokens ─────────────────────────────
- *
- * All HSL values match the authoritative palette exported from
- * tailwind.config.ts.  The @theme inline block below turns every variable into
- * a Tailwind utility class (bg-primary, text-muted-foreground, etc.) so that
- * shadcn/ui components work correctly with Tailwind CSS v4.
- *
- * Dark-mode has been removed; exclusively light theme.
- * ─────────────────────────────────────────────────────────────────────────── */
+/* --- Fluid Design System: CSS Variable Tokens ----------------------------- */
 
 :root {
   /* --- Backgrounds & surfaces --- */
@@ -52,13 +44,85 @@
   /* --- Fonts --- */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* --- Effects --- */
+  --glass-background: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.32);
 }
 
+[data-theme="light"] {
+  color-scheme: light;
+}
 
-/* ─── Tailwind v4 @theme mapping ────────────────────────────────────────────
- * Maps CSS variables → Tailwind utility classes.
- * "inline" means variables are inlined at build time for zero-runtime overhead.
- * ─────────────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: 222 47% 7%;
+  --foreground: 210 40% 96%;
+
+  --card: 222 47% 10%;
+  --card-foreground: 210 40% 96%;
+
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 96%;
+
+  --primary: 216 92% 62%;
+  --primary-foreground: 222 47% 9%;
+
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 96%;
+
+  --muted: 217 33% 15%;
+  --muted-foreground: 215 20% 74%;
+
+  --accent: 187 92% 44%;
+  --accent-foreground: 222 47% 9%;
+
+  --destructive: 0 70% 48%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217 32% 25%;
+  --input: 217 32% 25%;
+  --ring: 190 95% 55%;
+
+  --glass-background: rgba(8, 15, 30, 0.78);
+  --glass-border: rgba(100, 116, 139, 0.26);
+}
+
+[data-theme="high-contrast"] {
+  color-scheme: dark;
+  --background: 0 0% 5%;
+  --foreground: 0 0% 100%;
+
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 100%;
+
+  --primary: 55 100% 50%;
+  --primary-foreground: 0 0% 0%;
+
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 92%;
+
+  --accent: 180 100% 45%;
+  --accent-foreground: 0 0% 0%;
+
+  --destructive: 0 100% 61%;
+  --destructive-foreground: 0 0% 0%;
+
+  --border: 0 0% 100%;
+  --input: 0 0% 100%;
+  --ring: 55 100% 50%;
+
+  --glass-background: rgba(0, 0, 0, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.48);
+}
+
+/* --- Tailwind v4 @theme mapping ------------------------------------------ */
 
 @theme inline {
   /* Colors */
@@ -102,7 +166,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* ─── Base styles ─────────────────────────────────────────────────────────── */
+/* --- Base styles --------------------------------------------------------- */
 
 @layer base {
   *,
@@ -116,6 +180,10 @@
     color-scheme: light;
   }
 
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
 
   body {
     background-color: hsl(var(--background));
@@ -124,10 +192,65 @@
   }
 
   .glass {
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--glass-background);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--glass-border);
+  }
+}
+
+/* --- Compatibility layer for legacy light-only classes ------------------- */
+
+[data-theme="dark"] :is(.bg-white, .bg-gray-50, .bg-slate-50, .bg-slate-100, .bg-white\/90, .bg-slate-50\/50, .bg-slate-50\/60) {
+  background-color: hsl(var(--card)) !important;
+}
+
+[data-theme="high-contrast"] :is(.bg-white, .bg-gray-50, .bg-slate-50, .bg-slate-100, .bg-white\/90, .bg-slate-50\/50, .bg-slate-50\/60) {
+  background-color: hsl(var(--card)) !important;
+}
+
+[data-theme="dark"] :is(.border-gray-100, .border-gray-200, .border-gray-300, .border-slate-100, .border-slate-200, .border-slate-300) {
+  border-color: hsl(var(--border)) !important;
+}
+
+[data-theme="high-contrast"] :is(.border-gray-100, .border-gray-200, .border-gray-300, .border-slate-100, .border-slate-200, .border-slate-300) {
+  border-color: hsl(var(--border)) !important;
+}
+
+[data-theme="dark"] :is(.text-gray-900, .text-gray-800, .text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+  color: hsl(var(--foreground)) !important;
+}
+
+[data-theme="dark"] :is(.text-gray-700, .text-gray-600, .text-gray-500, .text-slate-600, .text-slate-500, .text-slate-400) {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+[data-theme="high-contrast"] :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700, .text-slate-600, .text-slate-500, .text-slate-400) {
+  color: hsl(var(--foreground)) !important;
+}
+
+[data-theme="dark"] :is(.hover\:bg-gray-50:hover, .hover\:bg-slate-50:hover, .hover\:bg-slate-100:hover, .hover\:bg-slate-200:hover) {
+  background-color: hsl(var(--secondary)) !important;
+}
+
+[data-theme="high-contrast"] :is(.hover\:bg-gray-50:hover, .hover\:bg-slate-50:hover, .hover\:bg-slate-100:hover, .hover\:bg-slate-200:hover) {
+  background-color: hsl(var(--secondary)) !important;
+}
+
+[data-theme="dark"] :is(.hover\:border-slate-400:hover, .hover\:border-gray-400:hover) {
+  border-color: hsl(var(--ring)) !important;
+}
+
+[data-theme="high-contrast"] :is(.hover\:border-slate-400:hover, .hover\:border-gray-400:hover) {
+  border-color: hsl(var(--ring)) !important;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
   }
 
+  .glass {
+    forced-color-adjust: auto;
+  }
 }

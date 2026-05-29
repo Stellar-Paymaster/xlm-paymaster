@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import prisma from "../utils/db";
-import { requirePermission, signAdminJwt } from "../utils/adminAuth";
-import { isValidRole, AdminRole } from "../utils/permissions";
+import { getAuthenticatedAdmin, signAdminJwt } from "../utils/adminAuth";
+import { AdminRole, isValidRole } from "../utils/permissions";
 import { getAuditActor, logAuditEvent } from "../services/auditLogger";
-import { AppError } from "../errors/AppError";
 
 const adminUserModel = (prisma as any).adminUser as {
   findMany: (args?: any) => Promise<any[]>;
@@ -13,7 +12,34 @@ const adminUserModel = (prisma as any).adminUser as {
   update: (args: any) => Promise<any>;
 };
 
-// ── POST /admin/auth/login ────────────────────────────────────────────────────
+function buildAdminAuthResponse(user: {
+  id: string;
+  email: string;
+  role: AdminRole;
+  sessionVersion?: number | null;
+}) {
+  const token = signAdminJwt({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    sessionVersion: user.sessionVersion ?? 0,
+  });
+
+  return {
+    token,
+    role: user.role,
+    email: user.email,
+  };
+}
+
+function getDbBackedAuthenticatedUser(req: Request) {
+  const auth = getAuthenticatedAdmin(req);
+  if (!auth || auth.authType !== "jwt" || auth.userId === "env-admin") {
+    return null;
+  }
+
+  return auth;
+}
 
 export async function adminLoginHandler(req: Request, res: Response) {
   const { email, password } = req.body ?? {};
@@ -23,37 +49,98 @@ export async function adminLoginHandler(req: Request, res: Response) {
   }
 
   try {
-    // 1. Try DB-based admin user
     const user = await adminUserModel.findUnique({ where: { email } });
 
     if (user && user.active) {
       const match = await bcrypt.compare(password, user.passwordHash);
       if (match) {
-        const token = signAdminJwt({ sub: user.id, email: user.email, role: user.role });
         void logAuditEvent("ADMIN_LOGIN", user.email, { source: "db" });
-        return res.json({ token, role: user.role, email: user.email });
+        return res.json(buildAdminAuthResponse(user));
       }
     }
 
-    // 2. Env-var fallback (bootstrap / single-admin deployments)
     const envEmail = process.env.ADMIN_EMAIL;
     const envHash = process.env.ADMIN_PASSWORD_HASH;
     if (envEmail && envHash && email === envEmail) {
       const match = await bcrypt.compare(password, envHash);
       if (match) {
-        const token = signAdminJwt({ sub: "env-admin", email: envEmail, role: "SUPER_ADMIN" });
+        const token = signAdminJwt({
+          sub: "env-admin",
+          email: envEmail,
+          role: "SUPER_ADMIN",
+          sessionVersion: 0,
+        });
         void logAuditEvent("ADMIN_LOGIN", envEmail, { source: "env" });
         return res.json({ token, role: "SUPER_ADMIN", email: envEmail });
       }
     }
 
     return res.status(401).json({ error: "Invalid credentials" });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
 
-// ── GET /admin/users ──────────────────────────────────────────────────────────
+export async function changeAdminPasswordHandler(req: Request, res: Response) {
+  const { currentPassword, newPassword } = req.body ?? {};
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "currentPassword and newPassword are required" });
+  }
+
+  if (typeof newPassword !== "string" || newPassword.length < 12) {
+    return res.status(400).json({ error: "newPassword must be at least 12 characters long" });
+  }
+
+  const auth = getDbBackedAuthenticatedUser(req);
+  if (!auth) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const user = await adminUserModel.findUnique({ where: { id: auth.userId } });
+    if (!user || !user.active) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const sessionVersion = user.sessionVersion ?? 0;
+    if (sessionVersion !== auth.sessionVersion) {
+      return res.status(401).json({ error: "Session is no longer valid. Please log in again." });
+    }
+
+    const currentPasswordMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!currentPasswordMatches) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const reusesExistingPassword = await bcrypt.compare(newPassword, user.passwordHash);
+    if (reusesExistingPassword) {
+      return res.status(400).json({ error: "newPassword must be different from the current password" });
+    }
+
+    const updated = await adminUserModel.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: await bcrypt.hash(newPassword, 12),
+        sessionVersion: sessionVersion + 1,
+        passwordChangedAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    void logAuditEvent("ADMIN_LOGIN", getAuditActor(req), {
+      action: "change_admin_password",
+      targetId: updated.id,
+      targetEmail: updated.email,
+      invalidatedSessionVersion: sessionVersion,
+      newSessionVersion: updated.sessionVersion ?? sessionVersion + 1,
+    });
+
+    return res.json(buildAdminAuthResponse(updated));
+  } catch {
+    return res.status(500).json({ error: "Failed to change password" });
+  }
+}
 
 export async function listAdminUsersHandler(req: Request, res: Response) {
   try {
@@ -67,14 +154,12 @@ export async function listAdminUsersHandler(req: Request, res: Response) {
         role: u.role,
         active: u.active,
         createdAt: u.createdAt,
-      }))
+      })),
     );
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Failed to list admin users" });
   }
 }
-
-// ── POST /admin/users ─────────────────────────────────────────────────────────
 
 export async function createAdminUserHandler(req: Request, res: Response) {
   const { email, password, role } = req.body ?? {};
@@ -83,7 +168,7 @@ export async function createAdminUserHandler(req: Request, res: Response) {
     return res.status(400).json({ error: "email, password, and role are required" });
   }
   if (!isValidRole(role)) {
-    return res.status(400).json({ error: `Invalid role. Must be one of: SUPER_ADMIN, ADMIN, READ_ONLY, BILLING` });
+    return res.status(400).json({ error: "Invalid role. Must be one of: SUPER_ADMIN, ADMIN, READ_ONLY, BILLING" });
   }
 
   try {
@@ -100,10 +185,11 @@ export async function createAdminUserHandler(req: Request, res: Response) {
         passwordHash,
         role,
         active: true,
+        sessionVersion: 0,
       },
     });
 
-    void logAuditEvent("ADMIN_ACTION", getAuditActor(req), {
+    void logAuditEvent("ADMIN_LOGIN", getAuditActor(req), {
       action: "create_admin_user",
       targetEmail: email,
       role,
@@ -116,31 +202,31 @@ export async function createAdminUserHandler(req: Request, res: Response) {
       active: user.active,
       createdAt: user.createdAt,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Failed to create admin user" });
   }
 }
-
-// ── PATCH /admin/users/:id/role ───────────────────────────────────────────────
 
 export async function updateAdminUserRoleHandler(req: Request, res: Response) {
   const { id } = req.params;
   const { role } = req.body ?? {};
 
   if (!role || !isValidRole(role)) {
-    return res.status(400).json({ error: `Invalid role. Must be one of: SUPER_ADMIN, ADMIN, READ_ONLY, BILLING` });
+    return res.status(400).json({ error: "Invalid role. Must be one of: SUPER_ADMIN, ADMIN, READ_ONLY, BILLING" });
   }
 
   try {
     const user = await adminUserModel.findUnique({ where: { id } });
-    if (!user) return res.status(404).json({ error: "Admin user not found" });
+    if (!user) {
+      return res.status(404).json({ error: "Admin user not found" });
+    }
 
     const updated = await adminUserModel.update({
       where: { id },
       data: { role, updatedAt: new Date() },
     });
 
-    void logAuditEvent("ADMIN_ACTION", getAuditActor(req), {
+    void logAuditEvent("ADMIN_LOGIN", getAuditActor(req), {
       action: "update_admin_role",
       targetId: id,
       targetEmail: updated.email,
@@ -154,33 +240,37 @@ export async function updateAdminUserRoleHandler(req: Request, res: Response) {
       role: updated.role,
       active: updated.active,
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Failed to update role" });
   }
 }
-
-// ── DELETE /admin/users/:id ───────────────────────────────────────────────────
 
 export async function deactivateAdminUserHandler(req: Request, res: Response) {
   const { id } = req.params;
 
   try {
     const user = await adminUserModel.findUnique({ where: { id } });
-    if (!user) return res.status(404).json({ error: "Admin user not found" });
+    if (!user) {
+      return res.status(404).json({ error: "Admin user not found" });
+    }
 
     const updated = await adminUserModel.update({
       where: { id },
-      data: { active: false, updatedAt: new Date() },
+      data: {
+        active: false,
+        sessionVersion: (user.sessionVersion ?? 0) + 1,
+        updatedAt: new Date(),
+      },
     });
 
-    void logAuditEvent("ADMIN_ACTION", getAuditActor(req), {
+    void logAuditEvent("ADMIN_LOGIN", getAuditActor(req), {
       action: "deactivate_admin_user",
       targetId: id,
       targetEmail: updated.email,
     });
 
     return res.json({ id: updated.id, email: updated.email, active: false });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Failed to deactivate admin user" });
   }
 }
