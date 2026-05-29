@@ -1,7 +1,8 @@
-import Redis from "ioredis";
+import { createRedisClient } from "./redisClientFactory";
 
-// Configure Redis connection via REDIS_URL env var, fallback to localhost
-const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379");
+// Build the connection via the shared factory so the production TLS policy
+// (rediss:// + CA verification) is enforced in one place.
+const redis = createRedisClient();
 
 redis.on("error", (err) => {
   // Keep errors visible in server logs. Do not crash the process here.

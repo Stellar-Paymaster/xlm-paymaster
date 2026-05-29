@@ -1,10 +1,10 @@
 import { Job, Queue, Worker } from "bullmq";
-import Redis from "ioredis";
 import prisma from "../utils/db";
 import { createLogger, serializeError } from "../utils/logger";
+import { createRedisClient } from "../utils/redisClientFactory";
 
 const logger = createLogger({ component: "audit_log" });
-const connection = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+const connection = createRedisClient();
 
 // ---------------------------------------------------------------------------
 // Queue
