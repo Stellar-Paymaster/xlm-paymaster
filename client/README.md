@@ -71,6 +71,23 @@ Soroban-specific options:
 - `fee`: optional base fee before Soroban resource fees are added during preparation
 - `sourceAccount`: optional preloaded source account if you want to avoid an extra RPC call
 
+## Optional gRPC transport
+
+For latency-sensitive deployments, the client can speak gRPC-web instead of JSON over HTTP.
+
+```ts
+const client = new FluidClient({
+  serverUrl: "https://grpc.fluid.example",
+  networkPassphrase: StellarSdk.Networks.TESTNET,
+  transport: "grpc-web",
+  grpc: {
+    serviceName: "fluid.v1.FeeBumpService",
+  },
+});
+```
+
+The full protocol details and configuration notes live in [docs/grpc-transport.md](docs/grpc-transport.md).
+
 To print a successfully generated SAC transfer XDR on testnet:
 
 ```bash

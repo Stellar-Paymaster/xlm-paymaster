@@ -24,6 +24,36 @@ export {
   getTelemetryConfig,
 } from "./telemetry";
 export type { TelemetryConfig, TelemetryData } from "./telemetry";
+export {
+  DEFAULT_GRPC_METHOD_NAMES,
+  DEFAULT_GRPC_SERVICE_NAME,
+  buildGrpcWebPath,
+  decodeFeeBumpBatchResponse,
+  decodeFeeBumpBatchRequest,
+  decodeFeeBumpRequest,
+  decodeFeeBumpResponse,
+  decodeGrpcWebFrames,
+  encodeFeeBumpBatchRequest,
+  encodeFeeBumpBatchResponse,
+  encodeFeeBumpRequest,
+  encodeFeeBumpResponse,
+  encodeGrpcWebFrame,
+  encodeGrpcWebTrailers,
+  mapGrpcStatusToHttpStatus,
+  performGrpcWebUnary,
+  GrpcWebTransportError,
+} from "./grpcTransport";
+export type {
+  GrpcFeeBumpBatchRequest,
+  GrpcFeeBumpBatchResponse,
+  GrpcFeeBumpRequest,
+  GrpcFeeBumpResponse,
+  GrpcTransportConfig,
+  GrpcTransportMethodNames,
+  GrpcTransportMode,
+  GrpcWebFrameDecodeResult,
+  GrpcWebUnaryOptions,
+} from "./grpcTransport";
 
 export { FluidQueue } from "./queue";
 export type { QueuedTransaction, FluidQueueCallbacks } from "./queue";
