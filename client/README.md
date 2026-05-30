@@ -71,6 +71,23 @@ Soroban-specific options:
 - `fee`: optional base fee before Soroban resource fees are added during preparation
 - `sourceAccount`: optional preloaded source account if you want to avoid an extra RPC call
 
+## Optional gRPC transport
+
+For latency-sensitive deployments, the client can speak gRPC-web instead of JSON over HTTP.
+
+```ts
+const client = new FluidClient({
+  serverUrl: "https://grpc.fluid.example",
+  networkPassphrase: StellarSdk.Networks.TESTNET,
+  transport: "grpc-web",
+  grpc: {
+    serviceName: "fluid.v1.FeeBumpService",
+  },
+});
+```
+
+The full protocol details and configuration notes live in [docs/grpc-transport.md](docs/grpc-transport.md).
+
 To print a successfully generated SAC transfer XDR on testnet:
 
 ```bash
@@ -89,115 +106,49 @@ new FluidClient(config: {
   networkPassphrase: string;
   horizonUrl?: string;
   sorobanRpcUrl?: string;
-  enableTelemetry?: boolean; // Enable anonymous telemetry (default: false)
-  telemetryEndpoint?: string; // Custom telemetry endpoint (default: 'https://telemetry.fluid.dev/ping')
+  enableTelemetry?: boolean;   // Enable anonymous telemetry (default: false)
+  telemetryEndpoint?: string;  // Custom telemetry endpoint
+  enableDiagnostics?: boolean; // Enable bug reporting (default: false)
+  diagnosticsEndpoint?: string;// Custom diagnostics endpoint
 })
 ```
 
 #### Methods
 
-- `requestFeeBump(transactionOrXdr: string | { toXDR(): string }, submit?: boolean)` - Request a fee-bump using either signed XDR or a transaction object
-- `submitFeeBumpTransaction(feeBumpXdr: string)` - Submit a fee-bump transaction to Horizon
-- `buildAndRequestFeeBump(transaction: Transaction, submit?: boolean)` - Build, sign, and request fee-bump
-- `buildSACTransferTx(options)` - Build and prepare a Stellar Asset Contract transfer transaction ready for signing and fee bumping
+- `requestFeeBump(transactionOrXdr, submit?)` - Request a fee-bump
+- `submitFeeBumpTransaction(feeBumpXdr)` - Submit a fee-bump to Horizon
+- `buildAndRequestFeeBump(transaction, submit?)` - Build, sign, and request fee-bump
+- `reportBug(message, context?)` - Report a bug or diagnostic info (requires `enableDiagnostics: true`)
 
-### `useFeeBump`
+### `FluidMockClient` (New!)
 
-```typescript
-const { requestFeeBump, isLoading, error, result } = useFeeBump(client);
-```
-
-- `requestFeeBump(transactionOrXdr, submit?)` accepts either a signed XDR string or an object with `toXDR()`
-- `isLoading` is `true` while the request is in flight
-- `error` contains the last thrown error, if any
-- `result` contains the latest successful fee-bump response
-
-## Universal Wallet Signing (WalletConnect)
-
-The client can sign fee-bump payloads through any Stellar wallet behind a single
-`WalletSigner` interface — WalletConnect sessions, SEP-43 browser wallets
-(Freighter, Stellar Wallets Kit, …), or an in-process keypair.
+For unit testing without network calls:
 
 ```typescript
-import {
-  FluidClient,
-  createWalletConnectSigner,
-  buildStellarRequiredNamespaces,
-  STELLAR_CHAINS,
-} from "fluid-client";
+import { FluidMockClient } from "fluid-client";
 
-// 1. Open a WalletConnect session with the standard Stellar namespaces.
-const { uri, approval } = await signClient.connect({
-  requiredNamespaces: buildStellarRequiredNamespaces({
-    chains: [STELLAR_CHAINS.TESTNET],
-  }),
-});
-const session = await approval();
+const mockClient = new FluidMockClient();
+mockClient.setMockResponse("requestFeeBump", { status: "success", hash: "mock-hash" });
 
-// 2. Build a universal signer from the connected session.
-const signer = createWalletConnectSigner(signClient, session, {
-  networkPassphrase: StellarSdk.Networks.TESTNET,
-});
-
-// 3. Sign + fee-bump in one call (works for ANY WalletSigner).
-const result = await client.buildAndRequestFeeBumpWithWallet(signer, unsignedTx);
+const result = await mockClient.requestFeeBump(tx);
+console.log(result.hash); // "mock-hash"
 ```
 
-Client methods:
+## Anonymous Usage Telemetry & Diagnostics
 
-- `signWithWallet(signer, transaction, options?)` - sign with any `WalletSigner`,
-  defaulting the network passphrase to the client configuration
-- `buildAndRequestFeeBumpWithWallet(signer, transaction, submit?, options?)` -
-  sign through a wallet and request a fee bump for the signed envelope
+The Fluid SDK includes optional, anonymous telemetry and diagnostics to help improve the library.
 
-Run the Node demo:
-
-```bash
-npm run demo:wallet-connect
-```
-
-See [WALLET_CONNECT.md](WALLET_CONNECT.md) for the full guide, the WalletConnect
-namespace reference, and the browser/Vue examples.
-
-## Anonymous Usage Telemetry
-
-The Fluid SDK includes an optional, anonymous telemetry system to help maintainers understand SDK usage patterns.
-
-**Telemetry is disabled by default (opt-in).**
+**Both features are disabled by default (opt-in).**
 
 ### What is Collected?
 
-When enabled, the SDK sends a single daily ping with:
+- **Telemetry**: SDK version, domain, and timestamp (once per day).
+- **Diagnostics**: Bug reports, error messages, and context you provide.
 
-- `sdk_version`: The installed package version
-- `domain`: `window.location.hostname` (no path, no query params)
-- `timestamp`: UTC date (day-level precision only)
-
-**No personal data, transaction data, or wallet addresses are collected.**
-
-### How to Enable Telemetry
-
-```typescript
-const client = new FluidClient({
-  serverUrl: "http://localhost:3000",
-  networkPassphrase: StellarSdk.Networks.TESTNET,
-  enableTelemetry: true, // Enable anonymous telemetry
-});
-```
-
-### How to Disable Telemetry
-
-Telemetry is disabled by default. To explicitly disable it:
-
-```typescript
-const client = new FluidClient({
-  serverUrl: "http://localhost:3000",
-  networkPassphrase: StellarSdk.Networks.TESTNET,
-  enableTelemetry: false, // Explicitly disable (this is the default)
-});
-```
+**No personal data or wallet addresses are collected without your explicit context.**
 
 For more details, see [TELEMETRY.md](TELEMETRY.md).
+
 
 ## Development
 
@@ -205,4 +156,22 @@ For more details, see [TELEMETRY.md](TELEMETRY.md).
 npm run build
 npm run dev
 npm run demo:sac-transfer-xdr
+```
+
+## Local Sandbox Docker Compose
+
+Use one command to spin up a local sandbox with Fluid server, PostgreSQL, and a mock Horizon endpoint:
+
+```bash
+npm run sandbox:up
+```
+
+The compose file is generated at `src/sandbox/docker-compose.local.yml`.
+
+Useful commands:
+
+```bash
+npm run sandbox:ps
+npm run sandbox:logs
+npm run sandbox:down
 ```

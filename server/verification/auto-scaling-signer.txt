@@ -1,0 +1,33 @@
+AUTO-SCALING LOGIC FOR SIGNER VERIFICATION REPORT
+=================================================
+
+Date: 2026-05-15
+Task: #467 [Hardening & Reliability] Auto-scaling Logic for Signer
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Implemented `SignerAutoscaler` class in `server/src/services/signerAutoscaler.ts` with heuristic queue depth scaling.
+2. Added differentiated cooldown windows to mitigate rapid scale-up/scale-down thrashing.
+3. Integrated an EventEmitter pattern for cleanly bridging mathematical state evaluation with external orchestration APIs.
+4. Created exhaustive unit test coverage in `server/src/services/signerAutoscaler.test.ts`.
+5. Created detailed architecture documentation under `server/docs/auto-scaling-signer.md`.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/services/signerAutoscaler.test.ts
+
+Result:
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should initialize with minReplicas
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should throw error on invalid configuration bounds
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should calculate scaling up when queue depth exceeds target
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should cap scale up at maxReplicas
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should respect scale up cooldown period
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should calculate scaling down when queue depth falls
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should cap scale down at minReplicas
+  ✓ src/services/signerAutoscaler.test.ts > SignerAutoscaler > should respect scale down cooldown period
+
+  Test Files  1 passed (1)
+       Tests  8 passed (8)

@@ -1,0 +1,26 @@
+{{- if .Values.serviceMonitor.enabled }}
+# ServiceMonitor for the Prometheus Operator.
+# Instructs Prometheus to scrape metrics from the nginx ingress controller,
+# which exposes nginx_ingress_controller_requests. The Prometheus Adapter then
+# converts that into the http_requests_per_second custom metric consumed by the HPA.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "fluid.fullname" . }}-ingress-metrics
+  namespace: {{ .Values.serviceMonitor.namespace }}
+  labels:
+    {{- include "fluid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node-api
+spec:
+  namespaceSelector:
+    matchNames:
+      - ingress-nginx
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+      path: /metrics
+{{- end }}

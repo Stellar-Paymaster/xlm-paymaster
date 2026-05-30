@@ -1,0 +1,12 @@
+# GitHub Sponsors and funding configuration for Fluid (#259).
+# Displays the "Sponsor" button on the repository page and links to accepted
+# funding platforms.
+
+github: [Stellar-Fluid]
+
+# Open Collective (uncomment once the collective is created)
+# open_collective: stellar-fluid
+
+# Custom funding URLs (e.g. project donation page or Stellar wallet)
+custom:
+  - "https://stellar-fluid.dev/sponsor"

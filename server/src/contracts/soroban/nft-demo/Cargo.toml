@@ -1,0 +1,22 @@
+[package]
+name = "fluid-nft-demo"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+soroban-sdk = { version = "=20.5.0", features = ["alloc"] }
+
+[dev-dependencies]
+soroban-sdk = { version = "=20.5.0", features = ["alloc"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+
+[profile.release-with-logs]
+inherits = "release"
+debug = true

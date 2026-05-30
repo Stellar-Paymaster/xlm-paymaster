@@ -1,0 +1,148 @@
+version: "3.9"
+
+# Scale test compose file.
+#
+# Spins up 3 stateless node-api replicas behind an nginx load balancer.
+# All rate-limit and API-key state is stored in Redis so any replica can
+# serve any request correctly.
+#
+# Usage:
+#   docker compose -f docker-compose.scale.yml up --scale node-api=3
+#
+# The node-api is then reachable through nginx on port 3001.
+# Individual replicas are NOT exposed directly; nginx is the single entry point.
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fluid-postgres-scale
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-fluid}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
+      POSTGRES_DB: "${POSTGRES_DB:-fluid_db}"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fluid} -d ${POSTGRES_DB:-fluid_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fluid-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: fluid-redis-scale
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fluid-network
+
+  stellar-quickstart:
+    image: stellar/quickstart:latest
+    container_name: fluid-stellar-quickstart-scale
+    command: ["--standalone", "--enable-soroban-rpc"]
+    environment:
+      NETWORK: standalone
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - fluid-network
+
+  rust-engine:
+    build:
+      context: ./fluid-server
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USER:-fluid}:${POSTGRES_PASSWORD:-fluid_pass}@postgres:5432/${POSTGRES_DB:-fluid_db}"
+      FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
+      STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
+      STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
+      PORT: "3000"
+      FLUID_ALLOWED_ORIGINS: "*"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fluid-network
+
+  # PgBouncer is especially important in the scale stack — each node-api replica
+  # would otherwise open its own Postgres connection pool, quickly exhausting
+  # Postgres max_connections. PgBouncer multiplexes all replica connections
+  # into a single shared pool of 20 server connections.
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    environment:
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_USER: "${POSTGRES_USER:-fluid}"
+      DB_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
+      DB_NAME: "${POSTGRES_DB:-fluid_db}"
+      POOL_MODE: "transaction"
+      MAX_CLIENT_CONN: "1000"
+      DEFAULT_POOL_SIZE: "20"
+      MIN_POOL_SIZE: "2"
+      AUTH_TYPE: "plain"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432 -U ${POSTGRES_USER:-fluid} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fluid-network
+
+  node-api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    # No container_name — Docker Compose assigns unique names when scaling.
+    # No fixed host port — nginx is the entry point.
+    environment:
+      PORT: "3001"
+      REDIS_URL: "redis://redis:6379"
+      # All replicas share the same PgBouncer pool — no per-replica connection bloat.
+      DATABASE_URL: "postgres://${POSTGRES_USER:-fluid}:${POSTGRES_PASSWORD:-fluid_pass}@pgbouncer:6432/${POSTGRES_DB:-fluid_db}?pgbouncer=true"
+      FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
+      STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
+      STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
+      FLUID_ALLOWED_ORIGINS: "*"
+      SANDBOX_HORIZON_URL: "http://stellar-quickstart:8000"
+      # Disable in-memory fallbacks so all state is in Redis.
+      # This is mandatory when running more than one replica.
+      STATELESS_MODE: "true"
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      stellar-quickstart:
+        condition: service_healthy
+    networks:
+      - fluid-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: fluid-nginx-lb
+    ports:
+      - "3001:80"
+    volumes:
+      - ./infra/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - node-api
+    networks:
+      - fluid-network
+    
+
+networks:
+  fluid-network:
+    driver: bridge
+

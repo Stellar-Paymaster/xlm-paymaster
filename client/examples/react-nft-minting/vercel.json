@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "env": {
+    "VITE_SOROBAN_RPC_URL": "@vite_soroban_rpc_url",
+    "VITE_NFT_CONTRACT_ID": "@vite_nft_contract_id",
+    "VITE_FLUID_SERVER_URL": "@vite_fluid_server_url",
+    "VITE_NETWORK_PASSPHRASE": "@vite_network_passphrase",
+    "VITE_STELLAR_EXPERT_URL": "@vite_stellar_expert_url",
+    "VITE_HORIZON_URL": "@vite_horizon_url"
+  }
+}

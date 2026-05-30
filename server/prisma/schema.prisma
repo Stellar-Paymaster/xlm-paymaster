@@ -26,6 +26,10 @@ model Tenant {
   id                 String            @id @default(uuid())
   name               String
   contactEmail       String?
+    parentId           String?
+
+  parent             Tenant?           @relation("SubTenants", fields: [parentId], references: [id])
+  children           Tenant[]          @relation("SubTenants")
   region             String            @default("US") // Data residency region: "US" | "EU"
   subscriptionTierId String
   subscriptionTier   SubscriptionTier  @relation(fields: [subscriptionTierId], references: [id])
@@ -243,6 +247,9 @@ model Transaction {
   @@index([txHash])
   @@index([category])
   @@index([chain])
+  @@index([tenantId, status, createdAt])
+  @@index([status, createdAt])
+  @@index([chain, createdAt])
 }
 
 model CrossChainSettlement {
@@ -338,6 +345,10 @@ model AuditLog {
   @@index([action])
   @@index([timestamp])
   @@index([createdAt])
+  @@index([actor, timestamp])
+  @@index([action, timestamp])
+  @@index([eventType, timestamp])
+  @@index([target, timestamp])
 }
 
 // Spend baseline for anomaly detection (7-day rolling average per tenant)
@@ -531,6 +542,8 @@ model AdminUser {
   passwordHash String
   role         String   @default("READ_ONLY") // SUPER_ADMIN | ADMIN | READ_ONLY | BILLING
   active       Boolean  @default(true)
+  sessionVersion Int    @default(0)
+  passwordChangedAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

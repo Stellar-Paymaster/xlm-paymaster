@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fluid.fullname" . }}-node-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node-api
+spec:
+  replicas: {{ .Values.nodeApi.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "fluid.selectorLabels" (dict "root" . "component" "node-api") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fluid.selectorLabels" (dict "root" . "component" "node-api") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "fluid.serviceAccountName" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: node-api
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.nodeApi.image.repository }}:{{ .Values.nodeApi.image.tag }}"
+          imagePullPolicy: {{ .Values.nodeApi.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.nodeApi.port }}
+              protocol: TCP
+          env:
+            - name: PORT
+              value: {{ .Values.nodeApi.port | quote }}
+            - name: STATELESS_MODE
+              value: {{ .Values.nodeApi.statelessMode | quote }}
+            - name: REDIS_URL
+              value: "redis://{{ include "fluid.fullname" . }}-redis:{{ .Values.redis.port }}"
+            - name: DATABASE_URL
+              value: "postgres://{{ .Values.postgres.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "fluid.fullname" . }}-postgres:{{ .Values.postgres.port }}/{{ .Values.postgres.auth.database }}"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fluid.postgresSecretName" . }}
+                  key: postgres-password
+            - name: FLUID_FEE_PAYER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fluid.secretName" . }}
+                  key: FLUID_FEE_PAYER_SECRET
+            - name: DATABASE_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fluid.secretName" . }}
+                  key: DATABASE_ENCRYPTION_KEY
+            - name: FLUID_GRPC_ENGINE_ADDRESS
+              value: "{{ include "fluid.fullname" . }}-rust-engine:50051"
+            {{- with .Values.nodeApi.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.nodeApi.resources | nindent 12 }}

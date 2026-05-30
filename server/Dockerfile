@@ -24,7 +24,7 @@ FROM node:20-bookworm-slim
 WORKDIR /app
 
 # Install runtime dependencies (OpenSSL used by Prisma)
-RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
 # Copy built assets and production dependencies
 COPY --from=builder /app/dist ./dist

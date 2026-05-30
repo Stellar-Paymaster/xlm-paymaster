@@ -1,14 +1,16 @@
 use std::fmt;
 use std::str::FromStr;
+use std::sync::{Mutex, OnceLock};
 mod blocklist;
 mod heuristics;
+pub mod archive;
 
 use blocklist::Blocklist;
 use heuristics::RequestTracker;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-static mut BLOCKLIST: Option<Blocklist> = None;
-static mut TRACKER: Option<RequestTracker> = None;
+static BLOCKLIST: OnceLock<Mutex<Blocklist>> = OnceLock::new();
+static TRACKER: OnceLock<Mutex<RequestTracker>> = OnceLock::new();
 
 fn now() -> u64 {
     #[cfg(target_arch = "wasm32")]
@@ -45,8 +47,38 @@ pub mod config;
 pub mod error;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod grpc;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod logging;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod rate_limiter;
 
 const MAX_SIGNATURES: usize = 20;
+
+// #695 – WASM Signing Out-Of-Memory Protections
+// We impose a hard ceiling on the XDR payload size that the WASM bundle will
+// process.  Excessively large XDR strings are the primary vector for
+// allocator exhaustion inside a constrained WebAssembly heap.  The limit is
+// set conservatively at 64 KiB – well above any realistic Stellar transaction
+// envelope – and can be overridden at compile-time via the
+// `FLUID_WASM_MAX_XDR_BYTES` env var (only honoured during `cargo build`,
+// not at runtime, since WASM has no env access).
+const MAX_XDR_BYTES: usize = 64 * 1024; // 64 KiB
+
+/// Validates that an XDR string is within the safe byte-size limit before any
+/// heap-intensive decoding is attempted.  Returns a [`SigningError`] when the
+/// limit would be exceeded so callers can surface it as a clean JS exception
+/// rather than an unrecoverable allocator OOM trap.
+fn check_xdr_size(xdr: &str) -> Result<(), SigningError> {
+    let byte_len = xdr.len();
+    if byte_len > MAX_XDR_BYTES {
+        return Err(SigningError::InvalidEnvelope(format!(
+            "XDR payload is {byte_len} bytes, which exceeds the maximum allowed \
+             size of {MAX_XDR_BYTES} bytes. This limit prevents out-of-memory \
+             conditions in the WASM signing bundle."
+        )));
+    }
+    Ok(())
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SigningResult {
@@ -144,6 +176,8 @@ pub fn sign_transaction_xdr(
     secret_key: &str,
     network_passphrase: &str,
 ) -> Result<WasmSigningResult, JsValue> {
+    // #695 – OOM protection: reject oversized payloads before heap allocation.
+    check_xdr_size(unsigned_xdr).map_err(|err| JsValue::from_str(&err.to_string()))?;
     sign_transaction_xdr_internal(unsigned_xdr, secret_key, network_passphrase)
         .map(Into::into)
         .map_err(|err| JsValue::from_str(&err.to_string()))
@@ -173,48 +207,52 @@ pub fn sign_transaction_xdr_internal(
     secret_key: &str,
     network_passphrase: &str,
 ) -> Result<SigningResult, SigningError> {
+    // #695 – OOM protection: enforce size ceiling before any decoding.
+    check_xdr_size(unsigned_xdr)?;
     let signer = signer_context(secret_key)?;
 
+    let public_key = signer.public_key.clone();
+    let blocklist = BLOCKLIST.get_or_init(|| Mutex::new(Blocklist::new()));
+    let tracker = TRACKER.get_or_init(|| Mutex::new(RequestTracker::new()));
 
-//  
-let public_key = signer.public_key.clone();
-
-unsafe {
-    if BLOCKLIST.is_none() {
-        BLOCKLIST = Some(Blocklist::new());
-    }
-    if TRACKER.is_none() {
-        TRACKER = Some(RequestTracker::new());
-    }
-
-    let blocklist = BLOCKLIST.as_mut().unwrap();
-    let tracker = TRACKER.as_mut().unwrap();
-
-    if blocklist.is_blocked(&public_key, now()) {
-        return Err("Account is blocked".into());
+    {
+        let blocklist_guard = blocklist
+            .lock()
+            .map_err(|_| SigningError::SuspiciousActivity("blocklist lock poisoned".to_string()))?;
+        if blocklist_guard.is_blocked(&public_key, now()) {
+            return Err("Account is blocked".into());
+        }
     }
 
-    if tracker.is_suspicious(&public_key, now()) {
-        blocklist.add(
-    public_key.clone(),
-    "Suspicious activity detected".to_string(),
-    now(),
-);
+    let suspicious = {
+        let mut tracker_guard = tracker
+            .lock()
+            .map_err(|_| SigningError::SuspiciousActivity("tracker lock poisoned".to_string()))?;
+        tracker_guard.is_suspicious(&public_key, now())
+    };
+
+    if suspicious {
+        let mut blocklist_guard = blocklist
+            .lock()
+            .map_err(|_| SigningError::SuspiciousActivity("blocklist lock poisoned".to_string()))?;
+        blocklist_guard.add(
+            public_key.clone(),
+            "Suspicious activity detected".to_string(),
+            now(),
+        );
         return Err("Account flagged and blocked".into());
     }
-}
-//  END BLOCK
 
-let mut envelope = parse_transaction_envelope(unsigned_xdr)?;
-let tx_hash = transaction_hash(&envelope, network_passphrase)?;
-let signed_envelope = append_signature(&mut envelope, &signer, &tx_hash)?;
+    let mut envelope = parse_transaction_envelope(unsigned_xdr)?;
+    let tx_hash = transaction_hash(&envelope, network_passphrase)?;
+    let signed_envelope = append_signature(&mut envelope, &signer, &tx_hash)?;
 
-Ok(SigningResult {
-    signed_xdr: signed_envelope,
-    signer_public_key: signer.public_key,
-    transaction_hash_hex: hex::encode(tx_hash),
-    signature_count: envelope_signature_count(&envelope),
-})
+    Ok(SigningResult {
+        signed_xdr: signed_envelope,
+        signer_public_key: signer.public_key,
+        transaction_hash_hex: hex::encode(tx_hash),
+        signature_count: envelope_signature_count(&envelope),
+    })
 }
 
 #[derive(Debug)]
@@ -572,5 +610,34 @@ mod tests {
         };
         let updated = push_signature(&signatures, decorated).unwrap();
         assert_eq!(updated.len(), 1);
+    }
+
+    // #695 – WASM OOM protection tests
+    #[test]
+    fn check_xdr_size_accepts_valid_payload() {
+        // Fixture XDR is well under 64 KiB
+        assert!(check_xdr_size(UNSIGNED_XDR).is_ok());
+    }
+
+    #[test]
+    fn check_xdr_size_rejects_oversized_payload() {
+        let huge = "A".repeat(MAX_XDR_BYTES + 1);
+        let err = check_xdr_size(&huge).unwrap_err();
+        let msg = err.to_string();
+        assert!(msg.contains("exceeds the maximum allowed size"), "msg: {msg}");
+    }
+
+    #[test]
+    fn check_xdr_size_accepts_exact_limit() {
+        let at_limit = "A".repeat(MAX_XDR_BYTES);
+        assert!(check_xdr_size(&at_limit).is_ok());
+    }
+
+    #[test]
+    fn sign_transaction_xdr_internal_rejects_oversized_xdr() {
+        let huge = "A".repeat(MAX_XDR_BYTES + 1);
+        let err = sign_transaction_xdr_internal(&huge, TEST_SECRET_KEY, TEST_NETWORK_PASSPHRASE)
+            .unwrap_err();
+        assert!(matches!(err, SigningError::InvalidEnvelope(_)));
     }
 }

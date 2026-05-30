@@ -15,6 +15,8 @@ function createSlackNotifierMock(): SlackNotifierLike {
     notifyLowBalance: vi.fn().mockResolvedValue(true),
     notifyServerError: vi.fn().mockResolvedValue(true),
     notifyServerLifecycle: vi.fn().mockResolvedValue(true),
+    notifyBridgeStall: vi.fn().mockResolvedValue(true),
+    notifyTreasuryRebalanceFailure: vi.fn().mockResolvedValue(true),
   };
 }
 
@@ -155,6 +157,33 @@ describe("AlertService", () => {
       "Dashboard: https://dashboard.fluid.test/admin/dashboard",
     );
     expect(body.html).toContain("Open operator dashboard");
+  });
+
+  it("sends treasury rebalancing failure alerts through Slack", async () => {
+    const notifier = createSlackNotifierMock();
+    const service = new AlertService(
+      {
+        checkIntervalMs: 60_000,
+        cooldownMs: 3_600_000,
+      },
+      notifier,
+    );
+
+    const sent = await service.sendTreasuryRebalanceFailureAlert({
+      accountPublicKey: "GHOTWALLET",
+      balanceXlm: 2,
+      detail: "EVM treasury surplus is below the configured top-up threshold.",
+      failedAt: new Date("2026-04-23T12:00:00.000Z"),
+      thresholdXlm: 50,
+    });
+
+    expect(sent).toBe(true);
+    expect(notifier.notifyTreasuryRebalanceFailure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accountPublicKey: "GHOTWALLET",
+        thresholdXlm: 50,
+      }),
+    );
   });
 });
 

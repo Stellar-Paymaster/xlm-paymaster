@@ -1,0 +1,88 @@
+version: "0.1.0"
+title: Kill Rust engine mid-request
+description: >
+  Terminates the Rust gRPC signing engine while the Node API has in-flight
+  signing requests.  Verifies that the Node API returns a 503 with a
+  structured error body instead of hanging or crashing, and that subsequent
+  requests recover once the engine is restarted.
+
+tags:
+  - component:rust-engine
+  - phase:Phase-14-Performance
+  - severity:high
+
+steady-state-hypothesis:
+  title: API is reachable and returns 200 for health
+  probes:
+    - name: health-check-ok
+      type: http
+      url: "${API_URL:-http://localhost:3001}/health"
+      method: GET
+      expected_status: 200
+      timeout: 5
+
+method:
+  - type: action
+    name: send-concurrent-fee-bump-requests
+    description: Issue 5 concurrent fee-bump requests to ensure in-flight load
+    provider:
+      type: process
+      path: node
+      arguments:
+        - chaos/scripts/send-fee-bump-requests.mjs
+        - "5"
+    background: true
+
+  - type: action
+    name: kill-rust-engine
+    description: Send SIGKILL to the fluid-server process
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "pkill -9 -f 'fluid-server' || true"
+
+  - type: probe
+    name: api-returns-503-or-500-not-hang
+    description: >
+      The Node API must fail fast (< 2 s) instead of hanging when the engine
+      is unreachable.
+    provider:
+      type: process
+      path: node
+      arguments:
+        - chaos/scripts/assert-fast-failure.mjs
+        - "${API_URL:-http://localhost:3001}"
+        - "2000"
+
+  - type: action
+    name: restart-rust-engine
+    description: Restart the fluid-server binary
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "cargo run --manifest-path fluid-server/Cargo.toml &"
+
+  - type: action
+    name: wait-for-engine-recovery
+    description: Allow 5 s for the gRPC server to re-bind its port
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "sleep 5"
+
+rollbacks:
+  - type: action
+    name: ensure-engine-running
+    description: Best-effort restart of the engine if it is still down
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "pgrep -f 'fluid-server' || (cargo run --manifest-path fluid-server/Cargo.toml &)"

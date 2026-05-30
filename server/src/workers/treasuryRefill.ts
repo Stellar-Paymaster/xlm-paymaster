@@ -5,6 +5,7 @@ import {
   loadTreasurySwapConfig,
 } from "../services/treasurySwap";
 import { createLogger, serializeError } from "../utils/logger";
+import { BaseWorker } from "./baseWorker";
 
 const logger = createLogger({ component: "treasury_refill" });
 
@@ -13,7 +14,7 @@ const CHECK_INTERVAL_MS = parseInt(
   10
 );
 
-export class TreasuryRefillWorker {
+export class TreasuryRefillWorker extends BaseWorker {
   private intervalHandle: NodeJS.Timeout | null = null;
   private readonly swapService: TreasurySwapService;
 
@@ -21,11 +22,12 @@ export class TreasuryRefillWorker {
     private readonly config: Config,
     private readonly swapConfig: TreasurySwapConfig
   ) {
+    super();
     this.swapService = new TreasurySwapService(swapConfig);
   }
 
   start(): void {
-    logger.info(
+    this.logger.info(
       {
         check_interval_ms: CHECK_INTERVAL_MS,
         swap_threshold: this.swapConfig.swapThreshold,
@@ -35,18 +37,19 @@ export class TreasuryRefillWorker {
       "Starting treasury refill worker"
     );
 
-    void this.checkAndRefill();
+    void this.runCycle(() => this.checkAndRefill());
     this.intervalHandle = setInterval(() => {
-      void this.checkAndRefill();
+      void this.runCycle(() => this.checkAndRefill());
     }, CHECK_INTERVAL_MS);
   }
 
-  stop(): void {
-    if (!this.intervalHandle) return;
-    clearInterval(this.intervalHandle);
-    this.intervalHandle = null;
-    logger.info("Stopped treasury refill worker");
+  protected clearScheduledTasks(): void {
+    if (this.intervalHandle) {
+      clearInterval(this.intervalHandle);
+      this.intervalHandle = null;
+    }
   }
+
 
   async checkAndRefill(): Promise<void> {
     try {

@@ -1,0 +1,4 @@
+/* App-specific styles (additional to index.css) */
+.form-group + .form-group {
+  margin-top: 20px;
+}

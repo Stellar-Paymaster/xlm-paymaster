@@ -1,0 +1,16 @@
+apiVersion: v2
+name: fluid
+description: Fluid - Stellar Fee Sponsorship Service. Deploys node-api, rust-engine, PostgreSQL, and Redis.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://github.com/Stellar-Fluid/fluid
+keywords:
+  - stellar
+  - fee-sponsorship
+  - blockchain
+  - gasless
+maintainers:
+  - name: Stellar-Fluid
+    url: https://github.com/Stellar-Fluid
+dependencies: []

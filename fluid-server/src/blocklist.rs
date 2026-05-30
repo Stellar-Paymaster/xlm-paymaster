@@ -33,9 +33,20 @@ impl Blocklist {
 
     pub fn is_blocked(&self, key: &str, now: u64) -> bool {
         if let Some(entry) = self.entries.get(key) {
+            let age_seconds = now.saturating_sub(entry.created_at);
             if let Some(expiry) = entry.expiry {
+                if now >= expiry {
+                    println!(
+                        "[BLOCKLIST] Expired block for {} (reason: {}, age={}s)",
+                        key, entry.reason, age_seconds
+                    );
+                }
                 return now < expiry;
             }
+            println!(
+                "[BLOCKLIST] Active permanent block for {} (reason: {}, age={}s)",
+                key, entry.reason, age_seconds
+            );
             return true;
         }
         false

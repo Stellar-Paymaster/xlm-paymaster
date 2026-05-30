@@ -1,0 +1,30 @@
+Fluid has been deployed successfully!
+
+Node API endpoint:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+  kubectl port-forward svc/{{ include "fluid.fullname" . }}-node-api 3001:3001
+  then access http://localhost:3001
+{{- end }}
+
+To check the status of all pods:
+  kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+
+To view node-api logs:
+  kubectl logs -l app.kubernetes.io/component=node-api -f
+
+{{- if .Values.hpa.enabled }}
+
+HPA is enabled. The node-api will scale between {{ .Values.hpa.minReplicas }} and {{ .Values.hpa.maxReplicas }} replicas
+based on CPU utilisation (target {{ .Values.hpa.cpuTargetUtilizationPercent }}%) and RPS per pod (target {{ .Values.hpa.rpsTargetPerPod }}).
+
+To watch the autoscaler:
+  kubectl get hpa {{ include "fluid.fullname" . }}-node-api -w
+
+For custom RPS metrics to work, install the Prometheus Adapter with:
+  helm install prometheus-adapter prometheus-community/prometheus-adapter \
+    -f helm/fluid/prometheus-adapter-values.yaml
+{{- end }}

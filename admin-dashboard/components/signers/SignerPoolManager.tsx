@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import type { ManagedSigner } from "@/lib/signer-management";
+import { SignerBalanceRingChart } from "@/components/signers/SignerBalanceRingChart";
 
 function formatHash(value: string) {
   if (value.length <= 18) {
@@ -195,6 +196,8 @@ export function SignerPoolManager({
           </p>
         </article>
       </section>
+
+      <SignerBalanceRingChart signers={signers} />
 
       <section className="rounded-[2rem] border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">

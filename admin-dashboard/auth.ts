@@ -21,8 +21,13 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string;
     adminJwt?: string;
+    iat?: number;
+    exp?: number;
   }
 }
+
+const JWT_ROTATION_INTERVAL = 60 * 60; // Rotate every 1 hour
+const JWT_EXPIRATION = 8 * 60 * 60; // 8-hour session max age
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -81,21 +86,75 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  session: { strategy: "jwt", maxAge: JWT_EXPIRATION },
   callbacks: {
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user, trigger, session }) => {
+      const now = Math.floor(Date.now() / 1000);
+
       if (user) {
+        // Initial sign-in
         token.role = user.role;
         token.adminJwt = user.adminJwt;
+        token.iat = now;
+        token.exp = now + JWT_EXPIRATION;
+      } else if (token.iat && token.exp) {
+        // Token rotation: refresh if half the rotation interval has passed
+        const issuedAt = token.iat;
+        const timeSinceIssue = now - issuedAt;
+
+        if (timeSinceIssue > JWT_ROTATION_INTERVAL) {
+          // Rotate the token by updating issued/expiry times
+          token.iat = now;
+          token.exp = now + JWT_EXPIRATION;
+
+          // If using backend admin JWT, attempt to refresh it
+          if (token.adminJwt && typeof token.adminJwt === "string") {
+            const serverUrl = process.env.FLUID_SERVER_URL;
+            if (serverUrl) {
+              try {
+                const resp = await fetch(
+                  `${serverUrl}/admin/auth/refresh`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token.adminJwt}`,
+                    },
+                  }
+                );
+                if (resp.ok) {
+                  const data = await resp.json();
+                  token.adminJwt = data.token;
+                }
+              } catch {
+                // Silent fail - keep existing token
+              }
+            }
+          }
+        }
       }
+
       return token;
     },
     session: async ({ session, token }) => {
+      // Check if token is expired
+      const now = Math.floor(Date.now() / 1000);
+      if (token.exp && now > token.exp) {
+        return null; // Expired session
+      }
+
       if (session.user) {
         session.user.role = token.role as string;
         session.user.adminJwt = token.adminJwt as string | undefined;
       }
       return session;
+    },
+    redirect: async ({ url, baseUrl }) => {
+      // Redirect to login if session invalid
+      if (url === "/login" || url.startsWith("/login")) {
+        return url;
+      }
+      return baseUrl;
     },
   },
   pages: { signIn: "/login" },

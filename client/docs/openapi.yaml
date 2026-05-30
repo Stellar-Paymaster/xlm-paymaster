@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: Fluid Server API
+  description: API for processing gasless Stellar transactions via the Fluid platform.
+  version: 2.0.0
+servers:
+  - url: https://api.fluid.dev
+    description: Production Server
+  - url: http://localhost:3000
+    description: Local Development
+paths:
+  /fee-bump:
+    post:
+      summary: Request a fee-bump for a transaction
+      description: Replaces the transaction fee with a fee-bump from the Fluid platform.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                xdr:
+                  type: string
+                  description: The base64-encoded signed transaction XDR.
+                submit:
+                  type: boolean
+                  description: Whether to immediately submit the transaction to Horizon.
+                  default: false
+      responses:
+        '200':
+          description: Fee-bump successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeBumpResponse'
+        '400':
+          description: Invalid transaction or insufficient funds
+        '500':
+          description: Server error
+
+  /fee-bump/batch:
+    post:
+      summary: Request fee-bumps for multiple transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                xdrs:
+                  type: array
+                  items:
+                    type: string
+                submit:
+                  type: boolean
+      responses:
+        '200':
+          description: Batch fee-bump successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FeeBumpResponse'
+
+  /cli/config/upload:
+    post:
+      summary: Upload platform configuration
+      tags:
+        - CLI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Config uploaded successfully
+
+  /cli/config/download:
+    get:
+      summary: Download platform configuration
+      tags:
+        - CLI
+      responses:
+        '200':
+          description: Current platform configuration
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    FeeBumpResponse:
+      type: object
+      properties:
+        xdr:
+          type: string
+          description: The resulting fee-bump transaction XDR.
+        status:
+          type: string
+          enum: [ready, submitted]
+        hash:
+          type: string
+          description: Transaction hash if submitted.
+        fee_payer:
+          type: string
+        submission_attempts:
+          type: integer

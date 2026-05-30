@@ -1,0 +1,2 @@
+ALTER TABLE "AdminUser" ADD COLUMN "sessionVersion" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "AdminUser" ADD COLUMN "passwordChangedAt" DATETIME;

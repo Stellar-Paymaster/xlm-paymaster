@@ -239,7 +239,9 @@ async function startEngine(): Promise<RunningEngine> {
   writeFileSync(caPath, certificates.clientCa.certPem);
   writeFileSync(clientCertPath, certificates.validClient.certPem);
   writeFileSync(clientKeyPath, certificates.validClient.keyPem);
-  writeFileSync(serverCertPath, certificates.validServer.certPem);
+  // grpc-js requires a complete chain to verify the server cert.
+  // Concatenate the leaf cert with the issuing CA so rustls sends the full chain.
+  writeFileSync(serverCertPath, certificates.validServer.certPem + certificates.clientCa.certPem);
   writeFileSync(serverKeyPath, certificates.validServer.keyPem);
 
   const logs: string[] = [];
@@ -436,7 +438,7 @@ describe("GrpcEngineSignerClient", () => {
       const beforeRotation = await client.signPayload(TEST_SECRET, payload);
       expect(beforeRotation.length).toBe(64);
 
-      writeFileSync(engine.paths.serverCertPath, engine.certificates.rotatedServer.certPem);
+      writeFileSync(engine.paths.serverCertPath, engine.certificates.rotatedServer.certPem + engine.certificates.clientCa.certPem);
       writeFileSync(engine.paths.serverKeyPath, engine.certificates.rotatedServer.keyPem);
       writeFileSync(engine.paths.clientCertPath, engine.certificates.rotatedClient.certPem);
       writeFileSync(engine.paths.clientKeyPath, engine.certificates.rotatedClient.keyPem);

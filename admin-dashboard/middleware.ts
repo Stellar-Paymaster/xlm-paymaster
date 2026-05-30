@@ -24,5 +24,5 @@ export default auth((req) => {
 
 // Matcher excludes static assets and Next.js internals automatically
 export const config = {
-  matcher: ["/admin/:path*", "/login", "/signup", "/verify-email"]
+  matcher: ["/admin/:path*", "/login", "/signup", "/verify-email"],
 };

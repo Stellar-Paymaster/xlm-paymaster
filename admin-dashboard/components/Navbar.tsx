@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { NotificationBell } from "./dashboard/NotificationBell";
 import { HelpCenter } from "./HelpCenter";
+import { ThemeSwitcher } from "./theme/ThemeSwitcher";
+import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 
 export function Navbar() {
     const pathname = usePathname();
+    const t = useTranslations("navigation");
     const isAdmin = Boolean(pathname?.startsWith("/admin"));
     const badge =
         pathname === "/" ? "Developer portal" : isAdmin ? "Admin" : null;
@@ -34,13 +38,13 @@ export function Navbar() {
                         href="/plugins"
                         className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
                     >
-                        Plugins
+                        {t("plugins")}
                     </Link>
                     <Link
                         href="/sdk"
                         className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
                     >
-                        SDKs
+                        {t("sdk")}
                     </Link>
                     <Link
                         href="/changelog"
@@ -48,6 +52,8 @@ export function Navbar() {
                     >
                         Changelog
                     </Link>
+                    <ThemeSwitcher />
+                    <LanguageSwitcher />
                     <HelpCenter />
                     {isAdmin && <NotificationBell />}
                 </nav>

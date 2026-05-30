@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { getAuditLogsData, type AuditLogEntry, type AuditLogPageData } from "@/lib/audit-logs-data";
+import { buildAuditTrailSnapshot } from "@/lib/audit-trail-snapshots";
 
 function AiSummaryTooltip({ summary }: { summary: string }) {
   return (
@@ -18,7 +19,43 @@ function AiSummaryTooltip({ summary }: { summary: string }) {
   );
 }
 
-function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
+function SnapshotPopover({ entry, baseline }: { entry: AuditLogEntry; baseline: AuditLogEntry | null }) {
+  const [open, setOpen] = useState(false);
+  const snapshot = useMemo(() => buildAuditTrailSnapshot(entry, baseline), [entry, baseline]);
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+      >
+        What changed
+      </button>
+      {open && (
+        <div className="absolute right-0 z-10 mt-2 w-90 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Audit Trail Snapshot</p>
+          <p className="mt-1 text-xs text-slate-700">{snapshot.summary}</p>
+          {snapshot.hasChanges ? (
+            <ul className="mt-2 space-y-2 text-xs">
+              {snapshot.changes.map((change) => (
+                <li key={change.field} className="rounded-md bg-slate-50 p-2">
+                  <p className="font-semibold text-slate-700">{change.field}</p>
+                  <p className="text-slate-500">Before: {change.before}</p>
+                  <p className="text-slate-700">After: {change.after}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-xs text-slate-500">No metadata diff available.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AuditLogRow({ entry, baseline }: { entry: AuditLogEntry; baseline: AuditLogEntry | null }) {
   const time = new Date(entry.createdAt).toLocaleString();
 
   return (
@@ -30,18 +67,21 @@ function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
         </span>
       </td>
       <td className="px-4 py-3 text-sm text-slate-700">{entry.actor}</td>
-      <td className="px-4 py-3 text-sm text-slate-500 font-mono truncate max-w-[160px]">
+      <td className="max-w-40 truncate px-4 py-3 font-mono text-sm text-slate-500">
         {entry.target ?? "—"}
       </td>
       <td className="px-4 py-3 text-sm">
         {entry.aiSummary ? (
           <div className="flex items-center gap-2">
             <AiSummaryTooltip summary={entry.aiSummary} />
-            <span className="text-slate-600 truncate max-w-[260px]">{entry.aiSummary}</span>
+            <span className="max-w-65 truncate text-slate-600">{entry.aiSummary}</span>
           </div>
         ) : (
           <span className="text-slate-400 italic text-xs">pending…</span>
         )}
+      </td>
+      <td className="px-4 py-3 text-sm text-slate-700">
+        <SnapshotPopover entry={entry} baseline={baseline} />
       </td>
     </tr>
   );
@@ -109,17 +149,24 @@ export default function AdminAuditLogsPage() {
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Actor</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Target</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">AI Summary</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Snapshot</th>
                 </tr>
               </thead>
               <tbody>
                 {data.items.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-sm text-slate-400">
+                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-400">
                       No audit logs yet
                     </td>
                   </tr>
                 ) : (
-                  data.items.map((entry) => <AuditLogRow key={entry.id} entry={entry} />)
+                  data.items.map((entry, index) => (
+                    <AuditLogRow
+                      key={entry.id}
+                      entry={entry}
+                      baseline={data.items[index + 1] ?? null}
+                    />
+                  ))
                 )}
               </tbody>
             </table>

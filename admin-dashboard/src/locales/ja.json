@@ -1,0 +1,16 @@
+{
+  "navigation": {
+    "dashboard": "ダッシュボード",
+    "transactions": "取引",
+    "signers": "署名者",
+    "apiKeys": "APIキー",
+    "settings": "設定",
+    "referrals": "紹介",
+    "plugins": "プラグイン",
+    "sdk": "SDK"
+  },
+  "languageSwitcher": {
+    "select": "言語を選択",
+    "options": "言語オプション"
+  }
+}

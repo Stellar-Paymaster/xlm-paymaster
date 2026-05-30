@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../utils/db";
+import { replicaDb as prisma } from "../utils/db";
 
 function requireAdminToken(req: Request, res: Response): boolean {
   const token = req.header("x-admin-token");

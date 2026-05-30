@@ -18,6 +18,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install wget for healthchecks
+RUN apk add --no-cache wget
+
 # Copy built assets and production binary
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public

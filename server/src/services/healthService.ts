@@ -1,5 +1,7 @@
 import StellarSdk, { Horizon } from "@stellar/stellar-sdk";
 import { Config } from "../config";
+import { getHorizonFailoverClient } from "../horizon/failoverClient";
+import type { CircuitBreakerStatus } from "../horizon/circuitBreaker";
 
 const BALANCE_CRITICAL_THRESHOLD = 1; // XLM
 const BALANCE_WARNING_THRESHOLD = 5; // XLM
@@ -16,6 +18,11 @@ interface FeePayerHealth {
   note?: string;
 }
 
+interface HorizonNodeCircuitBreakerInfo {
+  url: string;
+  circuitBreaker: CircuitBreakerStatus;
+}
+
 interface HealthResponse {
   status: HealthStatus;
   version: string;
@@ -27,6 +34,7 @@ interface HealthResponse {
       status: "healthy" | "unhealthy" | "not_configured";
       url: string;
       error?: string;
+      nodes?: HorizonNodeCircuitBreakerInfo[];
     };
     feePayers: FeePayerHealth[];
   };
@@ -94,6 +102,15 @@ export async function getHealthStatus(config: Config): Promise<HealthResponse> {
 
       response.status = "unhealthy";
     }
+  }
+
+  // ✅ Circuit breaker states per Horizon endpoint
+  const failoverClient = getHorizonFailoverClient();
+  if (failoverClient) {
+    response.checks.horizon.nodes = failoverClient.getNodeStatuses().map((n) => ({
+      url: n.url,
+      circuitBreaker: n.circuitBreaker ?? { state: "Closed", failureCount: 0 },
+    }));
   }
 
   // ✅ Fee payer checks

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluid SDK | Developer Playground</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+            --warning: #eab308;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        header {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card {
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .code-block {
+            background: #000;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .token-keyword { color: #c678dd; }
+        .token-string { color: #98c379; }
+        .token-comment { color: #5c6370; }
+        .token-function { color: #61afef; }
+
+        .tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tx-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tx-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border);
+        }
+
+        .tx-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .tx-details h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .tx-details p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .tx-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .status-success { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+        .status-pending { background: rgba(234, 179, 8, 0.1); color: var(--warning); }
+
+        .cta-button {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .sidebar-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .performance-graph {
+            height: 150px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            padding-top: 1rem;
+        }
+
+        .bar {
+            flex: 1;
+            background: var(--primary);
+            border-radius: 2px 2px 0 0;
+            opacity: 0.6;
+            transition: height 0.3s ease;
+        }
+
+        .bar:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 4L4 10V22L16 28L28 22V10L16 4Z" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 4V16L28 10" stroke="url(#paint1_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 16L4 10" stroke="url(#paint2_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 16V28" stroke="url(#paint3_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="paint0_linear" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6366F1"/>
+                        <stop offset="1" stop-color="#EC4899"/>
+                    </linearGradient>
+                    <linearGradient id="paint1_linear" x1="16" y1="4" x2="28" y2="16" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6366F1"/>
+                        <stop offset="1" stop-color="#EC4899"/>
+                    </linearGradient>
+                    <linearGradient id="paint2_linear" x1="4" y1="10" x2="16" y2="16" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6366F1"/>
+                        <stop offset="1" stop-color="#EC4899"/>
+                    </linearGradient>
+                    <linearGradient id="paint3_linear" x1="16" y1="16" x2="16" y2="28" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6366F1"/>
+                        <stop offset="1" stop-color="#EC4899"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            Fluid SDK
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="badge">Playground (Read-Only)</div>
+            <a href="https://github.com/Stellar-Fluid/fluid" class="cta-button" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Documentation</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="content">
+            <section>
+                <div class="stats-grid">
+                    <div class="card glass stat-card">
+                        <div class="stat-value">0.42s</div>
+                        <div class="stat-label">Avg. Fee-Bump Latency</div>
+                    </div>
+                    <div class="card glass stat-card">
+                        <div class="stat-value">99.9%</div>
+                        <div class="stat-label">Node Availability</div>
+                    </div>
+                    <div class="card glass stat-card">
+                        <div class="stat-value">12.4k</div>
+                        <div class="stat-label">Total Transactions</div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    SDK Implementation
+                </h2>
+                <div class="card glass">
+                    <div class="code-header">
+                        <span>src/main.ts</span>
+                        <span class="badge" style="font-size: 0.6rem;">TypeScript</span>
+                    </div>
+                    <div class="code-block">
+                        <pre><code><span class="token-keyword">import</span> { FluidClient } <span class="token-keyword">from</span> <span class="token-string">"@stellar-fluid/sdk"</span>;
+
+<span class="token-comment">// 1. Initialize the client</span>
+<span class="token-keyword">const</span> client = <span class="token-keyword">new</span> <span class="token-function">FluidClient</span>({
+  serverUrl: <span class="token-string">"https://api.fluid.dev"</span>,
+  networkPassphrase: <span class="token-string">"Public Global Stellar Network..."</span>
+});
+
+<span class="token-comment">// 2. Request a gasless fee-bump</span>
+<span class="token-keyword">const</span> result = <span class="token-keyword">await</span> client.<span class="token-function">requestFeeBump</span>(signedUserXdr);
+
+<span class="token-comment">// 3. Profit! User paid 0 XLM for fees.</span>
+console.<span class="token-function">log</span>(<span class="token-string">"Fee-bump successful:"</span>, result.hash);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">
+                    <span class="pulse"></span>
+                    Live Transaction Feed
+                </h2>
+                <div class="card glass tx-list" id="tx-feed">
+                    <!-- Transactions will be added here via JS -->
+                </div>
+            </section>
+        </div>
+
+        <aside>
+            <div class="card glass sidebar-card">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem;">Performance Metrics</h3>
+                <div class="performance-graph" id="graph">
+                    <!-- Bars added via JS -->
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                    <span>Last 30m</span>
+                    <span>Now</span>
+                </div>
+            </div>
+
+            <div class="card glass sidebar-card">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem;">Developer Tools</h3>
+                <ul style="list-style: none; font-size: 0.875rem;">
+                    <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        SDK Mocking Library
+                    </li>
+                    <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        Security Audit Logs
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Telemetry Diagnostics
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card glass sidebar-card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Ready to build?</h3>
+                <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Join 500+ developers building gasless apps on Stellar.</p>
+                <button class="cta-button" style="width: 100%;">Get API Key</button>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const txFeed = document.getElementById('tx-feed');
+        const graph = document.getElementById('graph');
+
+        // Initial graph bars
+        for (let i = 0; i < 30; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = (Math.random() * 80 + 20) + '%';
+            graph.appendChild(bar);
+        }
+
+        const actions = ['Payment', 'Account Create', 'Claimable Balance', 'Contract Call'];
+        const accounts = ['GA5B...X3Y7', 'GB72...9L1P', 'GC29...V4M0', 'GD01...A6K3'];
+
+        function addTx() {
+            const item = document.createElement('div');
+            item.className = 'tx-item';
+            const action = actions[Math.floor(Math.random() * actions.length)];
+            const account = accounts[Math.floor(Math.random() * accounts.length)];
+            const hash = Math.random().toString(16).substring(2, 10).toUpperCase();
+
+            item.innerHTML = `
+                <div class="tx-info">
+                    <div class="tx-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                    </div>
+                    <div class="tx-details">
+                        <h4>${action}</h4>
+                        <p>${account} • ${hash}</p>
+                    </div>
+                </div>
+                <div class="tx-status status-success">Success</div>
+            `;
+
+            txFeed.insertBefore(item, txFeed.firstChild);
+            if (txFeed.children.length > 5) {
+                txFeed.removeChild(txFeed.lastChild);
+            }
+
+            // Update graph
+            const firstBar = graph.firstChild;
+            graph.removeChild(firstBar);
+            const newBar = document.createElement('div');
+            newBar.className = 'bar';
+            newBar.style.height = (Math.random() * 80 + 20) + '%';
+            graph.appendChild(newBar);
+        }
+
+        // Add some initial txs
+        for (let i = 0; i < 5; i++) addTx();
+
+        // Loop
+        setInterval(addTx, 3000);
+    </script>
+</body>
+</html>

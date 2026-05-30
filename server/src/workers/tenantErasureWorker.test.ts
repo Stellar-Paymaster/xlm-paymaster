@@ -8,6 +8,8 @@ vi.mock("../utils/logger", () => ({
   createLogger: () => ({
     info: vi.fn(),
     error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
   }),
   serializeError: (error: unknown) => ({ message: String(error) }),
 }));
