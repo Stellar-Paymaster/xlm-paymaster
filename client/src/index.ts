@@ -577,6 +577,17 @@ export type { TelemetryConfig, TelemetryData } from "./telemetry";
 
 export { FluidQueue } from "./queue";
 export type { QueuedTransaction, FluidQueueCallbacks } from "./queue";
+
+export {
+  prepareOfflineTransaction,
+  getPendingOfflineTransactions,
+  removePreparedTransaction,
+  clearPreparedTransactions,
+  getPendingCount,
+  validatePreparedTransaction,
+  OFFLINE_TX_STORAGE_KEY,
+} from "./offline-tx";
+export type { OfflinePreparedTransaction, OfflinePrepareOptions } from "./offline-tx";
 export {
   buildFeeBumpTransaction,
   createHorizonServer,

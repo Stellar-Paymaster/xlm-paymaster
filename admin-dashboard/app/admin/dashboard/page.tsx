@@ -16,6 +16,7 @@ import { getFeeMultiplierData } from "@/lib/fee-multiplier-data";
 import { FeeEstimatorWidget } from "@/components/dashboard/FeeEstimatorWidget";
 import { ExpenseBreakdown } from "@/components/dashboard/ExpenseBreakdown";
 import { getExpenseBreakdownData } from "@/lib/expense-breakdown-data";
+import { TelemetryConsentSettings } from "@/components/dashboard/TelemetryConsentSettings";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -113,8 +114,13 @@ export default async function AdminDashboard() {
           <FeeEstimatorWidget />
         </section>
 
+        <section className="mt-6">
+          <TelemetryConsentSettings />
+        </section>
+
         {/* Tables */}
         <section className="mt-6 space-y-6">
+          <div className="flex flex-wrap gap-3">
             <Link
               href="/admin/billing"
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-primary/30 bg-primary/10 px-6 text-sm font-black text-primary transition hover:shadow-lg hover:-translate-y-0.5"
