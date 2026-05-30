@@ -1,17 +1,20 @@
 "use client";
 
-import type { TransactionStatus } from "@/components/dashboard/types";
+import type { TransactionStatus, WebhookDeliveryStatus } from "@/components/dashboard/types";
 import { Pulse } from "@/components/ui/motion";
 
 type BadgeTone = "green" | "amber" | "slate" | "red";
 
-function getTone(status: TransactionStatus | "active" | "inactive"): BadgeTone {
+type AllowedStatus = TransactionStatus | WebhookDeliveryStatus | "active" | "inactive";
+
+function getTone(status: AllowedStatus): BadgeTone {
   switch (status) {
     case "success":
     case "active":
       return "green";
     case "pending":
     case "submitted":
+    case "retrying":
       return "amber";
     case "failed":
       return "red";
@@ -20,16 +23,14 @@ function getTone(status: TransactionStatus | "active" | "inactive"): BadgeTone {
   }
 }
 
-function isPendingStatus(
-  status: TransactionStatus | "active" | "inactive"
-): boolean {
-  return status === "pending" || status === "submitted";
+function isPendingStatus(status: AllowedStatus): boolean {
+  return status === "pending" || status === "submitted" || status === "retrying";
 }
 
 export function StatusBadge({
   status,
 }: {
-  status: TransactionStatus | "active" | "inactive";
+  status: AllowedStatus;
 }) {
   const toneClassName = {
     green:

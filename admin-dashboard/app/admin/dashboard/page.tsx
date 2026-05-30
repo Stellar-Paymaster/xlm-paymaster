@@ -15,6 +15,7 @@ import { getFeeMultiplierData } from "@/lib/fee-multiplier-data";
 import { FeeEstimatorWidget } from "@/components/dashboard/FeeEstimatorWidget";
 import { ExpenseBreakdown } from "@/components/dashboard/ExpenseBreakdown";
 import { getExpenseBreakdownData } from "@/lib/expense-breakdown-data";
+import { TelemetryConsentSettings } from "@/components/dashboard/TelemetryConsentSettings";
 import { getTreasuryCriticalBannerState } from "@/lib/treasury-critical-banner";
 import { AlertTriangle } from "lucide-react";
 import { LiveTransactionFeed } from "@/components/dashboard/LiveTransactionFeed";
@@ -138,6 +139,10 @@ export default async function AdminDashboard() {
 
         <section className="mt-6">
           <FeeEstimatorWidget />
+        </section>
+
+        <section className="mt-6">
+          <TelemetryConsentSettings />
         </section>
 
         {/* Tables */}

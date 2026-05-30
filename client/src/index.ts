@@ -58,6 +58,16 @@ export type {
 export { FluidQueue } from "./queue";
 export type { QueuedTransaction, FluidQueueCallbacks } from "./queue";
 
+export {
+  prepareOfflineTransaction,
+  getPendingOfflineTransactions,
+  removePreparedTransaction,
+  clearPreparedTransactions,
+  getPendingCount,
+  validatePreparedTransaction,
+  OFFLINE_TX_STORAGE_KEY,
+} from "./offline-tx";
+export type { OfflinePreparedTransaction, OfflinePrepareOptions } from "./offline-tx";
 // Universal wallet signing (WalletConnect standard bindings, SEP-43 adapters)
 export * from "./wallet";
 export {

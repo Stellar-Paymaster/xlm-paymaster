@@ -60,41 +60,45 @@ interface WebhookDeliveryLogProps {
   onQueryChange: (query: Partial<WebhookDeliveryQuery>) => void;
 }
 
+function DrawerSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h5 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        {title}
+      </h5>
+      {children}
+    </div>
+  );
+}
+
+function JsonBlock({ value }: { value: Record<string, unknown> | Record<string, string> }) {
+  return (
+    <pre className="max-h-48 overflow-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100">
+      {JSON.stringify(value, null, 2)}
+    </pre>
+  );
+}
+
 export function WebhookDeliveryLogTable({
   data,
   onPageChange,
   onQueryChange,
 }: WebhookDeliveryLogProps) {
-  const [showPayload, setShowPayload] = useState<string | null>(null);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
-  const getStatusVariant = (status: WebhookDeliveryStatus) => {
-    switch (status) {
-      case "success":
-        return "success";
-      case "failed":
-        return "error";
-      case "pending":
-        return "warning";
-      case "retrying":
-        return "info";
-      default:
-        return "default";
-    }
-  };
-
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString();
-  };
+  const formatTimestamp = (timestamp: string) =>
+    new Date(timestamp).toLocaleString();
 
   const filteredRows = useMemo(() => {
     let rows = [...data.rows];
 
     if (data.search) {
+      const q = data.search.toLowerCase();
       rows = rows.filter(
         (row) =>
-          row.tenantName?.toLowerCase().includes(data.search.toLowerCase()) ||
-          row.tenantId.toLowerCase().includes(data.search.toLowerCase()) ||
-          row.webhookUrl.toLowerCase().includes(data.search.toLowerCase())
+          row.tenantName?.toLowerCase().includes(q) ||
+          row.tenantId.toLowerCase().includes(q) ||
+          row.webhookUrl.toLowerCase().includes(q),
       );
     }
 
@@ -138,7 +142,6 @@ export function WebhookDeliveryLogTable({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Search */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Search</label>
             <Input
@@ -148,7 +151,6 @@ export function WebhookDeliveryLogTable({
             />
           </div>
 
-          {/* Status Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Status</label>
             <div className="flex flex-wrap gap-2">
@@ -165,7 +167,6 @@ export function WebhookDeliveryLogTable({
             </div>
           </div>
 
-          {/* Event Type Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Event Type</label>
             <div className="flex flex-wrap gap-2">
@@ -182,12 +183,13 @@ export function WebhookDeliveryLogTable({
             </div>
           </div>
 
-          {/* Sort */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Sort By</label>
             <select
               value={data.sort}
-              onChange={(e) => onQueryChange({ sort: e.target.value as WebhookDeliverySort })}
+              onChange={(e) =>
+                onQueryChange({ sort: e.target.value as WebhookDeliverySort })
+              }
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               {SORT_OPTIONS.map((sort) => (
@@ -200,7 +202,7 @@ export function WebhookDeliveryLogTable({
         </CardContent>
       </Card>
 
-      {/* Results Summary */}
+      {/* Results summary */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Showing {filteredRows.length} of {data.totalRows} delivery logs
@@ -217,102 +219,143 @@ export function WebhookDeliveryLogTable({
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium">Timestamp</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Tenant</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Event Type</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Event</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Attempts</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Response</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Webhook URL</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">
+                    Webhook URL
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredRows.map((row) => (
-                  <tr key={row.id} className="border-b hover:bg-muted/25">
-                    <td className="px-4 py-3 text-sm">
-                      <div className="space-y-1">
-                        <div>{formatTimestamp(row.createdAt)}</div>
-                        {row.nextRetryAt && (
-                          <div className="text-xs text-muted-foreground">
-                            Next retry: {formatTimestamp(row.nextRetryAt)}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="space-y-1">
-                        <div className="font-medium">{row.tenantName || row.tenantId}</div>
-                        <div className="text-xs text-muted-foreground">{row.tenantId}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {EVENT_TYPE_OPTIONS.find(opt => opt.value === row.eventType)?.label || row.eventType}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <StatusBadge status={row.status} variant={getStatusVariant(row.status)} />
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="text-center">
-                        {row.attempts}/{row.maxAttempts}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {row.responseCode ? (
-                        <div className="space-y-1">
-                          <div className={`font-medium ${
-                            row.responseCode >= 200 && row.responseCode < 300 
-                              ? 'text-green-600' 
-                              : 'text-red-600'
-                          }`}>
-                            {row.responseCode}
-                          </div>
-                          {row.responseMessage && (
-                            <div className="text-xs text-muted-foreground max-w-32 truncate">
-                              {row.responseMessage}
+                {filteredRows.map((row) => {
+                  const isOpen = expandedRow === row.id;
+
+                  return (
+                    <>
+                      <tr key={row.id} className="border-b hover:bg-muted/25">
+                        <td className="px-4 py-3 text-sm">
+                          <div>{formatTimestamp(row.createdAt)}</div>
+                          {row.nextRetryAt && (
+                            <div className="text-xs text-muted-foreground">
+                              Next retry: {formatTimestamp(row.nextRetryAt)}
                             </div>
                           )}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <div className="font-medium">{row.tenantName ?? row.tenantId}</div>
+                          <div className="text-xs text-muted-foreground">{row.tenantId}</div>
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          {EVENT_TYPE_OPTIONS.find((o) => o.value === row.eventType)?.label ??
+                            row.eventType}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <StatusBadge status={row.status} />
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center">
+                          {row.attempts}/{row.maxAttempts}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          {row.responseCode !== null ? (
+                            <div>
+                              <div
+                                className={`font-medium ${
+                                  row.responseCode >= 200 && row.responseCode < 300
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                                }`}
+                              >
+                                {row.responseCode}
+                              </div>
+                              {row.responseMessage && (
+                                <div className="max-w-32 truncate text-xs text-muted-foreground">
+                                  {row.responseMessage}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="hidden px-4 py-3 text-sm md:table-cell">
+                          <div className="max-w-48 truncate" title={row.webhookUrl}>
+                            {row.webhookUrl}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <div className="flex items-center gap-2">
+                            <CopyButton value={row.id} label="Copy ID" />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setExpandedRow(isOpen ? null : row.id)
+                              }
+                              aria-expanded={isOpen}
+                            >
+                              {isOpen ? "Hide" : "Details"}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Expandable details drawer */}
+                      {isOpen && (
+                        <tr key={`${row.id}-drawer`} className="bg-muted/10">
+                          <td colSpan={8} className="px-4 py-5">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                              <DrawerSection title="Request Payload">
+                                {Object.keys(row.requestPayload).length > 0 ? (
+                                  <JsonBlock value={row.requestPayload} />
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">No request payload</p>
+                                )}
+                              </DrawerSection>
+
+                              <DrawerSection title="Response Headers">
+                                {Object.keys(row.responseHeaders).length > 0 ? (
+                                  <JsonBlock value={row.responseHeaders} />
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">No response headers</p>
+                                )}
+                              </DrawerSection>
+
+                              <DrawerSection title="Event Payload">
+                                <JsonBlock value={row.payload} />
+                              </DrawerSection>
+                            </div>
+
+                            <div className="mt-4 flex flex-wrap items-center gap-4 border-t pt-3 text-xs text-muted-foreground">
+                              <span>
+                                <span className="font-medium text-foreground">Delivery ID:</span>{" "}
+                                {row.id}
+                              </span>
+                              <span>
+                                <span className="font-medium text-foreground">Webhook URL:</span>{" "}
+                                {row.webhookUrl}
+                              </span>
+                              {row.nextRetryAt && (
+                                <span>
+                                  <span className="font-medium text-foreground">
+                                    Next Retry:
+                                  </span>{" "}
+                                  {formatTimestamp(row.nextRetryAt)}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="max-w-48 truncate" title={row.webhookUrl}>
-                        {row.webhookUrl}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <CopyButton text={row.id} label="Copy ID" />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowPayload(showPayload === row.id ? null : row.id)}
-                        >
-                          {showPayload === row.id ? "Hide" : "Payload"}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                    </>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
-          {/* Payload Details */}
-          {showPayload && (
-            <div className="border-t bg-muted/25 p-4">
-              <h4 className="mb-2 text-sm font-medium">Payload Details</h4>
-              <pre className="max-h-64 overflow-auto rounded bg-background p-3 text-xs">
-                {JSON.stringify(
-                  filteredRows.find((row) => row.id === showPayload)?.payload,
-                  null,
-                  2
-                )}
-              </pre>
-            </div>
-          )}
-
-          {/* Empty State */}
           {filteredRows.length === 0 && (
             <div className="py-12 text-center">
               <p className="text-muted-foreground">No webhook delivery logs found</p>
