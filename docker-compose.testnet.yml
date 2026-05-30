@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fluid-testnet-postgres
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-fluid}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
+      POSTGRES_DB: "${POSTGRES_DB:-fluid_testnet}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_testnet_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-fluid} -d ${POSTGRES_DB:-fluid_testnet}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fluid-testnet-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: fluid-testnet-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fluid-testnet-network
+
+  fluid-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fluid-testnet-api
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      STELLAR_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
+      HORIZON_URL: "https://horizon-testnet.stellar.org"
+      SOROBAN_RPC_URL: "https://soroban-testnet.stellar.org"
+      DATABASE_URL: "postgresql://fluid:fluid_pass@postgres:5432/fluid_testnet"
+      REDIS_URL: "redis://redis:6379"
+      LOG_LEVEL: "info"
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_WINDOW_MS: "86400000"  # 24 hours
+      RATE_LIMIT_DEFAULT_LIMIT: "100"   # 100 bumps/day for free tier
+      FREE_TIER_LIMIT: "100"
+      API_KEY_LENGTH: "32"
+      PORT: "3000"
+      CORS_ORIGIN: "*"
+      SIGNING_KEY: "${SIGNING_KEY:-}"
+      SPONSOR_ACCOUNT: "${SPONSOR_ACCOUNT:-}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fluid-testnet-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: fluid-testnet-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - fluid-api
+    networks:
+      - fluid-testnet-network
+    restart: unless-stopped
+
+volumes:
+  postgres_testnet_data:
+
+networks:
+  fluid-testnet-network:
+    driver: bridge

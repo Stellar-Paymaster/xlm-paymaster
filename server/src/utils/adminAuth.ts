@@ -30,8 +30,14 @@ const adminUserModel = (prisma as any).adminUser as {
   findUnique: (args: any) => Promise<any | null>;
 };
 
-function getJwtSecret(): string {
-  return process.env.FLUID_ADMIN_JWT_SECRET ?? "dev-admin-jwt-secret";
+function getJwtSecrets(): string[] {
+  const secretsEnv = process.env.FLUID_ADMIN_JWT_SECRETS;
+  if (secretsEnv) {
+    const parsed = secretsEnv.split(",").map(s => s.trim()).filter(Boolean);
+    if (parsed.length > 0) return parsed;
+  }
+  
+  return [process.env.FLUID_ADMIN_JWT_SECRET ?? "dev-admin-jwt-secret"];
 }
 
 export function signAdminJwt(payload: Omit<AdminJwtPayload, "iat" | "exp">): string {
@@ -40,25 +46,32 @@ export function signAdminJwt(payload: Omit<AdminJwtPayload, "iat" | "exp">): str
       ...payload,
       sessionVersion: payload.sessionVersion ?? 0,
     },
-    getJwtSecret(),
+    getJwtSecrets()[0],
     { expiresIn: "8h" },
   );
 }
 
 export function verifyAdminJwt(token: string): AdminJwtPayload | null {
-  try {
-    const decoded = jwt.verify(token, getJwtSecret()) as AdminJwtPayload;
-    if (!isValidRole(decoded.role)) {
-      return null;
-    }
+  const secrets = getJwtSecrets();
 
-    return {
-      ...decoded,
-      sessionVersion: decoded.sessionVersion ?? 0,
-    };
-  } catch {
-    return null;
+  for (const secret of secrets) {
+    try {
+      const decoded = jwt.verify(token, secret) as AdminJwtPayload;
+      if (!isValidRole(decoded.role)) {
+        continue;
+      }
+
+      return {
+        ...decoded,
+        sessionVersion: decoded.sessionVersion ?? 0,
+      };
+    } catch {
+      // Continue to the next secret if verification fails
+      continue;
+    }
   }
+
+  return null;
 }
 
 export function isAdminTokenAuthority(req: Request): boolean {

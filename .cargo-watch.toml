@@ -1,0 +1,10 @@
+# cargo-watch configuration for fluid-server hot reload
+# Run: npm run dev:rust
+#
+# --debounce 500   wait 500ms after last change before recompiling
+# -w               watch these source directories only
+# -i target        ignore the build output directory
+# -x 'run ...'     command to execute on change
+#
+# Build errors are printed inline; the watcher keeps running.
+# Skip with CTRL+C or use --no-restart to keep the process alive on error.

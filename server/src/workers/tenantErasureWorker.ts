@@ -1,5 +1,6 @@
 import { purgeExpiredTenantErasures } from "../services/tenantErasure";
 import { createLogger, serializeError } from "../utils/logger";
+import { BaseWorker } from "./baseWorker";
 
 const logger = createLogger({ component: "tenant_erasure_worker" });
 const DEFAULT_CRON_SCHEDULE = "0 3 * * *";
@@ -16,7 +17,7 @@ export interface TenantErasureWorkerOptions {
   purgeFn?: typeof purgeExpiredTenantErasures;
 }
 
-export class TenantErasureWorker {
+export class TenantErasureWorker extends BaseWorker {
   private task: { stop: () => void } | null = null;
   private readonly cronSchedule: string;
   private readonly enabled: boolean;
@@ -24,6 +25,7 @@ export class TenantErasureWorker {
   private readonly purgeFn: typeof purgeExpiredTenantErasures;
 
   constructor(options: TenantErasureWorkerOptions = {}) {
+    super();
     this.cronSchedule = options.cronSchedule ?? DEFAULT_CRON_SCHEDULE;
     this.enabled = options.enabled ?? true;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -33,12 +35,12 @@ export class TenantErasureWorker {
 
   start(): void {
     if (!this.enabled) {
-      logger.info("Tenant erasure worker disabled (GDPR_ERASURE_ENABLED=false)");
+      this.logger.info("Tenant erasure worker disabled (GDPR_ERASURE_ENABLED=false)");
       return;
     }
 
     if (!this.scheduler.validate(this.cronSchedule)) {
-      logger.error(
+      this.logger.error(
         { schedule: this.cronSchedule },
         "Invalid GDPR_ERASURE_CRON_SCHEDULE; tenant erasure worker disabled",
       );
@@ -46,18 +48,17 @@ export class TenantErasureWorker {
     }
 
     this.task = this.scheduler.schedule(this.cronSchedule, () => {
-      void this.runNow();
+      void this.runCycle(() => this.runNow().then(() => {}));
     });
   }
 
-  stop(): void {
-    if (!this.task) {
-      return;
+  protected clearScheduledTasks(): void {
+    if (this.task) {
+      this.task.stop();
+      this.task = null;
     }
-
-    this.task.stop();
-    this.task = null;
   }
+
 
   async runNow(): Promise<number> {
     try {

@@ -9,7 +9,6 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { UsageLeaderboard } from "@/components/dashboard/UsageLeaderboard";
 import { getTenantLeaderboard } from "@/lib/transaction-history";
 import { SpendChart } from "@/components/dashboard/SpendChart";
-import { getApiKeysPageData } from "@/lib/api-keys-data";
 import { Coins, CheckCircle, Wallet, Zap } from "lucide-react";
 import { getSpendForecastData } from "@/lib/spend-chart-data";
 import { getFeeMultiplierData } from "@/lib/fee-multiplier-data";
@@ -17,6 +16,10 @@ import { FeeEstimatorWidget } from "@/components/dashboard/FeeEstimatorWidget";
 import { ExpenseBreakdown } from "@/components/dashboard/ExpenseBreakdown";
 import { getExpenseBreakdownData } from "@/lib/expense-breakdown-data";
 import { TelemetryConsentSettings } from "@/components/dashboard/TelemetryConsentSettings";
+import { getTreasuryCriticalBannerState } from "@/lib/treasury-critical-banner";
+import { AlertTriangle } from "lucide-react";
+import { LiveTransactionFeed } from "@/components/dashboard/LiveTransactionFeed";
+import { AdminGuidedTour } from "@/components/dashboard/AdminGuidedTour";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -25,6 +28,7 @@ export default async function AdminDashboard() {
   const spendForecast = await getSpendForecastData();
   const feeMultiplier = await getFeeMultiplierData();
   const expenseBreakdown = await getExpenseBreakdownData();
+  const treasuryCriticalState = getTreasuryCriticalBannerState(spendForecast);
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,6 +70,29 @@ export default async function AdminDashboard() {
       </div>
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {treasuryCriticalState.isCritical && (
+          <section className="mb-6 rounded-2xl border border-rose-300 bg-rose-50 p-5 shadow-sm" aria-live="assertive">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-700" />
+              <div>
+                <h2 className="text-base font-bold text-rose-900">{treasuryCriticalState.title}</h2>
+                <p className="mt-1 text-sm text-rose-800">{treasuryCriticalState.summary}</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-rose-700">
+                  {treasuryCriticalState.reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+                <Link
+                  href="/admin/billing"
+                  className="mt-3 inline-flex min-h-9 items-center justify-center rounded-full border border-rose-400 bg-white px-4 text-xs font-black uppercase tracking-wider text-rose-800 transition hover:bg-rose-100"
+                >
+                  Add Funds Now
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Stat Cards */}
         <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -122,7 +149,15 @@ export default async function AdminDashboard() {
         <section className="mt-6 space-y-6">
           <div className="flex flex-wrap gap-3">
             <Link
+              href="/admin/api-keys"
+              data-tour-step="create-key"
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-slate-950 px-6 text-sm font-black text-white transition hover:shadow-xl hover:-translate-y-0.5"
+            >
+              Create key
+            </Link>
+            <Link
               href="/admin/billing"
+              data-tour-step="billing-config"
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-primary/30 bg-primary/10 px-6 text-sm font-black text-primary transition hover:shadow-lg hover:-translate-y-0.5"
             >
               Billing & Quota
@@ -147,6 +182,7 @@ export default async function AdminDashboard() {
             </Link>
             <Link
               href="/admin/signers"
+              data-tour-step="manage-signer-pool"
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-border/50 glass  px-6 text-sm font-black text-foreground transition hover:shadow-lg hover:-translate-y-0.5"
             >
               Manage signer pool
@@ -158,11 +194,13 @@ export default async function AdminDashboard() {
               Open transaction history
             </Link>
           </div>
+          <LiveTransactionFeed />
           <TransactionsTable transactions={transactions} />
           <SignersTable signers={signers} />
           <UsageLeaderboard rows={tenantUsage} />
         </section>
       </main>
+      <AdminGuidedTour userKey={session?.user?.id ?? session?.user?.email ?? "anonymous"} />
     </div>
   );
 }

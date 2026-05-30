@@ -7,6 +7,10 @@ import swaggerUi from "swagger-ui-express";
 import { loadConfig } from "./config";
 import { AppError } from "./errors/AppError";
 import {
+  createSubTenantHandler,
+  getSubTenantsHandler,
+} from "./handlers/subTenantHandler";
+import {
   listApiKeysHandler,
   revokeApiKeyHandler,
   updateApiKeyChainsHandler,
@@ -52,7 +56,10 @@ import {
   createCheckoutSessionHandler,
   stripeWebhookHandler,
 } from "./handlers/stripe";
-import { getHorizonFailoverClient } from "./horizon/failoverClient";
+import {
+  getHorizonFailoverClient,
+  initializeHorizonFailoverClient,
+} from "./horizon/failoverClient";
 import { apiKeyMiddleware } from "./middleware/apiKeys";
 import { soc2RequestLogger } from "./middleware/soc2Logger";
 import {
@@ -60,6 +67,7 @@ import {
   notFoundHandler,
 } from "./middleware/errorHandler";
 import { apiKeyRateLimit } from "./middleware/rateLimit";
+import { networkSimulationMiddleware } from "./middleware/networkSimulation";
 import { tenantTierTxLimit } from "./middleware/txLimit";
 import { AlertService } from "./services/alertService";
 import { initializeFcmNotifier } from "./services/fcmNotifier";
@@ -106,24 +114,35 @@ import {
   getSARReportHandler,
   reviewSARReportHandler,
   getSARStatsHandler,
-  exportSARReportsHandler
+  exportSARReportsHandler,
 } from "./handlers/adminSAR";
 import { getSpendForecastHandler } from "./handlers/adminAnalytics";
 import { getFeeMultiplierHandler } from "./handlers/adminFeeMultiplier";
 import { estimateFeeHandler } from "./handlers/estimate";
 import { initializeDigestWorker } from "./workers/digestWorker";
-import { initializeTenantErasureWorker, TenantErasureWorker } from "./workers/tenantErasureWorker";
+import {
+  initializeTenantErasureWorker,
+  TenantErasureWorker,
+} from "./workers/tenantErasureWorker";
 
 import { initializeTreasuryRefill } from "./workers/treasuryRefill";
 import { initializeTreasurySweeper } from "./tasks/sweeper";
 import { TreasuryRebalancer } from "./services/treasuryRebalancer";
 import { initializeFeeManager } from "./services/feeManager";
-import { initializeOFACScreening, stopOFACScreening } from "./services/ofacScreening";
+import {
+  initializeOFACScreening,
+  stopOFACScreening,
+} from "./services/ofacScreening";
 import { initializeRegionalDbs, DEFAULT_REGION } from "./services/regionRouter";
 import { requireAuthenticatedAdmin, requirePermission } from "./utils/adminAuth";
 import { ensureAuditLogTableIntegrity } from "./services/auditLogger";
 import { ipFilterMiddleware } from "./middleware/ipFilter";
-import { deleteCurrentTenantHandler, deleteTenantByAdminHandler } from "./handlers/tenantErasure";
+import { cspMiddleware } from "./middleware/csp";
+
+import {
+  deleteCurrentTenantHandler,
+  deleteTenantByAdminHandler,
+} from "./handlers/tenantErasure";
 import { listAuditLogsHandler } from "./handlers/adminAuditLogs";
 import { exportAuditLogHandler } from "./handlers/adminAuditLog";
 import { getMultiChainStatsHandler } from "./handlers/adminMultiChainStats";
@@ -133,6 +152,22 @@ import {
   startChainRegistryHotReload,
   stopChainRegistryHotReload,
 } from "./services/chainRegistryService";
+import { createBullBoard } from "@bull-board/api";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+import { ExpressAdapter } from "@bull-board/express";
+import { feeBumpQueue, feeBumpQueueEvents } from "./queues/feeBumpQueue";
+import { initializeFeeBumpWorker } from "./workers/feeBumpWorker";
+import {
+  initializePartitionMaintenanceWorker,
+  PartitionMaintenanceWorker,
+} from "./workers/partitionMaintenanceWorker";
+import { enterpriseWhiteLabelHandler } from "./handlers/enterpriseWhiteLabel";
+import { fiatToFeeGatewayHandler } from "./handlers/fiatToFeeGateway";
+import { enhancedWebhooksV2Handler } from "./handlers/enhancedWebhooksV2";
+import { samlLoginHandler, samlCallbackHandler } from "./handlers/samlSso";
+import { ammSwapHandler } from "./handlers/ammWrapper";
+import { DatabaseRecoveryDrillsService } from "./services/databaseRecoveryDrills";
+import { DatabaseRecoveryDrillsWorker } from "./workers/databaseRecoveryDrillsWorker";
 
 const logger = createLogger({ component: "server" });
 const config = loadConfig();
@@ -174,6 +209,7 @@ treasuryRebalancer.setAlertService(alertService);
 const app = express();
 
 app.use(ipFilterMiddleware);
+app.use(cspMiddleware());
 app.use(express.json());
 app.use(soc2RequestLogger);
 
@@ -233,6 +269,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(networkSimulationMiddleware(config));
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err.message === "Origin not allowed by CORS") {
@@ -311,14 +348,13 @@ app.post(
   },
 );
 
-
 // Fee bump endpoint
 app.post(
   "/fee-bump",
   apiKeyMiddleware,
   apiKeyRateLimit,
   tenantTierTxLimit,
-  limiter,
+  limiter as any,
   (req: Request, res: Response, next: NextFunction) => {
     void feeBumpHandler(req, res, next, config);
   },
@@ -329,7 +365,7 @@ app.post(
   apiKeyMiddleware,
   apiKeyRateLimit,
   tenantTierTxLimit,
-  limiter,
+  limiter as any,
   (req: Request, res: Response, next: NextFunction) => {
     feeBumpBatchHandler(req, res, next, config);
   },
@@ -338,7 +374,6 @@ app.post(
 app.delete("/tenant", apiKeyMiddleware, (req: Request, res: Response, next: NextFunction) => {
   void deleteCurrentTenantHandler(req, res, next);
 });
-
 
 app.post(
   "/test/alerts/low-balance",
@@ -357,6 +392,19 @@ app.post(
       next(error);
     }
   },
+);
+
+// Bull Board — job queue admin UI
+const bullBoardAdapter = new ExpressAdapter();
+bullBoardAdapter.setBasePath("/admin/queues");
+createBullBoard({
+  queues: [new BullMQAdapter(feeBumpQueue)],
+  serverAdapter: bullBoardAdapter,
+});
+app.use(
+  "/admin/queues",
+  requireAuthenticatedAdmin(),
+  bullBoardAdapter.getRouter(),
 );
 
 app.post("/admin/auth/login", adminLoginHandler);
@@ -399,7 +447,6 @@ app.post("/admin/webhooks/dlq/replay", requirePermission("manage_config"), repla
 app.post("/admin/webhooks/dlq/delete", requirePermission("manage_config"), deleteDlqHandler);
 app.get("/admin/audit-log/export", requirePermission("view_audit_logs"), exportAuditLogHandler);
 
-
 // Notification centre routes (SSE must be registered before /:id/read)
 app.get("/admin/notifications/sse", (req: Request, res: Response) =>
   notificationSseHandler(req, res),
@@ -423,7 +470,7 @@ app.post(
   stripeWebhookHandler,
 );
 app.post("/create-checkout-session", createCheckoutSessionHandler);
-app.post("/estimate", limiter, estimateFeeHandler(config));
+app.post("/estimate", limiter as any, estimateFeeHandler(config));
 
 // Daily digest
 app.get("/admin/digest/unsubscribe", digestUnsubscribeHandler);
@@ -488,7 +535,6 @@ app.delete("/admin/chains/:id", (req: Request, res: Response) => {
   void deleteChainHandler(req, res);
 });
 
-
 app.get("/admin/sar/stats", (req: Request, res: Response) => {
   void getSARStatsHandler(req, res);
 });
@@ -505,6 +551,51 @@ app.patch("/admin/sar/:id/review", (req: Request, res: Response) => {
   void reviewSARReportHandler(req, res);
 });
 
+app.post("/admin/enterprise/white-label", enterpriseWhiteLabelHandler);
+app.post("/fiat-to-fee/top-up", fiatToFeeGatewayHandler);
+app.post("/webhooks/v2", enhancedWebhooksV2Handler);
+
+// SAML SSO endpoints
+app.get("/admin/auth/saml/login", samlLoginHandler);
+app.post("/admin/auth/saml/callback", express.urlencoded({ extended: true }), samlCallbackHandler);
+
+// AMM Swap endpoint (sponsored gasless wrapper)
+app.post("/admin/amm/swap", apiKeyMiddleware, (req, res, next) => {
+  void ammSwapHandler(req, res, next, config);
+});
+
+// Database Recovery Drill trigger endpoint
+app.post(
+  "/admin/db/recovery-drill",
+  requireAuthenticatedAdmin(),
+  async (req, res, next) => {
+    try {
+      const drillService = new DatabaseRecoveryDrillsService();
+      const report = await drillService.runDrill();
+      res.json(report);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Sub-tenant (reseller accounts)
+app.post(
+  "/admin/tenants/:tenantId/sub-tenants",
+  requirePermission("manage_tenants"),
+  (req: Request, res: Response) => {
+    void createSubTenantHandler(req, res);
+  },
+);
+
+app.get(
+  "/admin/tenants/:tenantId/sub-tenants",
+  requirePermission("view_tenants"),
+  (req: Request, res: Response) => {
+    void getSubTenantsHandler(req, res);
+  },
+);
+
 app.use(notFoundHandler);
 app.use(createGlobalErrorHandler(slackNotifier));
 
@@ -516,6 +607,10 @@ let incidentMonitor: ReturnType<typeof initializeIncidentMonitor> | null = null;
 let treasurySweeper: ReturnType<typeof initializeTreasurySweeper> | null = null;
 let digestWorker: ReturnType<typeof initializeDigestWorker> | null = null;
 let tenantErasureWorker: TenantErasureWorker | null = null;
+let treasuryRefillWorker: ReturnType<typeof initializeTreasuryRefill> | null = null;
+let feeBumpWorker: ReturnType<typeof initializeFeeBumpWorker> | null = null;
+let partitionMaintenanceWorker: PartitionMaintenanceWorker | null = null;
+let dbRecoveryDrillsWorker: DatabaseRecoveryDrillsWorker | null = null;
 let shuttingDown = false;
 let server: ReturnType<typeof app.listen> | null = null;
 
@@ -525,6 +620,8 @@ async function shutdown(signal: string): Promise<void> {
   }
 
   shuttingDown = true;
+  logger.info(`Received ${signal}, starting graceful shutdown...`);
+
   await slackNotifier.notifyServerLifecycle({
     detail: `Signal received: ${signal}`,
     phase: "stop",
@@ -540,22 +637,40 @@ async function shutdown(signal: string): Promise<void> {
   stopChainRegistryHotReload();
   stopOFACScreening();
   treasurySweeper?.stop();
+  partitionMaintenanceWorker?.stop();
+  await dbRecoveryDrillsWorker?.stop();
+  await feeBumpWorker?.close();
+  await feeBumpQueueEvents.close();
+  await feeBumpQueue.close();
 
   if (server) {
-    server.close(() => process.exit(0));
-    setTimeout(() => process.exit(0), 2_000).unref();
+    server.close(() => {
+      logger.info("HTTP server closed");
+      process.exit(0);
+    });
+    setTimeout(() => {
+      logger.warn("HTTP server close timeout, forcing exit");
+      process.exit(0);
+    }, 5000).unref();
     return;
   }
 
   process.exit(0);
 }
 
+process.on("SIGTERM", () => void shutdown("SIGTERM"));
+process.on("SIGINT", () => void shutdown("SIGINT"));
+
 // --- Background Workers ---
-let ledgerMonitorInstance: any = null;
 if (config.horizonUrls.length > 0) {
   try {
-    ledgerMonitorInstance = initializeLedgerMonitor(config);
-    ledgerMonitorInstance.start();
+    const horizonFailoverClient = initializeHorizonFailoverClient(config);
+    ledgerMonitor = initializeLedgerMonitor(
+      config,
+      undefined,
+      horizonFailoverClient,
+    );
+    ledgerMonitor.start();
     logger.info("Ledger monitor worker started");
   } catch (error) {
     logger.error(
@@ -609,9 +724,9 @@ if (pagerDutyNotifier.isConfigured() || fcmNotifier.isConfigured()) {
 }
 
 try {
-  const treasuryRefill = initializeTreasuryRefill(config);
-  if (treasuryRefill) {
-    treasuryRefill.start();
+  treasuryRefillWorker = initializeTreasuryRefill(config);
+  if (treasuryRefillWorker) {
+    treasuryRefillWorker.start();
     logger.info("Treasury refill worker started");
   }
 } catch (error) {
@@ -690,6 +805,36 @@ try {
   logger.error(
     { ...serializeError(error) },
     "Failed to start treasury sweeper worker",
+  );
+}
+
+try {
+  feeBumpWorker = initializeFeeBumpWorker(config);
+} catch (error) {
+  logger.error(
+    { ...serializeError(error) },
+    "Failed to start fee-bump queue worker",
+  );
+}
+
+try {
+  partitionMaintenanceWorker = initializePartitionMaintenanceWorker();
+  partitionMaintenanceWorker.start();
+} catch (error) {
+  logger.error(
+    { ...serializeError(error) },
+    "Failed to start partition maintenance worker",
+  );
+}
+
+try {
+  dbRecoveryDrillsWorker = new DatabaseRecoveryDrillsWorker();
+  dbRecoveryDrillsWorker.start();
+  logger.info("Database recovery drills worker started");
+} catch (error) {
+  logger.error(
+    { ...serializeError(error) },
+    "Failed to start database recovery drills worker",
   );
 }
 

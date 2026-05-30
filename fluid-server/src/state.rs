@@ -28,6 +28,7 @@ pub struct ApiKeyConfig {
     pub daily_quota_stroops: i64,
     pub key: &'static str,
     pub max_requests: u32,
+    #[allow(dead_code)]
     pub name: &'static str,
     pub tenant_id: &'static str,
     pub tier: &'static str,

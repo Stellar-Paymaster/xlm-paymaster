@@ -67,4 +67,16 @@ describe("checkTenantDailyQuota", () => {
     expect(result.projectedTxCount).toBe(121);
     expect(result.projectedSpendStroops).toBe(205_000);
   });
+
+  it("accounts for multiple transactions in a batch quota check", async () => {
+    mockedSpend.mockResolvedValue(800_000);
+    mockedCount.mockResolvedValue(8);
+
+    const result = await checkTenantDailyQuota(buildTenant(), 50_000, 3);
+
+    expect(result.allowed).toBe(false);
+    expect(result.currentTxCount).toBe(8);
+    expect(result.projectedTxCount).toBe(11);
+    expect(result.txLimit).toBe(10);
+  });
 });

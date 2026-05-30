@@ -1,20 +1,28 @@
 ## Title
-feat: server hardening reliability hooks
+feat: horizon-failover-logic-polish
 
 ## Summary
 
-- Adds Prisma index audit logic and required compound indexes for large `Transaction` and `AuditLog` tables.
-- Adds critical treasury rebalancer failure alerting through `AlertService`, Slack, and persisted admin notifications.
-- Adds a disabled-by-default third-party KYC hook before fee sponsorship.
-- Adds environment-tuned ledger monitor concurrency controls.
+- Hardens `HorizonFailoverClient` with explicit `Active` / `Degraded` /
+  `Inactive` states, cooldown-based suppression, and recovery probes.
+- Prevents non-retryable Horizon submission errors from poisoning node health.
+- Initializes a shared Horizon failover client during server startup and passes
+  it into `LedgerMonitor` so worker paths observe the same node state.
+- Adds targeted unit and worker-level failover coverage plus docs and
+  verification artifacts.
 
 ## Verification
 
-Not run per request. Added focused unit coverage for Prisma index audit, KYC decisions, treasury rebalancer alerting, and ledger monitor concurrency.
+- Added `src/horizon/failoverClient.test.ts`
+- Added `src/workers/ledgerMonitor.failover.test.ts`
+- Added [`verification/horizon-failover-logic-polish.md`](verification/horizon-failover-logic-polish.md)
+- Execution is currently blocked by missing local `vitest` binaries and
+  pre-existing parse errors in `src/services/alertService.ts` and
+  `src/test-alert.ts`
 
 ## Issues
 
-Closes #453
-Closes #462
-Closes #447
-Closes #465
+Closes #461
+Refs #469
+Refs #451
+Refs #466

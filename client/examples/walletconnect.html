@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluid SDK – WalletConnect Universal Signing Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; background: #0f172a; color: #e2e8f0; }
+    h1 { color: #38bdf8; }
+    h2 { color: #7dd3fc; margin-top: 2rem; }
+    pre { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 13px; }
+    code { color: #a5f3fc; }
+    button { background: #0ea5e9; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin: 4px 2px; }
+    button:hover { background: #38bdf8; }
+    button:disabled { background: #475569; cursor: not-allowed; }
+    #log { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; min-height: 120px; font-family: monospace; font-size: 13px; white-space: pre-wrap; overflow-y: auto; max-height: 420px; }
+    .ok  { color: #4ade80; }
+    .err { color: #f87171; }
+    .inf { color: #94a3b8; }
+    #status { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>⚡ Fluid SDK – WalletConnect Universal Signing</h1>
+  <p>
+    This page loads the Fluid client via a plain <code>&lt;script&gt;</code> tag and
+    the Stellar SDK from a CDN. It demonstrates the <strong>standard WalletConnect
+    bindings</strong> for universal signing: building the Stellar
+    <code>requiredNamespaces</code>, parsing the connected account, and signing a
+    transaction through the <code>WalletConnectSigner</code> — all behind the same
+    <code>WalletSigner</code> interface that Freighter, the Stellar Wallets Kit, or an
+    in-process keypair also satisfy.
+  </p>
+  <p>
+    To keep the demo self-contained, a <em>mock</em> WalletConnect provider signs with a
+    throwaway keypair instead of a paired mobile wallet. Swap it for a real
+    <code>@walletconnect/sign-client</code> instance to talk to a live wallet.
+  </p>
+
+  <!-- Stellar SDK (browser global: StellarSdk) -->
+  <script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@11.3.0/dist/stellar-sdk.min.js"></script>
+  <!-- Fluid standalone bundle (build with: npm run build:standalone) -->
+  <script src="../dist/fluid.min.js"></script>
+
+  <p>Status: <span id="status" class="inf">idle</span></p>
+  <div>
+    <button id="btn-namespaces">1 · Show requiredNamespaces</button>
+    <button id="btn-sign">2 · Sign via WalletConnect</button>
+    <button id="btn-clear">Clear log</button>
+  </div>
+  <br />
+  <div id="log"></div>
+
+  <script>
+    const TESTNET = 'Test SDF Network ; September 2015';
+    const log = document.getElementById('log');
+    const status = document.getElementById('status');
+
+    function print(msg, cls = 'inf') {
+      const line = document.createElement('span');
+      line.className = cls;
+      line.textContent = msg + '\n';
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+    }
+    function setStatus(msg, cls) { status.textContent = msg; status.className = cls; }
+
+    print('Fluid global available: ' + (typeof Fluid !== 'undefined'), 'ok');
+    print('Fluid.WalletConnectSigner: ' + typeof Fluid.WalletConnectSigner, 'ok');
+    print('StellarSdk available: ' + (typeof StellarSdk !== 'undefined'), 'ok');
+
+    // A throwaway keypair stands in for the user's wallet key.
+    const walletKeypair = StellarSdk.Keypair.random();
+
+    // (1) The namespaces an app requests when opening a WalletConnect session.
+    document.getElementById('btn-namespaces').addEventListener('click', () => {
+      const ns = Fluid.buildStellarRequiredNamespaces({ chains: [Fluid.STELLAR_CHAINS.TESTNET] });
+      print('requiredNamespaces:', 'inf');
+      print(JSON.stringify(ns, null, 2), 'ok');
+      setStatus('namespaces ready', 'ok');
+    });
+
+    // A mock WalletConnect provider: signs locally instead of round-tripping
+    // to a paired wallet. Shape matches `signClient.request(...)`.
+    const mockProvider = {
+      async request({ request }) {
+        const { xdr } = request.params;
+        const tx = StellarSdk.TransactionBuilder.fromXDR(xdr, TESTNET);
+        tx.sign(walletKeypair);
+        return { signedXDR: tx.toXDR() };
+      },
+    };
+
+    function buildUnsignedXdr() {
+      const account = new StellarSdk.Account(walletKeypair.publicKey(), '1');
+      const tx = new StellarSdk.TransactionBuilder(account, {
+        fee: StellarSdk.BASE_FEE,
+        networkPassphrase: TESTNET,
+      })
+        .addOperation(StellarSdk.Operation.payment({
+          destination: StellarSdk.Keypair.random().publicKey(),
+          asset: StellarSdk.Asset.native(),
+          amount: '1',
+        }))
+        .setTimeout(180)
+        .build();
+      return tx.toXDR();
+    }
+
+    // (2) Sign through the WalletConnect binding.
+    document.getElementById('btn-sign').addEventListener('click', async () => {
+      setStatus('signing…', 'inf');
+      try {
+        const session = {
+          topic: 'demo-topic',
+          namespaces: {
+            stellar: {
+              accounts: [Fluid.STELLAR_CHAINS.TESTNET + ':' + walletKeypair.publicKey()],
+              methods: ['stellar_signXDR', 'stellar_signAndSubmitXDR'],
+              events: [],
+            },
+          },
+        };
+
+        print('Parsed accounts: ' + JSON.stringify(Fluid.parseStellarAccounts(session)), 'inf');
+
+        const signer = Fluid.createWalletConnectSigner(mockProvider, session, {
+          networkPassphrase: TESTNET,
+        });
+
+        const unsignedXdr = buildUnsignedXdr();
+        print('Unsigned XDR: ' + unsignedXdr.slice(0, 44) + '…', 'inf');
+
+        const signed = await signer.signTransaction(unsignedXdr);
+        print('signerAddress: ' + signed.signerAddress, 'ok');
+        print('signedTxXdr:   ' + signed.signedTxXdr.slice(0, 44) + '…', 'ok');
+
+        const verify = StellarSdk.TransactionBuilder.fromXDR(signed.signedTxXdr, TESTNET);
+        print('signatures on envelope: ' + verify.signatures.length, 'ok');
+        setStatus('signed ✓', 'ok');
+
+        // In a real app you would now fee-bump:
+        //   const client = new Fluid.FluidClient({ serverUrl, networkPassphrase: TESTNET });
+        //   await client.buildAndRequestFeeBumpWithWallet(signer, unsignedXdr);
+      } catch (e) {
+        print('Error: ' + e.message, 'err');
+        setStatus('error', 'err');
+      }
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', () => { log.innerHTML = ''; });
+  </script>
+</body>
+</html>

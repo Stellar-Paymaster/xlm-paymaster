@@ -1,14 +1,16 @@
 import cron from "node-cron";
-import { logger } from "../utils/logger";
+import { logger as globalLogger } from "../utils/logger";
 import { TenantUsageTracker } from "../services/tenantUsageTracker";
 import { IntelligentRateLimiter } from "../services/intelligentRateLimiter";
+import { BaseWorker } from "./baseWorker";
 
-export class DailyScoringWorker {
+export class DailyScoringWorker extends BaseWorker {
   private usageTracker: TenantUsageTracker;
   private rateLimiter: IntelligentRateLimiter;
-  private isRunning: boolean = false;
+  private task: cron.ScheduledTask | null = null;
 
   constructor() {
+    super();
     this.usageTracker = new TenantUsageTracker();
     this.rateLimiter = new IntelligentRateLimiter();
   }
@@ -18,46 +20,47 @@ export class DailyScoringWorker {
    * Runs every day at 2 AM UTC
    */
   start(): void {
-    // Schedule daily job at 2 AM UTC
-    cron.schedule("0 2 * * *", async () => {
-      if (this.isRunning) {
-        logger.warn("Daily scoring job is already running, skipping");
+    this.task = cron.schedule("0 2 * * *", () => {
+      if (this.currentPromise) {
+        this.logger.warn("Daily scoring job is already running, skipping");
         return;
       }
 
-      await this.runDailyScoring();
+      void this.runCycle(() => this.runDailyScoring());
     }, {
       timezone: "UTC"
     });
 
-    logger.info("Daily scoring worker started - scheduled to run daily at 2 AM UTC");
+    this.logger.info("Daily scoring worker started - scheduled to run daily at 2 AM UTC");
+  }
+
+  protected clearScheduledTasks(): void {
+    if (this.task) {
+      this.task.stop();
+      this.task = null;
+    }
   }
 
   /**
    * Run the daily scoring job manually
    */
   async runDailyScoring(): Promise<void> {
-    if (this.isRunning) {
-      throw new Error("Daily scoring job is already running");
-    }
-
-    this.isRunning = true;
     const startTime = Date.now();
 
     try {
-      logger.info("Starting daily tenant scoring job");
+      this.logger.info("Starting daily tenant scoring job");
 
       // Step 1: Update daily statistics for all tenants
       await this.usageTracker.updateDailyStats();
-      logger.info("Daily statistics updated");
+      this.logger.info("Daily statistics updated");
 
       // Step 2: Process intelligent rate limit adjustments
       const adjustments = await this.rateLimiter.processAutoAdjustments();
-      logger.info(`Processed ${adjustments.length} tier adjustments`);
+      this.logger.info(`Processed ${adjustments.length} tier adjustments`);
 
       // Step 3: Log summary
       const duration = Date.now() - startTime;
-      logger.info(`Daily scoring job completed in ${duration}ms`, {
+      this.logger.info(`Daily scoring job completed in ${duration}ms`, {
         adjustmentsProcessed: adjustments.length,
         duration
       } as any);
@@ -68,13 +71,11 @@ export class DailyScoringWorker {
       }
 
     } catch (error) {
-      logger.error("Daily scoring job failed", {
+      this.logger.error("Daily scoring job failed", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         duration: Date.now() - startTime
       } as any);
-    } finally {
-      this.isRunning = false;
     }
   }
 
@@ -112,7 +113,7 @@ export class DailyScoringWorker {
       });
 
     } catch (error) {
-      logger.error("Failed to create admin summary notification", {
+      this.logger.error("Failed to create admin summary notification", {
         error: error instanceof Error ? error.message : String(error)
       } as any);
     }
@@ -123,19 +124,12 @@ export class DailyScoringWorker {
    */
   getStatus(): { isRunning: boolean; lastRun?: Date } {
     return {
-      isRunning: this.isRunning,
+      isRunning: this.currentPromise !== null,
       // TODO: Add last run tracking if needed
     };
   }
-
-  /**
-   * Stop the worker
-   */
-  stop(): void {
-    cron.getTasks().forEach((task: any) => task.stop());
-    logger.info("Daily scoring worker stopped");
-  }
 }
+
 
 // Export singleton instance
 export const dailyScoringWorker = new DailyScoringWorker();

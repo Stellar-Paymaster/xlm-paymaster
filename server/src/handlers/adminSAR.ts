@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../utils/db";
+import { prisma, replicaDb } from "../utils/db";
 
 function requireAdminToken(req: Request, res: Response): boolean {
   const token = req.header("x-admin-token");
@@ -26,7 +26,7 @@ export async function listSARReportsHandler(req: Request, res: Response): Promis
   const sarStatus = status && typeof status === "string" ? status : undefined;
 
   try {
-    const reports = await prisma.sARReport.findMany({
+    const reports = await replicaDb.sARReport.findMany({
       where: sarStatus ? { status: sarStatus } : undefined,
       include: {
         tenant: { select: { name: true } },
@@ -77,7 +77,7 @@ export async function getSARReportHandler(req: Request, res: Response): Promise<
   const { id } = req.params;
 
   try {
-    const report = await prisma.sARReport.findUnique({
+    const report = await replicaDb.sARReport.findUnique({
       where: { id },
       include: {
         tenant: { select: { name: true, subscriptionTier: { select: { name: true } } } },
@@ -103,7 +103,7 @@ export async function getSARReportHandler(req: Request, res: Response): Promise<
     // Fetch recent transactions from the same tenant around the same time for context
     const contextStart = new Date(report.createdAt.getTime() - 2 * 60 * 1000); // 2 min before
     const contextEnd = new Date(report.createdAt.getTime() + 2 * 60 * 1000);   // 2 min after
-    const contextTxns = await prisma.transaction.findMany({
+    const contextTxns = await replicaDb.transaction.findMany({
       where: {
         tenantId: report.tenantId,
         createdAt: { gte: contextStart, lte: contextEnd }
@@ -219,12 +219,12 @@ export async function getSARStatsHandler(req: Request, res: Response): Promise<v
     const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const [pending, confirmed, falsePositive, last24hCount, last7dCount, byRule] = await Promise.all([
-      prisma.sARReport.count({ where: { status: "pending_review" } }),
-      prisma.sARReport.count({ where: { status: "confirmed_suspicious" } }),
-      prisma.sARReport.count({ where: { status: "false_positive" } }),
-      prisma.sARReport.count({ where: { createdAt: { gte: last24h } } }),
-      prisma.sARReport.count({ where: { createdAt: { gte: last7d } } }),
-      prisma.sARReport.groupBy({
+      replicaDb.sARReport.count({ where: { status: "pending_review" } }),
+      replicaDb.sARReport.count({ where: { status: "confirmed_suspicious" } }),
+      replicaDb.sARReport.count({ where: { status: "false_positive" } }),
+      replicaDb.sARReport.count({ where: { createdAt: { gte: last24h } } }),
+      replicaDb.sARReport.count({ where: { createdAt: { gte: last7d } } }),
+      replicaDb.sARReport.groupBy({
         by: ["ruleCode"],
         _count: { id: true },
         where: { status: "pending_review" }
@@ -266,7 +266,7 @@ export async function exportSARReportsHandler(req: Request, res: Response): Prom
   const toDate = to && typeof to === "string" ? new Date(to) : undefined;
 
   try {
-    const reports = await prisma.sARReport.findMany({
+    const reports = await replicaDb.sARReport.findMany({
       where: {
         ...(exportStatus ? { status: exportStatus } : {}),
         ...((fromDate || toDate) ? {

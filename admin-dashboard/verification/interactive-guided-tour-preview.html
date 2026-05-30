@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive Guided Tour Preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07111f;
+        --panel: rgba(15, 23, 42, 0.92);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --accent: #22d3ee;
+        --accent-2: #60a5fa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(34, 211, 238, 0.16), transparent 28%),
+          radial-gradient(circle at right center, rgba(96, 165, 250, 0.16), transparent 26%),
+          linear-gradient(180deg, #08111f 0%, #050b16 100%);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .shell {
+        width: min(1240px, calc(100vw - 32px));
+        min-height: 720px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 28px;
+        background: rgba(9, 15, 29, 0.88);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(18px);
+        position: relative;
+        padding: 32px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: start;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.28em;
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 900;
+        margin: 0 0 8px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(30px, 4vw, 58px);
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+      }
+
+      .subtext {
+        margin: 12px 0 0;
+        max-width: 680px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .pill {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px 18px;
+        background: rgba(255, 255, 255, 0.04);
+        min-width: 280px;
+      }
+
+      .pill .label {
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        color: var(--muted);
+        margin-bottom: 10px;
+        font-weight: 800;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .action {
+        min-height: 48px;
+        padding: 0 22px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 14px;
+        letter-spacing: 0.02em;
+        color: white;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .action.primary {
+        background: linear-gradient(135deg, #0f172a, #020617);
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+
+      .action.billing {
+        background: rgba(34, 211, 238, 0.12);
+        color: #67e8f9;
+        border-color: rgba(34, 211, 238, 0.3);
+      }
+
+      .tour-highlight {
+        position: absolute;
+        top: 238px;
+        left: 32px;
+        width: 118px;
+        height: 48px;
+        border-radius: 999px;
+        border: 2px solid rgba(34, 211, 238, 0.9);
+        box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.7), 0 0 0 6px rgba(34, 211, 238, 0.24);
+        pointer-events: none;
+      }
+
+      .tour-card {
+        position: absolute;
+        top: 294px;
+        left: 32px;
+        width: 360px;
+        border-radius: 28px;
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+      }
+
+      .tour-head {
+        padding: 18px 20px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(34, 211, 238, 0.12);
+        border: 1px solid rgba(34, 211, 238, 0.25);
+        color: #a5f3fc;
+        text-transform: uppercase;
+        letter-spacing: 0.28em;
+        font-size: 10px;
+        font-weight: 900;
+      }
+
+      .tour-title {
+        margin: 14px 0 0;
+        font-size: 20px;
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+      }
+
+      .tour-body {
+        padding: 18px 20px 20px;
+        color: #cbd5e1;
+        line-height: 1.65;
+        font-size: 14px;
+      }
+
+      .tour-meta {
+        margin-top: 16px;
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        font-size: 10px;
+        font-weight: 900;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 20px 18px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .button {
+        border: 0;
+        border-radius: 999px;
+        min-height: 40px;
+        padding: 0 16px;
+        font: inherit;
+        font-weight: 800;
+        cursor: default;
+      }
+
+      .button.secondary {
+        color: #f8fafc;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #020617;
+      }
+
+      .progress {
+        height: 6px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+        margin-top: 14px;
+      }
+
+      .progress > div {
+        width: 33%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="header">
+        <div>
+          <p class="eyebrow">Fluid Admin</p>
+          <h1>Node Operations Dashboard</h1>
+          <p class="subtext">
+            First-login guided onboarding highlights the exact controls new admins need:
+            create API keys, manage the signer pool, and configure billing without hunting
+            through the interface.
+          </p>
+        </div>
+        <aside class="pill">
+          <div class="label">New admin status</div>
+          <strong>Welcome, ops@example.com</strong>
+          <div style="margin-top: 8px; color: var(--muted); font-size: 14px; line-height: 1.5;">
+            Guided tour auto-opens on first login and stores completion per user.
+          </div>
+        </aside>
+      </section>
+
+      <section class="actions" aria-label="Quick actions">
+        <div class="action primary" data-tour-step="create-key">Create key</div>
+        <div class="action billing" data-tour-step="billing-config">Billing & Quota</div>
+        <div class="action" data-tour-step="manage-signer-pool">Manage signer pool</div>
+      </section>
+
+      <div class="tour-highlight" aria-hidden="true"></div>
+
+      <section class="tour-card" aria-label="Guided tour step">
+        <div class="tour-head">
+          <span class="badge">First-login guide</span>
+          <h2 class="tour-title">Create a new API key</h2>
+        </div>
+        <div class="tour-body">
+          Open API Key Management first to create, scope, or revoke access keys before you
+          wire a tenant into production.
+          <div class="tour-meta">
+            <span>Step 1 of 3</span>
+            <span>Target visible</span>
+          </div>
+          <div class="progress"><div></div></div>
+        </div>
+        <div class="controls">
+          <button class="button secondary">Skip tour</button>
+          <button class="button primary">Next</button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

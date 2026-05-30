@@ -1,6 +1,7 @@
 use axum::http::StatusCode;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ed25519_dalek::{Signer, SigningKey};
+use bytes::Bytes;
 use sha2::{Digest, Sha256};
 use stellar_strkey::Strkey;
 use stellar_xdr::curr::{
@@ -28,8 +29,16 @@ pub fn create_fee_bump_transaction(
     signer_secret: &str,
     signer_public_key_bytes: &[u8; 32],
 ) -> Result<CreatedFeeBumpTransaction, AppError> {
-    let trimmed = input_xdr.trim();
-    let parsed_inner = xdr::parse_xdr(trimmed).map_err(|error| {
+    // Validate the input XDR shape before attempting any decode or deserialization.
+    let validated_xdr = xdr::validate_xdr_input(input_xdr).map_err(|error| {
+        AppError::new(
+            StatusCode::BAD_REQUEST,
+            "INVALID_XDR",
+            format!("{error}"),
+        )
+    })?;
+
+    let parsed_inner = xdr::parse_xdr(validated_xdr).map_err(|error| {
         AppError::new(
             StatusCode::BAD_REQUEST,
             "INVALID_XDR",
@@ -38,7 +47,7 @@ pub fn create_fee_bump_transaction(
     })?;
 
     let envelope = TransactionEnvelope::from_xdr(
-        STANDARD.decode(trimmed).map_err(|error| {
+        STANDARD.decode(validated_xdr).map_err(|error| {
             AppError::new(
                 StatusCode::BAD_REQUEST,
                 "INVALID_XDR",

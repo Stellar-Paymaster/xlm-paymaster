@@ -1,0 +1,90 @@
+{
+  "navigation": {
+    "dashboard": "仪表板",
+    "transactions": "交易",
+    "signers": "签名者",
+    "apiKeys": "API密钥",
+    "settings": "设置",
+    "referrals": "推荐",
+    "plugins": "插件",
+    "sdk": "SDK"
+  },
+  "buttons": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "estimate": "估算",
+    "refresh": "刷新",
+    "submit": "提交"
+  },
+  "status": {
+    "operational": "正常运行",
+    "degraded": "性能下降",
+    "outage": "中断",
+    "loading": "加载中...",
+    "error": "加载数据时出错"
+  },
+  "forms": {
+    "placeholder": {
+      "search": "搜索...",
+      "email": "输入您的电子邮件",
+      "description": "输入描述"
+    }
+  },
+  "labels": {
+    "latency": "延迟",
+    "uptime": "运行时间",
+    "lastChecked": "最后检查",
+    "region": "区域",
+    "fee": "费用",
+    "baseFee": "基础费用",
+    "congestionLevel": "拥塞级别",
+    "low": "低",
+    "medium": "中",
+    "high": "高"
+  },
+  "errors": {
+    "generic": "发生错误",
+    "network": "网络错误，请重试",
+    "invalidInput": "无效输入",
+    "unknownRegion": "未知区域"
+  },
+  "fee": {
+    "estimatedFee": "估算费用",
+    "estimatedStroops": "估算 stroops",
+    "estimatedXlm": "估算 XLM",
+    "estimatedUsd": "估算 USD",
+    "multiplierUsed": "使用的乘数",
+    "operationCount": "操作数量",
+    "operationTypes": "操作类型",
+    "source": "来源",
+    "openai": "OpenAI",
+    "fallback": "后备规则",
+    "baseNetworkFee": "基础网络费用 (stroops)",
+    "surgeMultiplier": " surge 乘数 (费用提升)"
+  },
+  "theme": {
+    "system": "系统",
+    "light": "亮色",
+    "dark": "暗色",
+    "highContrast": "高对比度"
+  },
+  "table": {
+    "timestamp": "时间戳",
+    "actor": "操作者",
+    "action": "动作",
+    "details": "详情",
+    "amount": "金额",
+    "asset": "资产",
+    "status": "状态",
+    "noResults": "未找到结果"
+  },
+  "time": {
+    "last24Hours": "最后24小时",
+    "last7Days": "最后7天",
+    "last30Days": "最后30天",
+    "allTime": "所有时间"
+  }
+}

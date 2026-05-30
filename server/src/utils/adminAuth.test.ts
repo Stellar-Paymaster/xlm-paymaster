@@ -62,6 +62,30 @@ describe("signAdminJwt / verifyAdminJwt", () => {
   it("returns null for an invalid token", () => {
     expect(verifyAdminJwt("not.a.jwt")).toBeNull();
   });
+
+  it("supports multi-key rotation via FLUID_ADMIN_JWT_SECRETS", () => {
+    vi.stubEnv("FLUID_ADMIN_JWT_SECRETS", "new-secret, old-secret");
+
+    const payload = { sub: "u1", email: "a@test.com", role: "ADMIN" as const, sessionVersion: 1 };
+    
+    // Sign with the new logic (will use 'new-secret')
+    const token1 = signAdminJwt(payload);
+    
+    // Simulate a token signed with the 'old-secret'
+    const jwt = require("jsonwebtoken");
+    const token2 = jwt.sign(
+      { ...payload, sessionVersion: 1 },
+      "old-secret",
+      { expiresIn: "8h" }
+    );
+
+    // Both should verify successfully
+    const decoded1 = verifyAdminJwt(token1);
+    expect(decoded1?.sub).toBe("u1");
+
+    const decoded2 = verifyAdminJwt(token2);
+    expect(decoded2?.sub).toBe("u1");
+  });
 });
 
 describe("resolveAdminRole", () => {

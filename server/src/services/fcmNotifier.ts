@@ -27,12 +27,19 @@ export interface FcmTransactionFailurePayload {
   detail: string;
 }
 
+export interface FcmTransactionSuccessPayload {
+  transactionHash: string;
+  tenantId: string;
+  detail: string;
+}
+
 export interface FcmNotifierLike {
   isConfigured(): boolean;
   getRegisteredTokens(): Promise<string[]>;
   notifyLowBalance(payload: FcmLowBalancePayload): Promise<number>;
   notifyServerDown(payload: FcmServerDownPayload): Promise<number>;
   notifyTransactionFailure(payload: FcmTransactionFailurePayload): Promise<number>;
+  notifyTransactionSuccess(payload: FcmTransactionSuccessPayload): Promise<number>;
 }
 
 // Minimal types for firebase-admin messaging to avoid needing type declarations
@@ -69,10 +76,11 @@ type FirebaseAdminModule = {
 };
 
 // Deep-link paths for each alert type
-const DEEP_LINK_PATHS: Record<FcmAlertType, string> = {
+const DEEP_LINK_PATHS: Record<FcmAlertType | "transaction_success", string> = {
   low_balance: "/admin/dashboard",
   server_down: "/admin/signers",
   transaction_failure: "/admin/transactions",
+  transaction_success: "/admin/transactions",
 };
 
 export interface FcmNotifierOptions {
@@ -166,6 +174,20 @@ export class FcmNotifier implements FcmNotifierLike {
       body: payload.detail,
       data: {
         type: "transaction_failure",
+        transactionHash: payload.transactionHash,
+        tenantId: payload.tenantId,
+      },
+    });
+  }
+
+  async notifyTransactionSuccess(
+    payload: FcmTransactionSuccessPayload,
+  ): Promise<number> {
+    return this.sendToAll("transaction_success" as any, {
+      title: "Transaction success",
+      body: payload.detail,
+      data: {
+        type: "transaction_success",
         transactionHash: payload.transactionHash,
         tenantId: payload.tenantId,
       },

@@ -79,6 +79,9 @@ Optional:
 - `FLUID_ALERT_EMAIL_FROM` / `FLUID_ALERT_EMAIL_TO` - Email sender and comma-separated recipients
 - `RESEND_API_KEY` / `RESEND_EMAIL_FROM` / `RESEND_EMAIL_TO` - Optional Resend API transport for low-balance alerts
 - `FLUID_ALERT_DASHBOARD_URL` - Dashboard link included in low-balance emails
+- `FLUID_NETWORK_SIMULATION_ENABLED` - Enable network latency and packet loss simulation (default: `false`)
+- `FLUID_NETWORK_LATENCY_MS` - Artificial delay in milliseconds (default: `0`)
+- `FLUID_NETWORK_PACKET_LOSS_RATE` - Probability of dropping a request, 0.0 to 1.0 (default: `0`)
 
 Rust gRPC engine env vars:
 
@@ -267,17 +270,6 @@ The server now supports redundant Horizon submission and monitoring:
 
 If a key exceeds its tier limit, the server returns `429 Too Many Requests` with a response that cites the API key limit.
 
-## Rate Limit Verification
-
-You can verify that rate limiting is applied per API key by sending three requests with the free key and then one with the pro key:
-
-```bash
-curl -X POST http://127.0.0.1:3000/fee-bump \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: fluid-free-demo-key" \
-  --data '{"xdr":"AAAA","submit":false}'
-```
-
 Repeat the same request three times within one minute. The first two requests will reach the handler, and the third returns `429 Too Many Requests`.
 
 Then send the same request with the pro key:
@@ -290,6 +282,28 @@ curl -X POST http://127.0.0.1:3000/fee-bump \
 ```
 
 That request still goes through because the limit is tracked separately per API key.
+
+## Network Latency Simulation
+
+The server can simulate degraded network conditions to test client resilience. This is useful for verifying how the SDK handles timeouts and packet loss.
+
+Enable it with:
+
+```bash
+FLUID_NETWORK_SIMULATION_ENABLED=true
+FLUID_NETWORK_LATENCY_MS=500
+FLUID_NETWORK_PACKET_LOSS_RATE=0.1
+```
+
+With these settings:
+- Every request will be delayed by 500ms.
+- Approximately 10% of requests will fail with `503 Service Unavailable` or `504 Gateway Timeout`.
+
+Run the network performance benchmark to verify:
+
+```bash
+npm run benchmark:network
+```
 
 ## Architecture
 

@@ -1,19 +1,4 @@
 {
-<<<<<<< HEAD
-  "dependencies": {
-    "@stellar/stellar-sdk": "^14.6.1",
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.3.1",
-    "nodemailer": "^8.0.4"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/node": "^25.5.0",
-    "@types/nodemailer": "^7.0.11"
-=======
   "name": "fluid",
   "version": "1.22.0",
   "private": true,
@@ -30,12 +15,25 @@
     "url": "https://github.com/Stellar-Fluid/fluid.git"
   },
   "license": "MIT",
+  "dependencies": {
+    "@stellar/stellar-sdk": "^14.6.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
+    "nodemailer": "^8.0.4"
+  },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "@types/nodemailer": "^7.0.11",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@changesets/cli": "^2.29.7",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
+    "husky": "^9.1.7",
     "nx": "22.6.3",
     "semantic-release": "^24.2.3",
     "@nx/eslint": "22.6.3",
@@ -51,6 +49,5 @@
     "changeset:publish": "changeset publish",
     "changeset:status": "changeset status --since=origin/main",
     "release:changesets": "changeset publish"
->>>>>>> upstream/main
   }
 }

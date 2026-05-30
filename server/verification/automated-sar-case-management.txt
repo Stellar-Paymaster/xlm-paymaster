@@ -1,0 +1,38 @@
+AUTOMATED SAR CASE MANAGEMENT VERIFICATION REPORT
+=================================================
+
+Date: 2026-04-24
+Task: #435 [Security & Compliance] Automated SAR Case Management
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Added `sarCaseManagement.ts` to `server/src/services/`.
+2. Implemented the `SarCaseManager` to handle SAR case lifecycles.
+3. Created a strict state machine preventing modifications to closed cases.
+4. Added comprehensive unit tests covering all interactions.
+5. Authored technical documentation outlining integration rules.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/services/sarCaseManagement.test.ts
+
+Result:
+  ✓ src/services/sarCaseManagement.test.ts > SarCaseManager > should create a new SAR case
+  ✓ src/services/sarCaseManagement.test.ts > SarCaseManager > should reject invalid risk scores
+  ✓ src/services/sarCaseManagement.test.ts > SarCaseManager > should retrieve an existing case
+  ✓ src/services/sarCaseManagement.test.ts > SarCaseManager > should list cases optionally filtered by tenantId
+  ✓ src/services/sarCaseManagement.test.ts > SarCaseManager > should update case status and add a note
+  ✓ src/services/sarCaseManagement.test.ts > SarCaseManager > should prevent updating a closed case
+  ✓ src/services/sarCaseManagement.test.ts > SarCaseManager > should add a note to an existing case without changing status
+
+  Test Files  1 passed (1)
+       Tests  7 passed (7)
+
+DESIGN / ACCESSIBILITY / SECURITY CHECKS
+----------------------------------------
+- Implemented state machine checks for case transitions to ensure closed cases cannot be tampered with.
+- Validated score bounds to prevent misconfigurations.
+- Enforced append-only operations for officer notes to maintain legal auditability.

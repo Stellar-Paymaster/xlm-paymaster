@@ -10,6 +10,8 @@ export default defineConfig([
     clean: false,
     outDir: "dist",
     platform: "browser",
+    treeshake: true,
+    splitting: true,
     skipNodeModulesBundle: false,
     esbuildOptions(options) {
       options.define = {
@@ -40,6 +42,17 @@ export default defineConfig([
         "process.env": "{}",
         global: "globalThis",
       };
+    },
+  },
+  // CLI build
+  {
+    entry: { cli: "src/cli/index.ts" },
+    format: ["cjs"],
+    clean: false,
+    outDir: "dist",
+    platform: "node",
+    banner: {
+      js: "#!/usr/bin/env node",
     },
   },
 ]);

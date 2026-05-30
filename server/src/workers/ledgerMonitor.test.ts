@@ -4,8 +4,16 @@ vi.mock("../services/webhook", () => ({
   WebhookService: class {},
 }));
 
+vi.mock("../utils/memoryProfiler", () => ({
+  MemoryProfiler: vi.fn().mockImplementation(class {
+    start = vi.fn();
+    stop = vi.fn();
+  }),
+}));
+
 import { LedgerMonitor } from "./ledgerMonitor";
 import { transactionStore } from "./transactionStore";
+import { MemoryProfiler } from "../utils/memoryProfiler";
 
 describe("LedgerMonitor", () => {
   it("sends a Slack alert when Horizon confirms a transaction as failed", async () => {
@@ -85,4 +93,55 @@ describe("LedgerMonitor", () => {
 
     expect((monitor as any).batchSize).toBe(12);
   });
+
+  it("initializes and controls the memory profiler when enabled in config", () => {
+    const config = {
+      horizonSelectionStrategy: "priority",
+      horizonUrls: ["https://horizon-testnet.stellar.org"],
+      workers: {
+        memoryProfiling: {
+          enabled: true,
+          logIntervalMs: 1000,
+          heapSnapshotIntervalMs: 5000,
+          snapshotPath: "/tmp",
+        },
+      },
+    } as any;
+    const webhookService = {
+      dispatch: vi.fn().mockResolvedValue(undefined),
+    };
+    const client = {
+      getNodeStatuses: vi.fn().mockReturnValue([]),
+      getTransaction: vi.fn(),
+    };
+
+    const monitor = new LedgerMonitor(
+      config,
+      webhookService as any,
+      undefined,
+      client as any,
+    );
+
+    let cycleFinished = false;
+    // Mock runCycle to simulate a long-running operation
+    monitor["runCycle"] = async (workFn) => {
+      monitor["currentPromise"] = (async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        cycleFinished = true;
+      })();
+      await monitor["currentPromise"];
+      monitor["currentPromise"] = null;
+    };
+
+    // Trigger a cycle manually
+    const cyclePromise = monitor["runCycle"](async () => {});
+    
+    // Call stop concurrently
+    const stopPromise = monitor.stop();
+    
+    await stopPromise;
+    expect(cycleFinished).toBe(true);
+    await cyclePromise;
+  });
 });
+
