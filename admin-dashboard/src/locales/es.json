@@ -86,5 +86,9 @@
     "last7Days": "Últimos 7 Días",
     "last30Days": "Últimos 30 Días",
     "allTime": "Todo el Tiempo"
+  },
+  "languageSwitcher": {
+    "select": "Seleccionar idioma",
+    "options": "Opciones de idioma"
   }
 }

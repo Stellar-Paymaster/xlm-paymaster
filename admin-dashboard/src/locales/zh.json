@@ -71,6 +71,10 @@
     "dark": "暗色",
     "highContrast": "高对比度"
   },
+  "languageSwitcher": {
+    "select": "选择语言",
+    "options": "语言选项"
+  },
   "table": {
     "timestamp": "时间戳",
     "actor": "操作者",

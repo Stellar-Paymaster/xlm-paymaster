@@ -2,6 +2,8 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { ChainRegistryManager } from "@/components/chains/ChainRegistryManager";
 import type { ChainRecord } from "@/components/chains/ChainRegistryManager";
+import { HorizonLatencyGrid } from "@/components/dashboard/HorizonLatencyGrid";
+import { getHorizonLatencyGridData } from "@/lib/horizon-monitor";
 
 async function fetchChains(): Promise<ChainRecord[]> {
   const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
@@ -27,7 +29,10 @@ async function fetchChains(): Promise<ChainRecord[]> {
 
 export default async function AdminChainsPage() {
   const session = await auth();
-  const chains = await fetchChains();
+  const [chains, horizonHealth] = await Promise.all([
+    fetchChains(),
+    getHorizonLatencyGridData(),
+  ]);
 
   return (
     <main className="min-h-screen bg-slate-100">
@@ -68,6 +73,7 @@ export default async function AdminChainsPage() {
 
       {/* ── Content ── */}
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <HorizonLatencyGrid endpoints={horizonHealth} />
         <ChainRegistryManager chains={chains} />
       </div>
     </main>

@@ -71,6 +71,10 @@
     "dark": "Escuro",
     "highContrast": "Alto Contraste"
   },
+  "languageSwitcher": {
+    "select": "Selecionar idioma",
+    "options": "Opções de idioma"
+  },
   "table": {
     "timestamp": "Data/Hora",
     "actor": "Ator",

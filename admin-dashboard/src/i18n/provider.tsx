@@ -1,61 +1,57 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { I18nextProvider, useTranslation } from 'react-i18next';
-import i18n from './i18n';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { NextIntlClientProvider } from "next-intl";
+import {
+  DEFAULT_LOCALE,
+  LANGUAGE_STORAGE_KEY,
+  LOCALE_MESSAGES,
+  normalizeLocale,
+  type LocaleCode,
+} from "./config";
 
-type I18nContextType = {
-  t: ReturnType<typeof useTranslation>['t'];
-  i18n: typeof i18n;
-  changeLanguage: (language: string) => void;
-};
+interface DashboardLocaleContextValue {
+  locale: LocaleCode;
+  setLocale: (locale: LocaleCode) => void;
+}
 
-const I18nContext = React.createContext<I18nContextType | undefined>(undefined);
+const DashboardLocaleContext = createContext<DashboardLocaleContextValue | null>(null);
 
-type I18nProviderProps = {
-  children: React.ReactNode;
-};
+export function DashboardIntlProvider({ children }: { children: ReactNode }) {
+  const [locale, setLocale] = useState<LocaleCode>(DEFAULT_LOCALE);
+  const [hydrated, setHydrated] = useState(false);
 
-export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
-  const { t } = useTranslation();
+  useEffect(() => {
+    setLocale(normalizeLocale(localStorage.getItem(LANGUAGE_STORAGE_KEY)));
+    setHydrated(true);
+  }, []);
 
-  const changeLanguage = React.useCallback((language: string) => {
-    i18n.changeLanguage(language);
-    // Persist language selection
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('language', language);
+  useEffect(() => {
+    if (!hydrated) {
+      return;
     }
-  }, [i18n]);
 
-  // Initialize language from localStorage on first mount
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedLanguage = localStorage.getItem('language');
-      if (storedLanguage) {
-        i18n.changeLanguage(storedLanguage);
-      }
-    }
-  }, [i18n]);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, locale);
+    document.documentElement.lang = locale;
+  }, [hydrated, locale]);
 
-  const value = React.useMemo(() => ({
-    t,
-    i18n,
-    changeLanguage
-  }), [t, i18n, changeLanguage]);
+  const value = useMemo(() => ({ locale, setLocale }), [locale]);
 
   return (
-    <I18nContext.Provider value={value}>
-      <I18nextProvider i18n={i18n}>
+    <DashboardLocaleContext.Provider value={value}>
+      <NextIntlClientProvider locale={locale} messages={LOCALE_MESSAGES[locale]} timeZone="UTC">
         {children}
-      </I18nextProvider>
-    </I18nContext.Provider>
+      </NextIntlClientProvider>
+    </DashboardLocaleContext.Provider>
   );
-};
+}
 
-export const useI18n = () => {
-  const context = React.useContext(I18nContext);
-  if (context === undefined) {
-    throw new Error('useI18n must be used within an I18nProvider');
+export function useDashboardLocale() {
+  const context = useContext(DashboardLocaleContext);
+
+  if (!context) {
+    throw new Error("useDashboardLocale must be used within DashboardIntlProvider");
   }
+
   return context;
-};
+}

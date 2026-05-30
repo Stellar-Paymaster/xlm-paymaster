@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import type { LocaleCode, SUPPORTED_LOCALES } from "../i18n/config";
+import { type LocaleCode } from "./config";
+import { useDashboardLocale } from "./provider";
 
 interface Language {
   code: LocaleCode;
@@ -15,25 +16,22 @@ interface Language {
 const LANGUAGES: Language[] = [
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "ja", label: "日本語", flag: "🇯🇵" },
   { code: "pt", label: "Português", flag: "🇧🇷" },
   { code: "zh", label: "中文", flag: "🇨🇳" },
 ];
 
-/**
- * Language switcher component with dropdown selector.
- * Persists selection to localStorage and provides ARIA accessibility.
- */
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const t = useTranslations("languageSwitcher");
+  const { locale, setLocale } = useDashboardLocale();
   const [open, setOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState<Language>(LANGUAGES[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const currentCode = (i18n.language || "en") as LocaleCode;
-    const lang = LANGUAGES.find((l) => l.code === currentCode) || LANGUAGES[0];
-    setCurrentLang(lang);
-  }, [i18n.language]);
+    setCurrentLang(LANGUAGES.find((entry) => entry.code === locale) || LANGUAGES[0]);
+  }, [locale]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -41,15 +39,15 @@ export function LanguageSwitcher() {
         setOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   function handleLanguageChange(lang: Language) {
-    i18n.changeLanguage(lang.code);
+    setLocale(lang.code);
     setCurrentLang(lang);
     setOpen(false);
-    localStorage.setItem("fluid-admin-language", lang.code);
   }
 
   return (
@@ -58,28 +56,25 @@ export function LanguageSwitcher() {
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium",
-          "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700",
-          "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors",
-          "focus:outline-none focus:ring-2 focus:ring-blue-500"
+          "flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium",
+          "transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-500",
         )}
-        aria-label="Select language"
+        aria-label={t("select")}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className="text-lg" aria-hidden="true">{currentLang.flag}</span>
+        <span className="text-lg" aria-hidden="true">
+          {currentLang.flag}
+        </span>
         <span className="hidden sm:inline">{currentLang.label}</span>
-        <ChevronDown className="h-4 w-4 text-gray-500" aria-hidden="true" />
+        <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden="true" />
       </button>
 
-      {open && (
+      {open ? (
         <ul
-          className={cn(
-            "absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 dark:border-gray-700",
-            "bg-white dark:bg-gray-800 shadow-lg z-50 py-1"
-          )}
+          className="absolute right-0 z-50 mt-2 w-52 rounded-2xl border border-slate-200 bg-white py-1 shadow-lg"
           role="listbox"
-          aria-label="Language options"
+          aria-label={t("options")}
         >
           {LANGUAGES.map((lang) => (
             <li key={lang.code}>
@@ -87,20 +82,21 @@ export function LanguageSwitcher() {
                 type="button"
                 onClick={() => handleLanguageChange(lang)}
                 className={cn(
-                  "flex w-full items-center gap-3 px-3 py-2 text-sm text-left",
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors",
-                  "focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700"
+                  "flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors",
+                  "hover:bg-slate-100 focus:bg-slate-100 focus:outline-none",
                 )}
                 role="option"
                 aria-selected={currentLang.code === lang.code}
               >
-                <span className="text-lg" aria-hidden="true">{lang.flag}</span>
+                <span className="text-lg" aria-hidden="true">
+                  {lang.flag}
+                </span>
                 <span>{lang.label}</span>
               </button>
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -1,5 +1,31 @@
 # Verification Report
 
+## Current UI Enhancements
+
+### Signer Balance Ring Chart
+
+Validated with:
+
+```bash
+pnpm exec vitest run components/signers/SignerBalanceRingChart.test.tsx
+```
+
+Screenshot captured from `/admin/signers` showing the new ring chart and pool summary.
+
+### Horizon Latency Grid
+
+Validated with:
+
+```bash
+node --test --experimental-test-isolation=none --experimental-strip-types lib/horizon-monitor.test.ts
+```
+
+Screenshot captured from `/admin/chains` showing active Horizon endpoints, ping latency, and sync status.
+
+### Locale Switching and Error Boundary
+
+Verified through compiler checks on the touched files and browser inspection of the updated navbar language switcher plus the new route-level error boundary files.
+
 ## Test Results
 
 ### Unit Tests (27 passed)
