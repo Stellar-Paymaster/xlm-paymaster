@@ -8,7 +8,7 @@ mod metrics;
 mod profiling;
 mod state;
 mod stellar;
-mod xdr;
+pub use fluid_server::xdr;
 mod ai_query;
 use axum::{
     extract::{ConnectInfo, Extension, Request, State},

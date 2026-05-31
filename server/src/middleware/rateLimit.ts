@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiKeyConfig, maskApiKey } from "./apiKeys";
 import { consumeLeakyBucket } from "../utils/redis";
+import { consumeGcraBucket, type GcraState } from "../utils/gcraLeakyBucket";
 import { TenantUsageTracker } from "../services/tenantUsageTracker";
 
 // When STATELESS_MODE=true the in-memory fallback is disabled so that all rate
@@ -11,46 +12,21 @@ const STATELESS_MODE = process.env.STATELESS_MODE === "true";
 
 // Fallback in-memory leaky bucket used only when Redis is unavailable and
 // STATELESS_MODE is false (single-instance / dev deployments).
-interface LeakyBucketEntry {
-  tat: number; // Theoretical Arrival Time
-}
-
-const usageByApiKey = new Map<string, LeakyBucketEntry>();
+const usageByApiKey = new Map<string, GcraState>();
 const usageTracker = new TenantUsageTracker();
 
 function consumeFallbackBucket(apiKeyConfig: ApiKeyConfig): { allowed: boolean; remaining: number; retryAfterMs: number; resetMs: number } {
   const now = Date.now();
-  const capacity = apiKeyConfig.rateLimit;
-  const windowMs = apiKeyConfig.windowMs;
-  const emissionInterval = windowMs / capacity;
-
   let entry = usageByApiKey.get(apiKeyConfig.key);
   if (!entry) {
     entry = { tat: now };
     usageByApiKey.set(apiKeyConfig.key, entry);
   }
 
-  const tat = Math.max(entry.tat, now);
-  const newTat = tat + emissionInterval;
-
-  if (newTat - now > windowMs) {
-    // Rejected
-    return {
-      allowed: false,
-      remaining: 0,
-      retryAfterMs: Math.ceil(newTat - now - windowMs),
-      resetMs: Math.ceil(tat - now)
-    };
-  }
-
-  // Accepted
-  entry.tat = newTat;
-  return {
-    allowed: true,
-    remaining: Math.floor((windowMs - (newTat - now)) / emissionInterval),
-    retryAfterMs: 0,
-    resetMs: Math.ceil(newTat - now)
-  };
+  return consumeGcraBucket(entry, {
+    capacity: apiKeyConfig.rateLimit,
+    windowMs: apiKeyConfig.windowMs,
+  }, now);
 }
 
 export async function apiKeyRateLimit(
