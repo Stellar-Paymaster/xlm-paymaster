@@ -10,6 +10,7 @@ export interface FeeBumpJobData {
   submit: boolean;
   tenant: Tenant;
   requestId?: string;
+  shadowMode?: boolean;
 }
 
 export type FeeBumpJobResult = FeeBumpResponse;

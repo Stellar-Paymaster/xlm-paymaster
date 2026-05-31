@@ -1,0 +1,16 @@
+{
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "transactions": "Transactions",
+    "signers": "Signataires",
+    "apiKeys": "Clés API",
+    "settings": "Paramètres",
+    "referrals": "Parrainages",
+    "plugins": "Extensions",
+    "sdk": "SDK"
+  },
+  "languageSwitcher": {
+    "select": "Sélectionner la langue",
+    "options": "Options de langue"
+  }
+}

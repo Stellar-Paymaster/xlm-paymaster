@@ -26,6 +26,10 @@ model Tenant {
   id                 String            @id @default(uuid())
   name               String
   contactEmail       String?
+    parentId           String?
+
+  parent             Tenant?           @relation("SubTenants", fields: [parentId], references: [id])
+  children           Tenant[]          @relation("SubTenants")
   region             String            @default("US") // Data residency region: "US" | "EU"
   subscriptionTierId String
   subscriptionTier   SubscriptionTier  @relation(fields: [subscriptionTierId], references: [id])

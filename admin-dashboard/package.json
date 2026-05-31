@@ -4,15 +4,15 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "npm run test:unit && npm run test:integration",
     "test:watch": "vitest",
     "format:check": "echo \"No format check configured\"",
-    "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/portal-links.test.ts lib/theme.test.ts lib/security.test.ts",
-    "test:integration": "node --test --experimental-test-isolation=none --experimental-strip-types lib/theme.integration.test.ts",
+    "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/portal-links.test.ts lib/theme.test.ts src/compliance/__tests__/compliance.test.ts src/fees/__tests__/region-congestion-config.test.ts src/fees/__tests__/localized-fee-estimator.test.ts src/i18n/__tests__/i18n.test.ts",
+    "test:integration": "node --test --experimental-test-isolation=none --experimental-strip-types lib/theme.integration.test.ts src/compliance/__tests__/compliance.integration.test.ts",
     "test:e2e": "playwright test",
     "docs": "typedoc",
     "storybook": "storybook dev -p 6006",
@@ -40,6 +40,7 @@
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^1.7.0",
     "next": "15.5.14",
+    "next-intl": "^4.13.0",
     "next-auth": "5.0.0-beta.20",
     "next-themes": "^0.4.6",
     "react": "19.2.4",
@@ -76,7 +77,7 @@
     "storybook": "^8.6.12",
     "tailwindcss": "^4",
     "typedoc": "^0.28.18",
-    "typescript": "^5",
+    "typescript": "^6",
     "vitest": "^4.0.7"
   }
 }

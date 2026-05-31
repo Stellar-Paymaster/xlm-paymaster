@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CopyButton } from "@/components/dashboard/CopyButton";
 import type { ManagedSigner } from "@/lib/signer-management";
+import { SignerBalanceRingChart } from "@/components/signers/SignerBalanceRingChart";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 function formatHash(value: string) {
   if (value.length <= 18) {
@@ -49,6 +51,7 @@ export function SignerPoolManager({
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [removingKey, setRemovingKey] = useState<string | null>(null);
+  const [pendingRemoveKey, setPendingRemoveKey] = useState<string | null>(null);
   
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<string>("0.00");
@@ -196,6 +199,8 @@ export function SignerPoolManager({
         </article>
       </section>
 
+      <SignerBalanceRingChart signers={signers} />
+
       <section className="rounded-[2rem] border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -300,7 +305,7 @@ export function SignerPoolManager({
                       {signer.canRemove ? (
                         <button
                           type="button"
-                          onClick={() => void handleRemoveSigner(signer.publicKey)}
+                          onClick={() => setPendingRemoveKey(signer.publicKey)}
                           disabled={isPending || removingKey === signer.publicKey}
                           className="inline-flex min-h-9 items-center rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
@@ -424,6 +429,28 @@ export function SignerPoolManager({
           </div>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={pendingRemoveKey !== null}
+        onOpenChange={(open) => { if (!open && !removingKey) setPendingRemoveKey(null); }}
+        title="Remove Signer"
+        description={
+          pendingRemoveKey
+            ? `Remove signer ${formatHash(pendingRemoveKey)} from the pool? This signer will no longer sponsor transactions.`
+            : ""
+        }
+        confirmLabel="Remove Signer"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          if (pendingRemoveKey) {
+            setPendingRemoveKey(null);
+            void handleRemoveSigner(pendingRemoveKey);
+          }
+        }}
+        onCancel={() => setPendingRemoveKey(null)}
+        variant="destructive"
+        isLoading={pendingRemoveKey !== null && removingKey === pendingRemoveKey}
+      />
 
       {txSuccessHash ? (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">

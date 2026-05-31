@@ -3,3 +3,11 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# Local SQLite database artifacts — never commit these
+*.db
+*.db-shm
+*.db-wal
+
+# Precompiled native binaries — build on-demand or fetch as release assets
+*.node

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { ShieldOff } from "lucide-react";
 import type { ApiKey, ChainId } from "@/components/dashboard/types";
-import { RevokeKeyDialog } from "@/components/dashboard/RevokeKeyDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { CopyButton } from "@/components/dashboard/CopyButton";
 
 interface ApiKeysTableProps {
   initialKeys: ApiKey[];
@@ -120,24 +121,43 @@ export function ApiKeysTable({
 }: ApiKeysTableProps) {
   const [keys, setKeys] = useState<ApiKey[]>(initialKeys);
   const [pendingRevoke, setPendingRevoke] = useState<ApiKey | null>(null);
+  const [revoking, setRevoking] = useState(false);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
 
-  async function handleRevoke(keyId: string) {
-    const res = await fetch(`${serverUrl}/admin/api-keys/${keyId}/revoke`, {
-      method: "PATCH",
-      headers: {
-        "x-admin-token": adminToken,
-        "Content-Type": "application/json",
-      },
-    });
+  async function handleRevoke() {
+    if (!pendingRevoke) return;
+    setRevoking(true);
+    setRevokeError(null);
+    try {
+      const res = await fetch(`${serverUrl}/admin/api-keys/${pendingRevoke.id}/revoke`, {
+        method: "PATCH",
+        headers: {
+          "x-admin-token": adminToken,
+          "Content-Type": "application/json",
+        },
+      });
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body?.error ?? `Request failed (${res.status})`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error ?? `Request failed (${res.status})`);
+      }
+
+      setKeys((prev) =>
+        prev.map((k: ApiKey) => (k.id === pendingRevoke.id ? { ...k, active: false } : k)),
+      );
+      setPendingRevoke(null);
+    } catch (err: unknown) {
+      setRevokeError(err instanceof Error ? err.message : "Failed to revoke key. Please try again.");
+    } finally {
+      setRevoking(false);
     }
+  }
 
-    setKeys((prev) =>
-      prev.map((k: ApiKey) => (k.id === keyId ? { ...k, active: false } : k)),
-    );
+  function closeRevokeDialog() {
+    if (!revoking) {
+      setPendingRevoke(null);
+      setRevokeError(null);
+    }
   }
 
   function handleChainUpdate(keyId: string, chains: ChainId[]) {
@@ -201,15 +221,25 @@ export function ApiKeysTable({
                   }
                 >
                   <td className="px-5 py-4">
-                    <span
-                      className={`font-mono text-sm ${
-                        apiKey.active
-                          ? "text-slate-900"
-                          : "text-slate-400 line-through"
-                      }`}
-                    >
-                      {apiKey.key}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`font-mono text-sm ${
+                          apiKey.active
+                            ? "text-slate-900"
+                            : "text-slate-400 line-through"
+                        }`}
+                      >
+                        {apiKey.key}
+                      </span>
+                      {apiKey.active && (
+                        <CopyButton
+                          value={apiKey.key}
+                          label="Copy"
+                          size="sm"
+                          iconOnly
+                        />
+                      )}
+                    </div>
                   </td>
 
                   <td className="hidden px-5 py-4 text-sm text-slate-600 sm:table-cell">
@@ -263,13 +293,26 @@ export function ApiKeysTable({
         </div>
       </div>
 
-      {pendingRevoke && (
-        <RevokeKeyDialog
-          keyId={pendingRevoke.id}
-          keyDisplay={pendingRevoke.key}
-          onConfirm={handleRevoke}
-          onClose={() => setPendingRevoke(null)}
-        />
+      <ConfirmDialog
+        open={pendingRevoke !== null}
+        onOpenChange={(open) => { if (!open) closeRevokeDialog(); }}
+        title="Revoke API Key"
+        description={
+          pendingRevoke
+            ? `This will immediately deactivate ${pendingRevoke.key}. Any dApp or service using this key will lose access instantly. This action cannot be undone.`
+            : ""
+        }
+        confirmLabel={revoking ? "Revoking…" : "Revoke Key"}
+        cancelLabel="Cancel"
+        onConfirm={() => void handleRevoke()}
+        onCancel={closeRevokeDialog}
+        variant="destructive"
+        isLoading={revoking}
+      />
+      {revokeError && (
+        <div className="mt-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {revokeError}
+        </div>
       )}
     </>
   );

@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   # Stellar Quickstart — isolated local network for sandbox testing
   # Exposes Horizon on :8000 and Friendbot on :8000/friendbot
@@ -30,16 +29,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-fluid} -d ${POSTGRES_DB:-fluid_db}",
-        ]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fluid} -d ${POSTGRES_DB:-fluid_db}"]
+      interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
     networks:
       - fluid-network
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -48,11 +45,13 @@ services:
       - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     networks:
       - fluid-network
+    restart: unless-stopped
 
   rust-engine:
     build:
@@ -64,15 +63,27 @@ services:
       FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
       STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
       STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
+      FLUID_BASE_FEE: "${FLUID_BASE_FEE:-100}"
+      FLUID_FEE_MULTIPLIER: "${FLUID_FEE_MULTIPLIER:-2.0}"
+      FLUID_HORIZON_SELECTION: "${FLUID_HORIZON_SELECTION:-priority}"
+      FLUID_RATE_LIMIT_WINDOW_MS: "${FLUID_RATE_LIMIT_WINDOW_MS:-60000}"
+      FLUID_RATE_LIMIT_MAX: "${FLUID_RATE_LIMIT_MAX:-5}"
+      FLUID_ALLOWED_ORIGINS: "${FLUID_ALLOWED_ORIGINS:-*}"
       PORT: "3000"
-      FLUID_ALLOWED_ORIGINS: "*"
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - fluid-network
+    restart: unless-stopped
 
   # PgBouncer multiplexes thousands of short-lived app connections into a small
   # Postgres server-side pool, preventing connection exhaustion under high load
@@ -121,10 +132,17 @@ services:
       FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
       STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
       STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
-      FLUID_ALLOWED_ORIGINS: "*"
-      SANDBOX_HORIZON_URL: "http://stellar-quickstart:8000"
+      FLUID_BASE_FEE: "${FLUID_BASE_FEE:-100}"
+      FLUID_FEE_MULTIPLIER: "${FLUID_FEE_MULTIPLIER:-2.0}"
+      FLUID_ALLOWED_ORIGINS: "${FLUID_ALLOWED_ORIGINS:-*}"
     ports:
       - "3001:3001"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     depends_on:
       pgbouncer:
         condition: service_healthy
@@ -134,6 +152,7 @@ services:
         condition: service_healthy
     networks:
       - fluid-network
+    restart: unless-stopped
 
   dashboard:
     build:
@@ -144,19 +163,29 @@ services:
       PORT: "3002"
       AUTH_SECRET: "${AUTH_SECRET:-random_secret_for_dev_only}"
       ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@fluid.dev}"
-      ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH:-$2a$12$R.S6/e8G4U3ZJmBf6Bf6Bf6Bf6Bf6Bf6Bf6Bf6Bf6Bf6Bf6Bf6B}"
-      NEXTAUTH_URL: "http://localhost:3002"
+      ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH}"
+      NEXTAUTH_URL: "${NEXTAUTH_URL:-http://localhost:3002}"
       FLUID_SERVER_URL: "http://rust-engine:3000"
     ports:
       - "3002:3002"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     depends_on:
-      - rust-engine
+      rust-engine:
+        condition: service_healthy
     networks:
       - fluid-network
+    restart: unless-stopped
 
 networks:
   fluid-network:
     driver: bridge
+    name: fluid-network
 
 volumes:
   postgres_data:
+    name: fluid-postgres-data

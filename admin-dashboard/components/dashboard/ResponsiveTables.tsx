@@ -122,6 +122,7 @@ export function TransactionsTable({
 
               return (
                 <FragmentRow key={transaction.id}>
+                  <tr className="align-top">
                     <td className="px-5 py-4">
                       <div className="font-semibold text-slate-900">{transaction.amount}</div>
                       <div className="text-xs text-slate-500 md:hidden">{transaction.asset}</div>

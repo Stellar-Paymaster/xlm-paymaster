@@ -22,9 +22,9 @@ export function initializeFeeBumpWorker(
   const worker = new Worker<FeeBumpJobData, FeeBumpJobResult>(
     FEEBUMP_QUEUE_NAME,
     async (job) => {
-      const { xdr, submit, tenant } = job.data;
+      const { xdr, submit, tenant, shadowMode } = job.data;
       const feePayerAccount = pickFeePayerAccount(config);
-      return processFeeBump(xdr, submit, config, tenant, feePayerAccount);
+      return processFeeBump(xdr, submit, config, tenant, feePayerAccount, shadowMode);
     },
     { connection: bullmqConnection, concurrency },
   );

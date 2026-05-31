@@ -125,17 +125,23 @@ export interface Config {
   signerPool: SignerPool;
   stellarRpcUrl?: string;
   supportedAssets?: SupportedAsset[];
-  vault?: VaultConfig;
   evmSettlement?: EvmSettlementConfig;
   kyc: KycConfig;
   treasury: TreasuryConfig;
   workers: WorkerConfig;
+  networkSimulation: NetworkSimulationConfig;
 }
 
 export interface TreasuryConfig {
   coldWallet: string;
   retentionLimitXlm: number;
   cronSchedule: string;
+  enabled: boolean;
+}
+
+export interface NetworkSimulationConfig {
+  latencyMs: number;
+  packetLossRate: number; // 0.0 to 1.0
   enabled: boolean;
 }
 
@@ -348,65 +354,6 @@ function loadDigestConfig(): DigestConfig {
   };
 }
 
-function loadEvmSettlementConfig(): EvmSettlementConfig | undefined {
-  if (process.env.FLUID_EVM_SETTLEMENT_ENABLED !== "true") {
-    return undefined;
-  }
-
-  const rpcUrl = process.env.FLUID_EVM_RPC_URL?.trim();
-  const tokenAddress = process.env.FLUID_EVM_TOKEN_ADDRESS?.trim();
-  const receiverAddress = process.env.FLUID_EVM_RECEIVER_ADDRESS?.trim();
-  const chainId = parsePositiveInt(process.env.FLUID_EVM_CHAIN_ID, 0);
-
-  if (!rpcUrl || !tokenAddress || !receiverAddress || chainId <= 0) {
-    return undefined;
-  }
-
-  return {
-    enabled: true,
-    chainId,
-    rpcUrl,
-    tokenAddress,
-    receiverAddress,
-    confirmationsRequired: parsePositiveInt(
-      process.env.FLUID_EVM_CONFIRMATIONS_REQUIRED,
-      3,
-    ),
-    pollIntervalMs: parsePositiveInt(
-      process.env.FLUID_EVM_WATCH_POLL_INTERVAL_MS,
-      5_000,
-    ),
-    refundFromAddress: process.env.FLUID_EVM_REFUND_FROM_ADDRESS?.trim() || undefined,
-  };
-}
-
-function loadKycConfig(): KycConfig {
-  return {
-    enabled: parseBoolean(process.env.FLUID_KYC_ENABLED, false),
-    endpointUrl: process.env.FLUID_KYC_ENDPOINT_URL?.trim() || undefined,
-    apiKey: process.env.FLUID_KYC_API_KEY?.trim() || undefined,
-    timeoutMs: parseBoundedPositiveInt(
-      process.env.FLUID_KYC_TIMEOUT_MS,
-      2_000,
-      250,
-      30_000,
-    ),
-    failClosed: parseBoolean(process.env.FLUID_KYC_FAIL_CLOSED, true),
-  };
-}
-
-function loadTreasuryConfig(): TreasuryConfig {
-  return {
-    coldWallet: process.env.TREASURY_COLD_WALLET?.trim() || "",
-    retentionLimitXlm: parsePositiveInt(
-      process.env.TREASURY_RETENTION_LIMIT_XLM,
-      1000,
-    ),
-    cronSchedule: process.env.TREASURY_SWEEP_CRON_SCHEDULE?.trim() || "0 0 * * *",
-    enabled: process.env.TREASURY_SWEEP_ENABLED !== "false",
-  };
-}
-
 function loadWorkerConfig(): WorkerConfig {
   return {
     ledgerMonitorConcurrency: parseBoundedPositiveInt(
@@ -422,6 +369,16 @@ function loadWorkerConfig(): WorkerConfig {
       heapSnapshotIntervalMs: parsePositiveInt(process.env.FLUID_MEMORY_PROFILING_SNAPSHOT_INTERVAL_MS, 3600000),
       snapshotPath: process.env.FLUID_MEMORY_PROFILING_SNAPSHOT_PATH?.trim() || undefined,
     },
+  };
+}
+
+function loadNetworkSimulationConfig(): NetworkSimulationConfig {
+  return {
+    latencyMs: parsePositiveInt(process.env.FLUID_NETWORK_LATENCY_MS, 0),
+    packetLossRate: Number.parseFloat(
+      process.env.FLUID_NETWORK_PACKET_LOSS_RATE || "0",
+    ),
+    enabled: process.env.FLUID_NETWORK_SIMULATION_ENABLED === "true",
   };
 }
 
@@ -504,6 +461,7 @@ export function loadConfig(): Config {
     ),
     treasury: loadTreasuryConfig(),
     workers: loadWorkerConfig(),
+    networkSimulation: loadNetworkSimulationConfig(),
   };
 
   // ---- Vault mode ----------------------------------------------------------

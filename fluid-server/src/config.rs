@@ -16,6 +16,11 @@ pub struct Config {
     pub global_rate_limit_window_ms: u64,
     pub horizon_selection_strategy: HorizonSelectionStrategy,
     pub horizon_urls: Vec<String>,
+    /// Maximum number of operations allowed inside a single sponsored
+    /// transaction envelope. Requests exceeding this limit are rejected
+    /// with HTTP 400 before any signing takes place.
+    /// Configured via `FLUID_MAX_OPERATIONS_PER_ENVELOPE` (default: 100).
+    pub max_operations_per_envelope: usize,
     pub network_passphrase: String,
     pub port: u16,
 }
@@ -34,6 +39,7 @@ pub fn load_config() -> Result<(Config, Vec<String>), AppError> {
     let fee_multiplier = env_parse("FLUID_FEE_MULTIPLIER", 2.0_f64);
     let global_rate_limit_max = env_parse("FLUID_RATE_LIMIT_MAX", 5_u32);
     let global_rate_limit_window_ms = env_parse("FLUID_RATE_LIMIT_WINDOW_MS", 60_000_u64);
+    let max_operations_per_envelope = env_parse("FLUID_MAX_OPERATIONS_PER_ENVELOPE", 100_usize);
     let configured_horizon_urls = parse_csv_env("STELLAR_HORIZON_URLS").unwrap_or_default();
     let legacy_horizon_url = std::env::var("STELLAR_HORIZON_URL").ok();
     let horizon_urls = if configured_horizon_urls.is_empty() {
@@ -64,6 +70,7 @@ pub fn load_config() -> Result<(Config, Vec<String>), AppError> {
             global_rate_limit_window_ms,
             horizon_selection_strategy,
             horizon_urls,
+            max_operations_per_envelope,
             network_passphrase,
             port,
         },
@@ -198,6 +205,25 @@ mod tests {
         std::env::remove_var("STELLAR_HORIZON_URL");
         std::env::remove_var("STELLAR_HORIZON_URLS");
         std::env::remove_var("FLUID_HORIZON_SELECTION");
+    }
+
+    #[test]
+    fn load_config_max_operations_default_and_override() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-max-ops");
+
+        // Default: 100
+        std::env::remove_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE");
+        let (config, _) = load_config().expect("expected config to load");
+        assert_eq!(config.max_operations_per_envelope, 100);
+
+        // Custom value
+        std::env::set_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE", "25");
+        let (config, _) = load_config().expect("expected config to load");
+        assert_eq!(config.max_operations_per_envelope, 25);
+
+        std::env::remove_var("FLUID_FEE_PAYER_SECRET");
+        std::env::remove_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE");
     }
 
     #[test]

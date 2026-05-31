@@ -60,3 +60,4 @@ issue.md
 pr.md
 
 local/
+.DS_Store
