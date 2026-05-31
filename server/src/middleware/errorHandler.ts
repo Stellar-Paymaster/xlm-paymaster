@@ -43,6 +43,14 @@ export function createGlobalErrorHandler(slackNotifier?: SlackNotifierLike) {
   ): void {
     const isProd = process.env.NODE_ENV === "production";
 
+    if ((err as any).status === 413 || (err as any).type === "entity.too.large") {
+      res.status(413).json({
+        error: "Payload too large",
+        code: "PAYLOAD_TOO_LARGE",
+      });
+      return;
+    }
+
     if (err instanceof AppError) {
       notify5xx(slackNotifier, req, err.statusCode, err);
       res.status(err.statusCode).json({

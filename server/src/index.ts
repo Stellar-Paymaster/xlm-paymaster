@@ -210,7 +210,7 @@ const app = express();
 
 app.use(ipFilterMiddleware);
 app.use(cspMiddleware());
-app.use(express.json());
+app.use(express.json({ limit: "256kb" }));
 app.use(soc2RequestLogger);
 
 app.use((_req, res, next) => {
