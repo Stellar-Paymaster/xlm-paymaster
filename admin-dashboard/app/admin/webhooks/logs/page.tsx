@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { ServerLogStreamViewer } from "@/components/dashboard/ServerLogStreamViewer";
 import { WebhookDeliveryLogTable } from "@/components/dashboard/WebhookDeliveryLog";
 import type { WebhookDeliveryPageData, WebhookDeliveryQuery } from "@/components/dashboard/types";
 import { getWebhookDeliveryLogsData } from "@/lib/webhook-delivery-logs-data";
@@ -121,7 +122,8 @@ export default function AdminWebhookLogsPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+        <ServerLogStreamViewer />
         <WebhookDeliveryLogTable
           data={data}
           onPageChange={handlePageChange}
