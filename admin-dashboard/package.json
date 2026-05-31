@@ -14,6 +14,7 @@
     "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/audit-logs-data.test.ts lib/server-log-stream.test.ts lib/portal-links.test.ts lib/theme.test.ts src/compliance/__tests__/compliance.test.ts src/compliance/__tests__/wcag-accessibility.test.ts src/fees/__tests__/region-congestion-config.test.ts src/fees/__tests__/localized-fee-estimator.test.ts src/i18n/__tests__/i18n.test.ts",
     "test:integration": "node --test --experimental-test-isolation=none --experimental-strip-types lib/theme.integration.test.ts src/compliance/__tests__/compliance.integration.test.ts",
     "test:e2e": "playwright test",
+    "test:e2e:chromium": "playwright test --project=chromium",
     "docs": "typedoc",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
