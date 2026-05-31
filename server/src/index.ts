@@ -124,6 +124,15 @@ import {
   initializeTenantErasureWorker,
   TenantErasureWorker,
 } from "./workers/tenantErasureWorker";
+import {
+  initializeSandboxCleanupWorker,
+  SandboxCleanupWorker,
+} from "./workers/sandboxCleanupWorker";
+import {
+  createSandboxApiKeyHandler,
+  sandboxResetHandler,
+} from "./handlers/sandbox";
+import { sandboxRateLimit } from "./middleware/sandboxGuard";
 
 import { initializeTreasuryRefill } from "./workers/treasuryRefill";
 import { initializeTreasurySweeper } from "./tasks/sweeper";
@@ -352,6 +361,7 @@ app.post(
 app.post(
   "/fee-bump",
   apiKeyMiddleware,
+  sandboxRateLimit,
   apiKeyRateLimit,
   tenantTierTxLimit,
   limiter as any,
@@ -363,11 +373,20 @@ app.post(
 app.post(
   "/fee-bump/batch",
   apiKeyMiddleware,
+  sandboxRateLimit,
   apiKeyRateLimit,
   tenantTierTxLimit,
   limiter as any,
   (req: Request, res: Response, next: NextFunction) => {
     feeBumpBatchHandler(req, res, next, config);
+  },
+);
+
+app.post(
+  "/sandbox/reset",
+  apiKeyMiddleware,
+  (req: Request, res: Response, next: NextFunction) => {
+    void sandboxResetHandler(req, res, next);
   },
 );
 
@@ -416,6 +435,7 @@ app.delete("/admin/users/:id", requirePermission("manage_users"), deactivateAdmi
 
 app.get("/admin/api-keys", requirePermission("view_api_keys"), listApiKeysHandler);
 app.post("/admin/api-keys", requirePermission("manage_api_keys"), upsertApiKeyHandler);
+app.post("/admin/sandbox/api-keys", createSandboxApiKeyHandler);
 app.patch("/admin/api-keys/:key/revoke", requirePermission("manage_api_keys"), revokeApiKeyHandler);
 app.patch("/admin/api-keys/:key/chains", requirePermission("manage_api_keys"), updateApiKeyChainsHandler);
 app.delete("/admin/api-keys/:key", requirePermission("manage_api_keys"), revokeApiKeyHandler);
@@ -607,6 +627,7 @@ let incidentMonitor: ReturnType<typeof initializeIncidentMonitor> | null = null;
 let treasurySweeper: ReturnType<typeof initializeTreasurySweeper> | null = null;
 let digestWorker: ReturnType<typeof initializeDigestWorker> | null = null;
 let tenantErasureWorker: TenantErasureWorker | null = null;
+let sandboxCleanupWorker: SandboxCleanupWorker | null = null;
 let treasuryRefillWorker: ReturnType<typeof initializeTreasuryRefill> | null = null;
 let feeBumpWorker: ReturnType<typeof initializeFeeBumpWorker> | null = null;
 let partitionMaintenanceWorker: PartitionMaintenanceWorker | null = null;
@@ -633,6 +654,7 @@ async function shutdown(signal: string): Promise<void> {
   incidentMonitor?.stop();
   digestWorker?.stop();
   tenantErasureWorker?.stop();
+  sandboxCleanupWorker?.stop();
   feeManager.stop();
   stopChainRegistryHotReload();
   stopOFACScreening();
@@ -771,6 +793,17 @@ try {
   logger.error(
     { ...serializeError(error) },
     "Failed to start tenant erasure worker",
+  );
+}
+
+try {
+  sandboxCleanupWorker = initializeSandboxCleanupWorker();
+  sandboxCleanupWorker.start();
+  logger.info("Sandbox cleanup worker started");
+} catch (error) {
+  logger.error(
+    { ...serializeError(error) },
+    "Failed to start sandbox cleanup worker",
   );
 }
 
