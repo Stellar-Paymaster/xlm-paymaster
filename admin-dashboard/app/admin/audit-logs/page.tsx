@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { getAuditLogsData, type AuditLogEntry, type AuditLogPageData } from "@/lib/audit-logs-data";
+import { RotateCcw } from "lucide-react";
+import {
+  getAuditLogsData,
+  type AuditLogEntry,
+  type AuditLogFilters,
+  type AuditLogPageData,
+  type AuditLogTimePeriod,
+} from "@/lib/audit-logs-data";
 import { buildAuditTrailSnapshot } from "@/lib/audit-trail-snapshots";
 
 function AiSummaryTooltip({ summary }: { summary: string }) {
@@ -57,6 +64,12 @@ function SnapshotPopover({ entry, baseline }: { entry: AuditLogEntry; baseline: 
 
 function AuditLogRow({ entry, baseline }: { entry: AuditLogEntry; baseline: AuditLogEntry | null }) {
   const time = new Date(entry.createdAt).toLocaleString();
+  const riskTone =
+    entry.riskScore >= 80
+      ? "bg-rose-50 text-rose-700 ring-rose-200"
+      : entry.riskScore >= 50
+        ? "bg-amber-50 text-amber-700 ring-amber-200"
+        : "bg-emerald-50 text-emerald-700 ring-emerald-200";
 
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50/60 transition">
@@ -66,7 +79,14 @@ function AuditLogRow({ entry, baseline }: { entry: AuditLogEntry; baseline: Audi
           {entry.action}
         </span>
       </td>
+      <td className="px-4 py-3 text-sm text-slate-600">{entry.actionCategory}</td>
       <td className="px-4 py-3 text-sm text-slate-700">{entry.actor}</td>
+      <td className="px-4 py-3 font-mono text-sm text-slate-500">{entry.ipAddress ?? "—"}</td>
+      <td className="px-4 py-3 text-sm">
+        <span className={`inline-flex min-w-12 justify-center rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ${riskTone}`}>
+          {entry.riskScore}
+        </span>
+      </td>
       <td className="max-w-40 truncate px-4 py-3 font-mono text-sm text-slate-500">
         {entry.target ?? "—"}
       </td>
@@ -87,20 +107,37 @@ function AuditLogRow({ entry, baseline }: { entry: AuditLogEntry; baseline: Audi
   );
 }
 
+const emptyFilters: AuditLogFilters = {
+  actionCategory: "",
+  ipAddress: "",
+  maxRiskScore: undefined,
+  minRiskScore: undefined,
+  timePeriod: "all",
+};
+
 export default function AdminAuditLogsPage() {
   const { data: session } = useSession();
   const [data, setData] = useState<AuditLogPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [offset, setOffset] = useState(0);
+  const [filters, setFilters] = useState<AuditLogFilters>(emptyFilters);
   const limit = 50;
 
   useEffect(() => {
     setLoading(true);
-    getAuditLogsData(limit, offset).then(setData).finally(() => setLoading(false));
-  }, [offset]);
+    getAuditLogsData(limit, offset, filters).then(setData).finally(() => setLoading(false));
+  }, [offset, filters]);
 
   const hasPrev = offset > 0;
   const hasNext = data ? offset + limit < data.total : false;
+  const updateFilter = (updates: AuditLogFilters) => {
+    setOffset(0);
+    setFilters((current) => ({ ...current, ...updates }));
+  };
+  const resetFilters = () => {
+    setOffset(0);
+    setFilters(emptyFilters);
+  };
 
   return (
     <main className="min-h-screen bg-slate-100">
@@ -133,6 +170,93 @@ export default function AdminAuditLogsPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-4 border border-slate-200 bg-white px-4 py-4 shadow-sm">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.1fr_1fr_0.9fr_0.75fr_0.75fr_auto] xl:items-end">
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              IP
+              <input
+                type="search"
+                value={filters.ipAddress ?? ""}
+                onChange={(event) => updateFilter({ ipAddress: event.target.value })}
+                placeholder="203.0.113"
+                className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm normal-case tracking-normal text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              />
+            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Category
+              <select
+                value={filters.actionCategory ?? ""}
+                onChange={(event) => updateFilter({ actionCategory: event.target.value })}
+                className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm normal-case tracking-normal text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              >
+                <option value="">All categories</option>
+                {(data?.actionCategories ?? []).map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Period
+              <select
+                value={filters.timePeriod ?? "all"}
+                onChange={(event) =>
+                  updateFilter({ timePeriod: event.target.value as AuditLogTimePeriod })
+                }
+                className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm normal-case tracking-normal text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              >
+                <option value="all">All time</option>
+                <option value="24h">Last 24h</option>
+                <option value="7d">Last 7d</option>
+                <option value="30d">Last 30d</option>
+              </select>
+            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Min Risk
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={filters.minRiskScore ?? ""}
+                onChange={(event) =>
+                  updateFilter({
+                    minRiskScore:
+                      event.target.value === "" ? undefined : Number(event.target.value),
+                  })
+                }
+                className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm normal-case tracking-normal text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              />
+            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Max Risk
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={filters.maxRiskScore ?? ""}
+                onChange={(event) =>
+                  updateFilter({
+                    maxRiskScore:
+                      event.target.value === "" ? undefined : Number(event.target.value),
+                  })
+                }
+                className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm normal-case tracking-normal text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              />
+            </label>
+            <div className="flex">
+              <button
+                type="button"
+                aria-label="Reset audit log filters"
+                onClick={resetFilters}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-50"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
         {loading ? (
           <div className="animate-pulse space-y-4">
             <div className="h-64 bg-slate-200 rounded-xl" />
@@ -146,7 +270,10 @@ export default function AdminAuditLogsPage() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Time</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Action</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Category</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Actor</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">IP</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Risk</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Target</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">AI Summary</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Snapshot</th>
@@ -155,8 +282,8 @@ export default function AdminAuditLogsPage() {
               <tbody>
                 {data.items.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-400">
-                      No audit logs yet
+                    <td colSpan={9} className="px-4 py-12 text-center text-sm text-slate-400">
+                      No audit logs match the current filters
                     </td>
                   </tr>
                 ) : (
