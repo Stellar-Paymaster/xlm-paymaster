@@ -450,11 +450,27 @@ async fn fee_bump(
 
     let api_key = extract_api_key(&headers)?;
     let api_key_config = find_api_key(&api_key)?;
-    let ip_limit = state
-        .global_limiter
-        .check(&format!("ip:{}", addr.ip()))
-        .await?;
-    let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+    let (ip_limit, api_limit) = if state.config.disable_rate_limits {
+        (
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+        )
+    } else {
+        let ip_limit = state
+            .global_limiter
+            .check(&format!("ip:{}", addr.ip()))
+            .await?;
+        let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+        (ip_limit, api_limit)
+    };
 
     let result = process_fee_bump_request(
         &state,
@@ -491,11 +507,27 @@ async fn fee_bump_batch(
 
     let api_key = extract_api_key(&headers)?;
     let api_key_config = find_api_key(&api_key)?;
-    let ip_limit = state
-        .global_limiter
-        .check(&format!("ip:{}", addr.ip()))
-        .await?;
-    let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+    let (ip_limit, api_limit) = if state.config.disable_rate_limits {
+        (
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+        )
+    } else {
+        let ip_limit = state
+            .global_limiter
+            .check(&format!("ip:{}", addr.ip()))
+            .await?;
+        let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+        (ip_limit, api_limit)
+    };
 
     let submit = body.submit.unwrap_or(false);
     let mut results = Vec::with_capacity(body.xdrs.len());
@@ -604,7 +636,7 @@ async fn process_fee_bump_request(
         .map(|record| record.fee_stroops)
         .sum();
 
-    if current_spend + result.fee_amount > api_key_config.daily_quota_stroops {
+    if !state.config.disable_rate_limits && current_spend + result.fee_amount > api_key_config.daily_quota_stroops {
         signer_lease.release().await;
         return Err(AppError::new(
             axum::http::StatusCode::FORBIDDEN,

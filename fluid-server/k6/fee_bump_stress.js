@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check } from 'k6';
+import { check, sleep } from 'k6';
 
 // k6 execution configuration simulating a constant 1,000 requests/sec (RPS)
 export const options = {

@@ -23,6 +23,7 @@ pub struct Config {
     pub max_operations_per_envelope: usize,
     pub network_passphrase: String,
     pub port: u16,
+    pub disable_rate_limits: bool,
 }
 
 pub fn load_config() -> Result<(Config, Vec<String>), AppError> {
@@ -60,6 +61,7 @@ pub fn load_config() -> Result<(Config, Vec<String>), AppError> {
     let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
         .unwrap_or_else(|_| "Test SDF Network ; September 2015".to_string());
     let port = env_parse("PORT", 3000_u16);
+    let disable_rate_limits = env_parse("FLUID_DISABLE_RATE_LIMITS", false);
 
     Ok((
         Config {
@@ -73,6 +75,7 @@ pub fn load_config() -> Result<(Config, Vec<String>), AppError> {
             max_operations_per_envelope,
             network_passphrase,
             port,
+            disable_rate_limits,
         },
         secrets,
     ))
@@ -224,6 +227,25 @@ mod tests {
 
         std::env::remove_var("FLUID_FEE_PAYER_SECRET");
         std::env::remove_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE");
+    }
+
+    #[test]
+    fn load_config_disable_rate_limits() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-c");
+        
+        // Default: false
+        std::env::remove_var("FLUID_DISABLE_RATE_LIMITS");
+        let (config, _) = load_config().expect("expected config to load");
+        assert_eq!(config.disable_rate_limits, false);
+
+        // Custom value: true
+        std::env::set_var("FLUID_DISABLE_RATE_LIMITS", "true");
+        let (config, _) = load_config().expect("expected config to load");
+        assert_eq!(config.disable_rate_limits, true);
+
+        std::env::remove_var("FLUID_FEE_PAYER_SECRET");
+        std::env::remove_var("FLUID_DISABLE_RATE_LIMITS");
     }
 
     #[test]
