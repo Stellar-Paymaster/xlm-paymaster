@@ -1,9 +1,21 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
+export const middlewareCallback = (req: NextRequest & { auth: any }) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
+
+  // Force redirect to HTTPS in production
+  if (process.env.NODE_ENV === "production") {
+    const xForwardedProto = req.headers.get("x-forwarded-proto");
+    const isHttp = req.nextUrl.protocol === "http:" || xForwardedProto === "http";
+    if (isHttp) {
+      const secureUrl = new URL(req.url);
+      secureUrl.protocol = "https:";
+      return NextResponse.redirect(secureUrl.toString(), 301);
+    }
+  }
 
   // Protect all /admin/* routes
   if (pathname.startsWith("/admin")) {
@@ -20,7 +32,9 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+};
+
+export default auth(middlewareCallback);
 
 // Matcher excludes static assets and Next.js internals automatically
 export const config = {
