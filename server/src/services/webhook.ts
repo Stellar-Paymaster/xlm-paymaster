@@ -10,16 +10,20 @@ import {
   type WebhookEventType,
 } from "./webhookEventTypes";
 import { createRedisClient } from "../utils/redisClientFactory";
+import {
+  calculateWebhookNextAttempt,
+  WEBHOOK_RETRY_CONFIG,
+} from "./webhookBackoff";
 const connection = createRedisClient();
 export const webhookLogger = createLogger({ component: "webhook_service" });
 
 export const webhookQueue = new Queue("webhook-delivery", {
   connection,
   defaultJobOptions: {
-    attempts: 5,
+    attempts: WEBHOOK_RETRY_CONFIG.attempts,
     backoff: {
-      type: "exponential",
-      delay: 60000, // 1 minute initial delay
+      type: WEBHOOK_RETRY_CONFIG.backoffType,
+      delay: WEBHOOK_RETRY_CONFIG.baseDelayMs,
     },
     removeOnComplete: true,
   },
@@ -39,7 +43,7 @@ interface WebhookPayload {
 
 const WEBHOOK_SIGNATURE_HEADER = "X-Fluid-Signature-256";
 const WEBHOOK_SIGNATURE_PREFIX = "sha256=";
-const MAX_RETRY_ATTEMPTS = 5;
+const MAX_RETRY_ATTEMPTS = WEBHOOK_RETRY_CONFIG.maxAttempts;
 const DLQ_EXPIRY_DAYS = parseInt(process.env.WEBHOOK_DLQ_EXPIRY_DAYS || "30", 10);
 
 export function serializeWebhookPayload(payload: string | WebhookPayload): string {
@@ -290,7 +294,10 @@ export const startWebhookWorker = () => {
             status: "failed",
             retryCount: job.attemptsMade + 1,
             lastError: errorMessage.toString().substring(0, 500),
-            nextAttempt: new Date(Date.now() + (job.opts.backoff as any).delay * Math.pow(2, job.attemptsMade)),
+            nextAttempt: calculateWebhookNextAttempt({
+              baseDelayMs: (job.opts.backoff as { delay?: number })?.delay,
+              attemptsMade: job.attemptsMade,
+            }),
           },
         });
 
