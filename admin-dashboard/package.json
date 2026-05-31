@@ -1,6 +1,7 @@
 {
   "name": "admin-dashboard",
   "version": "0.1.1",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +11,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:watch": "vitest",
     "format:check": "echo \"No format check configured\"",
-    "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/portal-links.test.ts lib/theme.test.ts",
+    "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/portal-links.test.ts lib/theme.test.ts lib/security.test.ts",
     "test:integration": "node --test --experimental-test-isolation=none --experimental-strip-types lib/theme.integration.test.ts",
     "test:e2e": "playwright test",
     "docs": "typedoc",

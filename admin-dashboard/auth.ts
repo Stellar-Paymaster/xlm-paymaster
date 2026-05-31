@@ -24,7 +24,7 @@ declare module "next-auth/jwt" {
   }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authConfig = {
   providers: [
     Credentials({
       credentials: {
@@ -81,16 +81,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  session: { strategy: "jwt" as const, maxAge: 8 * 60 * 60 },
+  useSecureCookies: process.env.NODE_ENV === "production",
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production"
+        ? "__Secure-next-auth.session-token"
+        : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax" as const,
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   callbacks: {
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user }: any) => {
       if (user) {
         token.role = user.role;
         token.adminJwt = user.adminJwt;
       }
       return token;
     },
-    session: async ({ session, token }) => {
+    session: async ({ session, token }: any) => {
       if (session.user) {
         session.user.role = token.role as string;
         session.user.adminJwt = token.adminJwt as string | undefined;
@@ -99,4 +113,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   pages: { signIn: "/login" },
-});
+};
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
