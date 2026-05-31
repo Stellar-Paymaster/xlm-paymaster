@@ -11,7 +11,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:watch": "vitest",
     "format:check": "echo \"No format check configured\"",
-    "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/audit-logs-data.test.ts lib/server-log-stream.test.ts lib/portal-links.test.ts lib/theme.test.ts src/compliance/__tests__/compliance.test.ts src/fees/__tests__/region-congestion-config.test.ts src/fees/__tests__/localized-fee-estimator.test.ts src/i18n/__tests__/i18n.test.ts",
+    "test:unit": "node --test --experimental-test-isolation=none --experimental-strip-types lib/audit-logs-data.test.ts lib/server-log-stream.test.ts lib/portal-links.test.ts lib/theme.test.ts lib/api-key-usage-data.test.ts lib/settings-config.test.ts lib/export-leaderboard.test.ts src/compliance/__tests__/compliance.test.ts src/fees/__tests__/region-congestion-config.test.ts src/fees/__tests__/localized-fee-estimator.test.ts src/i18n/__tests__/i18n.test.ts",
     "test:integration": "node --test --experimental-test-isolation=none --experimental-strip-types lib/theme.integration.test.ts src/compliance/__tests__/compliance.integration.test.ts",
     "test:e2e": "playwright test",
     "docs": "typedoc",
