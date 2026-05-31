@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { SARPageData, SARReport, SARStatus } from "@/lib/sar-data";
+import { CopyButton } from "@/components/dashboard/CopyButton";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -268,8 +269,20 @@ export function SARTable({ data }: SARTableProps) {
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">
                       {formatDate(report.createdAt)}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-700">
-                      {shortenHash(report.txHash)}
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-xs text-slate-700">
+                          {shortenHash(report.txHash)}
+                        </span>
+                        {report.txHash && (
+                          <CopyButton
+                            value={report.txHash}
+                            label="Copy hash"
+                            size="sm"
+                            iconOnly
+                          />
+                        )}
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-700">
                       {report.tenantName}

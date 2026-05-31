@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx vitest *)"
+      "Bash(npx vitest *)",
+      "Bash(ls /Users/ik/Documents/fluid/admin-dashboard/*.config.*)",
+      "Bash(ls /Users/ik/Documents/fluid/admin-dashboard/*.config.js)"
     ]
   }
 }

@@ -1,5 +1,5 @@
 import StellarSdk, { Transaction } from "@stellar/stellar-sdk";
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { Config, FeePayerAccount, pickFeePayerAccount } from "../config";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
@@ -37,6 +37,7 @@ import {
   FeeBumpJobData,
 } from "../queues/feeBumpQueue";
 import { getFcmNotifier } from "../services/fcmNotifier";
+import { persistTransactionAsync } from "../utils/asyncDbPersist";
 
 const FEEBUMP_JOB_TIMEOUT_MS = parseInt(
   process.env.FEEBUMP_JOB_TIMEOUT_MS ?? "30000",
@@ -138,19 +139,20 @@ function fingerprintSponsorshipRequest(value: unknown): string {
   return createHash("sha256").update(serialized).digest("hex");
 }
 
-async function createPendingTransactionRecord(
+function createPendingTransactionRecord(
   tenantId: string,
   prepared: PreparedFeeBump,
-): Promise<{ id: string }> {
-  return prisma.transaction.create({
-    data: {
-      innerTxHash: prepared.innerTxHash,
-      tenantId,
-      status: "PENDING",
-      costStroops: prepared.feeAmount,
-      category: prepared.category,
-    },
+): { id: string } {
+  const id = randomUUID();
+  persistTransactionAsync({
+    id,
+    innerTxHash: prepared.innerTxHash,
+    tenantId,
+    status: "PENDING",
+    costStroops: prepared.feeAmount,
+    category: prepared.category,
   });
+  return { id };
 }
 
 async function executePreparedFeeBump(
@@ -315,7 +317,7 @@ export async function processFeeBump(
       "QUOTA_EXCEEDED",
     );
   }
-  const transactionRecord = await createPendingTransactionRecord(
+  const transactionRecord = createPendingTransactionRecord(
     tenant.id,
     prepared,
   );
@@ -526,7 +528,7 @@ export async function feeBumpHandler(
         );
       }
 
-      const transactionRecord = await createPendingTransactionRecord(
+      const transactionRecord = createPendingTransactionRecord(
         tenant.id,
         prepared,
       );
