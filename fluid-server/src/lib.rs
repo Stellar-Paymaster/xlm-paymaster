@@ -4,6 +4,7 @@ use std::sync::{Mutex, OnceLock};
 mod blocklist;
 mod heuristics;
 pub mod archive;
+pub mod memory_leak_profiling;
 
 use blocklist::Blocklist;
 use heuristics::RequestTracker;
