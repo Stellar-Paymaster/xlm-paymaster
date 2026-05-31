@@ -584,6 +584,62 @@ mod tests {
     }
 
     #[test]
+    fn verify_api_key_fuzzes_malformed_unicode_and_binary_like_inputs() {
+        let expected = "sk_live_0123456789abcdef";
+        let malformed_inputs = vec![
+            "\0".to_string(),
+            "\0\0\0".to_string(),
+            "sk_live_0123456789abcdef\0".to_string(),
+            "fluid\nkey".to_string(),
+            "fluid\r\nx-api-key: injected".to_string(),
+            "fluid\tkey".to_string(),
+            "   sk_live_0123456789abcdef   ".to_string(),
+            "sk_live_\u{202e}fedcba9876543210".to_string(),
+            "sk_live_\u{200d}\u{fe0f}".to_string(),
+            "🔑".to_string(),
+            "fluid-🔐-demo-key".to_string(),
+            "密钥".to_string(),
+            "مفتاح".to_string(),
+            "कुंजी".to_string(),
+            "\u{7f}".to_string(),
+            "\u{80}".to_string(),
+            "\u{fffd}".to_string(),
+            "\u{10ffff}".to_string(),
+            "A".repeat(8_192),
+            "sk_live_".repeat(1_024),
+        ];
+
+        for candidate in malformed_inputs {
+            let result = std::panic::catch_unwind(|| verify_api_key(&candidate, expected));
+            assert!(
+                result.is_ok(),
+                "verify_api_key panicked for candidate {:?}",
+                candidate
+            );
+            assert!(
+                !result.unwrap(),
+                "malformed candidate {:?} unexpectedly matched",
+                candidate
+            );
+        }
+    }
+
+    #[test]
+    fn verify_api_key_fuzzes_all_byte_values_without_panics() {
+        let expected = "sk_live_0123456789abcdef";
+
+        for byte in 0u8..=u8::MAX {
+            let candidate = char::from(byte).to_string();
+            let result = std::panic::catch_unwind(|| verify_api_key(&candidate, expected));
+            assert!(
+                result.is_ok(),
+                "verify_api_key panicked for byte value {byte}"
+            );
+            assert!(!result.unwrap(), "byte value {byte} unexpectedly matched");
+        }
+    }
+
+    #[test]
     fn envelope_signature_count_counts_all_envelope_variants() {
         let mut env = parse_transaction_envelope(UNSIGNED_XDR).unwrap();
         assert_eq!(envelope_signature_count(&env), 0);
