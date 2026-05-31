@@ -1,0 +1,35 @@
+[package]
+name = "fluid-server-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.fluid-server]
+path = ".."
+
+[[bin]]
+name = "fuzz_parse_xdr_from_bytes"
+path = "fuzz_targets/fuzz_parse_xdr_from_bytes.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_parse_xdr_base64"
+path = "fuzz_targets/fuzz_parse_xdr_base64.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_validate_xdr_input"
+path = "fuzz_targets/fuzz_validate_xdr_input.rs"
+test = false
+doc = false
+bench = false
