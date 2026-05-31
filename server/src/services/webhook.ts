@@ -2,7 +2,6 @@ import { createHmac } from "node:crypto";
 import { Job, Queue, Worker } from "bullmq";
 import { createLogger, serializeError } from "../utils/logger";
 
-import Redis from "ioredis";
 import axios from "axios";
 import prisma from "../utils/db";
 import {
@@ -10,7 +9,8 @@ import {
   mapTransactionStatusToWebhookEventType,
   type WebhookEventType,
 } from "./webhookEventTypes";
-const connection = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+import { createRedisClient } from "../utils/redisClientFactory";
+const connection = createRedisClient();
 export const webhookLogger = createLogger({ component: "webhook_service" });
 
 export const webhookQueue = new Queue("webhook-delivery", {
