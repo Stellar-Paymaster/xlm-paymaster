@@ -41,8 +41,6 @@ export function createGlobalErrorHandler(slackNotifier?: SlackNotifierLike) {
     res: Response,
     next: NextFunction,
   ): void {
-    const isProd = process.env.NODE_ENV === "production";
-
     if (err instanceof AppError) {
       notify5xx(slackNotifier, req, err.statusCode, err);
       res.status(err.statusCode).json({
@@ -65,9 +63,8 @@ export function createGlobalErrorHandler(slackNotifier?: SlackNotifierLike) {
     notify5xx(slackNotifier, req, 500, err);
 
     res.status(500).json({
-      error: isProd ? "An unexpected error occurred" : err.message,
+      error: "An unexpected error occurred",
       code: "INTERNAL_ERROR",
-      ...(isProd ? {} : { stack: err.stack }),
     });
   };
 }

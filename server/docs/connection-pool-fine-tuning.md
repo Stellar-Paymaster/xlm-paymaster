@@ -12,7 +12,7 @@ That matches the exact problem PgBouncer solves at the Postgres layer — pool *
 
 ## 2. Non-goals
 
-- **Running a separate PgBouncer process.** Fluid's server uses Prisma over the `better-sqlite3` adapter (single-writer storage). A literal Postgres proxy is not applicable. We implement the *pattern* in-process.
+- **Running a separate PgBouncer process.** Fluid's server now selects the Prisma driver adapter from the configured connection URL, so PostgreSQL deployments can use the pg adapter while local file-based tooling still uses SQLite. We implement the *pattern* in-process.
 - **Replacing Prisma.** The pool is layered *on top of* the existing `prisma` singleton. No model changes.
 
 ## 3. Design
@@ -59,7 +59,7 @@ Snapshot for metrics:
 
 ### 3.2 `createPooledDatabase` — integration with the shared Prisma client
 
-`server/src/db/pooledDatabase.ts` — wraps the existing `prisma` singleton in a pool whose "connections" are lease tokens. Since better-sqlite3 is single-writer, we don't open multiple Prisma clients; the pool acts as a bounded FIFO queue over the one we already have. Every fee-bump request that opts in goes through `db.withConnection(client => ...)`, inheriting all the tuning knobs above.
+`server/src/db/pooledDatabase.ts` — wraps the existing `prisma` singleton in a pool whose "connections" are lease tokens. The pool acts as a bounded FIFO queue over the shared Prisma client, regardless of whether that client is backed by PostgreSQL or the local SQLite fallback. Every fee-bump request that opts in goes through `db.withConnection(client => ...)`, inheriting all the tuning knobs above.
 
 Importantly, the pool's `destroy` is a no-op for this wrapper — destroying a *lease* does not disconnect the shared client. The `validate` hook defaults to a `SELECT 1` probe so unhealthy states surface immediately on acquire.
 
