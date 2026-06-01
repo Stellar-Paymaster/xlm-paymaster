@@ -255,4 +255,62 @@ export function ensureHashTag(key: string): string {
   return `{${key}}`;
 }
 
+// ─── Replay-attack prevention: short-lived transaction hash cache ─────────────
+
+export const TX_HASH_PREFIX = "txhash:";
+
+/**
+ * Default TTL for processed transaction hashes (5 minutes).
+ * Stellar transactions expire after their time bounds, but 5 minutes is a
+ * reasonable window to catch replay attempts for fee-bump requests.
+ */
+const TX_HASH_TTL_SECONDS = 300;
+
+/**
+ * Mark a transaction hash as processed. Returns true if the hash was newly
+ * recorded, false if it was already present (i.e. a duplicate / replay).
+ *
+ * Uses SET NX (set-if-not-exists) so the check and write are atomic.
+ */
+export async function markTransactionHashProcessed(
+  txHash: string,
+  ttlSeconds = TX_HASH_TTL_SECONDS,
+): Promise<boolean> {
+  try {
+    const key = ensureHashTag(TX_HASH_PREFIX + txHash);
+    // SET key 1 EX ttl NX — returns "OK" on success, null if key already exists
+    const result = await redis.set(key, "1", "EX", ttlSeconds, "NX");
+    return result === "OK";
+  } catch (err) {
+    console.error(
+      "[Redis] markTransactionHashProcessed error:",
+      err instanceof Error ? err.message : err,
+    );
+    // Fail open: if Redis is unavailable, allow the request through rather
+    // than blocking all traffic. The duplicate will be caught by downstream
+    // idempotency checks (e.g. Horizon rejecting a duplicate sequence number).
+    return true;
+  }
+}
+
+/**
+ * Check whether a transaction hash has already been processed without
+ * recording it. Useful for read-only inspection.
+ */
+export async function isTransactionHashProcessed(
+  txHash: string,
+): Promise<boolean> {
+  try {
+    const key = ensureHashTag(TX_HASH_PREFIX + txHash);
+    const val = await redis.get(key);
+    return val !== null;
+  } catch (err) {
+    console.error(
+      "[Redis] isTransactionHashProcessed error:",
+      err instanceof Error ? err.message : err,
+    );
+    return false;
+  }
+}
+
 export default redis;
