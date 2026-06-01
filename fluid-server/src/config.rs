@@ -1,5 +1,7 @@
 use crate::error::AppError;
 use axum::http::StatusCode;
+use reqwest::Client;
+use serde_json::Value;
 
 #[derive(Clone, Copy)]
 pub enum HorizonSelectionStrategy {
@@ -26,14 +28,29 @@ pub struct Config {
     pub disable_rate_limits: bool,
 }
 
-pub fn load_config() -> Result<(Config, Vec<String>), AppError> {
-    let secrets = parse_csv_env("FLUID_FEE_PAYER_SECRET").ok_or_else(|| {
-        AppError::new(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "INTERNAL_ERROR",
-            "FLUID_FEE_PAYER_SECRET environment variable is required",
-        )
-    })?;
+pub async fn load_config() -> Result<(Config, Vec<String>), AppError> {
+    // Attempt to fetch fee payer secrets from Vault when enabled, otherwise
+    // fall back to the FLUID_FEE_PAYER_SECRET environment variable.
+    let secrets = if std::env::var("VAULT_ENABLED")
+        .unwrap_or_default()
+        .to_lowercase()
+        == "true"
+    {
+        match fetch_secrets_from_vault().await {
+            Ok(s) => s,
+            Err(err) => {
+                return Err(err);
+            }
+        }
+    } else {
+        parse_csv_env("FLUID_FEE_PAYER_SECRET").ok_or_else(|| {
+            AppError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "INTERNAL_ERROR",
+                "FLUID_FEE_PAYER_SECRET environment variable is required",
+            )
+        })?
+    };
 
     let allowed_origins = parse_csv_env("FLUID_ALLOWED_ORIGINS").unwrap_or_default();
     let base_fee = env_parse("FLUID_BASE_FEE", 100_i64);
@@ -79,6 +96,156 @@ pub fn load_config() -> Result<(Config, Vec<String>), AppError> {
         },
         secrets,
     ))
+}
+
+async fn fetch_secrets_from_vault() -> Result<Vec<String>, AppError> {
+    let addr = std::env::var("VAULT_ADDR").map_err(|_| {
+        AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "VAULT_ERROR",
+            "VAULT_ADDR must be set when VAULT_ENABLED=true",
+        )
+    })?;
+
+    let token = std::env::var("VAULT_TOKEN").map_err(|_| {
+        AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "VAULT_ERROR",
+            "VAULT_TOKEN must be set when VAULT_ENABLED=true",
+        )
+    })?;
+
+    let secret_path = std::env::var("VAULT_SECRET_PATH")
+        .unwrap_or_else(|_| "secret/data/fluid/fee_payer".to_string());
+    // Build URL for KV v2 by default. If the user sets a direct path, use it as-is.
+    let url = if secret_path.starts_with('/') {
+        format!("{}v1{}", addr.trim_end_matches('/'), secret_path)
+    } else if secret_path.contains("/data/") || secret_path.contains("/secret/") {
+        format!("{}/v1/{}", addr.trim_end_matches('/'), secret_path)
+    } else {
+        format!(
+            "{}/v1/secret/data/{}",
+            addr.trim_end_matches('/'),
+            secret_path
+        )
+    };
+
+    let client = Client::new();
+    let res = client
+        .get(&url)
+        .header("X-Vault-Token", token.clone())
+        .send()
+        .await
+        .map_err(|e| {
+            AppError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "VAULT_ERROR",
+                format!("Failed to contact Vault at {url}: {e}"),
+            )
+        })?;
+
+    if !res.status().is_success() {
+        return Err(AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "VAULT_ERROR",
+            format!("Vault returned HTTP {} when fetching secrets", res.status()),
+        ));
+    }
+
+    let body: Value = res.json().await.map_err(|e| {
+        AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "VAULT_ERROR",
+            format!("Failed to parse Vault response JSON: {e}"),
+        )
+    })?;
+
+    // KV v2 stores secrets under `data.data`.
+    let secret_value = body
+        .get("data")
+        .and_then(|d| d.get("data"))
+        .cloned()
+        .unwrap_or_else(|| body.get("data").cloned().unwrap_or(Value::Null));
+
+    let mut secrets = Vec::new();
+    match secret_value {
+        Value::Object(map) => {
+            // Try common keys first, otherwise serialize values to strings.
+            if let Some(v) = map.get("FLUID_FEE_PAYER_SECRET") {
+                if let Some(s) = v.as_str() {
+                    secrets = s
+                        .split(',')
+                        .map(|s| s.trim().to_string())
+                        .filter(|s| !s.is_empty())
+                        .collect();
+                }
+            } else if let Some(v) = map.get("secret") {
+                if let Some(s) = v.as_str() {
+                    secrets = s
+                        .split(',')
+                        .map(|s| s.trim().to_string())
+                        .filter(|s| !s.is_empty())
+                        .collect();
+                }
+            } else {
+                for (_k, v) in map.into_iter() {
+                    if let Some(s) = v.as_str() {
+                        secrets.push(s.to_string());
+                    } else {
+                        secrets.push(v.to_string());
+                    }
+                }
+            }
+        }
+        Value::String(s) => {
+            secrets = s
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+        }
+        _ => {}
+    }
+
+    if secrets.is_empty() {
+        return Err(AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "VAULT_ERROR",
+            "No fee payer secret found in Vault response",
+        ));
+    }
+
+    // Spawn a background task to periodically renew the Vault token if configured.
+    if std::env::var("VAULT_TOKEN").is_ok() {
+        let renew_seconds = std::env::var("VAULT_TOKEN_RENEW_SECONDS")
+            .ok()
+            .and_then(|v| v.parse::<u64>().ok())
+            .unwrap_or(300);
+        let addr_clone = addr.clone();
+        let token_clone = token.clone();
+        tokio::spawn(async move {
+            let client = Client::new();
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(renew_seconds)).await;
+                let renew_url = format!(
+                    "{}/v1/auth/token/renew-self",
+                    addr_clone.trim_end_matches('/')
+                );
+                if let Err(e) = client
+                    .post(&renew_url)
+                    .header("X-Vault-Token", token_clone.clone())
+                    .send()
+                    .await
+                {
+                    tracing::error!("Vault token renewal failed: {}", e);
+                } else {
+                    tracing::debug!("Vault token renewal attempt completed");
+                }
+            }
+        });
+    }
+
+    Ok(secrets)
 }
 
 fn env_parse<T>(key: &str, default: T) -> T
@@ -233,7 +400,7 @@ mod tests {
     fn load_config_disable_rate_limits() {
         let _lock = ENV_LOCK.lock().unwrap();
         std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-c");
-        
+
         // Default: false
         std::env::remove_var("FLUID_DISABLE_RATE_LIMITS");
         let (config, _) = load_config().expect("expected config to load");
