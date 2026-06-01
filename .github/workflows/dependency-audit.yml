@@ -1,0 +1,69 @@
+name: Dependency Vulnerability Audit (fluid-server)
+
+on:
+  pull_request:
+    paths:
+      - "fluid-server/**"
+      - ".github/workflows/dependency-audit.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "fluid-server/**"
+      - ".github/workflows/dependency-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-audit:
+    name: ${{ matrix.scanner }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scanner: cargo-audit
+            working-directory: fluid-server
+          - scanner: npm-audit
+            working-directory: fluid-server/wasm-demo
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.working-directory }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: cargo-audit (Rust)
+        if: matrix.scanner == 'cargo-audit'
+        run: |
+          cargo install cargo-audit --locked
+          cargo audit --version
+          cargo audit --json > "${RUNNER_TEMP}/cargo-audit-report.json"
+          cargo audit --deny warnings
+
+      - name: Upload cargo-audit report
+        if: matrix.scanner == 'cargo-audit' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo-audit-report
+          path: ${{ runner.temp }}/cargo-audit-report.json
+          if-no-files-found: warn
+
+      - name: npm audit (wasm-demo)
+        if: matrix.scanner == 'npm-audit'
+        run: |
+          npm --version
+          npm ci
+          npm audit --json > "${RUNNER_TEMP}/npm-audit-report.json" || true
+          npm audit --audit-level=high
+
+      - name: Upload npm-audit report
+        if: matrix.scanner == 'npm-audit' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: ${{ runner.temp }}/npm-audit-report.json
+          if-no-files-found: warn
