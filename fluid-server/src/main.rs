@@ -1,14 +1,18 @@
-mod config;
-mod db;
 mod benchmarks;
+mod config;
+mod contract_cache;
+mod db;
 mod error;
+mod fee_calculator_mod;
 mod horizon;
 mod logging;
 mod metrics;
+mod notifications;
 mod profiling;
 mod state;
 mod stellar;
-mod xdr;
+mod tracing_ctx;
+pub use fluid_server::xdr;
 mod ai_query;
 use axum::{
     extract::{ConnectInfo, Extension, Request, State},
@@ -20,18 +24,22 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use std::{net::SocketAddr, sync::Arc, time::Instant};
 use serde::{Deserialize, Serialize};
+use std::{net::SocketAddr, sync::Arc, time::Instant};
 use tracing::{error, info};
 
-use ai_query::{handle_ai_query, QueryRequest, QueryFilters};
+use ai_query::{handle_ai_query, QueryFilters, QueryRequest};
 use config::load_config;
+use contract_cache::{
+    ContractCacheStatsResponse, FootprintSchema, UpsertDefinitionRequest, UpsertFootprintRequest,
+};
 use db::create_pool;
 use error::AppError;
 use fluid_server::archive::run_archival_job;
 use fluid_server::grpc::serve_grpc;
 use horizon::HorizonNodeStatus;
 use logging::init_logging_from_env;
+use notifications::{Backend, NotificationEngine, WebhookBackend};
 use sqlx::postgres::PgPool;
 use state::{
     iso_now, utc_day_start_ms, ApiKeyConfig, AppState, HealthFeePayer, RateLimitEntry,
@@ -213,7 +221,19 @@ async fn run() -> Result<(), AppError> {
     let (config, secrets) = load_config()?;
     let port = config.port;
     let allowed_origins = config.allowed_origins.clone();
-    let state = AppState::new(config, &secrets)?;
+
+    // Build the notification engine and attach a Slack webhook backend when
+    // the SLACK_WEBHOOK_URL env var is present. Additional backends can be
+    // registered here as the platform grows.
+    let (notification_engine, notification_handle) = NotificationEngine::new(256);
+    let notification_engine = if let Ok(slack_url) = std::env::var("SLACK_WEBHOOK_URL") {
+        notification_engine.register(Backend::Webhook(WebhookBackend::new("slack", slack_url)))
+    } else {
+        notification_engine
+    };
+    notification_engine.spawn();
+
+    let state = AppState::new(config, &secrets)?.with_notification_handle(notification_handle);
 
     // Create database pool for archival job
     let db_pool = match create_pool().await {
@@ -231,14 +251,15 @@ async fn run() -> Result<(), AppError> {
     if let Some(pool) = db_pool.clone() {
         tokio::spawn(async move {
             info!("Starting transaction archival job...");
-            
+
             // Run once on startup
             if let Err(e) = run_archival_job(&pool).await {
                 error!("Initial archival job failed: {}", e);
             }
-            
+
             // Then every 30 days (30 * 24 * 3600 seconds)
-            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(30 * 24 * 3600));
+            let mut interval =
+                tokio::time::interval(tokio::time::Duration::from_secs(30 * 24 * 3600));
             loop {
                 interval.tick().await;
                 info!("Running monthly transaction archival job...");
@@ -270,6 +291,19 @@ async fn run() -> Result<(), AppError> {
         });
     }
 
+    // Background task: evict expired contract cache entries every 60 seconds.
+    {
+        let cache = Arc::clone(&state.contract_cache);
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(std::time::Duration::from_secs(60));
+            interval.tick().await;
+            loop {
+                interval.tick().await;
+                cache.evict_expired().await;
+            }
+        });
+    }
+
     let app = Router::new()
         .route("/", get(dashboard))
         .route("/dashboard", get(dashboard))
@@ -279,6 +313,9 @@ async fn run() -> Result<(), AppError> {
         .route("/verify-db", get(verify_db))
         .route("/fee-bump", post(fee_bump))
         .route("/fee-bump/batch", post(fee_bump_batch))
+        .route("/contract/definition", post(upsert_contract_definition))
+        .route("/contract/footprint", post(upsert_contract_footprint))
+        .route("/contract/cache/stats", get(contract_cache_stats))
         .route("/test/add-transaction", post(add_transaction))
         .route("/test/transactions", get(list_transactions))
         .fallback(not_found)
@@ -306,25 +343,30 @@ async fn run() -> Result<(), AppError> {
     info!("Starting Fluid Rust services");
     info!("Fluid server (Rust) listening on {http_addr}");
 
-    let listener = tokio::net::TcpListener::bind(http_addr).await.map_err(|error| {
-        AppError::new(
-            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-            "INTERNAL_ERROR",
-            format!("Failed to bind TCP listener: {error}"),
-        )
-    })?;
+    let listener = tokio::net::TcpListener::bind(http_addr)
+        .await
+        .map_err(|error| {
+            AppError::new(
+                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                "INTERNAL_ERROR",
+                format!("Failed to bind TCP listener: {error}"),
+            )
+        })?;
 
     tokio::try_join!(
         async {
-            axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
-                .await
-                .map_err(|error| {
-                    AppError::new(
-                        axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-                        "INTERNAL_ERROR",
-                        format!("Rust server exited unexpectedly: {error}"),
-                    )
-                })
+            axum::serve(
+                listener,
+                app.into_make_service_with_connect_info::<SocketAddr>(),
+            )
+            .await
+            .map_err(|error| {
+                AppError::new(
+                    axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                    "INTERNAL_ERROR",
+                    format!("Rust server exited unexpectedly: {error}"),
+                )
+            })
         },
         async {
             serve_grpc(grpc_addr).await.map_err(|error| {
@@ -407,8 +449,7 @@ async fn metrics(State(state): State<AppState>) -> impl IntoResponse {
 async fn add_transaction(
     State(state): State<AppState>,
     Json(request): Json<AddTransactionRequest>,
-)
--> Result<Json<AddTransactionResponse>, AppError> {
+) -> Result<Json<AddTransactionResponse>, AppError> {
     let status = request.status.unwrap_or_else(|| "pending".to_string());
     let now = iso_now();
 
@@ -448,13 +489,38 @@ async fn fee_bump(
     state.metrics.inc_total_transactions();
     let started_at = Instant::now();
 
+    // Distributed tracing: extract or create a span context for this request.
+    let span_ctx = tracing_ctx::extract_span_context(&headers);
+    tracing_ctx::record_trace_ids(&span_ctx);
+    info!(
+        trace_id = %span_ctx.trace_id.to_hex(),
+        span_id  = %span_ctx.span_id.to_hex(),
+        "fee-bump request received"
+    );
+
     let api_key = extract_api_key(&headers)?;
     let api_key_config = find_api_key(&api_key)?;
-    let ip_limit = state
-        .global_limiter
-        .check(&format!("ip:{}", addr.ip()))
-        .await?;
-    let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+    let (ip_limit, api_limit) = if state.config.disable_rate_limits {
+        (
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+        )
+    } else {
+        let ip_limit = state
+            .global_limiter
+            .check(&format!("ip:{}", addr.ip()))
+            .await?;
+        let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+        (ip_limit, api_limit)
+    };
 
     let result = process_fee_bump_request(
         &state,
@@ -470,7 +536,13 @@ async fn fee_bump(
 
     match result {
         Ok(fee_bump_res) => {
-            let response = Json(fee_bump_res).into_response();
+            let mut response = Json(fee_bump_res).into_response();
+            // Propagate trace context to the caller.
+            if let Ok(val) = axum::http::HeaderValue::from_str(&span_ctx.to_traceparent()) {
+                response
+                    .headers_mut()
+                    .insert(axum::http::HeaderName::from_static("traceparent"), val);
+            }
             Ok(with_limit_headers(response, &ip_limit, &api_limit))
         }
         Err(err) => {
@@ -491,11 +563,27 @@ async fn fee_bump_batch(
 
     let api_key = extract_api_key(&headers)?;
     let api_key_config = find_api_key(&api_key)?;
-    let ip_limit = state
-        .global_limiter
-        .check(&format!("ip:{}", addr.ip()))
-        .await?;
-    let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+    let (ip_limit, api_limit) = if state.config.disable_rate_limits {
+        (
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+            RateLimitResult {
+                limit: 999_999_999,
+                remaining: 999_999_999,
+                reset_time_epoch_seconds: 0,
+            },
+        )
+    } else {
+        let ip_limit = state
+            .global_limiter
+            .check(&format!("ip:{}", addr.ip()))
+            .await?;
+        let api_limit = check_api_key_rate_limit(&state, &api_key_config).await?;
+        (ip_limit, api_limit)
+    };
 
     let submit = body.submit.unwrap_or(false);
     let mut results = Vec::with_capacity(body.xdrs.len());
@@ -538,8 +626,8 @@ async fn process_fee_bump_request(
     // Validate operation count before acquiring a signer lease to avoid
     // holding a resource slot while performing a cheap structural check.
     {
-        use stellar_xdr::curr::{Limits, ReadXdr, TransactionEnvelope};
         use base64::{engine::general_purpose::STANDARD, Engine as _};
+        use stellar_xdr::curr::{Limits, ReadXdr, TransactionEnvelope};
 
         let op_count: Option<usize> = STANDARD
             .decode(xdr.trim())
@@ -604,7 +692,9 @@ async fn process_fee_bump_request(
         .map(|record| record.fee_stroops)
         .sum();
 
-    if current_spend + result.fee_amount > api_key_config.daily_quota_stroops {
+    if !state.config.disable_rate_limits
+        && current_spend + result.fee_amount > api_key_config.daily_quota_stroops
+    {
         signer_lease.release().await;
         return Err(AppError::new(
             axum::http::StatusCode::FORBIDDEN,
@@ -680,6 +770,66 @@ async fn process_fee_bump_request(
     });
     signer_lease.release().await;
     Ok(response)
+}
+
+async fn upsert_contract_definition(
+    State(state): State<AppState>,
+    Json(body): Json<UpsertDefinitionRequest>,
+) -> Result<Json<contract_cache::ContractDefinition>, AppError> {
+    if body.contract_id.trim().is_empty() {
+        return Err(AppError::new(
+            axum::http::StatusCode::BAD_REQUEST,
+            "INVALID_REQUEST",
+            "contract_id is required",
+        ));
+    }
+    if body.wasm_hash.trim().is_empty() {
+        return Err(AppError::new(
+            axum::http::StatusCode::BAD_REQUEST,
+            "INVALID_REQUEST",
+            "wasm_hash is required",
+        ));
+    }
+    let definition = contract_cache::ContractDefinition {
+        contract_id: body.contract_id.clone(),
+        wasm_hash: body.wasm_hash,
+        network: body.network,
+        wasm_bytes: body.wasm_bytes,
+        cached_at_ms: state::now_ms(),
+    };
+    state
+        .contract_cache
+        .set_definition(definition.clone())
+        .await;
+    Ok(Json(definition))
+}
+
+async fn upsert_contract_footprint(
+    State(state): State<AppState>,
+    Json(body): Json<UpsertFootprintRequest>,
+) -> Result<Json<FootprintSchema>, AppError> {
+    if body.contract_id.trim().is_empty() {
+        return Err(AppError::new(
+            axum::http::StatusCode::BAD_REQUEST,
+            "INVALID_REQUEST",
+            "contract_id is required",
+        ));
+    }
+    let footprint = FootprintSchema {
+        contract_id: body.contract_id.clone(),
+        read_only: body.read_only,
+        read_write: body.read_write,
+        cached_at_ms: state::now_ms(),
+    };
+    state.contract_cache.set_footprint(footprint.clone()).await;
+    Ok(Json(footprint))
+}
+
+async fn contract_cache_stats(State(state): State<AppState>) -> Json<ContractCacheStatsResponse> {
+    Json(ContractCacheStatsResponse {
+        definition_count: state.contract_cache.definition_count().await,
+        footprint_count: state.contract_cache.footprint_count().await,
+    })
 }
 
 async fn not_found(uri: Uri, request: Request) -> Response {
@@ -775,8 +925,7 @@ async fn check_api_key_rate_limit(
             "RATE_LIMITED",
             format!(
                 "API key rate limit exceeded for {} ({}).",
-                api_key.name,
-                api_key.tier
+                api_key.name, api_key.tier
             ),
         ));
     }

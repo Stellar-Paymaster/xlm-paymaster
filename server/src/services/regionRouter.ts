@@ -15,8 +15,8 @@
  *   3. file:./dev.db           – local dev default
  */
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { createLogger } from "../utils/logger";
+import { createPrismaAdapter } from "../utils/prismaAdapter";
 
 const logger = createLogger({ component: "region_router" });
 
@@ -39,7 +39,7 @@ function loadPrismaClient(): PrismaModule["PrismaClient"] {
 
 function buildClient(url: string): PrismaClientLike {
   const PrismaClient = loadPrismaClient();
-  const adapter = new PrismaBetterSqlite3({ url });
+  const adapter = createPrismaAdapter(url);
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],

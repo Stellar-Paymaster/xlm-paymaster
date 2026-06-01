@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSandboxPageData } from "@/lib/sandbox-data";
 import { SandboxPanel } from "@/components/dashboard/SandboxPanel";
+import { SandboxTransactionBuilder } from "@/components/dashboard/SandboxTransactionBuilder";
 
 export default async function AdminSandboxPage() {
   const session = await auth();
@@ -45,6 +46,7 @@ export default async function AdminSandboxPage() {
           sandboxHorizonUrl={sandboxHorizonUrl}
           sandboxRateLimitMax={sandboxRateLimitMax}
         />
+        <SandboxTransactionBuilder />
       </main>
     </div>
   );

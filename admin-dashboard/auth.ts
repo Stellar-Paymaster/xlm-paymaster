@@ -2,17 +2,20 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import type { AdminRole } from "./lib/permissions";
+import { getRequestIp } from "./lib/request-ip";
 
 declare module "next-auth" {
   interface User {
     role?: string;
     adminJwt?: string;
+    ipAddress?: string;
   }
   interface Session {
     user: {
       email?: string | null;
       role?: string;
       adminJwt?: string;
+      ipAddress?: string;
     };
   }
 }
@@ -21,6 +24,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string;
     adminJwt?: string;
+    ipAddress?: string;
     iat?: number;
     exp?: number;
   }
@@ -36,7 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) return null;
 
         const email = credentials.email as string;
@@ -48,6 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (serverUrl && adminToken) {
           try {
+            const clientIp = getRequestIp(request);
             const resp = await fetch(`${serverUrl}/admin/auth/login`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -60,6 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 email,
                 role: data.role as AdminRole,
                 adminJwt: data.token,
+                ipAddress: clientIp ?? undefined,
               };
             }
           } catch {
@@ -82,7 +88,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const passwordMatch = await bcrypt.compare(password, adminPasswordHash);
         if (!passwordMatch) return null;
 
-        return { id: "env-admin", email: adminEmail, role: "SUPER_ADMIN" };
+        return {
+          id: "env-admin",
+          email: adminEmail,
+          role: "SUPER_ADMIN",
+          ipAddress: getRequestIp(request) ?? undefined,
+        };
       },
     }),
   ],
@@ -95,6 +106,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Initial sign-in
         token.role = user.role;
         token.adminJwt = user.adminJwt;
+        token.ipAddress = user.ipAddress;
         token.iat = now;
         token.exp = now + JWT_EXPIRATION;
       } else if (token.iat && token.exp) {
@@ -146,6 +158,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.role = token.role as string;
         session.user.adminJwt = token.adminJwt as string | undefined;
+        session.user.ipAddress = token.ipAddress as string | undefined;
       }
       return session;
     },
@@ -158,6 +171,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   pages: { signIn: "/login" },
-};
-
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+});

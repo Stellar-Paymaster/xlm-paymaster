@@ -1,9 +1,17 @@
 use std::fmt;
 use std::str::FromStr;
 use std::sync::{Mutex, OnceLock};
-mod blocklist;
-mod heuristics;
 pub mod archive;
+mod blocklist;
+pub mod fee_calculator;
+mod heuristics;
+pub mod memory_leak_profiling;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod mock_horizon;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod profiling;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod tracing;
 
 use blocklist::Blocklist;
 use heuristics::RequestTracker;
@@ -26,17 +34,16 @@ fn now() -> u64 {
     }
 }
 
-
 use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
 use stellar_strkey::ed25519::{PrivateKey, PublicKey};
 use stellar_strkey::Strkey;
-use subtle::ConstantTimeEq;
 use stellar_xdr::curr::{
     DecoratedSignature, Hash, Limits, MuxedAccount, Preconditions, ReadXdr, Signature,
     SignatureHint, Transaction, TransactionEnvelope, TransactionExt, TransactionSignaturePayload,
     TransactionSignaturePayloadTaggedTransaction, TransactionV0, Uint256, VecM, WriteXdr,
 };
+use subtle::ConstantTimeEq;
 use wasm_bindgen::prelude::*;
 
 // These modules are primarily used by the native server binary.
@@ -46,11 +53,15 @@ pub mod config;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod error;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod gateway_config;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod grpc;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod logging;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod rate_limiter;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod xdr;
 
 const MAX_SIGNATURES: usize = 20;
 
@@ -151,7 +162,9 @@ impl fmt::Display for SigningError {
                 "transaction already contains the maximum of 20 signatures"
             ),
             Self::AccountBlocked(message) => write!(f, "account is blocked: {message}"),
-            Self::SuspiciousActivity(message) => write!(f, "suspicious activity detected: {message}"),
+            Self::SuspiciousActivity(message) => {
+                write!(f, "suspicious activity detected: {message}")
+            }
         }
     }
 }
@@ -680,7 +693,10 @@ mod tests {
         let huge = "A".repeat(MAX_XDR_BYTES + 1);
         let err = check_xdr_size(&huge).unwrap_err();
         let msg = err.to_string();
-        assert!(msg.contains("exceeds the maximum allowed size"), "msg: {msg}");
+        assert!(
+            msg.contains("exceeds the maximum allowed size"),
+            "msg: {msg}"
+        );
     }
 
     #[test]
