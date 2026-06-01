@@ -1,12 +1,12 @@
 #![allow(dead_code)]
 
 use base64::{engine::general_purpose::STANDARD, Engine};
+use bytes::Bytes;
 use stellar_xdr::curr::{
     FeeBumpTransaction, FeeBumpTransactionInnerTx, Limits, Operation, OperationBody, ReadXdr,
     Transaction, TransactionEnvelope, TransactionV0,
 };
 use tracing::info;
-use bytes::Bytes;
 
 /// Hard ceiling for the encoded XDR payload accepted by the server before
 /// any decode or XDR deserialization work is attempted.
@@ -30,13 +30,14 @@ impl ZeroCopyDecoder {
         DECODE_BUFFER.with(|buffer| {
             let mut buf = buffer.borrow_mut();
             buf.clear();
-            
+
             // Ensure capacity without reallocating if possible
             let estimated_len = base64::decoded_len_estimate(input.len());
-            if buf.capacity() < estimated_len {
-                buf.reserve(estimated_len - buf.capacity());
+            let current_cap = buf.capacity();
+            if current_cap < estimated_len {
+                buf.reserve(estimated_len - current_cap);
             }
-            
+
             STANDARD.decode_vec(input, &mut buf)?;
             Ok(buf.clone()) // Only clone the actual decoded data
         })
@@ -165,7 +166,10 @@ pub fn parse_xdr_zero_copy(base64_bytes: &[u8]) -> Result<ParsedTransaction, Xdr
         });
     }
 
-    if !base64_bytes.iter().all(|byte| is_standard_base64_byte(*byte)) {
+    if !base64_bytes
+        .iter()
+        .all(|byte| is_standard_base64_byte(*byte))
+    {
         return Err(XdrError::InvalidBase64(
             "XDR payload must contain only standard base64 characters".to_string(),
         ));
@@ -606,7 +610,10 @@ mod tests {
     fn test_validate_xdr_input_accepts_whitespace_padded_valid_base64() {
         let valid = "  SGVsbG8gV29ybGQ=  \n";
         let result = validate_xdr_input(valid);
-        assert!(result.is_ok(), "whitespace-padded valid base64 should be accepted");
+        assert!(
+            result.is_ok(),
+            "whitespace-padded valid base64 should be accepted"
+        );
     }
 
     #[test]
@@ -672,5 +679,4 @@ mod tests {
         let decoded = result.unwrap();
         assert_eq!(decoded, b"Hello World");
     }
-}
 }

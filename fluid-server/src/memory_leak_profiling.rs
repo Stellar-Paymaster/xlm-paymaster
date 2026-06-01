@@ -58,11 +58,7 @@ mod memory_leak_profiling {
     /// A warmup phase of `warmup` iterations is executed first so that
     /// one-time initialisation allocations (lazy statics, thread-locals, etc.)
     /// are excluded from the measurement window.
-    fn measure<F: FnMut()>(
-        warmup: usize,
-        iterations: usize,
-        mut op: F,
-    ) -> (usize, usize) {
+    fn measure<F: FnMut()>(warmup: usize, iterations: usize, mut op: F) -> (usize, usize) {
         // Warmup – not measured
         for _ in 0..warmup {
             op();
