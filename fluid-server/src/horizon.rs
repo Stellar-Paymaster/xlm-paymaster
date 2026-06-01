@@ -10,7 +10,11 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 use tracing::info;
 
-use crate::{config::HorizonSelectionStrategy, error::AppError};
+use crate::{
+    config::HorizonSelectionStrategy,
+    error::AppError,
+    signer_weight::HorizonAccountAuth,
+};
 
 #[derive(Clone, Serialize)]
 pub struct HorizonNodeStatus {
@@ -190,6 +194,75 @@ impl HorizonCluster {
             "SUBMISSION_FAILED",
             format!(
                 "Transaction submission failed: {}",
+                last_error.unwrap_or_else(|| "all Horizon nodes failed".to_string())
+            ),
+        ))
+    }
+
+    pub async fn fetch_account_auth(&self, account_id: &str) -> Result<HorizonAccountAuth, AppError> {
+        let order = self.node_order().await;
+        let mut last_error = None;
+
+        for node_index in order {
+            let node_url = self.node_url(node_index).await;
+            let response = self
+                .client
+                .get(format!("{node_url}/accounts/{account_id}"))
+                .send()
+                .await;
+
+            match response {
+                Ok(response) if response.status().is_success() => {
+                    let body = response.json().await.map_err(|error| {
+                        AppError::new(
+                            StatusCode::BAD_GATEWAY,
+                            "HORIZON_LOOKUP_FAILED",
+                            format!("Failed to decode Horizon account response: {error}"),
+                        )
+                    })?;
+                    self.mark_node_active(node_index).await;
+                    return Ok(body);
+                }
+                Ok(response) if response.status() == StatusCode::NOT_FOUND => {
+                    return Err(AppError::new(
+                        StatusCode::BAD_REQUEST,
+                        "ACCOUNT_NOT_FOUND",
+                        format!("Source account {account_id} was not found on the network"),
+                    ));
+                }
+                Ok(response) => {
+                    let status = response.status();
+                    let body = response.text().await.unwrap_or_default();
+                    match classify_http_error(status, &body) {
+                        HorizonErrorDisposition::Retryable(message) => {
+                            self.mark_node_inactive(node_index, &message).await;
+                            last_error = Some(message);
+                            continue;
+                        }
+                        HorizonErrorDisposition::Final(message) => {
+                            self.mark_node_checked(node_index, Some(message.clone()))
+                                .await;
+                            return Err(AppError::new(
+                                StatusCode::BAD_GATEWAY,
+                                "HORIZON_LOOKUP_FAILED",
+                                format!("Horizon account lookup failed: {message}"),
+                            ));
+                        }
+                    }
+                }
+                Err(error) => {
+                    let message = error.to_string();
+                    self.mark_node_inactive(node_index, &message).await;
+                    last_error = Some(message);
+                }
+            }
+        }
+
+        Err(AppError::new(
+            StatusCode::BAD_GATEWAY,
+            "HORIZON_LOOKUP_FAILED",
+            format!(
+                "Horizon account lookup failed: {}",
                 last_error.unwrap_or_else(|| "all Horizon nodes failed".to_string())
             ),
         ))
