@@ -1,0 +1,46 @@
+{
+  "name": "server",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "server/src",
+  "tags": ["scope:server", "type:app", "lang:ts"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run build:ts",
+        "cwd": "server"
+      },
+      "cache": true,
+      "inputs": ["production", "^production"],
+      "outputs": ["{workspaceRoot}/server/dist"]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run test",
+        "cwd": "server"
+      },
+      "cache": true,
+      "inputs": ["default", "^production"]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run lint",
+        "cwd": "server"
+      },
+      "cache": true,
+      "inputs": ["default"]
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run format:check",
+        "cwd": "server"
+      },
+      "cache": true,
+      "inputs": ["default"]
+    }
+  }
+}

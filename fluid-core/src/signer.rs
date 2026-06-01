@@ -34,6 +34,10 @@ use crate::types::{DecoratedSignature, Keypair, PublicKey, TransactionHash};
 ///         // Your custom signing logic here
 ///         todo!("Implement signing")
 ///     }
+///
+///     fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+///         todo!("Implement signing")
+///     }
 /// }
 /// ```
 pub trait Signer: Send + Sync {
@@ -102,6 +106,7 @@ pub trait Signer: Send + Sync {
 ///
 /// // Use the signer to sign transactions
 /// // signer.sign_hash(&transaction_hash)?;
+/// // signer.sign_payload(&[0u8; 32])?;
 /// ```
 #[derive(Clone, Debug)]
 pub struct Ed25519Signer {

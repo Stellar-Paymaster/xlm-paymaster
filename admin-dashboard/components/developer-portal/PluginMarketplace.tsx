@@ -26,61 +26,24 @@ export function PluginMarketplace({ plugins }: PluginMarketplaceProps) {
 
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section
-        className="relative isolate overflow-hidden border-b border-border/80"
-        aria-labelledby="marketplace-heading"
-      >
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.15),transparent)]"
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary"
-            >
-              Plugin marketplace
-            </motion.p>
-            <motion.h1
-              id="marketplace-heading"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
-            >
-              Extend Fluid for every stack
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-6 text-lg text-muted-foreground sm:text-xl"
-            >
-              Community-built plugins, adapters, and integrations that bring Fluid fee
-              sponsorship to React, Vue, Python, Go, Soroban, and beyond.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-            >
-              <Button size="lg" className="min-w-[200px] text-base shadow-lg" asChild>
-                <a href={submitUrl} target="_blank" rel="noopener noreferrer">
-                  Submit a Plugin
-                </a>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/">Back to docs</Link>
-              </Button>
-            </motion.div>
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Plugins & Integrations
+            </h1>
+            <p className="mt-2 text-muted-foreground max-w-2xl text-balance">
+              Extend Fluid with community-built adapters for React, Vue, Python, Go, and more.
+            </p>
           </div>
+          <Button size="lg" className="shadow-lg group" asChild>
+            <a href={submitUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Submit a Plugin
+            </a>
+          </Button>
         </div>
-      </section>
+      </div>
 
       {/* ── Featured ─────────────────────────────────────────────────────── */}
       {featured.length > 0 && (
@@ -266,10 +229,11 @@ function PluginCard({ plugin, index, highlight = false }: PluginCardProps) {
       viewport={{ once: true, margin: "-40px" }}
       transition={{ delay: index * 0.06, duration: 0.45 }}
       className={cn(
-        "flex flex-col rounded-2xl border bg-card p-6 shadow-sm transition-colors",
+        "flex flex-col rounded-2xl border p-6 shadow-sm transition-all duration-300",
+        "glass ",
         highlight
-          ? "border-primary/30 hover:border-primary/60 hover:shadow-md"
-          : "border-border hover:border-primary/30 hover:shadow-md",
+          ? "ring-1 ring-primary/30 border-primary/20 hover:ring-primary/50 hover:shadow-xl hover:-translate-y-1"
+          : "border-border/50 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1",
       )}
       aria-label={plugin.name}
     >

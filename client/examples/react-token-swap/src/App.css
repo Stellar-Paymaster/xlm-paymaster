@@ -1,0 +1,5 @@
+/* App-specific styles */
+.swap-container {
+  display: flex;
+  flex-direction: column;
+}

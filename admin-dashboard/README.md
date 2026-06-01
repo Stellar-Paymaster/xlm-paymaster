@@ -25,6 +25,13 @@ ADMIN_PASSWORD_HASH=
 
 # Optional: Development URL (defaults to http://localhost:3001)
 NEXTAUTH_URL=http://localhost:3001
+
+# Embedded dashboard AI support
+AI_SUPPORT_PROVIDER=openai
+AI_SUPPORT_MODEL=gpt-4.1-mini
+OPENAI_API_KEY=
+AI_SUPPORT_LOCAL_BASE_URL=http://127.0.0.1:11434/v1
+AI_SUPPORT_LOCAL_API_KEY=local
 ```
 
 #### Generate AUTH_SECRET:
@@ -62,6 +69,16 @@ npm run dev
 ```
 
 Open [http://localhost:3001](http://localhost:3001) with your browser to access the login page.
+
+## Embedded AI Support
+
+The admin dashboard includes an always-available support widget in the bottom-right corner of authenticated `/admin/*` pages. The assistant sends the active conversation plus injected server-side context to `/api/ai/chat`, including:
+
+- Selected local docs from the repository and server quickstart
+- Current node configuration and live health metadata when available
+- The latest 100 transactions from the admin API when `FLUID_SERVER_URL` and `FLUID_ADMIN_TOKEN` are configured
+
+Conversation history is persisted in `sessionStorage` per admin browser session, so reloading or moving between admin pages keeps the current thread.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

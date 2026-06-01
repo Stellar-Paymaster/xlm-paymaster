@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package fluid.internal.signer.v1;
+
+service InternalSigner {
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc SignPayload(SignPayloadRequest) returns (SignPayloadResponse);
+  rpc SignPayloadFromVault(SignPayloadFromVaultRequest) returns (SignPayloadResponse);
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+}
+
+message SignPayloadRequest {
+  string secret = 1;
+  bytes payload = 2;
+}
+
+message SignPayloadFromVaultRequest {
+  string vault_addr = 1;
+  string vault_token = 2;
+  string approle_role_id = 3;
+  string approle_secret_id = 4;
+  string kv_mount = 5;
+  uint32 kv_version = 6;
+  string secret_path = 7;
+  string secret_field = 8;
+  bytes payload = 9;
+}
+
+message SignPayloadResponse {
+  bytes signature = 1;
+}

@@ -118,6 +118,21 @@ describe("settlementVerifier", () => {
       expect(parseFloat(result.actualAmount!)).toBeCloseTo(0.00001, 7);
     });
 
+    it("should reject overpayment because settlement amount must be exact", () => {
+      const tx = buildTx([
+        StellarSdk.Operation.payment({
+          destination: feePayerKeypair.publicKey(),
+          asset: StellarSdk.Asset.native(),
+          amount: "0.00003",
+        }),
+      ]);
+
+      const result = verifySettlementPayment(tx, { token: "XLM", requiredAmountStroops: 200 }, mockConfig);
+
+      expect(result.isValid).toBe(false);
+      expect(result.reason).toBe("Incorrect settlement amount");
+    });
+
     it("should reject payment to wrong destination", () => {
       const tx = buildTx([
         StellarSdk.Operation.payment({
@@ -148,6 +163,23 @@ describe("settlementVerifier", () => {
       expect(result.reason).toContain("No settlement payment found");
     });
 
+    it("should reject pathPaymentStrictSend settlements", () => {
+      const tx = buildTx([
+        StellarSdk.Operation.pathPaymentStrictSend({
+          sendAsset: StellarSdk.Asset.native(),
+          sendAmount: "1",
+          destination: feePayerKeypair.publicKey(),
+          destAsset: new StellarSdk.Asset("USDC", issuerKeypair.publicKey()),
+          destMin: "0.00002",
+        }),
+      ]);
+
+      const result = verifySettlementPayment(tx, { token: settlementToken, requiredAmountStroops: 200 }, mockConfig);
+
+      expect(result.isValid).toBe(false);
+      expect(result.reason).toContain("pathPaymentStrictReceive");
+    });
+
     it("should reject when no settlement operations are found", () => {
       const tx = buildTx([
         StellarSdk.Operation.createAccount({
@@ -160,6 +192,26 @@ describe("settlementVerifier", () => {
 
       expect(result.isValid).toBe(false);
       expect(result.reason).toContain("No settlement payment found");
+    });
+
+    it("should reject multiple settlement operations", () => {
+      const tx = buildTx([
+        StellarSdk.Operation.payment({
+          destination: feePayerKeypair.publicKey(),
+          asset: StellarSdk.Asset.native(),
+          amount: "0.00002",
+        }),
+        StellarSdk.Operation.payment({
+          destination: feePayerKeypair.publicKey(),
+          asset: StellarSdk.Asset.native(),
+          amount: "0.00002",
+        }),
+      ]);
+
+      const result = verifySettlementPayment(tx, { token: "XLM", requiredAmountStroops: 200 }, mockConfig);
+
+      expect(result.isValid).toBe(false);
+      expect(result.reason).toContain("Multiple settlement operations");
     });
   });
 

@@ -21,7 +21,7 @@ interface TransactionsApiResponse {
     innerTxHash?: string;
     category?: string;
     costStroops?: number;
-    tenantId: string;
+    tenantId: string | null;
     status: "pending" | "submitted" | "success" | "failed";
     createdAt: string;
   }>;
@@ -193,7 +193,7 @@ export async function getDashboardPageData(): Promise<DashboardPageData> {
           asset: "XLM",
           category: transaction.category ?? "Other",
           status: transaction.status,
-          tenantId: transaction.tenantId,
+          tenantId: transaction.tenantId ?? "deleted-tenant",
           createdAt: formatDate(transaction.createdAt),
           updatedAt: formatDate(transaction.createdAt),
         })) ?? SAMPLE_TRANSACTIONS,

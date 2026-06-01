@@ -1,0 +1,6 @@
+packages:
+  - 'client'
+  - 'client/examples/vue'
+  - 'server'
+  - 'admin-dashboard'
+  - 'fluid-server/wasm-demo'

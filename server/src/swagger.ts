@@ -117,6 +117,30 @@ const options: swaggerJsdoc.Options = {
                 "Maximum acceptable price slippage (%) for token-based fee payment. Requires `token`.",
               example: 1.5,
             },
+            evmSettlement: {
+              type: "object",
+              description:
+                "Optional EVM-side fee payment requirement. When present, Fluid queues the Stellar fee-bump until the ERC-20 payment confirms.",
+              properties: {
+                chainId: {
+                  type: "integer",
+                  example: 1,
+                },
+                tokenAddress: {
+                  type: "string",
+                  example: "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                },
+                amount: {
+                  type: "string",
+                  description: "ERC-20 base-unit amount, encoded as an integer string.",
+                  example: "1000000",
+                },
+                payerAddress: {
+                  type: "string",
+                  example: "0x1111111111111111111111111111111111111111",
+                },
+              },
+            },
           },
         },
         FeeBumpResponse: {
@@ -128,9 +152,9 @@ const options: swaggerJsdoc.Options = {
             },
             status: {
               type: "string",
-              enum: ["ready", "submitted"],
+              enum: ["ready", "submitted", "awaiting_evm_payment"],
               description:
-                "`ready` — XDR returned for client-side submission. `submitted` — transaction was submitted to Horizon by the server.",
+                "`ready` — XDR returned for client-side submission. `submitted` — transaction was submitted to Horizon by the server. `awaiting_evm_payment` — the Stellar sponsorship is queued until the EVM payment confirms.",
             },
             hash: {
               type: "string",
@@ -141,6 +165,37 @@ const options: swaggerJsdoc.Options = {
               type: "string",
               description:
                 "Stellar public key of the fee-payer account used to wrap the transaction.",
+            },
+            settlement_id: {
+              type: "string",
+              description:
+                "Cross-chain settlement identifier returned when `status` is `awaiting_evm_payment`.",
+            },
+            evm_payment: {
+              type: "object",
+              properties: {
+                chain_id: { type: "integer", example: 1 },
+                token_address: {
+                  type: "string",
+                  example: "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                },
+                amount: {
+                  type: "string",
+                  example: "1000000",
+                },
+                payer_address: {
+                  type: "string",
+                  example: "0x1111111111111111111111111111111111111111",
+                },
+                recipient_address: {
+                  type: "string",
+                  example: "0x2222222222222222222222222222222222222222",
+                },
+                confirmations_required: {
+                  type: "integer",
+                  example: 3,
+                },
+              },
             },
           },
         },

@@ -64,14 +64,17 @@ export async function aggregateYesterdayStats(
   if (totalTransactions > 0) {
     const rows = await prisma.sponsoredTransaction.groupBy({
       by: ["tenantId"],
-      where: { createdAt: { gte: start, lt: end } },
+      where: {
+        createdAt: { gte: start, lt: end },
+        tenantId: { not: null },
+      },
       _count: { id: true },
       _sum: { feeStroops: true },
       orderBy: { _count: { id: "desc" } },
       take: 1,
     });
 
-    if (rows.length > 0) {
+    if (rows.length > 0 && rows[0].tenantId) {
       const top = rows[0];
       topTenant = {
         tenantId: top.tenantId,

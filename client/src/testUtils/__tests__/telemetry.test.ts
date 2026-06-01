@@ -5,7 +5,7 @@ import {
   isTelemetryEnabled,
   getTelemetryConfig,
   TelemetryConfig,
-} from '../telemetry';
+} from '../../telemetry';
 
 describe('Telemetry', () => {
   let localStorageMock: Record<string, string>;

@@ -1,0 +1,7 @@
+[2m> [22mnpm run format:check
+
+
+> fluid-server-ts@0.1.1 format:check
+> echo "No format check configured"
+
+No format check configured

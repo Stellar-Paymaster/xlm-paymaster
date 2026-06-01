@@ -1,10 +1,12 @@
 import { ApiKeyConfig } from "../middleware/apiKeys";
 import { SubscriptionTierCode, SubscriptionTierName } from "./subscriptionTier";
+import { Region, DEFAULT_REGION } from "../services/regionRouter";
 
 export interface Tenant {
   id: string;
   apiKey: string;
   name: string;
+  region: Region;
   tier: SubscriptionTierCode;
   tierName: SubscriptionTierName;
   txLimit: number;
@@ -22,6 +24,7 @@ export function syncTenantFromApiKey(apiKeyConfig: ApiKeyConfig): Tenant {
     const updatedTenant: Tenant = {
       ...existingTenant,
       name: apiKeyConfig.name,
+      region: apiKeyConfig.region ?? existingTenant.region,
       tier: apiKeyConfig.tier,
       tierName: apiKeyConfig.tierName,
       txLimit: apiKeyConfig.txLimit,
@@ -38,6 +41,7 @@ export function syncTenantFromApiKey(apiKeyConfig: ApiKeyConfig): Tenant {
     id: apiKeyConfig.tenantId,
     apiKey: apiKeyConfig.key,
     name: apiKeyConfig.name,
+    region: apiKeyConfig.region ?? DEFAULT_REGION,
     tier: apiKeyConfig.tier,
     tierName: apiKeyConfig.tierName,
     txLimit: apiKeyConfig.txLimit,

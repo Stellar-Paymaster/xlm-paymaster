@@ -55,6 +55,11 @@ Optional:
 - `FLUID_RATE_LIMIT_WINDOW_MS` - Rate limit window in milliseconds (default: 60000)
 - `FLUID_RATE_LIMIT_MAX` - Max requests per window per IP (default: 5)
 - `FLUID_ALLOWED_ORIGINS` - Comma-separated CORS allowlist
+- `FLUID_GRPC_ENGINE_ADDRESS` - Internal Rust gRPC signer target such as `127.0.0.1:50051`
+- `FLUID_GRPC_ENGINE_TLS_SERVER_NAME` - Expected Rust engine TLS server name / SAN (default: `fluid-grpc-engine.internal`)
+- `FLUID_GRPC_ENGINE_CLIENT_CA_PATH` - PEM bundle for the pinned internal CA trust anchor
+- `FLUID_GRPC_ENGINE_CLIENT_CERT_PATH` / `FLUID_GRPC_ENGINE_CLIENT_KEY_PATH` - Node API client certificate and private key used for mTLS
+- `FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for the Rust engine server certificate; include both old and new values during rotation
 - `LOW_BALANCE_ALERT_XLM` - Primary low balance threshold env var for fee payer balances
 - `FLUID_LOW_BALANCE_THRESHOLD_XLM` - Backward-compatible low balance threshold env var
 - `LOW_BALANCE_ALERT_CHECK_INTERVAL_MS` / `FLUID_LOW_BALANCE_CHECK_INTERVAL_MS` - Balance polling interval (default: 300000 / 5 minutes)
@@ -74,6 +79,16 @@ Optional:
 - `FLUID_ALERT_EMAIL_FROM` / `FLUID_ALERT_EMAIL_TO` - Email sender and comma-separated recipients
 - `RESEND_API_KEY` / `RESEND_EMAIL_FROM` / `RESEND_EMAIL_TO` - Optional Resend API transport for low-balance alerts
 - `FLUID_ALERT_DASHBOARD_URL` - Dashboard link included in low-balance emails
+- `FLUID_NETWORK_SIMULATION_ENABLED` - Enable network latency and packet loss simulation (default: `false`)
+- `FLUID_NETWORK_LATENCY_MS` - Artificial delay in milliseconds (default: `0`)
+- `FLUID_NETWORK_PACKET_LOSS_RATE` - Probability of dropping a request, 0.0 to 1.0 (default: `0`)
+
+Rust gRPC engine env vars:
+
+- `FLUID_GRPC_ENGINE_LISTEN_ADDR` - Bind address for the Rust signer engine (default: `127.0.0.1:50051`)
+- `FLUID_GRPC_ENGINE_TLS_CERT_PATH` / `FLUID_GRPC_ENGINE_TLS_KEY_PATH` - Rust engine server certificate and private key
+- `FLUID_GRPC_ENGINE_TLS_CLIENT_CA_PATH` - PEM bundle used by the Rust engine to verify Node API client certificates
+- `FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for allowed Node API client certificates
 
 Mock API keys for local development:
 
@@ -81,6 +96,20 @@ Mock API keys for local development:
 - `fluid-pro-demo-key` - Pro tier, 5 requests per minute
 
 ## API Endpoints
+
+### Responsible disclosure (security.txt)
+
+Fluid serves an RFC 9116 `security.txt` at:
+
+- `GET /.well-known/security.txt`
+- `GET /security.txt` (alias)
+
+Configuration is via environment variables (see `.env.example`):
+
+- `SECURITY_TXT_ENABLED` (default: `true`)
+- `SECURITY_TXT_CONTACTS` (comma-separated `mailto:` and/or `https://` URIs)
+- `SECURITY_TXT_EXPIRES` (RFC3339 timestamp) or `SECURITY_TXT_EXPIRES_IN_DAYS` (default: `365`)
+- Optional: `SECURITY_TXT_PREFERRED_LANGUAGES`, `SECURITY_TXT_CANONICAL_URLS`, `SECURITY_TXT_POLICY_URLS`, `SECURITY_TXT_ACKNOWLEDGMENTS_URLS`, `SECURITY_TXT_ENCRYPTION_URLS`, `SECURITY_TXT_HIRING_URLS`
 
 ### GET /health
 
@@ -241,17 +270,6 @@ The server now supports redundant Horizon submission and monitoring:
 
 If a key exceeds its tier limit, the server returns `429 Too Many Requests` with a response that cites the API key limit.
 
-## Rate Limit Verification
-
-You can verify that rate limiting is applied per API key by sending three requests with the free key and then one with the pro key:
-
-```bash
-curl -X POST http://127.0.0.1:3000/fee-bump \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: fluid-free-demo-key" \
-  --data '{"xdr":"AAAA","submit":false}'
-```
-
 Repeat the same request three times within one minute. The first two requests will reach the handler, and the third returns `429 Too Many Requests`.
 
 Then send the same request with the pro key:
@@ -265,12 +283,45 @@ curl -X POST http://127.0.0.1:3000/fee-bump \
 
 That request still goes through because the limit is tracked separately per API key.
 
+## Network Latency Simulation
+
+The server can simulate degraded network conditions to test client resilience. This is useful for verifying how the SDK handles timeouts and packet loss.
+
+Enable it with:
+
+```bash
+FLUID_NETWORK_SIMULATION_ENABLED=true
+FLUID_NETWORK_LATENCY_MS=500
+FLUID_NETWORK_PACKET_LOSS_RATE=0.1
+```
+
+With these settings:
+- Every request will be delayed by 500ms.
+- Approximately 10% of requests will fail with `503 Service Unavailable` or `504 Gateway Timeout`.
+
+Run the network performance benchmark to verify:
+
+```bash
+npm run benchmark:network
+```
+
 ## Architecture
 
 - Express.js - HTTP server framework
 - TypeScript - Type-safe code
 - @stellar/stellar-sdk - Stellar SDK for transaction handling
-- Rust + `ed25519-dalek` - Non-blocking fee-payer signature generation through a native N-API module
+- Rust + `ed25519-dalek` - Non-blocking fee-payer signature generation through a native N-API module or the internal mTLS gRPC signer engine
+
+## Internal gRPC mTLS
+
+The Node API can delegate fee-payer signatures to the Rust signer engine over an internal gRPC channel protected by mutual TLS.
+
+- The Node API presents its own client certificate and verifies the Rust engine certificate against a dedicated internal CA bundle.
+- The Rust engine requires a client certificate signed by the configured CA bundle and can additionally pin exact client certificate SHA-256 fingerprints.
+- The Node API can additionally pin exact server certificate SHA-256 fingerprints.
+- TLS material is loaded from PEM files, and the Node gRPC client recreates its channel automatically when those files change.
+
+Local developer flow and production rotation guidance are documented in [docs/grpc-mtls.md](../docs/grpc-mtls.md).
 
 ## Development
 

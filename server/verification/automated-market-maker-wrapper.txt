@@ -1,0 +1,32 @@
+AUTOMATED MARKET MAKER (AMM) WRAPPER VERIFICATION REPORT
+======================================================
+
+Date: 2026-05-28
+Task: #609 [Smart Contracts & Soroban] Automated Market Maker (AMM) Wrapper
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Implemented `AmmWrapperService` in `server/src/services/ammWrapper.ts`.
+2. Created Zod validation schema in `server/src/schemas/ammWrapper.ts`.
+3. Created handler `ammSwapHandler` in `server/src/handlers/ammWrapper.ts`.
+4. Wrote unit tests in `server/src/handlers/ammWrapper.test.ts`.
+5. Created architectural documentation at `docs/automated-market-maker-wrapper.md`.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/handlers/ammWrapper.test.ts
+
+Result:
+  ✓ src/handlers/ammWrapper.test.ts > ammSwapHandler > should fail when parameters are missing and XDR is missing
+  ✓ src/handlers/ammWrapper.test.ts > ammSwapHandler > should build unsigned swap transaction when swap parameters are provided
+
+  Test Files  1 passed (1)
+       Tests  2 passed (2)
+
+DESIGN / SECURITY CHECKS
+------------------------
+- Zero-signing key exposure for users: The wrapper constructs unsigned transactions, allowing users to sign locally via their wallet.
+- Preflight enforcement: Ensures that preflight gas estimations are run correctly and the simulated transaction succeeds.

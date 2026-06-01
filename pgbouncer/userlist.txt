@@ -1,0 +1,13 @@
+# PgBouncer user authentication list.
+#
+# Format:  "username" "password"
+# Passwords can be plain-text, md5 hashes (md5<hash>), or SCRAM-SHA-256 verifiers.
+#
+# IMPORTANT: Do NOT commit real passwords here.
+# In docker-compose, this file is generated at container startup by the
+# entrypoint script from POSTGRES_USER / POSTGRES_PASSWORD environment variables.
+# For production deployments, use a secrets manager and inject this file at runtime.
+#
+# Local development placeholder — matches the defaults in docker-compose.yml:
+"fluid" "fluid_pass"
+"pgbouncer" "pgbouncer_admin_pass"

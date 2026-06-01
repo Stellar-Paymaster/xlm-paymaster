@@ -24,6 +24,10 @@ export interface ChainRecord {
   updatedAt: Date;
 }
 
+export interface EnabledChainSecretRecord extends ChainRecord {
+  feePayerSecret: string | null;
+}
+
 interface PersistedChain {
   id: string;
   chainId: string;
@@ -311,4 +315,18 @@ export function stopChainRegistryHotReload(): void {
 
 export function getEnabledChains(): ChainRecord[] {
   return enabledChainCache;
+}
+
+export async function listEnabledChainsWithSecrets(): Promise<EnabledChainSecretRecord[]> {
+  const rows = await getDelegate().findMany();
+
+  return rows
+    .filter((row) => row.enabled)
+    .map((row) => ({
+      ...toPublicRecord(row),
+      feePayerSecret:
+        row.encryptedSecret && row.initializationVec && row.authTag
+          ? decryptChainSecret(row)
+          : null,
+    }));
 }

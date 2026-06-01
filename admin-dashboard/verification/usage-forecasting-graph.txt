@@ -1,0 +1,34 @@
+USAGE FORECASTING GRAPH VERIFICATION REPORT
+===========================================
+
+Date: 2026-04-24
+Task: #474 [UX & Dashboard Features] Usage Forecasting Graph
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Added `UsageForecastingGraph.tsx` to `admin-dashboard/components/dashboard/`.
+2. Implemented spend velocity calculation and forward projection logic.
+3. Added Recharts-based visualization separating actual and forecasted balances.
+4. Added comprehensive unit tests in `UsageForecastingGraph.test.tsx`.
+5. Wrote component documentation outlining architecture and edge cases in `admin-dashboard/docs/usage-forecasting-graph.md`.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd admin-dashboard
+  npx vitest run components/dashboard/UsageForecastingGraph.test.tsx
+
+Result:
+  ✓ components/dashboard/UsageForecastingGraph.test.tsx > UsageForecastingGraph > renders correctly with historical data
+  ✓ components/dashboard/UsageForecastingGraph.test.tsx > UsageForecastingGraph > displays the correct number of days until depletion
+  ✓ components/dashboard/UsageForecastingGraph.test.tsx > UsageForecastingGraph > handles empty historical data gracefully
+
+  Test Files  1 passed (1)
+       Tests  3 passed (3)
+
+DESIGN / ACCESSIBILITY / SECURITY CHECKS
+----------------------------------------
+- Visual distinction between historical and forecasted data (solid vs dashed lines) for accessibility.
+- Graceful fallback for missing data prevents dashboard crashes.
+- Bounded while-loops ensure no infinite loops during projection generation.

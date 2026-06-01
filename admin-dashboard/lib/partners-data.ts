@@ -1,86 +1,111 @@
 import "server-only";
 
-import type { Partner, PartnerPageData, PartnerStatus } from "@/components/dashboard/types";
+import type { PartnerStatus } from "@/components/dashboard/types";
 
-// In-memory store — replace with a real DB (Prisma, etc.) in production.
-// Keyed by partner ID for O(1) lookups.
-const store = new Map<string, Partner>();
+export interface PartnerRecord {
+  contactEmail: string;
+  createdAt: string;
+  description: string;
+  id: string;
+  projectName: string;
+  reviewNote: string | null;
+  reviewedAt: string | null;
+  status: PartnerStatus;
+  updatedAt: string;
+  websiteUrl: string;
+}
 
-let _seeded = false;
+export interface PartnerPageData {
+  partners: PartnerRecord[];
+  source: "sample";
+}
 
-const SAMPLE_PARTNERS: Partner[] = [
+interface CreatePartnerInput {
+  contactEmail: string;
+  description: string;
+  projectName: string;
+  websiteUrl: string;
+}
+
+const samplePartners: PartnerRecord[] = [
   {
-    id: "partner-001",
-    projectName: "AnchorPay",
-    contactEmail: "dev@anchorpay.example",
-    websiteUrl: "https://anchorpay.example",
-    description: "Gasless payment rails for Stellar anchors.",
+    id: "partner-anchor-west",
+    projectName: "Anchor West",
+    contactEmail: "ops@anchorwest.example",
+    websiteUrl: "https://anchorwest.example",
+    description: "Cross-border settlement and treasury tooling for anchors.",
     status: "approved",
-    submittedAt: "2026-01-10T09:00:00Z",
-    reviewedAt: "2026-01-12T14:30:00Z",
-    reviewNote: "Excellent integration quality.",
+    reviewNote: "Approved for public listing after compliance review.",
+    reviewedAt: "2026-03-20T10:00:00.000Z",
+    createdAt: "2026-03-10T09:00:00.000Z",
+    updatedAt: "2026-03-20T10:00:00.000Z",
   },
   {
-    id: "partner-002",
-    projectName: "StellarSwap",
-    contactEmail: "hello@stellarswap.example",
-    websiteUrl: "https://stellarswap.example",
-    description: "DEX aggregator with Fluid fee sponsorship.",
+    id: "partner-orbit-pay",
+    projectName: "Orbit Pay",
+    contactEmail: "team@orbitpay.example",
+    websiteUrl: "https://orbitpay.example",
+    description: "Merchant acceptance and payout infrastructure for Stellar.",
     status: "pending",
-    submittedAt: "2026-03-20T11:00:00Z",
-    reviewedAt: null,
     reviewNote: null,
-  },
-  {
-    id: "partner-003",
-    projectName: "NovaNFT",
-    contactEmail: "team@novanft.example",
-    websiteUrl: "https://novanft.example",
-    description: "NFT marketplace on Soroban using Fluid for gasless minting.",
-    status: "rejected",
-    submittedAt: "2026-02-05T08:00:00Z",
-    reviewedAt: "2026-02-07T10:00:00Z",
-    reviewNote: "Integration does not meet security requirements.",
+    reviewedAt: null,
+    createdAt: "2026-04-01T14:15:00.000Z",
+    updatedAt: "2026-04-01T14:15:00.000Z",
   },
 ];
 
-function seed() {
-  if (_seeded) return;
-  _seeded = true;
-  for (const p of SAMPLE_PARTNERS) {
-    store.set(p.id, p);
-  }
+const partnerStore = new Map<string, PartnerRecord>(
+  samplePartners.map((partner) => [partner.id, partner]),
+);
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 48);
+}
+
+function listPartners() {
+  return [...partnerStore.values()].sort((left, right) =>
+    right.createdAt.localeCompare(left.createdAt),
+  );
 }
 
 export async function getPartnerPageData(): Promise<PartnerPageData> {
-  seed();
-  return { partners: Array.from(store.values()), source: "sample" };
-}
-
-export async function getApprovedPartners(): Promise<Partner[]> {
-  seed();
-  return Array.from(store.values()).filter((p) => p.status === "approved");
-}
-
-export async function getPartnerById(id: string): Promise<Partner | null> {
-  seed();
-  return store.get(id) ?? null;
-}
-
-export async function createPartner(
-  data: Pick<Partner, "projectName" | "contactEmail" | "websiteUrl" | "description">,
-): Promise<Partner> {
-  seed();
-  const id = `partner-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-  const partner: Partner = {
-    id,
-    ...data,
-    status: "pending",
-    submittedAt: new Date().toISOString(),
-    reviewedAt: null,
-    reviewNote: null,
+  return {
+    partners: listPartners(),
+    source: "sample",
   };
-  store.set(id, partner);
+}
+
+export async function getPartnerById(id: string): Promise<PartnerRecord | null> {
+  return partnerStore.get(id) ?? null;
+}
+
+export async function createPartner(input: CreatePartnerInput): Promise<PartnerRecord> {
+  const timestamp = nowIso();
+  const baseId = slugify(input.projectName) || "partner";
+  const id = `${baseId}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const partner: PartnerRecord = {
+    id,
+    projectName: input.projectName,
+    contactEmail: input.contactEmail,
+    websiteUrl: input.websiteUrl,
+    description: input.description,
+    status: "pending",
+    reviewNote: null,
+    reviewedAt: null,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  partnerStore.set(partner.id, partner);
   return partner;
 }
 
@@ -88,21 +113,25 @@ export async function updatePartnerStatus(
   id: string,
   status: PartnerStatus,
   reviewNote: string | null,
-): Promise<Partner | null> {
-  seed();
-  const existing = store.get(id);
-  if (!existing) return null;
-  const updated: Partner = {
+): Promise<PartnerRecord | null> {
+  const existing = partnerStore.get(id);
+  if (!existing) {
+    return null;
+  }
+
+  const reviewedAt = status === "pending" ? null : nowIso();
+  const updated: PartnerRecord = {
     ...existing,
     status,
-    reviewedAt: new Date().toISOString(),
     reviewNote,
+    reviewedAt,
+    updatedAt: nowIso(),
   };
-  store.set(id, updated);
+
+  partnerStore.set(id, updated);
   return updated;
 }
 
 export async function deletePartner(id: string): Promise<boolean> {
-  seed();
-  return store.delete(id);
+  return partnerStore.delete(id);
 }

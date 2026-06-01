@@ -23,6 +23,15 @@ vi.mock("../workers/transactionStore", () => ({
   },
 }));
 
+vi.mock("../utils/db", () => ({
+  prisma: {
+    transaction: {
+      create: vi.fn(async () => ({ id: "tx-record-1" })),
+      update: vi.fn(),
+    },
+  },
+}));
+
 import StellarSdk from "@stellar/stellar-sdk";
 import { feeBumpHandler } from "./feeBump";
 import { Config } from "../config";

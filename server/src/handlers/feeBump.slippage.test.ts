@@ -8,6 +8,31 @@ vi.mock("../signing/native", () => ({
   },
 }));
 
+vi.mock("../utils/db", () => ({
+  prisma: {
+    transaction: {
+      create: vi.fn(async () => ({ id: "tx-record-1" })),
+      update: vi.fn(),
+    },
+  },
+  default: {
+    transaction: {
+      create: vi.fn(async () => ({ id: "tx-record-1" })),
+      update: vi.fn(),
+    },
+    sponsoredTransaction: {
+      create: vi.fn(async () => ({
+        id: "sponsored-1",
+        tenantId: "test-tenant",
+        feeStroops: BigInt(100),
+        createdAt: new Date(),
+      })),
+      aggregate: vi.fn(async () => ({ _sum: { feeStroops: BigInt(0) } })),
+      count: vi.fn(async () => 0),
+    },
+  },
+}));
+
 import StellarSdk from "@stellar/stellar-sdk";
 import Decimal from "decimal.js";
 import { NextFunction, Request, Response } from "express";
@@ -75,6 +100,9 @@ describe("feeBumpHandler - Slippage Protection", () => {
       maxRequests: 100,
       windowMs: 60000,
       dailyQuotaStroops: 1000000,
+      isSandbox: false,
+      allowedChains: ["stellar"] as any,
+      region: "US" as const,
     };
 
     mockReq = { body: {}, headers: {}, method: "POST", url: "/fee-bump" };

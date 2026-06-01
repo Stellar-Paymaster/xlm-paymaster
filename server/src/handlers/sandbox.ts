@@ -1,60 +1,149 @@
 /**
- * Sandbox handlers
+ * Sandbox environment handlers (#717)
  *
- * POST /sandbox/reset  — wipe sandbox transaction history and re-fund the
- *                        sandbox fee-payer account via Friendbot (or the
- *                        configured Quickstart faucet).
- * GET  /sandbox/status — return sandbox metadata for the calling API key.
- *
- * Both endpoints require a sandbox API key (isSandbox === true).
+ * Manual reset endpoint and auto-reset helpers for stale sandbox API keys.
  */
 
-import { Request, Response, NextFunction } from "express";
+import { Keypair } from "@stellar/stellar-sdk";
+import { randomBytes } from "node:crypto";
+import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
-import { ApiKeyConfig } from "../middleware/apiKeys";
+import { ApiKeyConfig, invalidateCachedApiKey } from "../middleware/apiKeys";
+import { purgeSandboxTenantData } from "../services/sandboxCleanup";
+import { requireAdminToken } from "../utils/adminAuth";
 import prisma from "../utils/db";
-import { createLogger } from "../utils/logger";
-import { invalidateApiKeyCache } from "../utils/redis";
+import { createLogger, serializeError } from "../utils/logger";
 
-const logger = createLogger("sandbox");
+const logger = createLogger({ component: "sandbox_handler" });
 
 const SANDBOX_HORIZON_URL =
   process.env.SANDBOX_HORIZON_URL ?? "http://localhost:8000";
-
-const SANDBOX_RATE_LIMIT_MAX = Number(
-  process.env.SANDBOX_RATE_LIMIT_MAX ?? "10",
+const SANDBOX_RESET_STALE_HOURS = Number(
+  process.env.SANDBOX_RESET_STALE_HOURS ?? "24",
 );
 
-/**
- * Fund an account via Friendbot / Quickstart faucet.
- * Returns true on success, false if the network call fails (non-fatal).
- */
-async function fundViaSandboxFaucet(publicKey: string): Promise<boolean> {
+const apiKeyModel = (prisma as any).apiKey as {
+  findMany: (args: any) => Promise<any[]>;
+  findUnique: (args: any) => Promise<any | null>;
+  create: (args: any) => Promise<any>;
+  update: (args: any) => Promise<any>;
+};
+
+function generateApiKeyValue(prefix: string): string {
+  return `${prefix}_${randomBytes(24).toString("hex")}`;
+}
+
+function generateSandboxKeypair(): { secret: string; publicKey: string } {
+  const keypair = Keypair.random();
+  return {
+    secret: keypair.secret(),
+    publicKey: keypair.publicKey(),
+  };
+}
+
+async function fundSandboxAccount(publicKey: string): Promise<boolean> {
   try {
-    const url = `${SANDBOX_HORIZON_URL}/friendbot?addr=${encodeURIComponent(publicKey)}`;
-    const res = await fetch(url, { method: "GET" });
-    if (!res.ok) {
-      logger.warn(
-        { publicKey, status: res.status },
-        "Friendbot returned non-OK status",
-      );
-      return false;
-    }
-    logger.info({ publicKey }, "Sandbox account funded via Friendbot");
-    return true;
-  } catch (err) {
+    const url = `${SANDBOX_HORIZON_URL.replace(/\/$/, "")}/friendbot?addr=${encodeURIComponent(publicKey)}`;
+    const response = await fetch(url, { method: "GET" });
+    return response.ok;
+  } catch (error) {
     logger.warn(
-      { err, publicKey },
-      "Friendbot call failed (sandbox may be offline)",
+      { ...serializeError(error), publicKey },
+      "Sandbox friendbot funding failed",
     );
     return false;
   }
 }
 
 /**
- * Wipe all SponsoredTransaction rows for the tenant and re-fund the
- * sandbox fee-payer account.
+ * Reset a single sandbox API key: rotate fee payer, wipe tenant data, fund account.
  */
+export async function resetSandboxKey(apiKeyId: string): Promise<{
+  resetAt: string;
+  sandboxPublicKey: string;
+  deletedTransactions: number;
+  funded: boolean;
+}> {
+  const record = await apiKeyModel.findUnique({ where: { id: apiKeyId } });
+
+  if (!record?.isSandbox) {
+    throw new AppError("Sandbox API key not found.", 404, "NOT_FOUND");
+  }
+
+  const { secret, publicKey } = generateSandboxKeypair();
+  const resetAt = new Date();
+
+  const purgeResult = await purgeSandboxTenantData(record.tenantId);
+
+  await apiKeyModel.update({
+    where: { id: apiKeyId },
+    data: {
+      sandboxFeePayerSecret: secret,
+      sandboxLastResetAt: resetAt,
+    },
+  });
+
+  await invalidateCachedApiKey(record.key);
+
+  const funded = await fundSandboxAccount(publicKey);
+
+  logger.info(
+    {
+      apiKeyId,
+      tenantId: record.tenantId,
+      deletedTransactions: purgeResult.transactionsDeleted,
+      funded,
+    },
+    "Sandbox key reset complete",
+  );
+
+  return {
+    resetAt: resetAt.toISOString(),
+    sandboxPublicKey: publicKey,
+    deletedTransactions: purgeResult.transactionsDeleted,
+    funded,
+  };
+}
+
+/**
+ * Auto-reset sandbox keys whose last reset was more than SANDBOX_RESET_STALE_HOURS ago.
+ */
+export async function autoResetStaleSandboxKeys(
+  now: Date = new Date(),
+): Promise<number> {
+  const staleBefore = new Date(now);
+  staleBefore.setHours(staleBefore.getHours() - SANDBOX_RESET_STALE_HOURS);
+
+  const staleKeys = await apiKeyModel.findMany({
+    where: {
+      isSandbox: true,
+      active: true,
+      OR: [
+        { sandboxLastResetAt: null },
+        { sandboxLastResetAt: { lt: staleBefore } },
+      ],
+    },
+    select: { id: true },
+  });
+
+  let resetCount = 0;
+
+  for (const key of staleKeys) {
+    try {
+      await resetSandboxKey(key.id);
+      resetCount += 1;
+    } catch (error) {
+      logger.error(
+        { ...serializeError(error), apiKeyId: key.id },
+        "Failed to auto-reset stale sandbox key",
+      );
+    }
+  }
+
+  return resetCount;
+}
+
+/** POST /sandbox/reset — manual reset using the caller's sandbox API key. */
 export async function sandboxResetHandler(
   req: Request,
   res: Response,
@@ -62,262 +151,87 @@ export async function sandboxResetHandler(
 ): Promise<void> {
   try {
     const apiKeyConfig = res.locals.apiKey as ApiKeyConfig | undefined;
-    if (!apiKeyConfig) {
-      return next(
-        new AppError("Missing API key context", 500, "INTERNAL_ERROR"),
+
+    if (!apiKeyConfig?.isSandbox) {
+      throw new AppError(
+        "Only sandbox API keys may reset the sandbox environment.",
+        403,
+        "FORBIDDEN",
       );
     }
 
-    if (!apiKeyConfig.isSandbox) {
-      return next(
-        new AppError(
-          "This endpoint is only available for sandbox API keys.",
-          403,
-          "SANDBOX_ONLY",
-        ),
-      );
+    const record = await apiKeyModel.findUnique({
+      where: { key: apiKeyConfig.key },
+      select: { id: true },
+    });
+
+    if (!record) {
+      throw new AppError("Sandbox API key not found.", 404, "NOT_FOUND");
     }
 
-    const tenantId = apiKeyConfig.tenantId;
-
-    // 1. Delete all sponsored transactions for this tenant
-    const deleted = await (prisma as any).sponsoredTransaction.deleteMany({
-      where: { tenantId },
-    });
-
-    // 2. Reset daily quota usage by updating the tenant's quota tracking
-    //    (quota is computed from SponsoredTransaction rows, so deleting them
-    //     is sufficient — no extra field to reset)
-
-    // 3. Re-fund the sandbox fee-payer via Friendbot
-    const keyRecord = await (prisma as any).apiKey.findUnique({
-      where: { key: apiKeyConfig.key },
-      select: { sandboxFeePayerSecret: true, id: true },
-    });
-
-    let funded = false;
-    let sandboxPublicKey: string | null = null;
-
-    if (keyRecord?.sandboxFeePayerSecret) {
-      const { Keypair } = await import("@stellar/stellar-sdk");
-      const kp = Keypair.fromSecret(keyRecord.sandboxFeePayerSecret);
-      sandboxPublicKey = kp.publicKey();
-      funded = await fundViaSandboxFaucet(sandboxPublicKey);
-    }
-
-    // 4. Stamp the reset time
-    await (prisma as any).apiKey.update({
-      where: { key: apiKeyConfig.key },
-      data: { sandboxLastResetAt: new Date() },
-    });
-
-    // 5. Invalidate Redis cache so the updated record is re-read
-    await invalidateApiKeyCache(apiKeyConfig.key);
-
-    logger.info(
-      { tenantId, deletedTxCount: deleted.count, funded },
-      "Sandbox reset complete",
-    );
-
-    res.json({
-      ok: true,
-      tenantId,
-      deletedTransactions: deleted.count,
-      sandboxPublicKey,
-      funded,
-      resetAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    next(err);
+    const result = await resetSandboxKey(record.id);
+    res.json(result);
+  } catch (error) {
+    next(error);
   }
 }
 
-/**
- * Return sandbox status for the calling API key.
- */
-export async function sandboxStatusHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const apiKeyConfig = res.locals.apiKey as ApiKeyConfig | undefined;
-    if (!apiKeyConfig) {
-      return next(
-        new AppError("Missing API key context", 500, "INTERNAL_ERROR"),
-      );
-    }
-
-    if (!apiKeyConfig.isSandbox) {
-      return next(
-        new AppError(
-          "This endpoint is only available for sandbox API keys.",
-          403,
-          "SANDBOX_ONLY",
-        ),
-      );
-    }
-
-    const keyRecord = await (prisma as any).apiKey.findUnique({
-      where: { key: apiKeyConfig.key },
-      select: {
-        sandboxLastResetAt: true,
-        sandboxFeePayerSecret: true,
-        createdAt: true,
-      },
-    });
-
-    let sandboxPublicKey: string | null = null;
-    if (keyRecord?.sandboxFeePayerSecret) {
-      const { Keypair } = await import("@stellar/stellar-sdk");
-      sandboxPublicKey = Keypair.fromSecret(
-        keyRecord.sandboxFeePayerSecret,
-      ).publicKey();
-    }
-
-    // Count transactions since last reset
-    const txCount = await (prisma as any).sponsoredTransaction.count({
-      where: { tenantId: apiKeyConfig.tenantId },
-    });
-
-    res.json({
-      isSandbox: true,
-      tenantId: apiKeyConfig.tenantId,
-      sandboxPublicKey,
-      sandboxHorizonUrl: SANDBOX_HORIZON_URL,
-      sandboxRateLimitMax: SANDBOX_RATE_LIMIT_MAX,
-      lastResetAt: keyRecord?.sandboxLastResetAt ?? null,
-      transactionsSinceReset: txCount,
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-/**
- * Admin handler: create a sandbox API key for a tenant.
- * POST /admin/sandbox/api-keys
- */
+/** POST /admin/sandbox/api-keys — create a new sandbox key for a tenant. */
 export async function createSandboxApiKeyHandler(
   req: Request,
   res: Response,
-  next: NextFunction,
 ): Promise<void> {
-  try {
-    const adminToken = req.header("x-admin-token");
-    if (!adminToken || adminToken !== process.env.FLUID_ADMIN_TOKEN) {
-      return next(new AppError("Unauthorized", 401, "AUTH_FAILED"));
-    }
+  if (!requireAdminToken(req, res)) return;
 
-    const { tenantId, name } = req.body as {
-      tenantId?: string;
-      name?: string;
-    };
+  const { tenantId, name } = req.body as {
+    tenantId?: string;
+    name?: string;
+  };
 
-    if (!tenantId) {
-      return next(
-        new AppError("tenantId is required", 400, "VALIDATION_ERROR"),
-      );
-    }
-
-    // Generate a sandbox keypair for this key
-    const { Keypair } = await import("@stellar/stellar-sdk");
-    const sandboxKeypair = Keypair.random();
-
-    // Generate the API key string
-    const { randomBytes } = await import("crypto");
-    const rawKey = `sbx_${randomBytes(24).toString("hex")}`;
-    const prefix = rawKey.slice(0, 8);
-
-    const record = await (prisma as any).apiKey.create({
-      data: {
-        key: rawKey,
-        prefix,
-        name: name ?? "Sandbox Key",
-        tenantId,
-        isSandbox: true,
-        sandboxFeePayerSecret: sandboxKeypair.secret(),
-        // Sandbox gets lower rate limits
-        maxRequests: SANDBOX_RATE_LIMIT_MAX,
-        windowMs: 60_000,
-        dailyQuotaStroops: 500_000, // 0.05 XLM
-      },
-    });
-
-    // Attempt initial Friendbot funding
-    const funded = await fundViaSandboxFaucet(sandboxKeypair.publicKey());
-
-    logger.info(
-      { tenantId, keyId: record.id, funded },
-      "Sandbox API key created",
-    );
-
-    res.status(201).json({
-      id: record.id,
-      key: rawKey, // returned once — store it securely
-      prefix,
-      isSandbox: true,
-      sandboxPublicKey: sandboxKeypair.publicKey(),
-      sandboxHorizonUrl: SANDBOX_HORIZON_URL,
-      funded,
-    });
-  } catch (err) {
-    next(err);
+  if (!tenantId || typeof tenantId !== "string") {
+    res.status(400).json({ error: "tenantId is required" });
+    return;
   }
-}
 
-/**
- * Perform a reset for all sandbox keys whose last reset was > 24 h ago.
- * Called by the daily auto-reset worker.
- */
-export async function autoResetStaleSandboxKeys(): Promise<number> {
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const tenant = await (prisma as any).tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true, name: true },
+  });
 
-  const staleKeys = await (prisma as any).apiKey.findMany({
-    where: {
+  if (!tenant) {
+    res.status(404).json({ error: "Tenant not found" });
+    return;
+  }
+
+  const prefix = tenant.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .slice(0, 12);
+  const { secret, publicKey } = generateSandboxKeypair();
+  const keyValue = generateApiKeyValue(`${prefix}_sandbox`);
+
+  const created = await apiKeyModel.create({
+    data: {
+      key: keyValue,
+      prefix: `${prefix}_sandbox`,
+      name: name ?? "Sandbox Key",
+      tenantId,
       isSandbox: true,
-      active: true,
-      OR: [
-        { sandboxLastResetAt: null },
-        { sandboxLastResetAt: { lt: cutoff } },
-      ],
-    },
-    select: {
-      key: true,
-      tenantId: true,
-      sandboxFeePayerSecret: true,
+      sandboxFeePayerSecret: secret,
+      maxRequests: Number(process.env.SANDBOX_RATE_LIMIT_MAX ?? "10"),
+      tier: "free",
+      allowedChains: "stellar",
     },
   });
 
-  let resetCount = 0;
+  const funded = await fundSandboxAccount(publicKey);
 
-  for (const record of staleKeys) {
-    try {
-      await (prisma as any).sponsoredTransaction.deleteMany({
-        where: { tenantId: record.tenantId },
-      });
-
-      if (record.sandboxFeePayerSecret) {
-        const { Keypair } = await import("@stellar/stellar-sdk");
-        const pk = Keypair.fromSecret(record.sandboxFeePayerSecret).publicKey();
-        await fundViaSandboxFaucet(pk);
-      }
-
-      await (prisma as any).apiKey.update({
-        where: { key: record.key },
-        data: { sandboxLastResetAt: new Date() },
-      });
-
-      await invalidateApiKeyCache(record.key);
-      resetCount++;
-    } catch (err) {
-      logger.error(
-        { err, key: record.key },
-        "Auto-reset failed for sandbox key",
-      );
-    }
-  }
-
-  logger.info({ resetCount }, "Sandbox auto-reset complete");
-  return resetCount;
+  res.status(201).json({
+    id: created.id,
+    key: created.key,
+    prefix: created.prefix,
+    tenantId: created.tenantId,
+    sandboxPublicKey: publicKey,
+    funded,
+  });
 }

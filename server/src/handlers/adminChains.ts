@@ -6,11 +6,11 @@ import {
   listChains,
   updateChain,
 } from "../services/chainRegistryService";
+import { getAuditActor, logAuditEvent } from "../services/auditLogger";
+import { isAdminTokenAuthority } from "../utils/adminAuth";
 
 function isAuthorized(req: Request): boolean {
-  const token = req.header("x-admin-token");
-  const expected = process.env.FLUID_ADMIN_TOKEN;
-  return Boolean(expected) && token === expected;
+  return isAdminTokenAuthority(req);
 }
 
 export async function listChainsHandler(
@@ -66,6 +66,12 @@ export async function createChainHandler(
           ? feePayerSecret.trim()
           : undefined,
     });
+    void logAuditEvent("CHAIN_CREATED", getAuditActor(req), {
+      chainId: chain.chainId,
+      name: chain.name,
+      rpcUrl: chain.rpcUrl,
+      enabled: chain.enabled,
+    });
     res.status(201).json({ chain });
   } catch (error) {
     res.status(400).json({
@@ -107,6 +113,10 @@ export async function updateChainHandler(
 
   try {
     const chain = await updateChain(id, patch);
+    void logAuditEvent("CHAIN_UPDATED", getAuditActor(req), {
+      id,
+      patch,
+    });
     res.json({ chain });
   } catch (error) {
     const message =
@@ -133,6 +143,9 @@ export async function deleteChainHandler(
 
   try {
     await deleteChain(id);
+    void logAuditEvent("CHAIN_DELETED", getAuditActor(req), {
+      id,
+    });
     res.json({ message: "Chain deleted" });
   } catch (error) {
     const message =

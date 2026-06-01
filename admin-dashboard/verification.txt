@@ -1,0 +1,82 @@
+DARK MODE RESTORATION / HIGH-CONTRAST MODE VERIFICATION REPORT
+==============================================================
+
+Date: 2026-04-23
+Task: [UX & Dashboard Features] Dark Mode Restoration (Optional/Themed)
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Restored package-level theme support with persisted `system`, `light`, `dark`, and `high-contrast` modes.
+2. Added a shared appearance selector to the navbar for explicit operator control.
+3. Extended global tokens with dark and high-contrast palettes plus forced-colors handling.
+4. Added a compatibility layer for legacy light-only utility classes so existing admin surfaces remain readable.
+5. Updated shared notification UI to respect theme tokens in dark and accessible modes.
+6. Added package-local documentation in `admin-dashboard/docs/dark-mode-restoration.md`.
+7. Added unit and integration-style tests for theme logic and provider wiring.
+
+FILES MODIFIED / CREATED
+------------------------
+- app/globals.css
+- components/Navbar.tsx
+- components/dashboard/NotificationBell.tsx
+- components/providers.tsx
+- components/theme/ThemeSwitcher.tsx
+- docs/dark-mode-restoration.md
+- lib/portal-links.test.ts
+- lib/theme.ts
+- lib/theme.test.ts
+- lib/theme.integration.test.ts
+- package.json
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  npm run test
+
+Result:
+  > admin-dashboard@0.1.1 test
+  > npm run test:unit && npm run test:integration
+
+  > admin-dashboard@0.1.1 test:unit
+  > node --test --experimental-test-isolation=none --experimental-strip-types lib/portal-links.test.ts lib/theme.test.ts
+
+  PASS  getPortalLinks returns defaults when public variables are missing
+  PASS  getPortalLinks returns configured public variables
+  PASS  sanitizeThemePreference falls back to system for unsupported values
+  PASS  sanitizeResolvedTheme falls back to light for unresolved values
+  PASS  resolveThemePreference honors system preference and explicit overrides
+  PASS  describeThemePreference exposes current system resolution for the UI
+  PASS  theme options include every selectable appearance mode
+
+  > admin-dashboard@0.1.1 test:integration
+  > node --test --experimental-test-isolation=none --experimental-strip-types lib/theme.integration.test.ts
+
+  PASS  globals.css defines a token palette for each resolved theme
+  PASS  providers wire next-themes with persisted system-aware configuration
+  PASS  navbar exposes the shared theme switcher control
+  PASS  theme options stay aligned with the documented accessibility choices
+
+  Totals: 11 tests passed, 0 failed
+
+BUILD / TOOLING NOTES
+---------------------
+1. Package verification required a local dependency install inside `admin-dashboard/`.
+2. The built-in Node test lane now runs successfully because it uses in-process isolation.
+3. An earlier `next build` run reached Next.js compilation and exposed pre-existing missing modules unrelated to this theme change:
+   - `@/lib/partners-data`
+   - `@/lib/roadmap-store`
+   - `@/lib/ai-support/context`
+   - `@/lib/ai-support/providers`
+4. Subsequent `npm install --workspaces=false --include=dev` attempts timed out before finishing all dev tooling binaries, so a final lint/build pass could not be completed cleanly in this session.
+
+DESIGN / ACCESSIBILITY / SECURITY CHECKS
+----------------------------------------
+- High-contrast mode is explicit and persisted, rather than being forced unexpectedly.
+- Focus visibility is reinforced with ring-based outlines and `forced-colors` support.
+- Theme state is stored through `next-themes` with a package-local storage key.
+- No new network, auth, or secret-handling paths were introduced by this change.
+
+SCREENSHOT NOTE
+---------------
+Functional screenshots were not captured in this session because package-level build/tooling blockers prevented a clean UI launch path. Verified terminal output is included above.

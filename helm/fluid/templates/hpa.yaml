@@ -1,0 +1,60 @@
+{{- if .Values.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "fluid.fullname" . }}-node-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "fluid.fullname" . }}-node-api
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+    # Scale up when average CPU utilisation across all node-api pods exceeds the threshold.
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.cpuTargetUtilizationPercent }}
+    # Scale up when average RPS per pod exceeds the threshold.
+    # This metric is exposed by the Prometheus Adapter reading
+    # nginx_ingress_controller_requests from the ingress controller.
+    # Install the adapter with:
+    #   helm install prometheus-adapter prometheus-community/prometheus-adapter \
+    #     -f helm/fluid/prometheus-adapter-values.yaml
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.hpa.rpsTargetPerPod }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        # Allow adding up to 4 pods per minute.
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+        # Or doubling the current replica count per minute — whichever adds more.
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      # Wait 5 minutes of sustained low load before removing pods.
+      # Prevents flapping during brief traffic dips between spikes.
+      stabilizationWindowSeconds: {{ .Values.hpa.scaleDownStabilizationWindowSeconds }}
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+{{- end }}

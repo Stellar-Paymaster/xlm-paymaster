@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fluid.fullname" . }}-rust-engine
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fluid.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rust-engine
+spec:
+  type: {{ .Values.rustEngine.service.type }}
+  selector:
+    {{- include "fluid.selectorLabels" (dict "root" . "component" "rust-engine") | nindent 4 }}
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.rustEngine.service.port }}
+      targetPort: http
+    - name: grpc
+      protocol: TCP
+      port: 50051
+      targetPort: grpc

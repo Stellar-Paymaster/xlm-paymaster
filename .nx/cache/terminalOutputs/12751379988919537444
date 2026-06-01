@@ -1,0 +1,7 @@
+> npm run format:check
+
+
+> fluid-client@0.1.1 format:check
+> echo "No format check configured"
+
+No format check configured

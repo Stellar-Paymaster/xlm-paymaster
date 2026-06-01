@@ -11,6 +11,18 @@ import {
   SubscriptionTierName,
   toTierCode,
 } from "../models/subscriptionTier";
+import {
+  Region,
+  DEFAULT_REGION,
+  getDbForRegion,
+  findApiKeyAcrossRegions,
+} from "../services/regionRouter";
+
+// When STATELESS_MODE=true the in-memory API_KEYS map is bypassed so that
+// every instance resolves keys exclusively from Redis → DB. This is required
+// for horizontal scaling: a key registered on one instance must be visible to
+// all other instances without a restart.
+const STATELESS_MODE = process.env.STATELESS_MODE === "true";
 
 export const VALID_CHAINS = ["stellar", "evm", "solana", "cosmos"] as const;
 export type Chain = (typeof VALID_CHAINS)[number];
@@ -30,6 +42,7 @@ export interface ApiKeyConfig {
   dailyQuotaStroops: number;
   isSandbox: boolean;
   allowedChains: Chain[];
+  region: Region;
 }
 
 function parseAllowedChains(raw?: string | null): Chain[] {
@@ -80,27 +93,22 @@ export async function apiKeyMiddleware(
       // eslint-disable-next-line no-console
       console.log("[Redis] Cache Hit for API key:", maskApiKey(apiKey));
 
-      res.locals.apiKey = JSON.parse(cached) as ApiKeyConfig;
+      const apiKeyConfig = JSON.parse(cached) as ApiKeyConfig;
+      res.locals.apiKey = apiKeyConfig;
+      res.locals.db = getDbForRegion(apiKeyConfig.region ?? DEFAULT_REGION);
       return next();
     }
   } catch (err) {
     // If Redis fails, fall back to DB/in-memory lookup below.
   }
 
-  // 2) Try DB (Prisma) lookup
+  // 2) Try DB (Prisma) lookup — searches all configured regional DBs
   try {
-    const keyRecord = await prisma.apiKey.findUnique({
-      where: { key: apiKey },
-      include: {
-        tenant: {
-          include: {
-            subscriptionTier: true,
-          },
-        },
-      },
-    });
+    const found = await findApiKeyAcrossRegions(apiKey);
 
-    if (keyRecord) {
+    if (found) {
+      const { record: keyRecord, region } = found;
+
       // Reject revoked keys immediately
       if (!keyRecord.active) {
         return next(
@@ -130,6 +138,7 @@ export async function apiKeyMiddleware(
         dailyQuotaStroops: Number(keyRecord.dailyQuotaStroops),
         isSandbox: keyRecord.isSandbox ?? false,
         allowedChains,
+        region: (keyRecord.tenant?.region as Region | undefined) ?? region,
       };
 
       // Cache the key for future requests. Non-blocking: don't fail the request on cache errors.
@@ -138,24 +147,31 @@ export async function apiKeyMiddleware(
       );
 
       res.locals.apiKey = apiKeyConfig;
+      // Attach the correct regional DB client so handlers write to the right region
+      res.locals.db = getDbForRegion(apiKeyConfig.region);
       return next();
     }
   } catch (err) {
     // DB error — continue to in-memory fallback
   }
 
-  // 3) In-memory fallback (useful for local dev / tests)
-  const apiKeyConfig = API_KEYS.get(apiKey);
+  // 3) In-memory fallback — disabled in STATELESS_MODE to prevent per-instance
+  //    divergence when running multiple replicas behind a load balancer.
+  if (!STATELESS_MODE) {
+    const apiKeyConfig = API_KEYS.get(apiKey);
 
-  if (!apiKeyConfig) {
-    return next(new AppError("Invalid API key.", 403, "AUTH_FAILED"));
+    if (apiKeyConfig) {
+      // Cache in Redis asynchronously for future hits
+      setCachedApiKey(apiKey, JSON.stringify(apiKeyConfig), 300).catch(() => {});
+
+      res.locals.apiKey = apiKeyConfig;
+      res.locals.db = getDbForRegion(apiKeyConfig.region ?? DEFAULT_REGION);
+      next();
+      return;
+    }
   }
 
-  // Cache in Redis asynchronously for future hits
-  setCachedApiKey(apiKey, JSON.stringify(apiKeyConfig), 300).catch(() => {});
-
-  res.locals.apiKey = apiKeyConfig;
-  next();
+  return next(new AppError("Invalid API key.", 403, "AUTH_FAILED"));
 }
 
 export function listApiKeys(): ApiKeyConfig[] {

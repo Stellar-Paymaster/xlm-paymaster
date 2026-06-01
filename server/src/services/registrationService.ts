@@ -9,6 +9,8 @@ export interface RegisterInput {
   email: string;
   projectName: string;
   intendedUse: string;
+  acceptTos: boolean;
+  tosAcceptedIp: string;
 }
 
 export interface VerifyResult {
@@ -24,6 +26,12 @@ export interface VerifyResult {
 
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const FREE_TIER_NAME = "Free";
+const DEFAULT_TOS_VERSION = "2026-03-29";
+
+function getCurrentTosVersion(): string {
+  const version = process.env.TERMS_OF_SERVICE_VERSION?.trim();
+  return version && version.length > 0 ? version : DEFAULT_TOS_VERSION;
+}
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -196,11 +204,22 @@ function buildWelcomeEmail(opts: {
  * If a pending record for this email already exists it is re-used (resend).
  */
 export async function createRegistration(input: RegisterInput): Promise<void> {
+  if (!input.acceptTos) {
+    throw new Error("Terms of Service acceptance is required before registration.");
+  }
+
   const token = generateToken();
   const tokenExpiresAt = new Date(Date.now() + TOKEN_TTL_MS);
+  const tosAcceptedAt = new Date();
+  const tosAcceptedIp = input.tosAcceptedIp.trim() || "unknown";
+  const tosVersion = getCurrentTosVersion();
 
   const pendingReg = (prisma as any).pendingRegistration as {
     upsert: (args: any) => Promise<any>;
+  };
+
+  const tosAuditModel = (prisma as any).termsAcceptanceAudit as {
+    create: (args: any) => Promise<any>;
   };
 
   await pendingReg.upsert({
@@ -211,6 +230,9 @@ export async function createRegistration(input: RegisterInput): Promise<void> {
       intendedUse: input.intendedUse,
       token,
       tokenExpiresAt,
+      tosAcceptedAt,
+      tosAcceptedIp,
+      tosVersion,
       status: "pending",
     },
     update: {
@@ -218,7 +240,20 @@ export async function createRegistration(input: RegisterInput): Promise<void> {
       intendedUse: input.intendedUse,
       token,
       tokenExpiresAt,
+      tosAcceptedAt,
+      tosAcceptedIp,
+      tosVersion,
       status: "pending",
+    },
+  });
+
+  await tosAuditModel.create({
+    data: {
+      email: input.email,
+      projectName: input.projectName,
+      tosVersion,
+      acceptedAt: tosAcceptedAt,
+      acceptedIp: tosAcceptedIp,
     },
   });
 
@@ -269,7 +304,10 @@ export async function verifyRegistration(token: string): Promise<VerifyResult> {
 
     // Find tenant by project name + email (best-effort; unique by email in practice)
     const tenant = await tenantModel.findFirst({
-      where: { name: record.projectName },
+      where: {
+        name: record.projectName,
+        contactEmail: record.email,
+      },
     });
     const apiKey = tenant
       ? await apiKeyModel.findFirst({ where: { tenantId: tenant.id, active: true } })
@@ -293,6 +331,20 @@ export async function verifyRegistration(token: string): Promise<VerifyResult> {
       data: { status: "expired" },
     });
     throw new Error("Verification link has expired. Please sign up again.");
+  }
+
+  const currentTosVersion = getCurrentTosVersion();
+
+  if (!record.tosAcceptedAt || !record.tosVersion) {
+    throw new Error(
+      "Terms of Service acceptance is required before API key issuance.",
+    );
+  }
+
+  if (record.tosVersion !== currentTosVersion) {
+    throw new Error(
+      "Terms of Service has been updated. Please re-accept the latest version and verify again.",
+    );
   }
 
   // ---- Provision Tenant + ApiKey inside a transaction ----------------------
@@ -323,8 +375,12 @@ export async function verifyRegistration(token: string): Promise<VerifyResult> {
   const tenant = await tenantModel.create({
     data: {
       name: record.projectName,
+      contactEmail: record.email,
       subscriptionTierId: freeTier.id,
       dailyQuotaStroops: BigInt(freeTier.txLimit * 100), // rough default
+      tosAcceptedAt: record.tosAcceptedAt,
+      tosAcceptedIp: record.tosAcceptedIp ?? "unknown",
+      tosVersion: record.tosVersion,
     },
   });
 

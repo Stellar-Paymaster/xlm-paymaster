@@ -10,6 +10,8 @@ import {
 } from "../middleware/apiKeys";
 import { invalidateApiKeyCache } from "../utils/redis";
 import prisma from "../utils/db";
+import { getAuditActor, logAuditEvent } from "../services/auditLogger";
+import { requireAdminToken } from "../utils/adminAuth";
 
 // Typed accessor for the prisma apiKey model since db.ts uses a loose type
 const apiKeyModel = (prisma as any).apiKey as {
@@ -17,16 +19,6 @@ const apiKeyModel = (prisma as any).apiKey as {
   findUnique: (args: any) => Promise<any | null>;
   update: (args: any) => Promise<any>;
 };
-
-function requireAdminToken(req: Request, res: Response): boolean {
-  const token = req.header("x-admin-token");
-  const expected = process.env.FLUID_ADMIN_TOKEN;
-  if (!expected || token !== expected) {
-    res.status(401).json({ error: "Unauthorized" });
-    return false;
-  }
-  return true;
-}
 
 // Note: These admin endpoints are intentionally minimal — secure them in production.
 
@@ -85,7 +77,15 @@ export async function upsertApiKeyHandler(req: Request, res: Response) {
   }
 
   try {
+    if (!requireAdminToken(req, res)) return;
+
     upsertApiKey(payload);
+    void logAuditEvent("API_KEY_UPSERT", getAuditActor(req), {
+      key: payload.key,
+      tenantId: payload.tenantId,
+      active: payload.active ?? true,
+    });
+
     res
       .status(200)
       .json({ message: "API key upserted and cached", key: payload.key });
@@ -162,6 +162,11 @@ export async function revokeApiKeyHandler(req: Request, res: Response) {
     if (record) {
       deleteApiKey(record.key);
       await invalidateApiKeyCache(record.key);
+      void logAuditEvent("API_KEY_REVOKE", getAuditActor(req), {
+        id: key,
+        prefix: record.prefix,
+        tenantId: record.tenantId,
+      });
     }
 
     res.status(200).json({ message: `API key ${key} revoked` });

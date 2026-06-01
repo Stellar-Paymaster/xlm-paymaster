@@ -4,6 +4,8 @@ export type DashboardSignerStatus =
   | "Sequence Error"
   | "Inactive";
 
+export type PartnerStatus = "pending" | "approved" | "rejected";
+
 export interface DashboardTransaction {
   id: string;
   hash: string;
@@ -151,21 +153,3 @@ export interface TransactionHistoryPageData {
   source: "live" | "sample";
 }
 
-export type PartnerStatus = "pending" | "approved" | "rejected";
-
-export interface Partner {
-  id: string;
-  projectName: string;
-  contactEmail: string;
-  websiteUrl: string;
-  description: string;
-  status: PartnerStatus;
-  submittedAt: string;
-  reviewedAt: string | null;
-  reviewNote: string | null;
-}
-
-export interface PartnerPageData {
-  partners: Partner[];
-  source: "live" | "sample";
-}

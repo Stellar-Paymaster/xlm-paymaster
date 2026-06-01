@@ -1,0 +1,27 @@
+# Build artifacts
+target/
+pkg/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# WASM demo (not needed for native Docker build)
+wasm-demo/
+
+# Git
+.git/
+.github/
+
+# Documentation
+*.md
+!README.md
+
+# Test artifacts
+tests/

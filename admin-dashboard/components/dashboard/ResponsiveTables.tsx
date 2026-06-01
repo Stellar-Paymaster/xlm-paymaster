@@ -98,11 +98,8 @@ export function TransactionsTable({
 
   return (
     <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="text-lg font-semibold text-slate-900">Transactions</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Mobile keeps amount, hash, and status visible. Extra fields expand on tap.
-        </p>
+      <div className="border-b border-border/50 px-6 py-5">
+        <h2 className="text-xl font-black tracking-tight text-foreground">Transactions</h2>
       </div>
 
       <div className="overflow-x-auto">
@@ -222,11 +219,8 @@ export function SignersTable({ signers }: { signers: DashboardSigner[] }) {
 
   return (
     <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="text-lg font-semibold text-slate-900">Signer Accounts</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Primary key, status, and balance stay visible on small screens.
-        </p>
+      <div className="border-b border-border/50 px-6 py-5">
+        <h2 className="text-xl font-black tracking-tight text-foreground">Signer Accounts</h2>
       </div>
 
       <div className="overflow-x-auto">

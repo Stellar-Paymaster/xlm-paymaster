@@ -1,0 +1,7 @@
+{
+  "//": "Used by `npm run demo:*` so ts-node executes the examples as CommonJS.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS"
+  }
+}

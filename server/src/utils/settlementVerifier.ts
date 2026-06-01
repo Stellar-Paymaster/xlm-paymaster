@@ -53,12 +53,23 @@ export function verifySettlementPayment(
     };
   }
 
-  // Search for settlement payment operations
   const settlementOperations = innerTransaction.operations.filter((op) => {
     return isSettlementOperation(op, feePayerPublicKey, expectedAsset);
   });
 
   if (settlementOperations.length === 0) {
+    const strictSendSettlement = innerTransaction.operations.find((op) => {
+      return isStrictSendSettlementOperation(op, feePayerPublicKey, expectedAsset);
+    });
+
+    if (strictSendSettlement) {
+      return {
+        isValid: false,
+        reason:
+          "Settlement path payment must use pathPaymentStrictReceive so the fee payer receives the exact expected amount",
+      };
+    }
+
     return {
       isValid: false,
       reason: `No settlement payment found to fee payer ${feePayerPublicKey} in token ${requirement.token}`,
@@ -66,9 +77,10 @@ export function verifySettlementPayment(
   }
 
   if (settlementOperations.length > 1) {
-    console.warn(
-      `Multiple settlement operations found (${settlementOperations.length}), using first one`,
-    );
+    return {
+      isValid: false,
+      reason: "Multiple settlement operations found; expected exactly one settlement payment",
+    };
   }
 
   const settlementOp = settlementOperations[0];
@@ -86,7 +98,7 @@ export function verifySettlementPayment(
     parseFloat(paymentAmount) * 10_000_000,
   );
 
-  if (paymentAmountStroops < requirement.requiredAmountStroops) {
+  if (paymentAmountStroops !== requirement.requiredAmountStroops) {
     return {
       isValid: false,
       reason: "Incorrect settlement amount",
@@ -131,15 +143,21 @@ function isSettlementOperation(
         assetsEqual(operation.destAsset, expectedAsset)
       );
 
-    case "pathPaymentStrictSend":
-      return (
-        operation.destination === destination &&
-        assetsEqual(operation.destAsset, expectedAsset)
-      );
-
     default:
       return false;
   }
+}
+
+function isStrictSendSettlementOperation(
+  operation: Operation,
+  destination: string,
+  expectedAsset: Asset,
+): boolean {
+  return (
+    operation.type === "pathPaymentStrictSend" &&
+    operation.destination === destination &&
+    assetsEqual(operation.destAsset, expectedAsset)
+  );
 }
 
 /**
@@ -152,9 +170,6 @@ function getOperationAmount(operation: Operation): string | null {
 
     case "pathPaymentStrictReceive":
       return operation.destAmount;
-
-    case "pathPaymentStrictSend":
-      return operation.destMin;
 
     default:
       return null;

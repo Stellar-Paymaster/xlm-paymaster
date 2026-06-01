@@ -1,0 +1,25 @@
+BRUTE-FORCE PROTECTION FOR /ADMIN/AUTH/LOGIN VERIFICATION REPORT
+================================================================
+
+Date: 2026-05-15
+Task: #440 [Security & Compliance] Brute-force protection for /admin/auth/login
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Created `adminBruteForce.ts` middleware to track and block excessive failed login attempts.
+2. Implemented dual tracking for both IP addresses and email accounts.
+3. Added robust error handling with an in-memory `Map` fallback for when Redis is unavailable.
+4. Covered logic completely in `adminBruteForce.test.ts` verifying limits, resets, and Redis fallbacks.
+5. Authored technical documentation in `server/docs/brute-force-protection.md`.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/middleware/adminBruteForce.test.ts
+
+Result:
+  Test Files  1 passed (1)
+       Tests  4 passed (4)
+   Duration  53ms

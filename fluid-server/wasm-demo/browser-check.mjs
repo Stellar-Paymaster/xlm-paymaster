@@ -7,28 +7,9 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const serverScript = path.join(__dirname, "server.mjs");
 
-function browserExecutablePath() {
-  const candidates = [
-    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-  ];
-
-  return candidates.find((candidate) => fs.existsSync(candidate));
-}
-
-function startServer() {
-  return spawn(process.execPath, [serverScript], {
-    cwd: path.resolve(__dirname, ".."),
-    env: { ...process.env, PORT: "4173" },
-    stdio: ["ignore", "pipe", "pipe"]
-  });
-}
-
 async function waitForServer(serverProcess) {
   await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("Timed out waiting for the demo server")), 15000);
+    const timeout = setTimeout(() => reject(new Error("Timed out waiting for the demo server")), 30000); // Increased to 30s
     serverProcess.stdout.on("data", (chunk) => {
       const message = chunk.toString();
       if (message.includes("Fluid WASM demo server listening")) {
@@ -44,38 +25,44 @@ async function waitForServer(serverProcess) {
 }
 
 async function main() {
-  const executablePath = browserExecutablePath();
+  console.log("Starting WASM browser validation...");
   const serverProcess = startServer();
-  try {
-    await waitForServer(serverProcess);
+  
+  // Log server output to help debug in CI
+  serverProcess.stdout.on("data", (chunk) => console.log(`[Server]: ${chunk.toString().trim()}`));
+  serverProcess.stderr.on("data", (chunk) => console.error(`[Server Error]: ${chunk.toString().trim()}`));
 
-    const browser = await chromium.launch(
-      executablePath
-        ? {
-            executablePath,
-            headless: true
-          }
-        : {
-            headless: true
-          }
-    );
+  try {
+    console.log("Waiting for demo server to be ready...");
+    await waitForServer(serverProcess);
+    console.log("Server ready. Launching chromium...");
+
+    const browser = await chromium.launch({
+      headless: true
+    });
 
     try {
       const page = await browser.newPage();
       const consoleMessages = [];
       page.on("console", (message) => {
         consoleMessages.push(message.text());
+        console.log(`[Browser Console]: ${message.text()}`);
       });
 
+      console.log("Navigating to demo page...");
       await page.goto("http://127.0.0.1:4173/wasm-demo/index.html", {
-        waitUntil: "networkidle"
+        waitUntil: "networkidle",
+        timeout: 60000
       });
 
+      console.log("Waiting for WASM execution to complete...");
       await page.waitForFunction(() => document.body.dataset.status !== "running", undefined, {
-        timeout: 45000
+        timeout: 120000 // Increased to 2 minutes for slow CI runners
       });
 
       const status = await page.evaluate(() => document.body.dataset.status);
+      console.log(`Execution finished with status: ${status}`);
+
       if (status !== "success") {
         const mirroredOutput = await page.evaluate(() => {
           const output = document.getElementById("console-output");
@@ -94,7 +81,7 @@ async function main() {
         throw new Error(`Expected browser console success log, got: ${consoleMessages.join(" | ")}`);
       }
 
-      console.log(successMessage);
+      console.log("✅ WASM signing successful in browser");
     } finally {
       await browser.close();
     }

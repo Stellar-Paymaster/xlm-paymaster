@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../utils/db";
+import { replicaDb as prisma } from "../utils/db";
 
 function requireAdminToken(req: Request, res: Response): boolean {
   const token = req.header("x-admin-token");
@@ -43,7 +43,7 @@ export async function listTransactionsHandler(req: Request, res: Response): Prom
         hash: transaction.txHash ?? transaction.innerTxHash,
         txHash: transaction.txHash,
         innerTxHash: transaction.innerTxHash,
-        tenantId: transaction.tenantId,
+        tenantId: transaction.tenantId ?? null,
         status: transaction.status.toLowerCase(),
         costStroops: Number(transaction.costStroops),
         category: transaction.category,

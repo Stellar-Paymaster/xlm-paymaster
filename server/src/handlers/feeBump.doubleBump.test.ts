@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+import StellarSdk from "@stellar/stellar-sdk";
 
 import type { Config } from "../config";
-import StellarSdk from "@stellar/stellar-sdk";
 
 vi.mock("../signing/native", () => ({
   nativeSigner: {
@@ -17,15 +17,10 @@ describe("feeBumpHandler", () => {
 
     const sourceKeypair = StellarSdk.Keypair.random();
     const feePayerKeypair = StellarSdk.Keypair.random();
-
     const networkPassphrase = StellarSdk.Networks.TESTNET;
     const baseFee = 100;
 
-    const sourceAccount = new StellarSdk.Account(
-      sourceKeypair.publicKey(),
-      "1",
-    );
-
+    const sourceAccount = new StellarSdk.Account(sourceKeypair.publicKey(), "1");
     const innerTransaction = new StellarSdk.TransactionBuilder(sourceAccount, {
       fee: String(baseFee),
       networkPassphrase,
@@ -49,66 +44,61 @@ describe("feeBumpHandler", () => {
     );
     feeBumpTx.sign(feePayerKeypair);
 
-    const feeBumpXdr = feeBumpTx.toXDR();
-
-    const config: Config = {
+    const config = {
+      allowedOrigins: ["*"],
+      alerting: {
+        checkIntervalMs: 60_000,
+        cooldownMs: 60_000,
+      },
+      baseFee,
+      crossChainSettlementTimeoutMinutes: 10,
+      feeMultiplier: 2,
       feePayerAccounts: [
         {
           publicKey: feePayerKeypair.publicKey(),
           keypair: feePayerKeypair,
           secretSource: {
-            type: "env",
+            type: "env" as const,
             secret: feePayerKeypair.secret(),
           },
         },
       ],
-      signerPool: {
-        acquire: async () => ({
-          account: {
-            keypair: feePayerKeypair,
-            publicKey: feePayerKeypair.publicKey(),
-            secret: feePayerKeypair.secret(),
-          },
-          release: async () => undefined,
-          reservedSequenceNumber: null,
-        }),
-        getSnapshot: () => [],
-      } as any,
-      baseFee,
-      feeMultiplier: 2,
-      networkPassphrase,
+      horizonSelectionStrategy: "priority" as const,
       horizonUrl: undefined,
       horizonUrls: [],
-      horizonSelectionStrategy: "priority",
-      allowedOrigins: ["*"],
+      ipAllowlist: [],
+      ipDenylist: [],
       maxOperations: 100,
-      maxXdrSize: 10240,
-      rateLimitWindowMs: 60_000,
+      maxXdrSize: 10_240,
+      networkPassphrase,
       rateLimitMax: 5,
-      alerting: {
-        checkIntervalMs: 60_000,
-        cooldownMs: 60_000,
+      rateLimitWindowMs: 60_000,
+      signerPool: {
+        getSnapshot: () => [{ publicKey: feePayerKeypair.publicKey() }],
       },
-    };
+      stellarRpcUrl: undefined,
+      supportedAssets: [],
+      vault: undefined,
+    } as Config;
 
-    const req: any = {
+    const req = {
       body: {
-        xdr: feeBumpXdr,
         submit: false,
+        xdr: feeBumpTx.toXDR(),
       },
-    };
+    } as any;
 
-    const res: any = {
+    const res = {
       locals: {
         apiKey: {
-          tenantId: "tenant-1",
-          tier: "pro",
           apiKey: "test-key",
           dailyQuotaStroops: 1_000_000,
           perMinuteLimit: 10,
+          tenantId: "tenant-1",
+          tier: "pro",
         },
       },
-    };
+    } as any;
 
     let nextErr: any;
     const next = (err: any) => {
@@ -124,4 +114,3 @@ describe("feeBumpHandler", () => {
     );
   });
 });
-

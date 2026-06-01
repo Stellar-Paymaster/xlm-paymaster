@@ -43,17 +43,6 @@ export const fluidColors = {
   // Semantic
   destructive: "hsl(0 84% 60%)",
   destructiveForeground: "hsl(0 0% 98%)",
-
-  // Dark-mode overrides (used in globals.css .dark selector)
-  darkBackground: "hsl(224 71% 4%)",
-  darkForeground: "hsl(213 31% 91%)",
-  darkCard: "hsl(224 71% 7%)",
-  darkBorder: "hsl(216 34% 17%)",
-  darkInput: "hsl(216 34% 17%)",
-  darkMuted: "hsl(223 47% 11%)",
-  darkMutedForeground: "hsl(215 16% 57%)",
-  darkPrimary: "hsl(213 94% 68%)",
-  darkAccent: "hsl(186 94% 50%)",
 } as const;
 
 // ─── Border Radius ────────────────────────────────────────────────────────────
@@ -74,11 +63,6 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  /**
-   * Dark-mode is toggled by the `.dark` class on <html>.
-   * To enable: add `dark` to the className of your <html> element.
-   */
-  darkMode: "class",
 };
 
 export default config;

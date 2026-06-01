@@ -1,0 +1,3535 @@
+{
+  "version": "6.0",
+  "nxVersion": "22.6.3",
+  "pathMappings": {},
+  "nxJsonPlugins": [
+    {
+      "name": "@nx/docker",
+      "version": "22.6.3",
+      "options": {
+        "buildTarget": {
+          "name": "docker:build"
+        },
+        "runTarget": {
+          "name": "docker:run"
+        }
+      }
+    }
+  ],
+  "fileMap": {
+    "projectFileMap": {
+      "client": [
+        {
+          "file": "client/.gitignore",
+          "hash": "10496190824515781433"
+        },
+        {
+          "file": "client/README.md",
+          "hash": "7350996012471952538"
+        },
+        {
+          "file": "client/TELEMETRY.md",
+          "hash": "16293433500656222782"
+        },
+        {
+          "file": "client/WEB_WORKER_README.md",
+          "hash": "2625971472160269366"
+        },
+        {
+          "file": "client/demo-queue.html",
+          "hash": "8744053969755237343"
+        },
+        {
+          "file": "client/demo.html",
+          "hash": "4394216464547655735"
+        },
+        {
+          "file": "client/demo/cdn-demo.html",
+          "hash": "11773369837060993965"
+        },
+        {
+          "file": "client/docs/.nojekyll",
+          "hash": "12301719336174243164"
+        },
+        {
+          "file": "client/docs/assets/hierarchy.js",
+          "hash": "1796930891880343960"
+        },
+        {
+          "file": "client/docs/assets/highlight.css",
+          "hash": "16287918095802451176"
+        },
+        {
+          "file": "client/docs/assets/icons.js",
+          "hash": "683753101674281921"
+        },
+        {
+          "file": "client/docs/assets/icons.svg",
+          "hash": "11101735462978321965"
+        },
+        {
+          "file": "client/docs/assets/main.js",
+          "hash": "3787097780641039735"
+        },
+        {
+          "file": "client/docs/assets/navigation.js",
+          "hash": "4776228153571092348"
+        },
+        {
+          "file": "client/docs/assets/search.js",
+          "hash": "12153843438758427517"
+        },
+        {
+          "file": "client/docs/assets/style.css",
+          "hash": "9762875242259628377"
+        },
+        {
+          "file": "client/docs/classes/FluidClient.html",
+          "hash": "8751816999242073796"
+        },
+        {
+          "file": "client/docs/classes/FluidQueue.html",
+          "hash": "3843742033226300692"
+        },
+        {
+          "file": "client/docs/functions/buildFeeBumpTransaction.html",
+          "hash": "2894155942122561139"
+        },
+        {
+          "file": "client/docs/functions/buildSACTransferOperation.html",
+          "hash": "9149466232397611309"
+        },
+        {
+          "file": "client/docs/functions/buildSACTransferTx.html",
+          "hash": "4814038525223619083"
+        },
+        {
+          "file": "client/docs/functions/collectTelemetry.html",
+          "hash": "3356951885724390066"
+        },
+        {
+          "file": "client/docs/functions/createHorizonServer.html",
+          "hash": "2450568180073426566"
+        },
+        {
+          "file": "client/docs/functions/createTelemetryCollector.html",
+          "hash": "8198621325531724803"
+        },
+        {
+          "file": "client/docs/functions/fromTransactionXdr.html",
+          "hash": "15922464192830291783"
+        },
+        {
+          "file": "client/docs/functions/getSdkFamily.html",
+          "hash": "8531676186278161312"
+        },
+        {
+          "file": "client/docs/functions/getTelemetryConfig.html",
+          "hash": "5754818433081800184"
+        },
+        {
+          "file": "client/docs/functions/isTelemetryEnabled.html",
+          "hash": "7864649192281795233"
+        },
+        {
+          "file": "client/docs/functions/isTransactionLike.html",
+          "hash": "3785639213887891891"
+        },
+        {
+          "file": "client/docs/functions/resolveSacAsset.html",
+          "hash": "7192851714797996219"
+        },
+        {
+          "file": "client/docs/functions/resolveStellarSdk.html",
+          "hash": "6735699337223080130"
+        },
+        {
+          "file": "client/docs/functions/toTransactionXdr.html",
+          "hash": "2955931365271948759"
+        },
+        {
+          "file": "client/docs/hierarchy.html",
+          "hash": "8700327829938427893"
+        },
+        {
+          "file": "client/docs/index.html",
+          "hash": "17696273663418177438"
+        },
+        {
+          "file": "client/docs/interfaces/BuildSACTransferTxOptions.html",
+          "hash": "2425960964841617376"
+        },
+        {
+          "file": "client/docs/interfaces/FeeBumpResponse.html",
+          "hash": "10245956310659670881"
+        },
+        {
+          "file": "client/docs/interfaces/FluidClientConfig.html",
+          "hash": "16638992610840470997"
+        },
+        {
+          "file": "client/docs/interfaces/FluidQueueCallbacks.html",
+          "hash": "14358799017305300524"
+        },
+        {
+          "file": "client/docs/interfaces/IssuedAssetInput.html",
+          "hash": "17679887200744249333"
+        },
+        {
+          "file": "client/docs/interfaces/QueuedTransaction.html",
+          "hash": "5733993130937020840"
+        },
+        {
+          "file": "client/docs/interfaces/ResolvedSacAsset.html",
+          "hash": "575316489476241340"
+        },
+        {
+          "file": "client/docs/interfaces/TelemetryConfig.html",
+          "hash": "3339203336545386511"
+        },
+        {
+          "file": "client/docs/interfaces/TelemetryData.html",
+          "hash": "8657583025597687118"
+        },
+        {
+          "file": "client/docs/media/TELEMETRY.md",
+          "hash": "16293433500656222782"
+        },
+        {
+          "file": "client/docs/modules.html",
+          "hash": "3980060920523376602"
+        },
+        {
+          "file": "client/docs/types/SacAssetInput.html",
+          "hash": "2768765182552505638"
+        },
+        {
+          "file": "client/docs/types/WaitForConfirmationOptions.html",
+          "hash": "9164141780228313457"
+        },
+        {
+          "file": "client/docs/types/WaitForConfirmationProgress.html",
+          "hash": "1372243995438219530"
+        },
+        {
+          "file": "client/package.json",
+          "hash": "5869275321897442483",
+          "deps": [
+            "npm:react",
+            "npm:vue",
+            "npm:@types/node@20.19.39",
+            "npm:@types/react@18.3.28",
+            "npm:jsdom",
+            "npm:msw",
+            "npm:rollup-plugin-visualizer",
+            "npm:stellar-sdk",
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:ts-node",
+            "npm:tsup",
+            "npm:typedoc",
+            "npm:typescript@5.9.3",
+            "npm:vitest",
+            "npm:dotenv@16.6.1"
+          ]
+        },
+        {
+          "file": "client/project.json",
+          "hash": "7748771390789485078"
+        },
+        {
+          "file": "client/src/FluidClient.ts",
+          "hash": "6495961612805594666",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "client/src/components/SponsorButton.tsx",
+          "hash": "13942763832862894949",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "client/src/demo/waitForConfirmation.ts",
+          "hash": "6841977145780949300",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:dotenv@16.6.1"
+          ]
+        },
+        {
+          "file": "client/src/demo/waitForConfirmationOnly.ts",
+          "hash": "17785929364481829458",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:dotenv@16.6.1"
+          ]
+        },
+        {
+          "file": "client/src/examples/sacTransferXdr.ts",
+          "hash": "18412971076046470921",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "client/src/hooks/useFeeBump.ts",
+          "hash": "10718162185272256257",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "client/src/index.ts",
+          "hash": "1462525268078580389",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:dotenv@16.6.1"
+          ]
+        },
+        {
+          "file": "client/src/performance/test.ts",
+          "hash": "8592149977598961663",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "client/src/queue.ts",
+          "hash": "17704392604885060221"
+        },
+        {
+          "file": "client/src/soroban.ts",
+          "hash": "1098798562236209349",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "client/src/standalone.ts",
+          "hash": "6786307322564520859"
+        },
+        {
+          "file": "client/src/stellarCompatibility.ts",
+          "hash": "10693216838776712985"
+        },
+        {
+          "file": "client/src/telemetry.ts",
+          "hash": "7460506336633250257"
+        },
+        {
+          "file": "client/src/testUtils/__tests__/fallbackRedundancy.test.ts",
+          "hash": "1000244285363165184",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "client/src/testUtils/__tests__/mockServer.test.ts",
+          "hash": "12816688385750388769",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "client/src/testUtils/__tests__/telemetry.test.ts",
+          "hash": "14176741688615983758",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "client/src/testUtils/fallbackLogDemo.ts",
+          "hash": "10661572216938184834"
+        },
+        {
+          "file": "client/src/testUtils/mockServer.ts",
+          "hash": "13412065419657207012",
+          "deps": [
+            "npm:msw"
+          ]
+        },
+        {
+          "file": "client/src/vue/index.ts",
+          "hash": "17362066572265775050"
+        },
+        {
+          "file": "client/src/vue/useFluid.ts",
+          "hash": "5735881787050122349",
+          "deps": [
+            "npm:vue"
+          ]
+        },
+        {
+          "file": "client/src/wasm/signing_wasm.ts",
+          "hash": "15505822568334050992"
+        },
+        {
+          "file": "client/src/workers/signingWorker.ts",
+          "hash": "13503954755087293006"
+        },
+        {
+          "file": "client/test/stellarCompatibility.ts",
+          "hash": "10848255964676416984"
+        },
+        {
+          "file": "client/tsconfig.json",
+          "hash": "16732116283342901073"
+        },
+        {
+          "file": "client/tsup.config.ts",
+          "hash": "18131873292774379364",
+          "deps": [
+            "npm:tsup"
+          ]
+        },
+        {
+          "file": "client/typedoc.json",
+          "hash": "15305398149601160134"
+        },
+        {
+          "file": "client/vitest.config.ts",
+          "hash": "2365268902296064373",
+          "deps": [
+            "npm:vitest"
+          ]
+        }
+      ],
+      "server": [
+        {
+          "file": "server/.env.example",
+          "hash": "6861884106653240926"
+        },
+        {
+          "file": "server/.gitignore",
+          "hash": "13301744766005274183"
+        },
+        {
+          "file": "server/Cargo.toml",
+          "hash": "2263667809483681317"
+        },
+        {
+          "file": "server/Dockerfile",
+          "hash": "17605995006008816882"
+        },
+        {
+          "file": "server/PR_DESCRIPTION.md",
+          "hash": "8294616540588107907"
+        },
+        {
+          "file": "server/README.md",
+          "hash": "16863590078324996127"
+        },
+        {
+          "file": "server/benches/tokio_runtime.rs",
+          "hash": "13217483434945439454"
+        },
+        {
+          "file": "server/benchmarks/signing-report.md",
+          "hash": "14613399111523012638"
+        },
+        {
+          "file": "server/build.rs",
+          "hash": "4011234336434390225"
+        },
+        {
+          "file": "server/demo-anomaly-detection.ts",
+          "hash": "16624247535546179836"
+        },
+        {
+          "file": "server/dev.db",
+          "hash": "3228003769064601271"
+        },
+        {
+          "file": "server/docs/.nojekyll",
+          "hash": "12301719336174243164"
+        },
+        {
+          "file": "server/docs/assets/hierarchy.js",
+          "hash": "1796930891880343960"
+        },
+        {
+          "file": "server/docs/assets/highlight.css",
+          "hash": "12518379086483685290"
+        },
+        {
+          "file": "server/docs/assets/icons.js",
+          "hash": "683753101674281921"
+        },
+        {
+          "file": "server/docs/assets/icons.svg",
+          "hash": "11101735462978321965"
+        },
+        {
+          "file": "server/docs/assets/main.js",
+          "hash": "3787097780641039735"
+        },
+        {
+          "file": "server/docs/assets/navigation.js",
+          "hash": "1158863315557288629"
+        },
+        {
+          "file": "server/docs/assets/search.js",
+          "hash": "11798476115161589722"
+        },
+        {
+          "file": "server/docs/assets/style.css",
+          "hash": "9762875242259628377"
+        },
+        {
+          "file": "server/docs/hierarchy.html",
+          "hash": "873134482864645995"
+        },
+        {
+          "file": "server/docs/index.html",
+          "hash": "1427067236447840860"
+        },
+        {
+          "file": "server/docs/modules.html",
+          "hash": "1252072395329455340"
+        },
+        {
+          "file": "server/index.d.ts",
+          "hash": "13175122904768121638"
+        },
+        {
+          "file": "server/package.json",
+          "hash": "9497505437571142614",
+          "deps": [
+            "npm:@napi-rs/cli",
+            "npm:@types/better-sqlite3",
+            "npm:@types/cors",
+            "npm:@types/express",
+            "npm:@types/node@20.19.39",
+            "npm:@types/node-cron",
+            "npm:@types/supertest",
+            "npm:@vitest/coverage-v8",
+            "npm:dotenv@17.4.1",
+            "npm:node-forge",
+            "npm:prisma",
+            "npm:supertest",
+            "npm:ts-node",
+            "npm:typedoc",
+            "npm:typescript@5.9.3",
+            "npm:vitest",
+            "npm:@grpc/grpc-js",
+            "npm:@grpc/proto-loader@0.8.0",
+            "npm:@cosmjs/amino@0.38.1",
+            "npm:@cosmjs/encoding@0.38.1",
+            "npm:@cosmjs/proto-signing@0.38.1",
+            "npm:@cosmjs/stargate@0.38.1",
+            "npm:@libsql/client",
+            "npm:@prisma/adapter-better-sqlite3",
+            "npm:@prisma/adapter-libsql",
+            "npm:@prisma/client",
+            "npm:@prisma/config",
+            "npm:@solana/web3.js",
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:@types/bcryptjs",
+            "npm:@types/jsonwebtoken",
+            "npm:@types/swagger-jsdoc",
+            "npm:@types/swagger-ui-express",
+            "npm:@wormhole-foundation/sdk",
+            "npm:bullmq",
+            "npm:cors",
+            "npm:decimal.js",
+            "npm:ethers",
+            "npm:express",
+            "npm:express-rate-limit",
+            "npm:firebase-admin",
+            "npm:ioredis",
+            "npm:jsonwebtoken",
+            "npm:node-cron",
+            "npm:nodemailer",
+            "npm:pino",
+            "npm:pino-pretty",
+            "npm:swagger-jsdoc",
+            "npm:swagger-ui-express",
+            "npm:twilio",
+            "npm:zod@4.3.6"
+          ]
+        },
+        {
+          "file": "server/prisma.config.ts",
+          "hash": "11689378932314022715",
+          "deps": [
+            "npm:@prisma/config"
+          ]
+        },
+        {
+          "file": "server/prisma/README.md",
+          "hash": "647790431032422426"
+        },
+        {
+          "file": "server/prisma/migrations/0_init/migration.sql",
+          "hash": "348722915147559605"
+        },
+        {
+          "file": "server/prisma/migrations/20250101000000_add_tenant_webhook_url/migration.sql",
+          "hash": "4550710113228746889"
+        },
+        {
+          "file": "server/prisma/migrations/20260325174800_init_tenants/migration.sql",
+          "hash": "95390489212611621"
+        },
+        {
+          "file": "server/prisma/migrations/20260326000000_add_quota_top_up/migration.sql",
+          "hash": "18064833260124088283"
+        },
+        {
+          "file": "server/prisma/migrations/20260326123000_add_signer_secret_storage/migration.sql",
+          "hash": "6648925332372545300"
+        },
+        {
+          "file": "server/prisma/migrations/20260326191112_testing/migration.sql",
+          "hash": "10335928681180711849"
+        },
+        {
+          "file": "server/prisma/migrations/20260326192049_init/migration.sql",
+          "hash": "3316506422927726900"
+        },
+        {
+          "file": "server/prisma/migrations/20260326192547_add_webhook_url/migration.sql",
+          "hash": "4550710113228746889"
+        },
+        {
+          "file": "server/prisma/migrations/20260326193655_add_last_error_field/migration.sql",
+          "hash": "6547795353211099449"
+        },
+        {
+          "file": "server/prisma/migrations/20260327010000_add_tenant_webhook_event_types/migration.sql",
+          "hash": "2501718501263809353"
+        },
+        {
+          "file": "server/prisma/migrations/20260327093000_add_tenant_webhook_secret/migration.sql",
+          "hash": "7173581181217524641"
+        },
+        {
+          "file": "server/prisma/migrations/20260327162000_add_discord_milestones/migration.sql",
+          "hash": "11728870130407508100"
+        },
+        {
+          "file": "server/prisma/migrations/20260327190000_add_subscription_tiers/migration.sql",
+          "hash": "5963392071653527369"
+        },
+        {
+          "file": "server/prisma/migrations/20260328000000_add_pending_registration/migration.sql",
+          "hash": "12091744580400835209"
+        },
+        {
+          "file": "server/prisma/migrations/20260328000000_add_sandbox_api_keys/migration.sql",
+          "hash": "4280415278159904494"
+        },
+        {
+          "file": "server/prisma/migrations/20260328120000_add_transaction_logging/migration.sql",
+          "hash": "14177445859378906065"
+        },
+        {
+          "file": "server/prisma/migrations/20260328130000_add_webhook_dlq/migration.sql",
+          "hash": "15184146970325446651"
+        },
+        {
+          "file": "server/prisma/migrations/20260329000000_add_admin_notification/migration.sql",
+          "hash": "10655237092696000655"
+        },
+        {
+          "file": "server/prisma/migrations/20260329000000_add_digest_unsubscribe/migration.sql",
+          "hash": "8973967102112698025"
+        },
+        {
+          "file": "server/prisma/migrations/20260329120001_add_transaction_category/migration.sql",
+          "hash": "9821732376838946087"
+        },
+        {
+          "file": "server/prisma/migrations/20260329140000_add_chain_registry/migration.sql",
+          "hash": "12866688786450701489"
+        },
+        {
+          "file": "server/prisma/migrations/20260329153000_add_cross_chain_settlements/migration.sql",
+          "hash": "10050344521258010751"
+        },
+        {
+          "file": "server/prisma/migrations/20260329160000_add_sar_compliance/migration.sql",
+          "hash": "14914541588656794369"
+        },
+        {
+          "file": "server/prisma/migrations/20260329170000_add_tos_acceptance_gate/migration.sql",
+          "hash": "11262326053585623815"
+        },
+        {
+          "file": "server/prisma/migrations/20260329180000_add_tenant_region/migration.sql",
+          "hash": "6084150345202806868"
+        },
+        {
+          "file": "server/prisma/migrations/20260329193000_add_tenant_erasure/migration.sql",
+          "hash": "7946418212020462335"
+        },
+        {
+          "file": "server/prisma/migrations/20260330000000_add_admin_users/migration.sql",
+          "hash": "12112713219721008891"
+        },
+        {
+          "file": "server/prisma/migrations/migration_lock.toml",
+          "hash": "17507861707484682820"
+        },
+        {
+          "file": "server/prisma/schema.prisma",
+          "hash": "16514705871500110505"
+        },
+        {
+          "file": "server/prisma/seed.ts",
+          "hash": "13080497038679532131",
+          "deps": [
+            "npm:dotenv@17.4.1",
+            "npm:@prisma/adapter-better-sqlite3",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "server/project.json",
+          "hash": "4711841124393058206"
+        },
+        {
+          "file": "server/proto/internal_signer.proto",
+          "hash": "3528610086133117420"
+        },
+        {
+          "file": "server/rust/src/lib.rs",
+          "hash": "9560877439158195603"
+        },
+        {
+          "file": "server/src/benchmarks/load_test.ts",
+          "hash": "720337138643339406"
+        },
+        {
+          "file": "server/src/benchmarks/signing.ts",
+          "hash": "12833192216646876444",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/benchmarks/simple_benchmark.ts",
+          "hash": "18371880021977112904"
+        },
+        {
+          "file": "server/src/benchmarks/tokio_runtime.rs",
+          "hash": "17888218169919843176"
+        },
+        {
+          "file": "server/src/bin/grpc_engine.rs",
+          "hash": "16629493154893711513"
+        },
+        {
+          "file": "server/src/config.ts",
+          "hash": "1546741911957503654",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/config/sar-rules.json",
+          "hash": "1817616034291363161"
+        },
+        {
+          "file": "server/src/contracts/evm/SimpleCounter.sol",
+          "hash": "7155506437462606421"
+        },
+        {
+          "file": "server/src/contracts/soroban/counter/src/lib.rs",
+          "hash": "11125991235555873596"
+        },
+        {
+          "file": "server/src/docs-preview.ts",
+          "hash": "8926931683604981743",
+          "deps": [
+            "npm:dotenv@17.4.1",
+            "npm:express",
+            "npm:swagger-ui-express"
+          ]
+        },
+        {
+          "file": "server/src/errors/AppError.ts",
+          "hash": "16519186413660114332"
+        },
+        {
+          "file": "server/src/handlers/adminAnalytics.test.ts",
+          "hash": "10010551310898002680",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminAnalytics.ts",
+          "hash": "13650766582252307296",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminApiKeys.ts",
+          "hash": "923714423334561456",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminAuditLog.test.ts",
+          "hash": "292508255456558345",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminAuditLog.ts",
+          "hash": "18067792098221408834",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminAuditLogs.ts",
+          "hash": "1614614162889494199",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminChains.test.ts",
+          "hash": "5041103702744320226",
+          "deps": [
+            "npm:vitest",
+            "npm:express",
+            "npm:supertest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminChains.ts",
+          "hash": "2215975600760456626",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminCosmosFeeGrant.ts",
+          "hash": "9361696320267476405",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminDeviceTokens.test.ts",
+          "hash": "13874612529476313468",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminDeviceTokens.ts",
+          "hash": "15896926230557251583",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminDlq.ts",
+          "hash": "15975191976514973100",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminFeeMultiplier.ts",
+          "hash": "975806153242962648",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminFlaggedEvents.test.ts",
+          "hash": "8780820079589288558",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminFlaggedEvents.ts",
+          "hash": "14429934603173946521",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminMultiChainStats.test.ts",
+          "hash": "2664337178693484295",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminMultiChainStats.ts",
+          "hash": "6452400974064879080",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminNotifications.test.ts",
+          "hash": "17258283359132456520",
+          "deps": [
+            "npm:vitest",
+            "npm:express",
+            "npm:supertest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminNotifications.ts",
+          "hash": "17508033304975292748",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminPrice.ts",
+          "hash": "16719155957063710370",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminRateLimit.ts",
+          "hash": "2211474551381166063",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminSAR.test.ts",
+          "hash": "9842213200504386191",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminSAR.ts",
+          "hash": "586755903177251621",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminSigners.ts",
+          "hash": "10473135797188367114",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminSubscriptionTiers.ts",
+          "hash": "2081021758267383662",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminTransactions.ts",
+          "hash": "2717553999165646721",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminUsers.test.ts",
+          "hash": "17237167736519083718",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminUsers.ts",
+          "hash": "11036902107089692009",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/adminWebhooks.ts",
+          "hash": "12405161072615713401",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/badge.test.ts",
+          "hash": "7744938760418537838",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/badge.ts",
+          "hash": "10002177861737576955",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/digest.ts",
+          "hash": "11513319625999305533",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/estimate.test.ts",
+          "hash": "11255131626783693179",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/estimate.ts",
+          "hash": "9926585171047227937",
+          "deps": [
+            "npm:express",
+            "npm:zod@4.3.6"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeBump.doubleBump.test.ts",
+          "hash": "18219156913681465991",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeBump.evmSettlement.test.ts",
+          "hash": "1339446744388297058",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeBump.networkIsolation.test.ts",
+          "hash": "7327056362669301540",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeBump.slippage.test.ts",
+          "hash": "9033509309145039384",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:decimal.js",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeBump.test.ts",
+          "hash": "4706407330414053814",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeBump.ts",
+          "hash": "9255220493194175198",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeBump.whitelist.test.ts",
+          "hash": "7828674648692250637",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/handlers/feeEstimate.ts",
+          "hash": "2393647842367916223",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/health.ts",
+          "hash": "12123006482424910769",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/registration.test.ts",
+          "hash": "12237543784834544974",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/registration.ts",
+          "hash": "3998759524442971231",
+          "deps": [
+            "npm:express",
+            "npm:express-rate-limit",
+            "npm:zod@4.3.6"
+          ]
+        },
+        {
+          "file": "server/src/handlers/statusPage.test.ts",
+          "hash": "18206761991556393653",
+          "deps": [
+            "npm:vitest",
+            "npm:supertest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/statusPage.ts",
+          "hash": "18043787138699737199",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/stripe.ts",
+          "hash": "12385322421231727073",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/stripeWebhook.ts",
+          "hash": "15561337587002006712",
+          "deps": [
+            "npm:express",
+            "npm:stripe",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "server/src/handlers/tenantErasure.test.ts",
+          "hash": "17033916568674653543",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/tenantErasure.ts",
+          "hash": "3341220868254246026",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/handlers/tenantWebhook.test.ts",
+          "hash": "11336889055663600123",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/handlers/tenantWebhook.ts",
+          "hash": "416430839661575482",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/horizon/failoverClient.ts",
+          "hash": "2913246925489371400",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/index.ts",
+          "hash": "13381753676101896129",
+          "deps": [
+            "npm:dotenv@17.4.1",
+            "npm:cors",
+            "npm:express",
+            "npm:express-rate-limit",
+            "npm:swagger-ui-express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/apiKeys.ts",
+          "hash": "588299346794061288",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/auth.ts",
+          "hash": "17938114979825587868",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/errorHandler.test.ts",
+          "hash": "8189909230851289659",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/middleware/errorHandler.ts",
+          "hash": "15614785499106120450",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/ipFilter.test.ts",
+          "hash": "3612654790934225639",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/middleware/ipFilter.ts",
+          "hash": "740682265172379539",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/rateLimit.test.ts",
+          "hash": "10658831142104031952",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/middleware/rateLimit.ts",
+          "hash": "2377319458514931450",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/sandboxGuard.ts",
+          "hash": "2931190343069208063",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/soc2Logger.test.ts",
+          "hash": "6175946646133737728",
+          "deps": [
+            "npm:express",
+            "npm:supertest"
+          ]
+        },
+        {
+          "file": "server/src/middleware/soc2Logger.ts",
+          "hash": "17452497566743463089",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/middleware/txLimit.test.ts",
+          "hash": "15541475202185225074",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/middleware/txLimit.ts",
+          "hash": "2557139922397866163",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/models/subscriptionTier.ts",
+          "hash": "9812376539957132829"
+        },
+        {
+          "file": "server/src/models/tenantStore.ts",
+          "hash": "8086232728687727763"
+        },
+        {
+          "file": "server/src/models/transactionLedger.ts",
+          "hash": "5781822038096761590"
+        },
+        {
+          "file": "server/src/schemas/feeBump.ts",
+          "hash": "10683258414661507311",
+          "deps": [
+            "npm:zod@4.3.6"
+          ]
+        },
+        {
+          "file": "server/src/schemas/tenantWebhook.ts",
+          "hash": "10494228723415839102",
+          "deps": [
+            "npm:zod@4.3.6"
+          ]
+        },
+        {
+          "file": "server/src/services/alertService.test.ts",
+          "hash": "13615942768831329675",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/alertService.ts",
+          "hash": "14212792962669530275",
+          "deps": [
+            [
+              "npm:nodemailer",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/services/anomalyDetection.test.ts",
+          "hash": "13894106538250921033",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/anomalyDetection.ts",
+          "hash": "1024034542648737826"
+        },
+        {
+          "file": "server/src/services/auditLog.ts",
+          "hash": "14166686620925914076",
+          "deps": [
+            "npm:bullmq",
+            "npm:ioredis"
+          ]
+        },
+        {
+          "file": "server/src/services/auditLogger.test.ts",
+          "hash": "595960931718941587",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/auditLogger.ts",
+          "hash": "1310388874906769233",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/services/chainRegistryService.ts",
+          "hash": "16414208759179960535"
+        },
+        {
+          "file": "server/src/services/cosmosFeeGrant.ts",
+          "hash": "4644396800982092149",
+          "deps": [
+            "npm:@cosmjs/stargate@0.38.1",
+            "npm:@cosmjs/proto-signing@0.38.1",
+            "npm:@cosmjs/tendermint-rpc@0.38.1"
+          ]
+        },
+        {
+          "file": "server/src/services/crossChainSettlement.test.ts",
+          "hash": "17345106210931694841",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/crossChainSettlement.ts",
+          "hash": "10337047690186281663"
+        },
+        {
+          "file": "server/src/services/digestAggregator.test.ts",
+          "hash": "9425224283873601647",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/digestAggregator.ts",
+          "hash": "6657020042053022036"
+        },
+        {
+          "file": "server/src/services/digestService.ts",
+          "hash": "14032469592643445998",
+          "deps": [
+            [
+              "npm:nodemailer",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/services/digestTemplate.test.ts",
+          "hash": "11980965878034586847",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/digestTemplate.ts",
+          "hash": "18143561608630918066"
+        },
+        {
+          "file": "server/src/services/discordMilestones.test.ts",
+          "hash": "3615023143590741023",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/discordMilestones.ts",
+          "hash": "4045893870447978453"
+        },
+        {
+          "file": "server/src/services/fcmNotifier.test.ts",
+          "hash": "15369643401621792609",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/fcmNotifier.ts",
+          "hash": "7756633996072856836",
+          "deps": [
+            [
+              "npm:firebase-admin",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/services/feeEstimator.test.ts",
+          "hash": "14077213135332699353",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/feeEstimator.ts",
+          "hash": "1359055531332227266"
+        },
+        {
+          "file": "server/src/services/feeManager.test.ts",
+          "hash": "18330681965302526141",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/feeManager.ts",
+          "hash": "10483487630115395341"
+        },
+        {
+          "file": "server/src/services/feeOracle.ts",
+          "hash": "18249281478168901523"
+        },
+        {
+          "file": "server/src/services/healthService.ts",
+          "hash": "3915394522202858072",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/services/intelligentRateLimiter.ts",
+          "hash": "3575930775706456086"
+        },
+        {
+          "file": "server/src/services/intelligentRateLimiting.test.ts",
+          "hash": "5987534404730133678",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/notificationService.ts",
+          "hash": "13676018841817880606",
+          "deps": [
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/services/ofacScreening.test.ts",
+          "hash": "8116842056651005150",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/ofacScreening.ts",
+          "hash": "13631251209261219601"
+        },
+        {
+          "file": "server/src/services/pagerDutyNotifier.test.ts",
+          "hash": "5989870390661311666",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/pagerDutyNotifier.ts",
+          "hash": "7217861641776435972"
+        },
+        {
+          "file": "server/src/services/priceService.ts",
+          "hash": "6876660474913562079",
+          "deps": [
+            "npm:decimal.js"
+          ]
+        },
+        {
+          "file": "server/src/services/quota.test.ts",
+          "hash": "12989756980418807012",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/quota.ts",
+          "hash": "9952979205276332484"
+        },
+        {
+          "file": "server/src/services/regionRouter.test.ts",
+          "hash": "11859007780362250267",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/regionRouter.ts",
+          "hash": "3344478090052211585",
+          "deps": [
+            "npm:@prisma/adapter-better-sqlite3",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "server/src/services/registrationService.test.ts",
+          "hash": "11993054769548894299",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/registrationService.ts",
+          "hash": "4280731194307878285",
+          "deps": [
+            [
+              "npm:nodemailer",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/services/sarService.test.ts",
+          "hash": "8193978032085430023",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/sarService.ts",
+          "hash": "2673832885096726899"
+        },
+        {
+          "file": "server/src/services/signerRegistry.ts",
+          "hash": "15623455267983779042",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/services/slackNotifier.test.ts",
+          "hash": "12928197073017906185",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/slackNotifier.ts",
+          "hash": "12890293383733377869"
+        },
+        {
+          "file": "server/src/services/spendForecast.test.ts",
+          "hash": "17871466204853708620",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/spendForecast.ts",
+          "hash": "8163469523791044144"
+        },
+        {
+          "file": "server/src/services/statusMonitorService.test.ts",
+          "hash": "6178480114209928715",
+          "deps": [
+            "npm:vitest",
+            [
+              "npm:@stellar/stellar-sdk@11.3.0",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/services/statusMonitorService.ts",
+          "hash": "12462829843220637968",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/services/stripe.ts",
+          "hash": "9725623823327840586",
+          "deps": [
+            "npm:stripe"
+          ]
+        },
+        {
+          "file": "server/src/services/tenantErasure.test.ts",
+          "hash": "467200727561715713",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/tenantErasure.ts",
+          "hash": "16512549883286429670",
+          "deps": [
+            [
+              "npm:nodemailer",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/services/tenantUsageTracker.ts",
+          "hash": "11240157990423067043"
+        },
+        {
+          "file": "server/src/services/transactionCategorizer.test.ts",
+          "hash": "6451734212110741216",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/transactionCategorizer.ts",
+          "hash": "15307546860146617977"
+        },
+        {
+          "file": "server/src/services/treasuryRebalancer.ts",
+          "hash": "13145503576890148711"
+        },
+        {
+          "file": "server/src/services/treasuryService.test.ts",
+          "hash": "9502971903366853708",
+          "deps": [
+            "npm:decimal.js",
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/treasuryService.ts",
+          "hash": "15464669848208512065",
+          "deps": [
+            "npm:@solana/web3.js",
+            "npm:@cosmjs/proto-signing@0.38.1",
+            "npm:@cosmjs/stargate@0.38.1",
+            "npm:decimal.js",
+            "npm:ethers",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/services/treasurySwap.ts",
+          "hash": "18215634661137055834",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/services/twilioNotifier.test.ts",
+          "hash": "7753570765702560363",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/twilioNotifier.ts",
+          "hash": "16992923702524986327",
+          "deps": [
+            "npm:twilio"
+          ]
+        },
+        {
+          "file": "server/src/services/webhook.test.ts",
+          "hash": "14284159872221053560",
+          "deps": [
+            "npm:fast-check",
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/services/webhook.ts",
+          "hash": "16581679552020681342",
+          "deps": [
+            "npm:bullmq",
+            "npm:ioredis",
+            "npm:axios@1.15.0"
+          ]
+        },
+        {
+          "file": "server/src/services/webhookEventTypes.ts",
+          "hash": "12898211961271430928"
+        },
+        {
+          "file": "server/src/services/wormholeBridgeService.ts",
+          "hash": "12085209140782467686",
+          "deps": [
+            "npm:ethers",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/signing/grpcEngine.test.ts",
+          "hash": "14240885948817355823",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0",
+            "npm:vitest",
+            "npm:node-forge"
+          ]
+        },
+        {
+          "file": "server/src/signing/grpcEngineClient.ts",
+          "hash": "8179164806101411940",
+          "deps": [
+            "npm:@grpc/grpc-js",
+            "npm:@grpc/proto-loader@0.8.0",
+            [
+              "npm:@grpc/grpc-js",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/signing/grpcSigner.ts",
+          "hash": "8321814795755227343",
+          "deps": [
+            "npm:@grpc/grpc-js",
+            "npm:@grpc/proto-loader@0.8.0"
+          ]
+        },
+        {
+          "file": "server/src/signing/index.ts",
+          "hash": "1234664122224510417",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/signing/native.ts",
+          "hash": "8713832874877922928"
+        },
+        {
+          "file": "server/src/signing/signerPool.test.ts",
+          "hash": "564094237868435130",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/signing/signerPool.ts",
+          "hash": "12226061851234958557",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/sponsors/base.ts",
+          "hash": "7780953291144979229"
+        },
+        {
+          "file": "server/src/sponsors/evm.ts",
+          "hash": "3780909467658785287",
+          "deps": [
+            "npm:ethers"
+          ]
+        },
+        {
+          "file": "server/src/sponsors/factory.ts",
+          "hash": "1460183027209096267"
+        },
+        {
+          "file": "server/src/sponsors/solana.ts",
+          "hash": "17574631030708302450",
+          "deps": [
+            "npm:@solana/web3.js"
+          ]
+        },
+        {
+          "file": "server/src/sponsors/stellar.ts",
+          "hash": "15978012584874203601",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/swagger.ts",
+          "hash": "6917828621886646503",
+          "deps": [
+            "npm:swagger-jsdoc"
+          ]
+        },
+        {
+          "file": "server/src/tasks/sweeper.ts",
+          "hash": "7639373617833823188",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0",
+            [
+              "npm:node-cron",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/test-alert.ts",
+          "hash": "10767748019592750816",
+          "deps": [
+            "npm:dotenv@17.4.1",
+            [
+              "npm:@stellar/stellar-sdk@11.3.0",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/test/stripeWebhookIntegration.ts",
+          "hash": "11013201458025434111",
+          "deps": [
+            "npm:stripe",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "server/src/test/stripeWebhookTest.ts",
+          "hash": "14377097001255661634",
+          "deps": [
+            "npm:stripe",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "server/src/test/verifyWormhole.ts",
+          "hash": "6102193795522276409"
+        },
+        {
+          "file": "server/src/utils/adminAuth.test.ts",
+          "hash": "17634245382815139504",
+          "deps": [
+            "npm:vitest",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "server/src/utils/adminAuth.ts",
+          "hash": "8293295128281924436",
+          "deps": [
+            "npm:express",
+            "npm:jsonwebtoken"
+          ]
+        },
+        {
+          "file": "server/src/utils/db.ts",
+          "hash": "433076377428967050",
+          "deps": [
+            "npm:@prisma/adapter-better-sqlite3",
+            [
+              "npm:@prisma/client",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/utils/feeCalculator.ts",
+          "hash": "9260929384279833605"
+        },
+        {
+          "file": "server/src/utils/logger.test.ts",
+          "hash": "1236133612126760152",
+          "deps": [
+            "npm:pino"
+          ]
+        },
+        {
+          "file": "server/src/utils/logger.ts",
+          "hash": "18290027567116597497",
+          "deps": [
+            "npm:pino"
+          ]
+        },
+        {
+          "file": "server/src/utils/networkVerification.test.ts",
+          "hash": "8537897618447961207",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/utils/networkVerification.ts",
+          "hash": "17295514676969275276",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/utils/permissions.test.ts",
+          "hash": "7415563681589629456",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/utils/permissions.ts",
+          "hash": "12179929745597065987"
+        },
+        {
+          "file": "server/src/utils/priceOracle.test.ts",
+          "hash": "14007714786709712084",
+          "deps": [
+            "npm:vitest",
+            "npm:decimal.js"
+          ]
+        },
+        {
+          "file": "server/src/utils/priceOracle.ts",
+          "hash": "6623635953023389018",
+          "deps": [
+            "npm:decimal.js"
+          ]
+        },
+        {
+          "file": "server/src/utils/redis.ts",
+          "hash": "312432485081838899",
+          "deps": [
+            "npm:ioredis"
+          ]
+        },
+        {
+          "file": "server/src/utils/redisRateLimitStore.ts",
+          "hash": "6497494662409039239"
+        },
+        {
+          "file": "server/src/utils/settlementTransactionAnalyzer.test.ts",
+          "hash": "15463344715477115450",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/utils/settlementTransactionAnalyzer.ts",
+          "hash": "12798601241617621680",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/utils/settlementVerifier.test.ts",
+          "hash": "13675109080466365568",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/utils/settlementVerifier.ts",
+          "hash": "9003468213596625447",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/utils/stellarAddressExtractor.test.ts",
+          "hash": "261579746638750395",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/utils/stellarAddressExtractor.ts",
+          "hash": "9842871454912708509",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/workers/anomalyDetectionWorker.ts",
+          "hash": "17164097437370667607"
+        },
+        {
+          "file": "server/src/workers/balanceMonitor.test.ts",
+          "hash": "15922071160237564208",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/workers/balanceMonitor.ts",
+          "hash": "1016155542230220381",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/workers/dailyScoringWorker.test.ts",
+          "hash": "10600281509948566725",
+          "deps": [
+            "npm:vitest",
+            [
+              "npm:node-cron",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/workers/dailyScoringWorker.ts",
+          "hash": "13701025628737202081",
+          "deps": [
+            "npm:node-cron"
+          ]
+        },
+        {
+          "file": "server/src/workers/digestWorker.test.ts",
+          "hash": "3122739658869581657",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/workers/digestWorker.ts",
+          "hash": "15437769997102608390",
+          "deps": [
+            [
+              "npm:node-cron",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/workers/incidentMonitor.test.ts",
+          "hash": "6014143623508984990",
+          "deps": [
+            "npm:vitest",
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/workers/incidentMonitor.ts",
+          "hash": "2703709930147971096",
+          "deps": [
+            "npm:@stellar/stellar-sdk@11.3.0"
+          ]
+        },
+        {
+          "file": "server/src/workers/ledgerMonitor.test.ts",
+          "hash": "12076179988815812196",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/workers/ledgerMonitor.ts",
+          "hash": "1671577567063639786"
+        },
+        {
+          "file": "server/src/workers/sandboxAutoReset.ts",
+          "hash": "6598255192057031352"
+        },
+        {
+          "file": "server/src/workers/tenantErasureWorker.test.ts",
+          "hash": "3561262875594678232",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "server/src/workers/tenantErasureWorker.ts",
+          "hash": "8776298262642794165",
+          "deps": [
+            [
+              "npm:node-cron",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "server/src/workers/transactionStore.test.ts",
+          "hash": "1626381229287033895",
+          "deps": [
+            "npm:vitest",
+            "npm:fast-check"
+          ]
+        },
+        {
+          "file": "server/src/workers/transactionStore.ts",
+          "hash": "912948462788984781"
+        },
+        {
+          "file": "server/src/workers/treasuryRefill.ts",
+          "hash": "8421339767312734389"
+        },
+        {
+          "file": "server/tokio_performance_report.md",
+          "hash": "12884326434466174586"
+        },
+        {
+          "file": "server/tsconfig.json",
+          "hash": "8328672439596693664"
+        },
+        {
+          "file": "server/typedoc.json",
+          "hash": "10451447127129744594"
+        },
+        {
+          "file": "server/vitest.config.ts",
+          "hash": "4445822414813605507",
+          "deps": [
+            "npm:vitest"
+          ]
+        }
+      ],
+      "fluid-server-rust": [
+        {
+          "file": "fluid-server/.cargo/config.toml",
+          "hash": "14745244630651384018"
+        },
+        {
+          "file": "fluid-server/Cargo.toml",
+          "hash": "11583299958954659751"
+        },
+        {
+          "file": "fluid-server/Dockerfile",
+          "hash": "18063842740673787610"
+        },
+        {
+          "file": "fluid-server/Makefile",
+          "hash": "17113703612166958812"
+        },
+        {
+          "file": "fluid-server/build.rs",
+          "hash": "18380426920237715821"
+        },
+        {
+          "file": "fluid-server/project.json",
+          "hash": "14268951649204267389"
+        },
+        {
+          "file": "fluid-server/src/ai_query.rs",
+          "hash": "3028149117136828153"
+        },
+        {
+          "file": "fluid-server/src/blocklist.rs",
+          "hash": "14473935603168735594"
+        },
+        {
+          "file": "fluid-server/src/config.rs",
+          "hash": "5262300111614185813"
+        },
+        {
+          "file": "fluid-server/src/db.rs",
+          "hash": "1822368327300594114"
+        },
+        {
+          "file": "fluid-server/src/error.rs",
+          "hash": "2286444074767840916"
+        },
+        {
+          "file": "fluid-server/src/grpc.rs",
+          "hash": "972524741760851846"
+        },
+        {
+          "file": "fluid-server/src/heuristics.rs",
+          "hash": "936455211277154574"
+        },
+        {
+          "file": "fluid-server/src/horizon.rs",
+          "hash": "2876941227767287813"
+        },
+        {
+          "file": "fluid-server/src/lib.rs",
+          "hash": "14021594846768971090"
+        },
+        {
+          "file": "fluid-server/src/main.rs",
+          "hash": "2160865171265402261"
+        },
+        {
+          "file": "fluid-server/src/metrics.rs",
+          "hash": "4839861950739042604"
+        },
+        {
+          "file": "fluid-server/src/notifications/telegramAlert.test.ts",
+          "hash": "11008459475603899073",
+          "deps": [
+            "npm:axios@1.15.0"
+          ]
+        },
+        {
+          "file": "fluid-server/src/notifications/telegramAlert.ts",
+          "hash": "13494936856726598985",
+          "deps": [
+            "npm:axios@1.15.0"
+          ]
+        },
+        {
+          "file": "fluid-server/src/state.rs",
+          "hash": "14066036255371919864"
+        },
+        {
+          "file": "fluid-server/src/stellar.rs",
+          "hash": "10726071579447869667"
+        },
+        {
+          "file": "fluid-server/src/xdr.rs",
+          "hash": "11243946142747735523"
+        },
+        {
+          "file": "fluid-server/tests/rust_only_verification.rs",
+          "hash": "9293062385181831609"
+        }
+      ],
+      "admin-dashboard": [
+        {
+          "file": "admin-dashboard/.gitignore",
+          "hash": "9320339109708254681"
+        },
+        {
+          "file": "admin-dashboard/Dockerfile",
+          "hash": "9963183707173755094"
+        },
+        {
+          "file": "admin-dashboard/README.md",
+          "hash": "14280839957128389735"
+        },
+        {
+          "file": "admin-dashboard/app/admin/api-keys/page.tsx",
+          "hash": "454326314956151330",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/audit-logs/page.tsx",
+          "hash": "15541806374291414416",
+          "deps": [
+            "npm:react",
+            "npm:next-auth",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/bridge-settlements/page.tsx",
+          "hash": "8567342853419211444",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/chains/page.tsx",
+          "hash": "3636974675479970658",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/cosmos-feegrant/page.tsx",
+          "hash": "5804565190760083828",
+          "deps": [
+            "npm:react",
+            "npm:next-auth",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/cross-chain-sync/page.tsx",
+          "hash": "1064592325787982935",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/dashboard/page.tsx",
+          "hash": "2857684607976685624",
+          "deps": [
+            "npm:next",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/sandbox/page.tsx",
+          "hash": "6079878068000147533",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/sar/page.tsx",
+          "hash": "7682662003978663943",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/signers/page.tsx",
+          "hash": "18337268846339180760",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/transactions/page.tsx",
+          "hash": "2664389000426726608",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/users/page.tsx",
+          "hash": "10273396143947748978",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/webhooks/dlq/page.tsx",
+          "hash": "510423081992961429",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/webhooks/logs/page.tsx",
+          "hash": "13105773196010064526",
+          "deps": [
+            "npm:react",
+            "npm:next-auth",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/admin/webhooks/page.tsx",
+          "hash": "12697133301955815068",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/chains/[id]/route.ts",
+          "hash": "2231536582132963174",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/chains/route.ts",
+          "hash": "15293221772415090088",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/partners/[id]/route.ts",
+          "hash": "1768354700193695155",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/partners/route.ts",
+          "hash": "13574310945592919425",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/roadmap/[id]/route.ts",
+          "hash": "10519949063340938396",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/sandbox/create-key/route.ts",
+          "hash": "1305149105339060294",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/sandbox/reset/route.ts",
+          "hash": "9763849476593962715",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/signers/[publicKey]/route.ts",
+          "hash": "2670523913568581019",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/signers/route.ts",
+          "hash": "10858877387809659273",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/subscription-tiers/route.ts",
+          "hash": "16391813939236336756",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/tenants/[tenantId]/subscription-tier/route.ts",
+          "hash": "2949510690152230457",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/users/[id]/role/route.ts",
+          "hash": "215689060420012946",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/users/[id]/route.ts",
+          "hash": "6984075986219989047",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/users/route.ts",
+          "hash": "266773011723044479",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/webhooks/[tenantId]/route.ts",
+          "hash": "5791316107915820590",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/webhooks/delivery-logs/route.ts",
+          "hash": "4587204745084648665",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/webhooks/dlq/route.ts",
+          "hash": "12870218490237995298",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/admin/webhooks/route.ts",
+          "hash": "9859172862233675119",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/ai/chat/route.ts",
+          "hash": "10562052448252143307"
+        },
+        {
+          "file": "admin-dashboard/app/api/auth/[...nextauth]/route.ts",
+          "hash": "6898140225989190846"
+        },
+        {
+          "file": "admin-dashboard/app/api/auth/register/route.ts",
+          "hash": "14244497696282277938",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/auth/verify-email/route.ts",
+          "hash": "15209420097051836282",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/billing/create-checkout-session/route.ts",
+          "hash": "1958441822364181084",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/discourse/search/route.ts",
+          "hash": "17329799302566371480",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/estimate/route.ts",
+          "hash": "346575123098345811",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/notifications/[id]/read/route.ts",
+          "hash": "15834630169725849604",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/notifications/read-all/route.ts",
+          "hash": "17639297231573442680",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/notifications/route.ts",
+          "hash": "11561335911485220533",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/notifications/sse/route.ts",
+          "hash": "16869044822504843806"
+        },
+        {
+          "file": "admin-dashboard/app/api/partners/badge/[id]/route.ts",
+          "hash": "11570014883402919331",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/partners/verify/[id]/route.ts",
+          "hash": "11659632560129704005",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/sar/[id]/review/route.ts",
+          "hash": "13065901049895547135",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/sar/export/route.ts",
+          "hash": "1606929947867636335",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/sar/route.ts",
+          "hash": "10082500418611650945",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/api/wizard/poll/route.ts",
+          "hash": "3051410918803369689",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/changelog/ChangelogContent.tsx",
+          "hash": "12371691803701627586",
+          "deps": [
+            "npm:react",
+            "npm:react-markdown",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/changelog/page.tsx",
+          "hash": "5023164226719453147"
+        },
+        {
+          "file": "admin-dashboard/app/changelog/rss.xml/route.ts",
+          "hash": "14123279583127874491",
+          "deps": [
+            "npm:rss"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/favicon.ico",
+          "hash": "9157999678830540297"
+        },
+        {
+          "file": "admin-dashboard/app/gallery/page.tsx",
+          "hash": "17369296949378334250",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/globals.css",
+          "hash": "7758821064712061095"
+        },
+        {
+          "file": "admin-dashboard/app/layout.tsx",
+          "hash": "4987458343575784014",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/login/loading.tsx",
+          "hash": "14727396656269716367"
+        },
+        {
+          "file": "admin-dashboard/app/login/page.tsx",
+          "hash": "3723906165616007296",
+          "deps": [
+            "npm:react",
+            "npm:next-auth",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/page.tsx",
+          "hash": "11029405923547100772",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/plugins/page.tsx",
+          "hash": "2381423262410819781",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/sdk/page.tsx",
+          "hash": "15222331820511981087",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/signers-preview/page.tsx",
+          "hash": "5735909460297033389"
+        },
+        {
+          "file": "admin-dashboard/app/signup/page.tsx",
+          "hash": "14983844182715384580",
+          "deps": [
+            "npm:react",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/app/table-preview/page.tsx",
+          "hash": "14353961960876203098"
+        },
+        {
+          "file": "admin-dashboard/app/transactions-preview/page.tsx",
+          "hash": "9818435082363941050"
+        },
+        {
+          "file": "admin-dashboard/app/verify-email/page.tsx",
+          "hash": "8900093823260195067",
+          "deps": [
+            "npm:react",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/auth.ts",
+          "hash": "11794118699753024154",
+          "deps": [
+            "npm:next-auth",
+            "npm:bcryptjs@2.4.3"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components.json",
+          "hash": "15449161095434470740"
+        },
+        {
+          "file": "admin-dashboard/components/Navbar.tsx",
+          "hash": "10522503300301832428",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/SimulationErrorDisplay.tsx",
+          "hash": "15966804831007686726",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/chains/ChainRegistryManager.tsx",
+          "hash": "7932585770769258705",
+          "deps": [
+            "npm:react",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/AdminUsersTable.tsx",
+          "hash": "15174667437220743771",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/AiSupportWidget.tsx",
+          "hash": "10099889540496696526",
+          "deps": [
+            "npm:react",
+            "npm:next",
+            "npm:next-auth",
+            "npm:react-markdown",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/ApiKeysTable.tsx",
+          "hash": "4374709877399557860",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/BillingTopUp.tsx",
+          "hash": "968081224031988806",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/CategoryBadge.tsx",
+          "hash": "11577000189087635704"
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/ConnectDeviceDialog.tsx",
+          "hash": "8493545286433698581",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/CopyButton.tsx",
+          "hash": "8496659293168939329",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/ExpenseBreakdown.tsx",
+          "hash": "14808841662074724582",
+          "deps": [
+            "npm:recharts"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/ExportDropdown.tsx",
+          "hash": "10019184611645558149",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/FeeEstimatorWidget.tsx",
+          "hash": "8865646089897678025",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/MultiChainDashboard.tsx",
+          "hash": "11420547829840155100",
+          "deps": [
+            "npm:recharts"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/NotificationBell.tsx",
+          "hash": "15832005698455086029",
+          "deps": [
+            "npm:react",
+            "npm:@radix-ui/react-popover",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/QuickstartWizard.tsx",
+          "hash": "2767435972871055652",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react",
+            [
+              "npm:canvas-confetti",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/ResponsiveTables.tsx",
+          "hash": "14571774090913916795",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/RevokeKeyDialog.tsx",
+          "hash": "6968914038083386958",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/SARTable.tsx",
+          "hash": "17066615952005111991",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/SandboxPanel.tsx",
+          "hash": "322713367255618795",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/SpendChart.tsx",
+          "hash": "16913380399631157349",
+          "deps": [
+            "npm:recharts"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/StatCard.tsx",
+          "hash": "13899283648702730485",
+          "deps": [
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/StatusBadge.tsx",
+          "hash": "3537292551514899441"
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/SubscriptionTierManager.tsx",
+          "hash": "3739384868502814664",
+          "deps": [
+            "npm:react",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/TransactionTable.tsx",
+          "hash": "13642660294729646869",
+          "deps": [
+            "npm:next",
+            "npm:react",
+            "npm:@tanstack/react-table"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/UsageLeaderboard.tsx",
+          "hash": "1354425598822789391",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/WebhookDeliveryLog.tsx",
+          "hash": "17532253787603329063",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/WebhookDlqManager.tsx",
+          "hash": "2890401262690241079",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/WebhookSettingsManager.tsx",
+          "hash": "10699272812703210525",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/dashboard/types.ts",
+          "hash": "14713521644003454532"
+        },
+        {
+          "file": "admin-dashboard/components/developer-portal/DeveloperPortalLanding.tsx",
+          "hash": "16412107380598505345",
+          "deps": [
+            "npm:framer-motion",
+            "npm:lucide-react",
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/developer-portal/JsonLd.tsx",
+          "hash": "17928725402498837200"
+        },
+        {
+          "file": "admin-dashboard/components/developer-portal/PluginMarketplace.tsx",
+          "hash": "12683010258751966989",
+          "deps": [
+            "npm:framer-motion",
+            "npm:lucide-react",
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/developer-portal/SdkRegistry.tsx",
+          "hash": "4805692136867214312",
+          "deps": [
+            "npm:framer-motion",
+            "npm:lucide-react",
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/providers.tsx",
+          "hash": "10472686593023171987",
+          "deps": [
+            "npm:next-auth",
+            "npm:next-themes"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/signers/SignerPoolManager.tsx",
+          "hash": "13815799684484854128",
+          "deps": [
+            "npm:react",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/button.tsx",
+          "hash": "2370699313999093731",
+          "deps": [
+            "npm:react",
+            "npm:@radix-ui/react-slot@1.2.4",
+            "npm:class-variance-authority"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/card.tsx",
+          "hash": "6040267924507266831",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/dialog.tsx",
+          "hash": "12785454844149785461",
+          "deps": [
+            "npm:react",
+            "npm:@radix-ui/react-dialog",
+            "npm:lucide-react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/input.tsx",
+          "hash": "5152129079836468214",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/motion.tsx",
+          "hash": "4340855099861904122",
+          "deps": [
+            "npm:framer-motion",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/switch.tsx",
+          "hash": "5052291449149317822",
+          "deps": [
+            "npm:react",
+            "npm:@radix-ui/react-switch"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/table.tsx",
+          "hash": "14894674749377310392",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/components/ui/tabs.tsx",
+          "hash": "5665516900636608220",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "admin-dashboard/env.example",
+          "hash": "17950787180515711920"
+        },
+        {
+          "file": "admin-dashboard/eslint.config.mjs",
+          "hash": "10625622066265325689",
+          "deps": [
+            "npm:eslint"
+          ]
+        },
+        {
+          "file": "admin-dashboard/lib/api-keys-data.ts",
+          "hash": "16625508077000086778"
+        },
+        {
+          "file": "admin-dashboard/lib/audit-logs-data.ts",
+          "hash": "474797832737374293"
+        },
+        {
+          "file": "admin-dashboard/lib/cosmos-feegrant-data.ts",
+          "hash": "7139690450822777300"
+        },
+        {
+          "file": "admin-dashboard/lib/dashboard-data.ts",
+          "hash": "3179339266738447203"
+        },
+        {
+          "file": "admin-dashboard/lib/expense-breakdown-data.ts",
+          "hash": "7816273980796851408"
+        },
+        {
+          "file": "admin-dashboard/lib/export-transactions.ts",
+          "hash": "14073462426432765789",
+          "deps": [
+            [
+              "npm:jspdf",
+              "dynamic"
+            ],
+            [
+              "npm:jspdf-autotable",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "admin-dashboard/lib/fee-multiplier-data.ts",
+          "hash": "6315809297353853676"
+        },
+        {
+          "file": "admin-dashboard/lib/freighter.ts",
+          "hash": "7759303133078298359",
+          "deps": [
+            "npm:@stellar/freighter-api",
+            "npm:@stellar/stellar-sdk@14.6.1"
+          ]
+        },
+        {
+          "file": "admin-dashboard/lib/github.ts",
+          "hash": "17977501421635831872"
+        },
+        {
+          "file": "admin-dashboard/lib/multi-chain-data.ts",
+          "hash": "8425426802670043867"
+        },
+        {
+          "file": "admin-dashboard/lib/permissions.ts",
+          "hash": "17146668195333885694"
+        },
+        {
+          "file": "admin-dashboard/lib/plugins.ts",
+          "hash": "4245901543028427206"
+        },
+        {
+          "file": "admin-dashboard/lib/portal-links.ts",
+          "hash": "15838984576497113615"
+        },
+        {
+          "file": "admin-dashboard/lib/sandbox-data.ts",
+          "hash": "6242973877720329775"
+        },
+        {
+          "file": "admin-dashboard/lib/sar-data.ts",
+          "hash": "11157723513345282416"
+        },
+        {
+          "file": "admin-dashboard/lib/sdk-registry.ts",
+          "hash": "13183976474288811696"
+        },
+        {
+          "file": "admin-dashboard/lib/server-env.ts",
+          "hash": "3442666114319181364"
+        },
+        {
+          "file": "admin-dashboard/lib/signer-management.ts",
+          "hash": "3173244646896010823"
+        },
+        {
+          "file": "admin-dashboard/lib/simulation-error-mapper.ts",
+          "hash": "15807015892567758699"
+        },
+        {
+          "file": "admin-dashboard/lib/spend-chart-data.ts",
+          "hash": "7871196266027072565"
+        },
+        {
+          "file": "admin-dashboard/lib/subscription-tiers-data.ts",
+          "hash": "6661176122909021310"
+        },
+        {
+          "file": "admin-dashboard/lib/transaction-history.ts",
+          "hash": "5852585773848287997"
+        },
+        {
+          "file": "admin-dashboard/lib/utils.ts",
+          "hash": "1260146919662595987",
+          "deps": [
+            "npm:clsx",
+            "npm:tailwind-merge"
+          ]
+        },
+        {
+          "file": "admin-dashboard/lib/webhook-delivery-logs-data.ts",
+          "hash": "2276487600594973913"
+        },
+        {
+          "file": "admin-dashboard/lib/webhook-dlq-data.ts",
+          "hash": "14391605952105712719"
+        },
+        {
+          "file": "admin-dashboard/lib/webhook-settings-data.ts",
+          "hash": "9565542346013208087"
+        },
+        {
+          "file": "admin-dashboard/middleware.ts",
+          "hash": "2361880112295599093",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/next.config.ts",
+          "hash": "17157214668998829023",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "admin-dashboard/package.json",
+          "hash": "6866215231868549516",
+          "deps": [
+            "npm:@playwright/test",
+            "npm:@storybook/nextjs",
+            "npm:@storybook/addon-themes",
+            "npm:@tailwindcss/postcss",
+            "npm:@types/bcryptjs",
+            "npm:@types/canvas-confetti",
+            "npm:@types/node@20.19.39",
+            "npm:@types/react@19.2.14",
+            "npm:@types/react-dom",
+            "npm:chromatic",
+            "npm:eslint",
+            "npm:eslint-config-next",
+            "npm:playwright",
+            "npm:puppeteer",
+            "npm:storybook",
+            "npm:tailwindcss",
+            "npm:typedoc",
+            "npm:typescript@5.9.3",
+            "npm:@radix-ui/react-dialog",
+            "npm:@radix-ui/react-label",
+            "npm:@radix-ui/react-popover",
+            "npm:@radix-ui/react-slot@1.2.4",
+            "npm:@radix-ui/react-switch",
+            "npm:@stellar/freighter-api",
+            "npm:@stellar/stellar-sdk@14.6.1",
+            "npm:@tailwindcss/typography",
+            "npm:@tanstack/react-table",
+            "npm:@types/rss",
+            "npm:bcryptjs@2.4.3",
+            "npm:canvas-confetti",
+            "npm:class-variance-authority",
+            "npm:clsx",
+            "npm:framer-motion",
+            "npm:jspdf",
+            "npm:jspdf-autotable",
+            "npm:lucide-react",
+            "npm:next",
+            "npm:next-auth",
+            "npm:next-themes",
+            "npm:react",
+            "npm:react-dom",
+            "npm:react-markdown",
+            "npm:recharts",
+            "npm:rss",
+            "npm:stripe",
+            "npm:tailwind-merge"
+          ]
+        },
+        {
+          "file": "admin-dashboard/postcss.config.mjs",
+          "hash": "12094959087305894889"
+        },
+        {
+          "file": "admin-dashboard/project.json",
+          "hash": "17353058552982322825"
+        },
+        {
+          "file": "admin-dashboard/public/file.svg",
+          "hash": "15617830351863523835"
+        },
+        {
+          "file": "admin-dashboard/public/globe.svg",
+          "hash": "9134466864871335697"
+        },
+        {
+          "file": "admin-dashboard/public/logo.png",
+          "hash": "16517429261574024439"
+        },
+        {
+          "file": "admin-dashboard/public/next.svg",
+          "hash": "8300767200008744458"
+        },
+        {
+          "file": "admin-dashboard/public/plugins.json",
+          "hash": "11997332115171467948"
+        },
+        {
+          "file": "admin-dashboard/public/roadmap.json",
+          "hash": "9725339643407742011"
+        },
+        {
+          "file": "admin-dashboard/public/sdk-registry.json",
+          "hash": "3557075613278821738"
+        },
+        {
+          "file": "admin-dashboard/public/vercel.svg",
+          "hash": "3007623926711696394"
+        },
+        {
+          "file": "admin-dashboard/public/window.svg",
+          "hash": "16677869292061012332"
+        },
+        {
+          "file": "admin-dashboard/tailwind.config.ts",
+          "hash": "15004886577813822977",
+          "deps": [
+            "npm:tailwindcss"
+          ]
+        },
+        {
+          "file": "admin-dashboard/tsconfig.json",
+          "hash": "16804292888371494863"
+        },
+        {
+          "file": "admin-dashboard/typedoc.json",
+          "hash": "14340379515532991389"
+        },
+        {
+          "file": "admin-dashboard/types/next-auth.d.ts",
+          "hash": "11117517383800287953",
+          "deps": [
+            "npm:next-auth"
+          ]
+        }
+      ]
+    },
+    "nonProjectFiles": [
+      {
+        "file": ".changeset/README.md",
+        "hash": "10814460457645639063"
+      },
+      {
+        "file": ".changeset/config.json",
+        "hash": "5068354859870151197"
+      },
+      {
+        "file": ".devcontainer/devcontainer.json",
+        "hash": "1793856754684157821"
+      },
+      {
+        "file": ".env.docker",
+        "hash": "1156223928045171841"
+      },
+      {
+        "file": ".env.example",
+        "hash": "4910495028436363737"
+      },
+      {
+        "file": ".github/dependabot.yml",
+        "hash": "4801205506159048583"
+      },
+      {
+        "file": ".github/workflows/codeql-analysis.yml",
+        "hash": "16100619272922780865"
+      },
+      {
+        "file": ".github/workflows/commitlint.yml",
+        "hash": "14494960972346897847"
+      },
+      {
+        "file": ".github/workflows/fluid-server-tests.yml",
+        "hash": "4076690624423808615"
+      },
+      {
+        "file": ".github/workflows/lint-ts.yml",
+        "hash": "10804744711137822520"
+      },
+      {
+        "file": ".github/workflows/nx-ci.yml",
+        "hash": "4430398009821642030"
+      },
+      {
+        "file": ".github/workflows/rust-ci.yml",
+        "hash": "16739027792026515698"
+      },
+      {
+        "file": ".github/workflows/rust-wasm.yml",
+        "hash": "2674261865321278004"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "14952625056183422478"
+      },
+      {
+        "file": ".gitleaks.toml",
+        "hash": "10487765249072360858"
+      },
+      {
+        "file": ".kiro/specs/affiliate-referral-program/.config.kiro",
+        "hash": "16832617667323370091"
+      },
+      {
+        "file": ".kiro/specs/affiliate-referral-program/requirements.md",
+        "hash": "3196537810250125766"
+      },
+      {
+        "file": ".next/trace",
+        "hash": "16795548412555312409"
+      },
+      {
+        "file": ".next/trace-build",
+        "hash": "12204216681059616642"
+      },
+      {
+        "file": ".nxignore",
+        "hash": "4680915152043755851"
+      },
+      {
+        "file": ".releaserc.json",
+        "hash": "14263634872203441214"
+      },
+      {
+        "file": "Cargo.toml",
+        "hash": "6090011815231516790"
+      },
+      {
+        "file": "README.md",
+        "hash": "4352608773869344182"
+      },
+      {
+        "file": "commitlint.config.js",
+        "hash": "14207217877112209526"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "13357838194060061935"
+      },
+      {
+        "file": "docs/adr/001-chain-agnostic-fee-sponsor.md",
+        "hash": "7280815448124321599"
+      },
+      {
+        "file": "docs/grpc-mtls.md",
+        "hash": "10140717261870200384"
+      },
+      {
+        "file": "docs/index.html",
+        "hash": "13043532507167699210"
+      },
+      {
+        "file": "docs/security/issue-137-sandwich-attack-mitigation.md",
+        "hash": "7794257916960948249"
+      },
+      {
+        "file": "fluid-cli/Cargo.toml",
+        "hash": "7944853143934668525"
+      },
+      {
+        "file": "fluid-cli/USAGE.md",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": "fluid-cli/fluid-cli-fund.png",
+        "hash": "12819704563267636424"
+      },
+      {
+        "file": "fluid-cli/fluid-cli-help.png",
+        "hash": "7489258875935734802"
+      },
+      {
+        "file": "fluid-cli/src/main.rs",
+        "hash": "2881214224639570327"
+      },
+      {
+        "file": "fluid-core/Cargo.toml",
+        "hash": "2952929566807447764"
+      },
+      {
+        "file": "fluid-core/README.md",
+        "hash": "17694281822149276556"
+      },
+      {
+        "file": "fluid-core/examples/basic_signing.rs",
+        "hash": "5329489145577768445"
+      },
+      {
+        "file": "fluid-core/examples/custom_signer.rs",
+        "hash": "9240355109859762712"
+      },
+      {
+        "file": "fluid-core/examples/transaction_builder.rs",
+        "hash": "18192732089815545902"
+      },
+      {
+        "file": "fluid-core/src/error.rs",
+        "hash": "6428381024023793908"
+      },
+      {
+        "file": "fluid-core/src/lib.rs",
+        "hash": "1150761989485683327"
+      },
+      {
+        "file": "fluid-core/src/signer.rs",
+        "hash": "17808809575163742182"
+      },
+      {
+        "file": "fluid-core/src/transaction_builder.rs",
+        "hash": "13840791937620438723"
+      },
+      {
+        "file": "fluid-core/src/types.rs",
+        "hash": "16025658156869396484"
+      },
+      {
+        "file": "fluid-core/tests/integration_test.rs",
+        "hash": "6973589154225095543"
+      },
+      {
+        "file": "fluid-go/client.go",
+        "hash": "17446105776732374728"
+      },
+      {
+        "file": "fluid-go/client_test.go",
+        "hash": "16760027712046695778"
+      },
+      {
+        "file": "fluid-go/example/main.go",
+        "hash": "3229516454702936511"
+      },
+      {
+        "file": "fluid-go/go.mod",
+        "hash": "3190127633773297382"
+      },
+      {
+        "file": "fluid-go/go.sum",
+        "hash": "3515716525527337375"
+      },
+      {
+        "file": "logo.png",
+        "hash": "16517429261574024439"
+      },
+      {
+        "file": "nx.json",
+        "hash": "17098057820461190211"
+      },
+      {
+        "file": "package.json",
+        "hash": "3052917018570253207"
+      },
+      {
+        "file": "pnpm-lock.yaml",
+        "hash": "6113943665208916195"
+      },
+      {
+        "file": "pnpm-workspace.yaml",
+        "hash": "3490486814222404011"
+      },
+      {
+        "file": "proto/signer.proto",
+        "hash": "9486133312062976797"
+      }
+    ]
+  },
+  "externalNodesHash": "3372522475057570929"
+}

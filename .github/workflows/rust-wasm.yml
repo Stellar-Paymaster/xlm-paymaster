@@ -23,19 +23,26 @@ jobs:
       - name: Set up wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
 
+      - name: Install protobuf
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: fluid-server/wasm-demo/package-lock.json
+          cache: pnpm
 
       - name: Install demo dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         working-directory: fluid-server/wasm-demo
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
         working-directory: fluid-server/wasm-demo
 
       - name: Run Rust unit tests
@@ -48,9 +55,9 @@ jobs:
         working-directory: fluid-server
 
       - name: Run Node demo validation
-        run: npm run test:node
+        run: pnpm run test:node
         working-directory: fluid-server/wasm-demo
 
       - name: Run browser demo validation
-        run: npm run test:browser
+        run: pnpm run test:browser
         working-directory: fluid-server/wasm-demo

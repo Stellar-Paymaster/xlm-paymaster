@@ -1,0 +1,23 @@
+{
+  "rules": [
+    {
+      "code": "HIGH_FREQUENCY",
+      "description": "More than 50 transactions from the same tenant in a 1-minute window",
+      "enabled": true,
+      "windowSeconds": 60,
+      "threshold": 50
+    },
+    {
+      "code": "HIGH_SOROBAN_FEE",
+      "description": "Soroban transaction with very high resource fees",
+      "enabled": true,
+      "thresholdStroops": 100000
+    },
+    {
+      "code": "LARGE_FEE_BUMP",
+      "description": "Single fee-bump cost exceeds 0.1 XLM (1,000,000 stroops)",
+      "enabled": true,
+      "thresholdStroops": 1000000
+    }
+  ]
+}

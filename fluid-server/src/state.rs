@@ -37,6 +37,7 @@ pub struct ApiKeyConfig {
     pub daily_quota_stroops: i64,
     pub key: &'static str,
     pub max_requests: u32,
+    #[allow(dead_code)]
     pub name: &'static str,
     pub tenant_id: &'static str,
     pub tier: &'static str,
@@ -422,7 +423,10 @@ fn decode_secret(secret: &str) -> Result<([u8; 32], String), AppError> {
 
     let signing_key = ed25519_dalek::SigningKey::from_bytes(&secret.0);
     let public_key_bytes = signing_key.verifying_key().to_bytes();
-    let public_key = Strkey::PublicKeyEd25519(ed25519::PublicKey(public_key_bytes)).to_string();
+    let public_key = format!(
+        "{}",
+        Strkey::PublicKeyEd25519(ed25519::PublicKey(public_key_bytes))
+    );
 
     Ok((public_key_bytes, public_key.to_string()))
 }

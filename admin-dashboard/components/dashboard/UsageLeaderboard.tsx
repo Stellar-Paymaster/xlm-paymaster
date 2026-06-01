@@ -1,5 +1,9 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { TenantUsageRow } from "@/components/dashboard/types";
+import { exportLeaderboardToCSV, exportLeaderboardToPDF } from "@/lib/export-leaderboard";
 
 interface UsageLeaderboardProps {
   rows: TenantUsageRow[];
@@ -7,7 +11,6 @@ interface UsageLeaderboardProps {
   transactionsBasePath?: string;
 }
 
-// Palette cycles through distinct hues for each rank
 const BAR_COLORS = [
   "bg-sky-500",
   "bg-violet-500",
@@ -26,6 +29,126 @@ function formatStroops(stroops: number): string {
   return `${stroops.toLocaleString()} stroops`;
 }
 
+function ExportMenu({ rows }: { rows: TenantUsageRow[] }) {
+  const [open, setOpen] = useState(false);
+  const [exporting, setExporting] = useState<"csv" | "pdf" | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  async function handleExport(format: "csv" | "pdf") {
+    setExporting(format);
+    try {
+      if (format === "csv") {
+        exportLeaderboardToCSV(rows);
+      } else {
+        await exportLeaderboardToPDF(rows);
+      }
+    } finally {
+      setExporting(null);
+      setOpen(false);
+    }
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label="Export leaderboard"
+        className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-border/70 bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-muted"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="shrink-0"
+          aria-hidden="true"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Export
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 z-10 mt-2 w-48 rounded-xl border border-border/70 bg-card py-1 shadow-lg"
+          role="menu"
+        >
+          <button
+            type="button"
+            disabled={exporting !== null}
+            onClick={() => handleExport("csv")}
+            role="menuitem"
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-foreground transition hover:bg-muted disabled:opacity-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="shrink-0 text-emerald-600"
+              aria-hidden="true"
+            >
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="8" y1="13" x2="16" y2="13" />
+              <line x1="8" y1="17" x2="16" y2="17" />
+            </svg>
+            {exporting === "csv" ? "Exporting…" : "Export as CSV"}
+          </button>
+          <button
+            type="button"
+            disabled={exporting !== null}
+            onClick={() => handleExport("pdf")}
+            role="menuitem"
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-foreground transition hover:bg-muted disabled:opacity-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="shrink-0 text-red-500"
+              aria-hidden="true"
+            >
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            {exporting === "pdf" ? "Exporting…" : "Export as PDF"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function UsageLeaderboard({
   rows,
   sortBy = "cost",
@@ -41,30 +164,31 @@ export function UsageLeaderboard({
   const maxTx = sorted[0]?.txCount ?? 1;
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      {/* Header */}
-      <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="overflow-hidden rounded-3xl border border-border/50 glass  shadow-sm">
+      <div className="flex flex-col gap-3 border-b border-border/50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-xl font-black tracking-tight text-foreground">
             Tenant Usage Ranking
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Top tenants by XLM spent and transaction volume.
+          <p className="mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Top performers by sponsorship volume
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-sky-500" />
-            XLM cost
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-slate-300" />
-            Tx count
-          </span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+              XLM spend
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-muted shadow-inner" />
+              Tx volume
+            </span>
+          </div>
+          {rows.length > 0 && <ExportMenu rows={rows} />}
         </div>
       </div>
 
-      {/* Rows */}
       <ul className="divide-y divide-slate-100">
         {sorted.map((row, index) => {
           const costPct = Math.max(2, (row.totalCostStroops / maxCost) * 100);

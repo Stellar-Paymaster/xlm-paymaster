@@ -1,0 +1,37 @@
+# Railway.app Configuration for Fluid Public Testnet Node
+
+# Project name
+name = "fluid-public-testnet"
+
+# Build configuration
+[build]
+builder = "docker"
+dockerfile = "./Dockerfile"
+
+# Runtime environment
+[deploy]
+startCommand = "npm start"
+
+# Compute resources
+[environments.production]
+cpus = "0.5"
+memory = "1GB"
+
+# Environment variables (set in Railway dashboard)
+# STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
+# HORIZON_URL=https://horizon-testnet.stellar.org
+# SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
+# DATABASE_URL=postgresql://user:pass@db:5432/fluid
+# REDIS_URL=redis://cache:6379
+# NODE_ENV=production
+# LOG_LEVEL=info
+# RATE_LIMIT_ENABLED=true
+# RATE_LIMIT_WINDOW_MS=86400000
+# RATE_LIMIT_DEFAULT_LIMIT=100
+# FREE_TIER_LIMIT=100
+# API_KEY_LENGTH=32
+
+# DNS
+[routes]
+domain = "testnet.fluid.dev"
+https = true

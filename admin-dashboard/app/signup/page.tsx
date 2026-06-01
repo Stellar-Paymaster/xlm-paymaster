@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-type FieldErrors = Partial<Record<"email" | "projectName" | "intendedUse", string[]>>;
+type FieldErrors = Partial<
+  Record<"email" | "projectName" | "intendedUse" | "acceptTos", string[]>
+>;
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -12,6 +14,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [projectName, setProjectName] = useState("");
   const [intendedUse, setIntendedUse] = useState("");
+  const [acceptTos, setAcceptTos] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -27,7 +30,12 @@ export default function SignUpPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, projectName, intendedUse }),
+        body: JSON.stringify({
+          email,
+          projectName,
+          intendedUse,
+          acceptTos,
+        }),
       });
 
       const data = await res.json();
@@ -171,6 +179,26 @@ export default function SignUpPage() {
               <p className="text-sm text-red-700">{serverError}</p>
             </div>
           )}
+
+          <div>
+            <label className="flex items-start gap-3 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                name="acceptTos"
+                checked={acceptTos}
+                onChange={(e) => setAcceptTos(e.target.checked)}
+                disabled={isLoading}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                required
+              />
+              <span>
+                I accept the Terms of Service.
+              </span>
+            </label>
+            {fieldErrors.acceptTos && (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.acceptTos[0]}</p>
+            )}
+          </div>
 
           <button
             type="submit"

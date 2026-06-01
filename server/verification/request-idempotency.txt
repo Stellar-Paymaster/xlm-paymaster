@@ -1,0 +1,70 @@
+#467 [Hardening & Reliability] Auto-scaling Logic for Signer
+Repo Avatar
+Stellar-Fluid/fluid
+Description:
+Horizontally scale Rust pods based on signing queue depth.
+
+Requirements and Context:
+
+CRITICAL CONTEXT: All code changes and execution steps for this issue must happen strictly within the server folder of the repository. Ensure you are working inside the server/ directory before beginning.
+
+The Fluid platform requires professional-grade hardening & reliability standards. This issue focuses on auto-scaling logic for signer to ensure the system is production-ready and resilient.
+
+Acceptance Criteria:
+
+ Implement auto-scaling logic for signer logic in the server package
+ Ensure full test coverage (unit and integration)
+ Verify compliance with internal design and security standards
+ Validate Auto-scaling Logic for Signer handles edge cases correctly
+Deliverables:
+
+ Code implementation in server/src
+ Updated documentation in /docs
+ Verification report with terminal output/screenshots
+NOTE: This issue will NOT be reviewed or approved without functional screenshots or verified terminal output where applicable!
+
+Suggested Execution:
+
+Research existing implementation in server
+Draft a technical design for Auto-scaling Logic for Signer
+Execute implementation and verify against local environment
+Run full test suite to ensure no regressions
+Guidelines:
+
+Maintain consistency with the existing TypeScript/Rust coding standards
+Prioritize performance and memory efficiencyREQUEST IDEMPOTENCY LOGIC VERIFICATION REPORT
+=============================================
+
+Date: 2026-05-14
+Task: #458 [Hardening & Reliability] Request Idempotency Logic
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Created `IdempotencyService` to manage in-memory transaction statuses enforcing LRU cache bounds.
+2. Added `idempotencyMiddleware.ts` to intercept identical client mutation requests (`Idempotency-Key` or `X-Request-Id`).
+3. Ensured concurrent exact requests correctly resolve as `409 Conflict`.
+4. Created detailed documentation within `server/docs/request-idempotency.md`.
+5. Wrote complete Vitest coverage for service logic and middleware bindings.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/services/idempotencyService.test.ts src/middleware/idempotencyMiddleware.test.ts
+
+Result:
+  ✓ src/services/idempotencyService.test.ts > IdempotencyService > should return NEW for a fresh key
+  ✓ src/services/idempotencyService.test.ts > IdempotencyService > should return IN_PROGRESS for an active key without a finished response
+  ✓ src/services/idempotencyService.test.ts > IdempotencyService > should return COMPLETED and cache the response once finished
+  ✓ src/services/idempotencyService.test.ts > IdempotencyService > should allow retries when a request fails
+  ✓ src/services/idempotencyService.test.ts > IdempotencyService > should evict expired keys automatically
+  ✓ src/services/idempotencyService.test.ts > IdempotencyService > should enforce the LRU max size policy
+  ✓ src/middleware/idempotencyMiddleware.test.ts > idempotencyMiddleware > should call next() immediately for GET requests
+  ✓ src/middleware/idempotencyMiddleware.test.ts > idempotencyMiddleware > should call next() if no idempotency key is provided
+  ✓ src/middleware/idempotencyMiddleware.test.ts > idempotencyMiddleware > should intercept response and cache it for a new idempotency key
+  ✓ src/middleware/idempotencyMiddleware.test.ts > idempotencyMiddleware > should return 409 Conflict if the request is IN_PROGRESS
+  ✓ src/middleware/idempotencyMiddleware.test.ts > idempotencyMiddleware > should return cached response if COMPLETED
+
+  Test Files  2 passed (2)
+       Tests  11 passed (11)

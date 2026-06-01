@@ -2,16 +2,8 @@ import { Request, Response } from "express";
 import prisma from "../utils/db";
 import { invalidateCachedApiKey } from "../middleware/apiKeys";
 import { toTierCode } from "../models/subscriptionTier";
-
-function requireAdminToken(req: Request, res: Response): boolean {
-  const token = req.header("x-admin-token");
-  const expected = process.env.FLUID_ADMIN_TOKEN;
-  if (!expected || token !== expected) {
-    res.status(401).json({ error: "Unauthorized" });
-    return false;
-  }
-  return true;
-}
+import { getAuditActor, logAuditEvent } from "../services/auditLogger";
+import { requireAdminToken } from "../utils/adminAuth";
 
 export async function listSubscriptionTiersHandler(req: Request, res: Response) {
   if (!requireAdminToken(req, res)) return;
@@ -24,6 +16,7 @@ export async function listSubscriptionTiersHandler(req: Request, res: Response) 
         orderBy: { priceMonthly: "asc" },
       }),
       prisma.tenant.findMany({
+        where: { deletedAt: null },
         orderBy: { name: "asc" },
         include: { subscriptionTier: true },
       }),
@@ -102,6 +95,12 @@ export async function updateTenantSubscriptionTierHandler(req: Request, res: Res
       where: { id: tenantId },
       data: { subscriptionTierId: tier.id },
       include: { subscriptionTier: true },
+    });
+
+    void logAuditEvent("TENANT_TIER_UPDATE", getAuditActor(req), {
+      tenantId,
+      tierId: tier.id,
+      tierName: tier.name,
     });
 
     const apiKeys = await prisma.apiKey.findMany({

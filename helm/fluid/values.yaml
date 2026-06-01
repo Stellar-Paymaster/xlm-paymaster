@@ -1,0 +1,220 @@
+# Default values for the Fluid Helm chart.
+# Override these in your own values file or with --set flags.
+
+# -- Global settings ----------------------------------------------------------
+global:
+  # Registry prefix prepended to all image repositories. Leave empty to use
+  # Docker Hub (the default).
+  imageRegistry: ""
+  imagePullSecrets: []
+
+# -- Node API (TypeScript / Express) ------------------------------------------
+nodeApi:
+  image:
+    repository: ghcr.io/stellar-fluid/fluid-node-api
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2
+
+  port: 3001
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Extra environment variables injected into the node-api pods.
+  extraEnv: []
+  # - name: MY_VAR
+  #   value: "my-value"
+
+  # Enable STATELESS_MODE so all replicas share Redis for rate limiting and
+  # API key caching. Always set to "true" when replicaCount > 1.
+  statelessMode: "true"
+
+  service:
+    type: ClusterIP
+    port: 3001
+
+# -- Rust signing engine (Axum) -----------------------------------------------
+rustEngine:
+  image:
+    repository: ghcr.io/stellar-fluid/fluid-rust-engine
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+
+  port: 3000
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+  extraEnv: []
+
+  service:
+    type: ClusterIP
+    port: 3000
+
+# -- Admin dashboard (Next.js) ------------------------------------------------
+dashboard:
+  image:
+    repository: ghcr.io/stellar-fluid/fluid-dashboard
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+
+  port: 3002
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  service:
+    type: ClusterIP
+    port: 3002
+
+# -- PostgreSQL ---------------------------------------------------------------
+postgres:
+  image:
+    repository: postgres
+    tag: "15-alpine"
+    pullPolicy: IfNotPresent
+
+  port: 5432
+
+  # Name of an existing Kubernetes Secret that contains the PostgreSQL password
+  # under the key "postgres-password". Leave empty to have the chart create a
+  # Secret from the values below.
+  existingSecret: ""
+
+  auth:
+    username: fluid
+    password: ""          # Required when existingSecret is empty
+    database: fluid_db
+
+  storage:
+    size: 10Gi
+    storageClass: ""      # Empty = cluster default StorageClass
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# -- Redis --------------------------------------------------------------------
+redis:
+  image:
+    repository: redis
+    tag: "7-alpine"
+    pullPolicy: IfNotPresent
+
+  port: 6379
+
+  storage:
+    size: 2Gi
+    storageClass: ""
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+# -- Ingress ------------------------------------------------------------------
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  #   cert-manager.io/cluster-issuer: letsencrypt-prod
+  #   nginx.ingress.kubernetes.io/proxy-body-size: "4m"
+
+  hosts:
+    - host: api.fluid.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: node-api
+    - host: dashboard.fluid.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: dashboard
+
+  tls: []
+  # - secretName: fluid-tls
+  #   hosts:
+  #     - api.fluid.example.com
+  #     - dashboard.fluid.example.com
+
+# -- Secrets ------------------------------------------------------------------
+# Fluid-specific secrets. All values are base64-encoded by Helm when written to
+# Kubernetes Secrets. Use an external secrets operator for production.
+secrets:
+  # Name of an existing Secret to use for all Fluid credentials.
+  # When set, all values below are ignored.
+  existingSecret: ""
+
+  # Required: Stellar secret key of the fee-payer account.
+  fluidFeePayerSecret: ""
+
+  # Required: 32-byte base64 string for database encryption at rest.
+  databaseEncryptionKey: ""
+
+  # Required: Random string used to sign admin dashboard JWT sessions.
+  authSecret: ""
+
+  # Optional: Admin credentials for the dashboard bootstrap user.
+  adminEmail: "admin@fluid.example.com"
+  adminPasswordHash: ""
+
+# -- ServiceAccount -----------------------------------------------------------
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# -- HorizontalPodAutoscaler (node-api only) ----------------------------------
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 20
+
+  # Scale up when average CPU across all node-api pods exceeds this threshold.
+  cpuTargetUtilizationPercent: 70
+
+  # Scale up when average RPS per pod exceeds this value.
+  # Requires the Prometheus Adapter to expose the "http_requests_per_second"
+  # custom metric. See helm/fluid/prometheus-adapter-values.yaml.
+  rpsTargetPerPod: 200
+
+  # Scale-down stabilisation window (seconds). Prevents flapping during
+  # traffic spikes that briefly dip below the threshold.
+  scaleDownStabilizationWindowSeconds: 300
+
+# -- ServiceMonitor (Prometheus Operator) -------------------------------------
+serviceMonitor:
+  # Set to true if the Prometheus Operator CRDs are installed in the cluster.
+  enabled: false
+  namespace: monitoring
+  interval: 15s
+  scrapeTimeout: 10s

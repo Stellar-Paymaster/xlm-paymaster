@@ -1,0 +1,7 @@
+[2m> [22mnpm run lint
+
+
+> fluid-server-ts@0.1.1 lint
+> echo "No lint configured"
+
+No lint configured

@@ -1,0 +1,36 @@
+IP-BASED ADMIN ACCESS LIST VERIFICATION REPORT
+==============================================
+
+Date: 2026-04-24
+Task: #443 [Security & Compliance] IP-based Admin Access List
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Added `ipAccessControl.ts` to `server/src/services/` for precise IPv4/IPv6 CIDR evaluations.
+2. Added `adminIpAccessMiddleware.ts` to `server/src/middleware/` to integrate with Express router.
+3. Created unit tests ensuring robust IP processing, bitwise bounds, and subnet parsing.
+4. Added technical documentation under `server/docs/`.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/services/ipAccessControl.test.ts src/middleware/adminIpAccessMiddleware.test.ts
+
+Result:
+  ✓ src/services/ipAccessControl.test.ts > IpAccessControlService > should deny access by default if no ranges are configured
+  ✓ src/services/ipAccessControl.test.ts > IpAccessControlService > should allow exactly matching IPv4 addresses
+  ✓ src/services/ipAccessControl.test.ts > IpAccessControlService > should allow IPv4 addresses within a /24 CIDR block
+  ... (8 other tests passed)
+  ✓ src/middleware/adminIpAccessMiddleware.test.ts > adminIpAccessMiddleware > should return 403 if IP is not allowed
+  ✓ src/middleware/adminIpAccessMiddleware.test.ts > adminIpAccessMiddleware > should call next() if IP is allowed
+
+  Test Files  2 passed (2)
+       Tests  11 passed (11)
+
+DESIGN / ACCESSIBILITY / SECURITY CHECKS
+----------------------------------------
+- Fail-closed default: An empty whitelist blocks all traffic avoiding public exposures.
+- BigInt precision for IPv6 prevents overflow issues common in JS number representations.
+- Unsigned right-shifts (`>>> 0`) guarantee accurate IPv4 bitwise evaluations.

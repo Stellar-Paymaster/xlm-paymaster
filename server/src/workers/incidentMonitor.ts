@@ -7,6 +7,7 @@ import {
   type PagerDutyEventType,
 } from "../services/pagerDutyNotifier";
 import type { FcmNotifierLike } from "../services/fcmNotifier";
+import { BaseWorker } from "./baseWorker";
 
 const logger = createLogger({ component: "incident_monitor" });
 
@@ -87,7 +88,7 @@ export interface IncidentMonitorOptions {
   fcmNotifier?: FcmNotifierLike;
 }
 
-export class IncidentMonitor {
+export class IncidentMonitor extends BaseWorker {
   private intervalHandle: NodeJS.Timeout | null = null;
   private readonly horizonServer: StellarSdk.Horizon.Server | null;
   private readonly state = new IncidentStateStore();
@@ -99,6 +100,7 @@ export class IncidentMonitor {
     private readonly pagerDuty: PagerDutyNotifier,
     private readonly options: IncidentMonitorOptions = {},
   ) {
+    super();
     this.horizonServer = config.horizonUrl
       ? new StellarSdk.Horizon.Server(config.horizonUrl)
       : null;
@@ -108,7 +110,7 @@ export class IncidentMonitor {
   start(): void {
     const intervalMs =
       this.options.checkIntervalMs ?? DEFAULT_CHECK_INTERVAL_MS;
-    logger.info(
+    this.logger.info(
       { interval_ms: intervalMs },
       "Starting incident monitor worker",
     );
@@ -118,20 +120,19 @@ export class IncidentMonitor {
       void this.triggerRestartIncident();
     }
 
-    void this.checkIncidents();
+    void this.runCycle(() => this.checkIncidents());
     this.intervalHandle = setInterval(() => {
-      void this.checkIncidents();
+      void this.runCycle(() => this.checkIncidents());
     }, intervalMs);
   }
 
-  stop(): void {
-    if (!this.intervalHandle) {
-      return;
+  protected clearScheduledTasks(): void {
+    if (this.intervalHandle) {
+      clearInterval(this.intervalHandle);
+      this.intervalHandle = null;
     }
-    clearInterval(this.intervalHandle);
-    this.intervalHandle = null;
-    logger.info("Stopped incident monitor worker");
   }
+
 
   private async checkIncidents(): Promise<void> {
     try {

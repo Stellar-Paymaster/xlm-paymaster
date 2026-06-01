@@ -5,9 +5,16 @@ import { Box, Layers, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { getPortalLinks } from "@/lib/portal-links";
 import { cn } from "@/lib/utils";
+
+// Leaflet requires browser APIs — load without SSR
+const NodeNetworkMap = dynamic(
+  () => import("./NodeNetworkMap").then((m) => ({ default: m.NodeNetworkMap })),
+  { ssr: false },
+);
 
 const SDK_SNIPPET = `import { FluidClient } from "fluid-client";
 
@@ -37,77 +44,31 @@ export function DeveloperPortalLanding() {
 
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
-      <section
-        className="relative isolate overflow-hidden border-b border-border/80"
-        aria-labelledby="hero-heading"
-      >
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.18),transparent)]"
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary"
-            >
-              Developer portal
-            </motion.p>
-            <motion.h1
-              id="hero-heading"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.06,
-                duration: 0.45,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
-            >
-              Ship gasless Stellar experiences at scale
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.12,
-                duration: 0.45,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="mt-6 text-lg text-muted-foreground sm:text-xl"
-            >
-              Fluid sponsors network fees so your users never hold XLM for gas.
-              Sign locally, bump fees on the server, and go live on testnet or
-              mainnet with the same SDK.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.18,
-                duration: 0.45,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-            >
-              <Button
-                size="lg"
-                className="min-w-[200px] text-base shadow-lg"
-                asChild
-              >
-                <Link href="/login">Get API Key</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <a href={docs} target="_blank" rel="noopener noreferrer">
-                  Read the docs
-                </a>
-              </Button>
-            </motion.div>
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-foreground">
+              Ship gasless Stellar experiences
+            </h1>
+            <p className="mt-2 text-muted-foreground max-w-2xl text-balance">
+              Sponsor network fees so your users never hold XLM for gas. Secure, server-side bumps for every stack.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button size="lg" className="shadow-lg" asChild>
+              <Link href="/login">Get API Key</Link>
+            </Button>
+            <Button size="lg" variant="secondary" className="shadow-md" asChild>
+              <Link href="/admin/dashboard">Admin Dashboard</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <a href={docs} target="_blank" rel="noopener noreferrer">
+                Read the docs
+              </a>
+            </Button>
           </div>
         </div>
-      </section>
+      </div>
 
       <section
         id="features"
@@ -158,8 +119,9 @@ export function DeveloperPortalLanding() {
               viewport={{ once: true, margin: "-40px" }}
               transition={{ delay: index * 0.08, duration: 0.45 }}
               className={cn(
-                "flex flex-col rounded-2xl border border-border bg-card p-8 shadow-sm",
-                "hover:border-primary/30 hover:shadow-md transition-colors",
+                "flex flex-col rounded-2xl border p-8 shadow-sm transition-all duration-300",
+                "glass",
+                "border-border/50 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1",
               )}
             >
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -173,6 +135,8 @@ export function DeveloperPortalLanding() {
           ))}
         </div>
       </section>
+
+      <NodeNetworkMap />
 
       <section
         className="border-y border-border bg-muted/30"
@@ -203,7 +167,7 @@ export function DeveloperPortalLanding() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-border bg-zinc-950 shadow-xl dark:bg-zinc-950"
+            className="relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-border bg-zinc-950 shadow-xl"
           >
             <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
               <span className="text-xs font-medium text-zinc-400">
@@ -259,12 +223,6 @@ export function DeveloperPortalLanding() {
             >
               SDK Registry
             </Link>
-            <Link
-              href="/badge"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              Badge Generator
-            </Link>
             <a
               href={github}
               className="text-sm font-medium text-primary hover:underline"
@@ -273,26 +231,6 @@ export function DeveloperPortalLanding() {
             >
               GitHub
             </a>
-            <a
-              href={discord}
-              className="text-sm font-medium text-primary hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Discord
-            </a>
-            <Link
-              href="/forum"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              Community Forum
-            </Link>
-            <Link
-              href="/roadmap"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              Roadmap
-            </Link>
           </nav>
         </div>
       </footer>

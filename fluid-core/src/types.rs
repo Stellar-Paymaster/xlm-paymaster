@@ -420,7 +420,7 @@ impl AsRef<[u8]> for TransactionHash {
 /// # Examples
 ///
 /// ```
-/// use fluid_core::FeePayerAccount;
+/// use fluid_core::{FeePayerAccount, Keypair};
 ///
 /// // Create a fee payer account (in practice, load from secure storage)
 /// let account = FeePayerAccount::new(

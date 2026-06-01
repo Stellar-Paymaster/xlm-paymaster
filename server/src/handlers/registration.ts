@@ -14,6 +14,11 @@ const RegisterSchema = z.object({
   email: z.string().email(),
   projectName: z.string().min(2).max(100),
   intendedUse: z.string().min(5).max(500),
+  acceptTos: z
+    .boolean()
+    .refine((value) => value === true, {
+      message: "You must accept the Terms of Service.",
+    }),
 });
 
 const VerifySchema = z.object({
@@ -69,7 +74,15 @@ export async function registerHandler(
   }
 
   try {
-    await createRegistration(parsed.data);
+    const forwardedFor = req.header("x-forwarded-for");
+    const realIp = req.header("x-real-ip");
+    const forwardedIp = forwardedFor?.split(",")[0]?.trim();
+    const tosAcceptedIp = forwardedIp || realIp || req.ip || "unknown";
+
+    await createRegistration({
+      ...parsed.data,
+      tosAcceptedIp,
+    });
     res.status(202).json({
       message:
         "Registration received. Please check your email to verify your address.",
@@ -108,6 +121,8 @@ export async function verifyEmailHandler(
       "Invalid or expired verification token.",
       "Verification link has expired. Please sign up again.",
       "Free subscription tier not found.",
+      "Terms of Service acceptance is required before API key issuance.",
+      "Terms of Service has been updated.",
     ];
     if (userErrors.some((msg) => err?.message?.startsWith(msg.slice(0, 20)))) {
       res.status(400).json({ error: err.message });

@@ -1,0 +1,107 @@
+version: "0.1.0"
+title: Horizon 503 — fallback RPC kick-in
+description: >
+  Uses Toxiproxy to force all Horizon HTTP calls to return a connection
+  timeout, simulating a 503 / unreachable upstream.  Verifies that the
+  HorizonFailoverClient degrades gracefully and that fallback RPC (secondary
+  Horizon URL) is used within the configured cooldown window.
+
+tags:
+  - component:horizon
+  - phase:Phase-14-Performance
+  - severity:medium
+
+steady-state-hypothesis:
+  title: Horizon is reachable and transactions submit successfully
+  probes:
+    - name: horizon-health-ok
+      type: http
+      url: "${API_URL:-http://localhost:3001}/health"
+      method: GET
+      expected_status: 200
+      timeout: 5
+
+method:
+  - type: action
+    name: configure-toxiproxy-horizon
+    description: Create a Toxiproxy proxy for Horizon
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - |
+          toxiproxy-cli create horizon_proxy \
+            --listen  0.0.0.0:${TOXIPROXY_HORIZON_PORT:-8001} \
+            --upstream 127.0.0.1:${HORIZON_PORT:-8000} 2>/dev/null || true
+
+  - type: action
+    name: inject-horizon-timeout-toxic
+    description: Drop all connections to the primary Horizon node
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - |
+          toxiproxy-cli toxic add horizon_proxy \
+            --type timeout \
+            --attribute timeout=0 \
+            --toxicName horizon_timeout
+
+  - type: probe
+    name: api-falls-back-to-secondary-horizon
+    description: >
+      Submit a fee-bump and confirm the server logs show a secondary-node
+      attempt and ultimately succeeds (if a secondary is configured) or
+      returns a structured error (not a crash).
+    provider:
+      type: process
+      path: node
+      arguments:
+        - chaos/scripts/assert-horizon-fallback.mjs
+        - "${API_URL:-http://localhost:3001}"
+        - "${SECONDARY_HORIZON_URL}"
+
+  - type: action
+    name: remove-horizon-toxic
+    description: Restore Horizon connectivity
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "toxiproxy-cli toxic remove horizon_proxy --toxicName horizon_timeout"
+
+  - type: action
+    name: wait-for-horizon-recovery
+    description: Allow circuit breaker half-open probe to succeed
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "sleep 15"
+
+  - type: probe
+    name: api-recovers-after-horizon-restored
+    description: After removing toxic, the health endpoint must return healthy
+    provider:
+      type: process
+      path: node
+      arguments:
+        - chaos/scripts/assert-recovery.mjs
+        - "${API_URL:-http://localhost:3001}/health"
+        - "200"
+        - "20000"
+
+rollbacks:
+  - type: action
+    name: remove-all-horizon-toxics
+    description: Ensure Horizon toxics are cleaned up
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "toxiproxy-cli toxic remove horizon_proxy --toxicName horizon_timeout 2>/dev/null || true"

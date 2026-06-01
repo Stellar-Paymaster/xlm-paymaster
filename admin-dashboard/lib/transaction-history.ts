@@ -15,7 +15,7 @@ interface TransactionsApiResponse {
     innerTxHash?: string;
     category?: string;
     costStroops?: number;
-    tenantId: string;
+    tenantId: string | null;
     status: TransactionStatus;
     createdAt: string;
   }>;
@@ -300,7 +300,7 @@ async function fetchLiveRows(): Promise<TransactionHistoryRow[]> {
       typeof transaction.costStroops === "number"
         ? transaction.costStroops
         : deterministicCost(transaction.hash),
-    tenant: transaction.tenantId,
+    tenant: transaction.tenantId ?? "deleted-tenant",
   }));
 }
 

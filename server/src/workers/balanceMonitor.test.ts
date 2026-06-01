@@ -1,4 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../services/notificationService", () => ({
+  createNotification: vi.fn().mockResolvedValue({}),
+}));
+
 import { BalanceMonitor } from "./balanceMonitor";
 
 describe("BalanceMonitor", () => {

@@ -1,0 +1,236 @@
+{
+  "5145320929033093914admin-dashboard/Dockerfile": {
+    "targets": {
+      "docker:build": {
+        "dependsOn": [
+          "build",
+          "^build"
+        ],
+        "command": "docker build .",
+        "options": {
+          "cwd": "admin-dashboard",
+          "args": [
+            "--tag admin-dashboard"
+          ]
+        },
+        "inputs": [
+          "production",
+          "^production"
+        ],
+        "metadata": {
+          "technologies": [
+            "docker"
+          ],
+          "description": "Run Docker build",
+          "help": {
+            "command": "docker build --help",
+            "example": {
+              "options": {
+                "cache-from": "type=s3,region=eu-west-1,bucket=mybucket .",
+                "cache-to": "type=s3,region=eu-west-1,bucket=mybucket ."
+              }
+            }
+          }
+        }
+      },
+      "docker:run": {
+        "dependsOn": [
+          "docker:build"
+        ],
+        "command": "docker run {args} admin-dashboard",
+        "options": {
+          "cwd": "admin-dashboard"
+        },
+        "inputs": [
+          "production",
+          "^production"
+        ],
+        "metadata": {
+          "technologies": [
+            "docker"
+          ],
+          "description": "Run Docker run",
+          "help": {
+            "command": "docker run --help",
+            "example": {
+              "options": {
+                "args": [
+                  "-p",
+                  "3000:3000"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "nx-release-publish": {
+        "executor": "@nx/docker:release-publish"
+      }
+    },
+    "metadata": {
+      "targetGroups": {
+        "Docker": [
+          "docker:build",
+          "docker:run",
+          "nx-release-publish"
+        ]
+      }
+    }
+  },
+  "7298848556530222902fluid-server/Dockerfile": {
+    "targets": {
+      "docker:build": {
+        "dependsOn": [
+          "build",
+          "^build"
+        ],
+        "command": "docker build .",
+        "options": {
+          "cwd": "fluid-server",
+          "args": [
+            "--tag fluid-server"
+          ]
+        },
+        "inputs": [
+          "production",
+          "^production"
+        ],
+        "metadata": {
+          "technologies": [
+            "docker"
+          ],
+          "description": "Run Docker build",
+          "help": {
+            "command": "docker build --help",
+            "example": {
+              "options": {
+                "cache-from": "type=s3,region=eu-west-1,bucket=mybucket .",
+                "cache-to": "type=s3,region=eu-west-1,bucket=mybucket ."
+              }
+            }
+          }
+        }
+      },
+      "docker:run": {
+        "dependsOn": [
+          "docker:build"
+        ],
+        "command": "docker run {args} fluid-server",
+        "options": {
+          "cwd": "fluid-server"
+        },
+        "inputs": [
+          "production",
+          "^production"
+        ],
+        "metadata": {
+          "technologies": [
+            "docker"
+          ],
+          "description": "Run Docker run",
+          "help": {
+            "command": "docker run --help",
+            "example": {
+              "options": {
+                "args": [
+                  "-p",
+                  "3000:3000"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "nx-release-publish": {
+        "executor": "@nx/docker:release-publish"
+      }
+    },
+    "metadata": {
+      "targetGroups": {
+        "Docker": [
+          "docker:build",
+          "docker:run",
+          "nx-release-publish"
+        ]
+      }
+    }
+  },
+  "5276271343711660120server/Dockerfile": {
+    "targets": {
+      "docker:build": {
+        "dependsOn": [
+          "build",
+          "^build"
+        ],
+        "command": "docker build .",
+        "options": {
+          "cwd": "server",
+          "args": [
+            "--tag server"
+          ]
+        },
+        "inputs": [
+          "production",
+          "^production"
+        ],
+        "metadata": {
+          "technologies": [
+            "docker"
+          ],
+          "description": "Run Docker build",
+          "help": {
+            "command": "docker build --help",
+            "example": {
+              "options": {
+                "cache-from": "type=s3,region=eu-west-1,bucket=mybucket .",
+                "cache-to": "type=s3,region=eu-west-1,bucket=mybucket ."
+              }
+            }
+          }
+        }
+      },
+      "docker:run": {
+        "dependsOn": [
+          "docker:build"
+        ],
+        "command": "docker run {args} server",
+        "options": {
+          "cwd": "server"
+        },
+        "inputs": [
+          "production",
+          "^production"
+        ],
+        "metadata": {
+          "technologies": [
+            "docker"
+          ],
+          "description": "Run Docker run",
+          "help": {
+            "command": "docker run --help",
+            "example": {
+              "options": {
+                "args": [
+                  "-p",
+                  "3000:3000"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "nx-release-publish": {
+        "executor": "@nx/docker:release-publish"
+      }
+    },
+    "metadata": {
+      "targetGroups": {
+        "Docker": [
+          "docker:build",
+          "docker:run",
+          "nx-release-publish"
+        ]
+      }
+    }
+  }
+}

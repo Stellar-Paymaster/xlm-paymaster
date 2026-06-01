@@ -287,8 +287,7 @@ describe("TwilioNotifier", () => {
       });
 
       const callArgs = mockTwilioCreate.mock.calls[0][0];
-      expect(callArgs.body).toContain("ABC123");
-      expect(callArgs.body).toContain("DEF456");
+      expect(callArgs.body).toMatch(/Account:.*ABC123D.*DEFG456/);
       expect(callArgs.body).toContain("5.42");
     });
   });

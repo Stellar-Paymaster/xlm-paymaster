@@ -1,6 +1,6 @@
 {
   "name": "fluid-vue-example",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Example Vue 3 application demonstrating Fluid SDK composable",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "vue": "^3.4.0",
-    "fluid-client": "file:../../",
+    "fluid-client": "workspace:*",
     "@stellar/stellar-sdk": "^11.3.0"
   },
   "devDependencies": {

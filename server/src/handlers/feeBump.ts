@@ -1,11 +1,18 @@
 import StellarSdk, { Transaction } from "@stellar/stellar-sdk";
+import { createHash, randomUUID } from "crypto";
 import { Config, FeePayerAccount, pickFeePayerAccount } from "../config";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
 import { ApiKeyConfig } from "../middleware/apiKeys";
+import { runPlugins } from "../middleware/pluginMiddleware";
 import { Tenant, syncTenantFromApiKey } from "../models/tenantStore";
 import { recordSponsoredTransaction } from "../models/transactionLedger";
-import { FeeBumpRequest, FeeBumpSchema, FeeBumpBatchRequest, FeeBumpBatchSchema } from "../schemas/feeBump";
+import {
+  FeeBumpRequest,
+  FeeBumpSchema,
+  FeeBumpBatchRequest,
+  FeeBumpBatchSchema,
+} from "../schemas/feeBump";
 import { checkTenantDailyQuota } from "../services/quota";
 import { calculateFeeBumpFee } from "../utils/feeCalculator";
 import { verifyXdrNetwork } from "../utils/networkVerification";
@@ -16,165 +23,50 @@ import { transactionStore } from "../workers/transactionStore";
 import { prisma } from "../utils/db";
 import { classifyTransactionCategory } from "../services/transactionCategorizer";
 import { getFeeManager } from "../services/feeManager";
+import {
+  getCrossChainSettlementService,
+  SettlementExecutor,
+} from "../services/crossChainSettlement";
+import { enforceKycForFeeSponsorship } from "../services/kycService";
+import { SponsorFactory } from "../sponsors/factory";
+import { StellarFeeSponsor } from "../sponsors/stellar";
+import { nativeSigner } from "../signing/native";
+import {
+  feeBumpQueue,
+  feeBumpQueueEvents,
+  FeeBumpJobData,
+} from "../queues/feeBumpQueue";
+import { getFcmNotifier } from "../services/fcmNotifier";
+import { persistTransactionAsync } from "../utils/asyncDbPersist";
 
-/**
- * @openapi
- * /fee-bump:
- *   post:
- *     summary: Wrap a transaction with a fee-bump envelope
- *     description: >
- *       Accepts a signed Stellar inner transaction XDR and returns a
- *       fee-bumped version signed by the Fluid fee-payer account.
- *       Optionally submits the transaction directly to Horizon.
- *     tags:
- *       - Fee Bump
- *     security:
- *       - ApiKeyAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/FeeBumpRequest'
- *           examples:
- *             minimal:
- *               summary: Wrap only (no submission)
- *               value:
- *                 xdr: "AAAAAgAAAAB..."
- *                 submit: false
- *             submit:
- *               summary: Wrap and submit to Horizon
- *               value:
- *                 xdr: "AAAAAgAAAAB..."
- *                 submit: true
- *     responses:
- *       200:
- *         description: Fee-bumped transaction XDR (and hash if submitted).
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/FeeBumpResponse'
- *             examples:
- *               ready:
- *                 summary: XDR ready for client submission
- *                 value:
- *                   xdr: "AAAABQAAAABf..."
- *                   status: ready
- *                   fee_payer: "GABC...XYZ"
- *               submitted:
- *                 summary: Submitted to Horizon
- *                 value:
- *                   xdr: "AAAABQAAAABf..."
- *                   status: submitted
- *                   hash: "a1b2c3..."
- *                   fee_payer: "GABC...XYZ"
- *       400:
- *         description: >
- *           Invalid request — bad XDR, unsigned transaction, wrong network,
- *           unsupported asset, or slippage exceeded.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             examples:
- *               invalidXdr:
- *                 summary: Malformed XDR
- *                 value:
- *                   error: "Invalid XDR: ..."
- *                   code: INVALID_XDR
- *               unsignedTx:
- *                 summary: Transaction not signed
- *                 value:
- *                   error: "Inner transaction must be signed before fee-bumping"
- *                   code: INVALID_XDR
- *       401:
- *         description: Missing API key.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             examples:
- *               missingKey:
- *                 summary: No x-api-key header
- *                 value:
- *                   error: "Missing API key. Provide a valid x-api-key header to access this endpoint."
- *                   code: AUTH_FAILED
- *       403:
- *         description: Invalid/revoked API key or daily quota exceeded.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             examples:
- *               quotaExceeded:
- *                 summary: Tier quota exhausted
- *                 value:
- *                   error: "Tier limit exceeded. Spend 1000000/500000 stroops..."
- *                   code: QUOTA_EXCEEDED
- *       500:
- *         description: Internal server error or Horizon submission failure.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             examples:
- *               submissionFailed:
- *                 summary: Horizon rejected the transaction
- *                 value:
- *                   error: "Transaction submission failed: ..."
- *                   code: SUBMISSION_FAILED
- *
- * /fee-bump/batch:
- *   post:
- *     summary: Wrap multiple transactions in a single request
- *     description: >
- *       Accepts an array of signed inner transaction XDRs and returns
- *       fee-bumped versions for each, processed concurrently.
- *     tags:
- *       - Fee Bump
- *     security:
- *       - ApiKeyAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/FeeBumpBatchRequest'
- *     responses:
- *       200:
- *         description: Array of fee-bump results, one per input XDR.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/FeeBumpResponse'
- *       400:
- *         description: Validation error on one or more XDRs.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       401:
- *         description: Missing API key.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
+const FEEBUMP_JOB_TIMEOUT_MS = parseInt(
+  process.env.FEEBUMP_JOB_TIMEOUT_MS ?? "30000",
+  10,
+);
+
 export interface FeeBumpResponse {
   xdr: string;
-  status: "ready" | "submitted";
+  status: "ready" | "submitted" | "awaiting_evm_payment";
   hash?: string;
   fee_payer: string;
+  settlement_id?: string;
+  evm_payment?: {
+    chain_id: number;
+    token_address: string;
+    amount: string;
+    payer_address: string;
+    recipient_address: string;
+    confirmations_required: number;
+  };
   submitted_via?: string;
   submission_attempts?: number;
+}
+
+interface PreparedFeeBump {
+  innerTransaction: Transaction;
+  feeAmount: number;
+  category: string;
+  innerTxHash: string;
 }
 
 async function maybeNotifyMilestones(): Promise<void> {
@@ -185,29 +77,26 @@ async function maybeNotifyMilestones(): Promise<void> {
   }
 }
 
-async function processFeeBump(
-  xdr: string,
-  submit: boolean,
-  config: Config,
-  tenant: Tenant,
-  feePayerAccount: FeePayerAccount
-): Promise<FeeBumpResponse> {
+function parseInnerTransaction(xdr: string, config: Config): Transaction {
   let innerTransaction: Transaction;
 
   try {
     innerTransaction = StellarSdk.TransactionBuilder.fromXDR(
       xdr,
-      config.networkPassphrase
+      config.networkPassphrase,
     ) as Transaction;
   } catch (error: any) {
     throw new AppError(`Invalid XDR: ${error.message}`, 400, "INVALID_XDR");
   }
 
-  if (!innerTransaction.signatures || innerTransaction.signatures.length === 0) {
+  if (
+    !innerTransaction.signatures ||
+    innerTransaction.signatures.length === 0
+  ) {
     throw new AppError(
       "Inner transaction must be signed before fee-bumping",
       400,
-      "UNSIGNED_TRANSACTION"
+      "UNSIGNED_TRANSACTION",
     );
   }
 
@@ -215,54 +104,103 @@ async function processFeeBump(
     throw new AppError(
       "Cannot fee-bump an already fee-bumped transaction",
       400,
-      "ALREADY_FEE_BUMPED"
+      "ALREADY_FEE_BUMPED",
     );
   }
 
-  const operationCount = innerTransaction.operations?.length || 0;
+  return innerTransaction;
+}
+
+function prepareFeeBump(xdr: string, config: Config): PreparedFeeBump {
+  const innerTransaction = parseInnerTransaction(xdr, config);
   const dynamicFeeMultiplier =
     getFeeManager()?.getMultiplier() ?? config.feeMultiplier;
   const feeAmount = calculateFeeBumpFee(
-    innerTransaction, // Pass the transaction object for Soroban check
+    innerTransaction,
     config.baseFee,
-    dynamicFeeMultiplier
+    dynamicFeeMultiplier,
   );
   const category = classifyTransactionCategory(
-    innerTransaction.operations as Array<{ type?: string }>
+    innerTransaction.operations as Array<{ type?: string }>,
   );
-
-  const quotaCheck = await checkTenantDailyQuota(tenant, feeAmount);
-  if (!quotaCheck.allowed) {
-    throw new AppError(
-      `Tier limit exceeded. Spend ${quotaCheck.currentSpendStroops}/${quotaCheck.dailyQuotaStroops} stroops and transactions ${quotaCheck.currentTxCount}/${quotaCheck.txLimit} today.`,
-      403,
-      "QUOTA_EXCEEDED"
-    );
-  }
-
   const innerTxHash = innerTransaction.hash().toString("hex");
 
-  // Create transaction record with PENDING status
-  const transactionRecord = await prisma.transaction.create({
-    data: {
-      innerTxHash,
-      tenantId: tenant.id,
-      status: "PENDING",
-      costStroops: feeAmount,
-      category,
-    },
+  return {
+    innerTransaction,
+    feeAmount,
+    category,
+    innerTxHash,
+  };
+}
+
+function fingerprintSponsorshipRequest(value: unknown): string {
+  const serialized =
+    typeof value === "string" ? value : JSON.stringify(value ?? null);
+  return createHash("sha256").update(serialized).digest("hex");
+}
+
+function createPendingTransactionRecord(
+  tenantId: string,
+  prepared: PreparedFeeBump,
+): { id: string } {
+  const id = randomUUID();
+  persistTransactionAsync({
+    id,
+    innerTxHash: prepared.innerTxHash,
+    tenantId,
+    status: "PENDING",
+    costStroops: prepared.feeAmount,
+    category: prepared.category,
   });
+  return { id };
+}
+
+async function executePreparedFeeBump(
+  xdr: string,
+  submit: boolean,
+  config: Config,
+  tenantId: string,
+  feePayerAccount: FeePayerAccount,
+  transactionRecordId: string,
+  shadowMode?: boolean,
+): Promise<FeeBumpResponse> {
+  const innerTransaction = parseInnerTransaction(xdr, config);
+  const dynamicFeeMultiplier =
+    getFeeManager()?.getMultiplier() ?? config.feeMultiplier;
+  const feeAmount = calculateFeeBumpFee(
+    innerTransaction,
+    config.baseFee,
+    dynamicFeeMultiplier,
+  );
+  const innerTxHash = innerTransaction.hash().toString("hex");
+
+  if (shadowMode || process.env.SHADOW_MODE === "true") {
+    await prisma.transaction.update({
+      where: { id: transactionRecordId },
+      data: {
+        status: "SHADOW",
+        txHash: "shadow_" + innerTxHash,
+      },
+    });
+
+    return {
+      xdr: xdr,
+      status: submit ? "submitted" : "ready",
+      hash: "shadow_" + innerTxHash,
+      fee_payer: feePayerAccount.publicKey,
+    };
+  }
 
   try {
     const feeBumpTx = StellarSdk.TransactionBuilder.buildFeeBumpTransaction(
       feePayerAccount.keypair,
       feeAmount.toString(),
       innerTransaction,
-      config.networkPassphrase
+      config.networkPassphrase,
     );
 
     feeBumpTx.sign(feePayerAccount.keypair);
-    await recordSponsoredTransaction(tenant.id, feeAmount);
+    await recordSponsoredTransaction(tenantId, feeAmount);
     await maybeNotifyMilestones();
 
     const feeBumpXdr = feeBumpTx.toXDR();
@@ -273,15 +211,30 @@ async function processFeeBump(
 
       try {
         const submissionResult = await server.submitTransaction(feeBumpTx);
-        await transactionStore.addTransaction(submissionResult.hash, tenant.id, "submitted");
+        await transactionStore.addTransaction(
+          submissionResult.hash,
+          tenantId,
+          "submitted",
+        );
 
         await prisma.transaction.update({
-          where: { id: transactionRecord.id },
+          where: { id: transactionRecordId },
           data: {
             status: "SUCCESS",
             txHash: submissionResult.hash,
           },
         });
+
+        const fcm = getFcmNotifier();
+        if (fcm) {
+          fcm
+            .notifyTransactionSuccess({
+              transactionHash: submissionResult.hash,
+              tenantId,
+              detail: "Transaction successfully sponsored and submitted.",
+            })
+            .catch(console.error);
+        }
 
         return {
           xdr: feeBumpXdr,
@@ -292,9 +245,8 @@ async function processFeeBump(
       } catch (error: any) {
         console.error("Transaction submission failed:", error);
 
-        // Update transaction record to FAILED
         await prisma.transaction.update({
-          where: { id: transactionRecord.id },
+          where: { id: transactionRecordId },
           data: {
             status: "FAILED",
           },
@@ -303,14 +255,13 @@ async function processFeeBump(
         throw new AppError(
           `Transaction submission failed: ${error.message}`,
           500,
-          "SUBMISSION_FAILED"
+          "SUBMISSION_FAILED",
         );
       }
     }
 
-    // Update transaction record to SUCCESS for non-submitted transactions
     await prisma.transaction.update({
-      where: { id: transactionRecord.id },
+      where: { id: transactionRecordId },
       data: {
         status: "SUCCESS",
         txHash: feeBumpTxHash,
@@ -323,9 +274,8 @@ async function processFeeBump(
       fee_payer: feePayerAccount.publicKey,
     };
   } catch (error: any) {
-    // Update transaction record to FAILED for any other errors
     await prisma.transaction.update({
-      where: { id: transactionRecord.id },
+      where: { id: transactionRecordId },
       data: {
         status: "FAILED",
       },
@@ -335,136 +285,324 @@ async function processFeeBump(
   }
 }
 
+function createSettlementExecutor(config: Config): SettlementExecutor {
+  return {
+    async execute(input) {
+      await executePreparedFeeBump(
+        input.xdr,
+        input.submit,
+        config,
+        input.tenantId,
+        input.feePayerAccount,
+        input.transactionId,
+      );
+    },
+  };
+}
+
+export async function processFeeBump(
+  xdr: string,
+  submit: boolean,
+  config: Config,
+  tenant: Tenant,
+  feePayerAccount: FeePayerAccount,
+  shadowMode?: boolean,
+): Promise<FeeBumpResponse> {
+  const prepared = prepareFeeBump(xdr, config);
+  const quotaCheck = await checkTenantDailyQuota(tenant, prepared.feeAmount);
+  if (!quotaCheck.allowed) {
+    throw new AppError(
+      `Tier limit exceeded. Spend ${quotaCheck.currentSpendStroops}/${quotaCheck.dailyQuotaStroops} stroops and transactions ${quotaCheck.currentTxCount}/${quotaCheck.txLimit} today.`,
+      403,
+      "QUOTA_EXCEEDED",
+    );
+  }
+  const transactionRecord = createPendingTransactionRecord(
+    tenant.id,
+    prepared,
+  );
+
+  return executePreparedFeeBump(
+    xdr,
+    submit,
+    config,
+    tenant.id,
+    feePayerAccount,
+    transactionRecord.id,
+    shadowMode,
+  );
+}
+
 export async function feeBumpHandler(
   req: Request,
   res: Response,
   next: NextFunction,
-  config: Config
+  config: Config,
 ): Promise<void> {
   try {
     const result = FeeBumpSchema.safeParse(req.body);
 
     if (!result.success) {
-      console.warn(
-        "Validation failed for fee-bump request:",
-        result.error.format()
-      );
-
       return next(
         new AppError(
           `Validation failed: ${JSON.stringify(result.error.format())}`,
           400,
-          "INVALID_XDR"
-        )
+          "INVALID_XDR",
+        ),
       );
     }
 
     const body: FeeBumpRequest = result.data;
-
-    // Validate XDR early so errors surface before touching the signer pool
-    let parsedInner: Transaction;
-    try {
-      parsedInner = StellarSdk.TransactionBuilder.fromXDR(
-        body.xdr,
-        config.networkPassphrase
-      ) as Transaction;
-    } catch (err: any) {
-      return next(new AppError(`Invalid XDR: ${err.message}`, 400, "INVALID_XDR"));
-    }
-    if ("innerTransaction" in parsedInner) {
-      return next(new AppError("Cannot fee-bump an already fee-bumped transaction", 400, "ALREADY_FEE_BUMPED"));
-    }
-
-    // Verify the XDR was signed for the server's configured network
-    const networkCheck = verifyXdrNetwork(body.xdr, config.networkPassphrase);
-    if (!networkCheck.valid) {
-      return next(new AppError(networkCheck.errorMessage ?? "Network mismatch", 400, "NETWORK_MISMATCH"));
-    }
-
-    // Check against token whitelist if a token is provided
-    if (body.token) {
-      const supportedAssets = config.supportedAssets ?? [];
-      const isWhitelisted = supportedAssets.some((asset) => {
-        const assetId = asset.issuer ? `${asset.code}:${asset.issuer}` : asset.code;
-        return body.token === assetId;
-      });
-
-      if (!isWhitelisted) {
-        console.warn(`Rejected fee-bump request for non-whitelisted asset: ${body.token}`);
-        return next(
-          new AppError(
-            `Whitelisting failed: Asset "${body.token}" is not accepted for fee sponsorship.`,
-            400,
-            "UNSUPPORTED_ASSET",
-          ),
-        );
-      }
-      console.log(`Accepted whitelisted asset: ${body.token}`);
-
-      // Slippage protection for token payments
-      if (body.maxSlippage !== undefined) {
-        const priceOracle = new MockPriceOracle();
-        const requestTime = Date.now();
-        try {
-          const currentPrice = await priceOracle.getCurrentPrice(body.token);
-          const historicalPrice = await priceOracle.getHistoricalPrice(body.token, requestTime - 120000);
-          const slippageCheck = validateSlippage(historicalPrice, currentPrice, body.maxSlippage);
-          if (!slippageCheck.valid) {
-            return next(new AppError("Slippage too high: try increasing your fee payment", 400, "SLIPPAGE_TOO_HIGH"));
-          }
-        } catch (error: any) {
-          return next(new AppError(`Failed to verify token price: ${error.message}`, 500, "INTERNAL_ERROR"));
-        }
-      }
-
-      // Dynamic fee threshold validation using real-time oracle price
-      try {
-        const dynamicFeeMultiplier =
-          getFeeManager()?.getMultiplier() ?? config.feeMultiplier;
-        const feeAmount = calculateFeeBumpFee(
-          parsedInner,
-          config.baseFee,
-          dynamicFeeMultiplier
-        );
-        const tokenCode = body.token.split(":")[0].toUpperCase();
-        const xlmPriceUsd = await priceService.getTokenPriceUsd("XLM");
-        const tokenPriceUsd = await priceService.getTokenPriceUsd(tokenCode);
-        const requiredTokenAmount = priceService.calculateRequiredTokenAmount(
-          feeAmount,
-          xlmPriceUsd,
-          tokenPriceUsd
-        );
-
-        console.log(
-          `[PriceOracle] XLM/USD: ${xlmPriceUsd.toString()}, ` +
-          `${tokenCode}/USD: ${tokenPriceUsd.toString()}, ` +
-          `fee: ${feeAmount} stroops, ` +
-          `required: ${requiredTokenAmount.toString()} ${tokenCode} ` +
-          `(buffer: ${priceService.getSafetyBuffer()}x)`
-        );
-      } catch (error: any) {
-        console.warn(`[PriceOracle] Price check failed (non-blocking): ${error.message}`);
-      }
-    }
+    const chainId = body.chainId || "stellar";
+    const sponsor = SponsorFactory.getSponsor(chainId as any);
 
     const apiKeyConfig = res.locals.apiKey as ApiKeyConfig | undefined;
     if (!apiKeyConfig) {
-      res.status(500).json({
-        error: "Missing tenant context for fee sponsorship",
-      });
+      res
+        .status(500)
+        .json({ error: "Missing tenant context for fee sponsorship" });
       return;
     }
 
     const tenant = syncTenantFromApiKey(apiKeyConfig);
     const feePayerAccount = pickFeePayerAccount(config);
 
-    const response = await processFeeBump(
-      body.xdr,
-      body.submit || false,
+    const pluginCtx = await runPlugins(req, {
+      tenantId: tenant.id,
+      chainId,
+      xdr: body.xdr,
+      submit: body.submit,
+    });
+
+    const effectiveXdr = pluginCtx.xdr ?? body.xdr;
+    const effectiveSubmit = pluginCtx.submit ?? body.submit;
+
+    const shadowMode =
+      req.headers["x-shadow-mode"] === "true" ||
+      req.body.shadowMode === true ||
+      process.env.SHADOW_MODE === "true";
+
+    let params: any = {
+      ...body,
+      xdr: effectiveXdr,
+      submit: effectiveSubmit,
       config,
       tenant,
-      feePayerAccount
-    );
+      feePayerAccount,
+      shadowMode,
+    };
+
+    await enforceKycForFeeSponsorship(config, {
+      chainId,
+      requestId: req.header("x-request-id") ?? undefined,
+      tenant,
+      transactionHash: fingerprintSponsorshipRequest(
+        effectiveXdr ?? body.userOp ?? body.transactionB64,
+      ),
+    });
+
+    if (chainId === "stellar") {
+      if (!effectiveXdr) {
+        throw new AppError("Stellar requires xdr field", 400, "INVALID_XDR");
+      }
+
+      const networkCheck = verifyXdrNetwork(
+        effectiveXdr,
+        config.networkPassphrase,
+      );
+      if (!networkCheck.valid) {
+        throw new AppError(
+          networkCheck.errorMessage ?? "Network mismatch",
+          400,
+          "NETWORK_MISMATCH",
+        );
+      }
+
+      let innerTransaction: any;
+      try {
+        innerTransaction = StellarSdk.TransactionBuilder.fromXDR(
+          effectiveXdr,
+          config.networkPassphrase,
+        ) as any;
+      } catch (error: any) {
+        throw new AppError(`Invalid XDR: ${error.message}`, 400, "INVALID_XDR");
+      }
+
+      const isSoroban = innerTransaction.operations.some((op: any) =>
+        [
+          "invokeHostFunction",
+          "extendFootprintTtl",
+          "restoreFootprint",
+        ].includes(op.type),
+      );
+
+      if (isSoroban) {
+        if (!config.stellarRpcUrl) {
+          throw new AppError(
+            "Soroban transaction requires STELLAR_RPC_URL for preflight simulation",
+            400,
+            "INVALID_XDR",
+          );
+        }
+
+        try {
+          const updatedXdr = await nativeSigner.preflightSoroban(
+            config.stellarRpcUrl,
+            effectiveXdr,
+          );
+          params = { ...params, xdr: updatedXdr };
+        } catch (error: any) {
+          throw new AppError(
+            `Soroban simulation failed: ${error.message}. The transaction would fail on-chain or out of gas.`,
+            400,
+            "INVALID_XDR",
+          );
+        }
+      }
+
+      if (body.token) {
+        const supportedAssets = config.supportedAssets ?? [];
+        const isWhitelisted = supportedAssets.some((asset) => {
+          const assetId = asset.issuer
+            ? `${asset.code}:${asset.issuer}`
+            : asset.code;
+          return body.token === assetId;
+        });
+
+        if (!isWhitelisted) {
+          throw new AppError(
+            `Whitelisting failed: Asset "${body.token}" is not accepted for fee sponsorship.`,
+            400,
+            "UNSUPPORTED_ASSET",
+          );
+        }
+      }
+    }
+
+    if (body.evmSettlement) {
+      if (!config.evmSettlement?.enabled) {
+        return next(
+          new AppError(
+            "EVM settlement is not enabled on this server.",
+            400,
+            "EVM_SETTLEMENT_DISABLED",
+          ),
+        );
+      }
+
+      if (body.evmSettlement.chainId !== config.evmSettlement.chainId) {
+        return next(
+          new AppError(
+            `Unsupported EVM chain ${body.evmSettlement.chainId}. Expected chain ${config.evmSettlement.chainId}.`,
+            400,
+            "UNSUPPORTED_EVM_CHAIN",
+          ),
+        );
+      }
+
+      if (
+        body.evmSettlement.tokenAddress.toLowerCase() !==
+        config.evmSettlement.tokenAddress.toLowerCase()
+      ) {
+        return next(
+          new AppError(
+            "Unsupported EVM settlement token address.",
+            400,
+            "UNSUPPORTED_EVM_TOKEN",
+          ),
+        );
+      }
+
+      const prepared = prepareFeeBump(effectiveXdr, config);
+      const quotaCheck = await checkTenantDailyQuota(
+        tenant,
+        prepared.feeAmount,
+      );
+      if (!quotaCheck.allowed) {
+        return next(
+          new AppError(
+            `Tier limit exceeded. Spend ${quotaCheck.currentSpendStroops}/${quotaCheck.dailyQuotaStroops} stroops and transactions ${quotaCheck.currentTxCount}/${quotaCheck.txLimit} today.`,
+            403,
+            "QUOTA_EXCEEDED",
+          ),
+        );
+      }
+
+      const transactionRecord = createPendingTransactionRecord(
+        tenant.id,
+        prepared,
+      );
+      const settlementService = getCrossChainSettlementService(
+        config,
+        createSettlementExecutor(config),
+      );
+      const settlement = await settlementService.enqueuePendingSettlement({
+        transactionId: transactionRecord.id,
+        tenantId: tenant.id,
+        xdr: effectiveXdr,
+        submit: effectiveSubmit || false,
+        sourceChainId: body.evmSettlement.chainId,
+        sourceTokenAddress: body.evmSettlement.tokenAddress,
+        sourceAmount: body.evmSettlement.amount,
+        payerAddress: body.evmSettlement.payerAddress,
+        recipientAddress: config.evmSettlement.receiverAddress,
+        confirmationsRequired: config.evmSettlement.confirmationsRequired,
+        feePayerPublicKey: feePayerAccount.publicKey,
+      });
+      settlementService.ensureStarted();
+
+      res.json({
+        xdr: effectiveXdr,
+        status: "awaiting_evm_payment",
+        fee_payer: feePayerAccount.publicKey,
+        settlement_id: settlement.settlementId,
+        evm_payment: {
+          chain_id: config.evmSettlement.chainId,
+          token_address: config.evmSettlement.tokenAddress,
+          amount: body.evmSettlement.amount,
+          payer_address: body.evmSettlement.payerAddress.toLowerCase(),
+          recipient_address: config.evmSettlement.receiverAddress.toLowerCase(),
+          confirmations_required: config.evmSettlement.confirmationsRequired,
+        },
+      } satisfies FeeBumpResponse);
+      return;
+    }
+
+    if (chainId !== "stellar") {
+      const sponsored = await sponsor.buildSponsoredTx(params);
+      res.json({
+        xdr: sponsored.tx,
+        status: sponsored.status,
+        hash: sponsored.hash,
+        fee_payer: sponsored.feePayer,
+        submitted_via: sponsored.submittedVia,
+      } satisfies FeeBumpResponse);
+      return;
+    }
+
+    const job = await feeBumpQueue.add("submit", {
+      xdr: params.xdr,
+      submit: params.submit ?? false,
+      tenant,
+      requestId: req.header("x-request-id") ?? undefined,
+      shadowMode: params.shadowMode,
+    } satisfies FeeBumpJobData);
+
+    let response: FeeBumpResponse;
+    try {
+      response = await job.waitUntilFinished(
+        feeBumpQueueEvents,
+        FEEBUMP_JOB_TIMEOUT_MS,
+      );
+    } catch (err: any) {
+      if (err.message?.includes("timed out")) {
+        res
+          .status(504)
+          .json({ error: "Fee-bump job timed out", code: "JOB_TIMEOUT" });
+        return;
+      }
+      throw err;
+    }
 
     res.json(response);
   } catch (error: any) {
@@ -477,39 +615,99 @@ export async function feeBumpBatchHandler(
   req: Request,
   res: Response,
   next: NextFunction,
-  config: Config
+  config: Config,
 ): Promise<void> {
   try {
     const parsedBody = FeeBumpBatchSchema.safeParse(req.body);
 
     if (!parsedBody.success) {
-      console.warn(
-        "Validation failed for fee-bump batch request:",
-        parsedBody.error.format()
-      );
-
       return next(
         new AppError(
           `Validation failed: ${JSON.stringify(parsedBody.error.format())}`,
           400,
-          "INVALID_XDR"
-        )
+          "INVALID_XDR",
+        ),
       );
     }
 
     const body: FeeBumpBatchRequest = parsedBody.data;
-
     const apiKeyConfig = res.locals.apiKey as ApiKeyConfig | undefined;
     if (!apiKeyConfig) {
-      res.status(500).json({ error: "Missing tenant context for fee sponsorship" });
+      res
+        .status(500)
+        .json({ error: "Missing tenant context for fee sponsorship" });
       return;
     }
 
     const tenant = syncTenantFromApiKey(apiKeyConfig);
     const feePayerAccount = pickFeePayerAccount(config);
-    const results: FeeBumpResponse[] = await Promise.all(
-      body.xdrs.map((xdr) => processFeeBump(xdr, body.submit ?? false, config, tenant, feePayerAccount))
+    const stellarSponsor = new StellarFeeSponsor();
+
+    await Promise.all(
+      body.xdrs.map((xdr) =>
+        enforceKycForFeeSponsorship(config, {
+          chainId: "stellar",
+          requestId: req.header("x-request-id") ?? undefined,
+          tenant,
+          transactionHash: fingerprintSponsorshipRequest(xdr),
+        }),
+      ),
     );
+
+    const preparedFeeBumps = body.xdrs.map((xdr) =>
+      prepareFeeBump(xdr, config),
+    );
+    const totalFeeStroops = preparedFeeBumps.reduce(
+      (sum, prepared) => sum + prepared.feeAmount,
+      0,
+    );
+
+    const quotaCheck = await checkTenantDailyQuota(
+      tenant,
+      totalFeeStroops,
+      body.xdrs.length,
+    );
+
+    if (!quotaCheck.allowed) {
+      throw new AppError(
+        `Tier limit exceeded. Spend ${quotaCheck.currentSpendStroops}/${quotaCheck.dailyQuotaStroops} stroops and transactions ${quotaCheck.currentTxCount}/${quotaCheck.txLimit} today.`,
+        403,
+        "QUOTA_EXCEEDED",
+      );
+    }
+
+    if (body.token) {
+      const supportedAssets = config.supportedAssets ?? [];
+      const isWhitelisted = supportedAssets.some((asset) => {
+        const assetId = asset.issuer
+          ? `${asset.code}:${asset.issuer}`
+          : asset.code;
+        return body.token === assetId;
+      });
+
+      if (!isWhitelisted) {
+        throw new AppError(
+          `Whitelisting failed: Asset "${body.token}" is not accepted for fee sponsorship.`,
+          400,
+          "UNSUPPORTED_ASSET",
+        );
+      }
+    }
+
+    const results: Array<
+      Awaited<ReturnType<typeof stellarSponsor.buildSponsoredTx>>
+    > = [];
+    for (const xdr of body.xdrs) {
+      const result = await stellarSponsor.buildSponsoredTx({
+        config,
+        feePayerAccount,
+        submit: body.submit ?? false,
+        tenant,
+        xdr,
+        token: body.token,
+      });
+      results.push(result);
+    }
 
     res.json(results);
   } catch (error: any) {

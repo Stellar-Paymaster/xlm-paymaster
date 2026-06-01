@@ -1,0 +1,24 @@
+name: Awesome Lint
+
+on:
+  push:
+    paths:
+      - "docs/awesome-fluid.md"
+  pull_request:
+    paths:
+      - "docs/awesome-fluid.md"
+
+jobs:
+  lint:
+    name: Lint awesome-fluid list
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run awesome-lint
+        run: npx --yes awesome-lint docs/awesome-fluid.md

@@ -7,11 +7,17 @@ export async function POST(req: NextRequest) {
   }
 
   const serverUrl = process.env.FLUID_SERVER_URL ?? "http://localhost:3000";
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  const realIp = req.headers.get("x-real-ip");
 
   try {
     const upstream = await fetch(`${serverUrl}/auth/register`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(forwardedFor ? { "x-forwarded-for": forwardedFor } : {}),
+        ...(realIp ? { "x-real-ip": realIp } : {}),
+      },
       body: JSON.stringify(body),
     });
 

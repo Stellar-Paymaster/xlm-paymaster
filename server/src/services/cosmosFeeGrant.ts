@@ -35,6 +35,10 @@ export interface GranterRecord {
   updatedAt: Date;
 }
 
+export interface EnabledGranterSecretRecord extends GranterRecord {
+  mnemonic: string | null;
+}
+
 export interface AllowanceRecord {
   id: string;
   granterId: string;
@@ -166,6 +170,20 @@ async function getQueryClient(rpcUrl: string) {
 export async function listGranters(): Promise<GranterRecord[]> {
   const rows = await granterDelegate().findMany();
   return rows.map(toPublicGranter);
+}
+
+export async function listEnabledGrantersWithMnemonics(): Promise<EnabledGranterSecretRecord[]> {
+  const rows = await granterDelegate().findMany();
+
+  return rows
+    .filter((row: any) => row.enabled)
+    .map((row: any) => ({
+      ...toPublicGranter(row),
+      mnemonic:
+        row.encryptedMnemonic && row.initializationVec && row.authTag
+          ? decryptMnemonic(row)
+          : null,
+    }));
 }
 
 export async function getGranter(id: string): Promise<GranterRecord | null> {

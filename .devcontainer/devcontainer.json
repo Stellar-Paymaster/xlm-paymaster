@@ -1,0 +1,44 @@
+{
+  "name": "Fluid Dev Environment",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "stable"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "rust-lang.rust-analyzer",
+        "Prisma.prisma"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        },
+        "rust-analyzer.cargo.buildScripts.enable": true
+      }
+    }
+  },
+
+  "postCreateCommand": "cp -n .env.example .env 2>/dev/null || true && cd server && npm install && cd ../fluid-server && cargo build && cd ../fluid-cli && cargo build",
+
+  "remoteUser": "vscode",
+
+  "forwardPorts": [3000, 5173, 5432],
+
+  "portsAttributes": {
+    "3000": { "label": "Fluid API Server", "onAutoForward": "notify" },
+    "5173": { "label": "Frontend Dev Server", "onAutoForward": "notify" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" }
+  }
+}

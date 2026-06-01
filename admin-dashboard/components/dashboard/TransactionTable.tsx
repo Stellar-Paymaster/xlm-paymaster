@@ -9,6 +9,7 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table";
 import { CopyButton } from "@/components/dashboard/CopyButton";
+import { ExportDropdown } from "@/components/dashboard/ExportDropdown";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { CategoryBadge } from "@/components/dashboard/CategoryBadge";
 import type {
@@ -211,27 +212,30 @@ export function TransactionTable({
           </p>
         </div>
 
-        <form action={basePath} className="flex flex-col gap-3 sm:flex-row">
-          <input type="hidden" name="page" value="1" />
-          <input type="hidden" name="pageSize" value={`${data.pageSize}`} />
-          <input type="hidden" name="sort" value={data.sort} />
-          <label className="sr-only" htmlFor="transaction-search">
-            Search transactions
-          </label>
-          <input
-            id="transaction-search"
-            name="q"
-            defaultValue={data.search}
-            placeholder="Search hash, tenant, status, or category"
-            className="min-w-0 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-400"
-          />
-          <button
-            type="submit"
-            className="inline-flex min-h-10 items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-700"
-          >
-            Search
-          </button>
-        </form>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <form action={basePath} className="flex flex-col gap-3 sm:flex-row">
+            <input type="hidden" name="page" value="1" />
+            <input type="hidden" name="pageSize" value={`${data.pageSize}`} />
+            <input type="hidden" name="sort" value={data.sort} />
+            <label className="sr-only" htmlFor="transaction-search">
+              Search transactions
+            </label>
+            <input
+              id="transaction-search"
+              name="q"
+              defaultValue={data.search}
+              placeholder="Search hash, tenant, status, or category"
+              className="min-w-0 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-400"
+            />
+            <button
+              type="submit"
+              className="inline-flex min-h-10 items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              Search
+            </button>
+          </form>
+          <ExportDropdown rows={data.rows} />
+        </div>
       </div>
 
       <div className="overflow-x-auto">

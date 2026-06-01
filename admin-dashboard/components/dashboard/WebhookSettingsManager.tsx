@@ -6,6 +6,7 @@ import type {
   WebhookTenantSettings,
 } from "@/components/dashboard/types";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   Card,
   CardContent,
@@ -57,6 +58,7 @@ export function WebhookSettingsManager({
 }) {
   const [rows, setRows] = useState(initialRows);
   const [saveStateByTenant, setSaveStateByTenant] = useState<Record<string, SaveState>>({});
+  const [pendingSave, setPendingSave] = useState<WebhookTenantSettings | null>(null);
 
   const updateRow = (tenantId: string, updater: (row: WebhookTenantSettings) => WebhookTenantSettings) => {
     setRows((current) =>
@@ -125,6 +127,7 @@ export function WebhookSettingsManager({
   };
 
   return (
+    <>
     <div className="space-y-6">
       {rows.map((row) => {
         const state = saveStateByTenant[row.tenantId] ?? {
@@ -198,7 +201,13 @@ export function WebhookSettingsManager({
               <div className="flex flex-wrap items-center gap-3">
                 <Button
                   type="button"
-                  onClick={() => void saveTenantSettings(row)}
+                  onClick={() => {
+                    if (!row.webhookUrl || row.webhookUrl.trim() === "") {
+                      setPendingSave(row);
+                    } else {
+                      void saveTenantSettings(row);
+                    }
+                  }}
                   disabled={state.saving}
                 >
                   {state.saving ? "Saving..." : "Save settings"}
@@ -215,5 +224,29 @@ export function WebhookSettingsManager({
         );
       })}
     </div>
+
+    <ConfirmDialog
+      open={pendingSave !== null}
+      onOpenChange={(open) => { if (!open) setPendingSave(null); }}
+      title="Disable Webhook Delivery"
+      description={
+        pendingSave
+          ? `Saving with an empty URL will disable all webhook delivery for tenant "${pendingSave.tenantName ?? pendingSave.tenantId}". Are you sure you want to continue?`
+          : ""
+      }
+      confirmLabel="Yes, disable webhooks"
+      cancelLabel="Cancel"
+      onConfirm={() => {
+        if (pendingSave) {
+          const rowToSave = pendingSave;
+          setPendingSave(null);
+          void saveTenantSettings(rowToSave);
+        }
+      }}
+      onCancel={() => setPendingSave(null)}
+      variant="destructive"
+      isLoading={pendingSave !== null && (saveStateByTenant[pendingSave.tenantId]?.saving ?? false)}
+    />
+    </>
   );
 }

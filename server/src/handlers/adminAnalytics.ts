@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Config } from "../config";
 import { calculateSpendForecast } from "../services/spendForecast";
 import readPrisma from "../utils/readDb";
+import { replicaDb as prisma } from "../utils/db";
 
 function requireAdminToken(req: Request, res: Response): boolean {
   const token = req.header("x-admin-token");

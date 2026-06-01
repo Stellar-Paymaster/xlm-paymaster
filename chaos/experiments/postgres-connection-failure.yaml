@@ -1,0 +1,105 @@
+version: "0.1.0"
+title: Postgres connection failure and request queue recovery
+description: >
+  Uses Toxiproxy to inject TCP connection disruption on the Postgres port.
+  Verifies that queued/pending requests are not permanently dropped and recover
+  once the database is reachable again.
+
+tags:
+  - component:database
+  - phase:Phase-14-Performance
+  - severity:high
+
+steady-state-hypothesis:
+  title: API is healthy and DB writes succeed
+  probes:
+    - name: health-check-ok
+      type: http
+      url: "${API_URL:-http://localhost:3001}/health"
+      method: GET
+      expected_status: 200
+      timeout: 5
+
+method:
+  - type: action
+    name: configure-toxiproxy-postgres
+    description: Create a Toxiproxy proxy for Postgres if it does not exist yet
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - |
+          toxiproxy-cli create postgres_proxy \
+            --listen  0.0.0.0:${TOXIPROXY_POSTGRES_PORT:-5433} \
+            --upstream 127.0.0.1:${POSTGRES_PORT:-5432} 2>/dev/null || true
+
+  - type: action
+    name: inject-postgres-timeout-toxic
+    description: Add a timeout toxic that drops all new connections to Postgres
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - |
+          toxiproxy-cli toxic add postgres_proxy \
+            --type timeout \
+            --attribute timeout=0 \
+            --toxicName pg_timeout
+
+  - type: probe
+    name: api-queues-or-returns-503-within-1s
+    description: >
+      Under DB failure, the API must not return 200 and must respond within 1 s
+      (no indefinite hang).
+    provider:
+      type: process
+      path: node
+      arguments:
+        - chaos/scripts/assert-db-failure-handled.mjs
+        - "${API_URL:-http://localhost:3001}"
+        - "1000"
+
+  - type: action
+    name: remove-postgres-toxic
+    description: Remove the timeout toxic to restore Postgres connectivity
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "toxiproxy-cli toxic remove postgres_proxy --toxicName pg_timeout"
+
+  - type: action
+    name: wait-for-db-recovery
+    description: Allow connection pool to re-establish connections
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "sleep 3"
+
+  - type: probe
+    name: api-recovers-after-db-restored
+    description: After removing the toxic, the health endpoint must return 200
+    provider:
+      type: process
+      path: node
+      arguments:
+        - chaos/scripts/assert-recovery.mjs
+        - "${API_URL:-http://localhost:3001}/health"
+        - "200"
+        - "10000"
+
+rollbacks:
+  - type: action
+    name: remove-all-postgres-toxics
+    description: Ensure toxics are cleaned up even on experiment failure
+    provider:
+      type: process
+      path: bash
+      arguments:
+        - -c
+        - "toxiproxy-cli toxic remove postgres_proxy --toxicName pg_timeout 2>/dev/null || true"

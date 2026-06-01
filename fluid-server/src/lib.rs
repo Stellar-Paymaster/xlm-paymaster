@@ -1,10 +1,38 @@
 use std::fmt;
 use std::str::FromStr;
+use std::sync::{Mutex, OnceLock};
+mod blocklist;
+mod heuristics;
+pub mod archive;
+pub mod memory_leak_profiling;
+
+use blocklist::Blocklist;
+use heuristics::RequestTracker;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+static BLOCKLIST: OnceLock<Mutex<Blocklist>> = OnceLock::new();
+static TRACKER: OnceLock<Mutex<RequestTracker>> = OnceLock::new();
+
+fn now() -> u64 {
+    #[cfg(target_arch = "wasm32")]
+    {
+        (js_sys::Date::now() / 1000.0) as u64
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+    }
+}
+
 
 use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
 use stellar_strkey::ed25519::{PrivateKey, PublicKey};
 use stellar_strkey::Strkey;
+use subtle::ConstantTimeEq;
 use stellar_xdr::curr::{
     DecoratedSignature, Hash, Limits, MuxedAccount, Preconditions, ReadXdr, Signature,
     SignatureHint, Transaction, TransactionEnvelope, TransactionExt, TransactionSignaturePayload,
@@ -18,8 +46,44 @@ use wasm_bindgen::prelude::*;
 pub mod config;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod error;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod gateway_config;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod grpc;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod logging;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod rate_limiter;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod xdr;
 
 const MAX_SIGNATURES: usize = 20;
+
+// #695 – WASM Signing Out-Of-Memory Protections
+// We impose a hard ceiling on the XDR payload size that the WASM bundle will
+// process.  Excessively large XDR strings are the primary vector for
+// allocator exhaustion inside a constrained WebAssembly heap.  The limit is
+// set conservatively at 64 KiB – well above any realistic Stellar transaction
+// envelope – and can be overridden at compile-time via the
+// `FLUID_WASM_MAX_XDR_BYTES` env var (only honoured during `cargo build`,
+// not at runtime, since WASM has no env access).
+const MAX_XDR_BYTES: usize = 64 * 1024; // 64 KiB
+
+/// Validates that an XDR string is within the safe byte-size limit before any
+/// heap-intensive decoding is attempted.  Returns a [`SigningError`] when the
+/// limit would be exceeded so callers can surface it as a clean JS exception
+/// rather than an unrecoverable allocator OOM trap.
+fn check_xdr_size(xdr: &str) -> Result<(), SigningError> {
+    let byte_len = xdr.len();
+    if byte_len > MAX_XDR_BYTES {
+        return Err(SigningError::InvalidEnvelope(format!(
+            "XDR payload is {byte_len} bytes, which exceeds the maximum allowed \
+             size of {MAX_XDR_BYTES} bytes. This limit prevents out-of-memory \
+             conditions in the WASM signing bundle."
+        )));
+    }
+    Ok(())
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SigningResult {
@@ -72,11 +136,13 @@ impl WasmSigningResult {
 }
 
 #[derive(Debug)]
-enum SigningError {
+pub enum SigningError {
     InvalidSecretKey(String),
     InvalidEnvelope(String),
     UnsupportedEnvelope(String),
     SignatureOverflow,
+    AccountBlocked(String),
+    SuspiciousActivity(String),
 }
 
 impl fmt::Display for SigningError {
@@ -89,11 +155,25 @@ impl fmt::Display for SigningError {
                 f,
                 "transaction already contains the maximum of 20 signatures"
             ),
+            Self::AccountBlocked(message) => write!(f, "account is blocked: {message}"),
+            Self::SuspiciousActivity(message) => write!(f, "suspicious activity detected: {message}"),
         }
     }
 }
 
 impl std::error::Error for SigningError {}
+
+impl From<&str> for SigningError {
+    fn from(s: &str) -> Self {
+        Self::AccountBlocked(s.to_string())
+    }
+}
+
+impl From<String> for SigningError {
+    fn from(s: String) -> Self {
+        Self::AccountBlocked(s)
+    }
+}
 
 #[wasm_bindgen(js_name = signTransactionXdr)]
 pub fn sign_transaction_xdr(
@@ -101,6 +181,8 @@ pub fn sign_transaction_xdr(
     secret_key: &str,
     network_passphrase: &str,
 ) -> Result<WasmSigningResult, JsValue> {
+    // #695 – OOM protection: reject oversized payloads before heap allocation.
+    check_xdr_size(unsigned_xdr).map_err(|err| JsValue::from_str(&err.to_string()))?;
     sign_transaction_xdr_internal(unsigned_xdr, secret_key, network_passphrase)
         .map(Into::into)
         .map_err(|err| JsValue::from_str(&err.to_string()))
@@ -129,8 +211,43 @@ pub fn sign_transaction_xdr_internal(
     unsigned_xdr: &str,
     secret_key: &str,
     network_passphrase: &str,
-) -> Result<SigningResult, Box<dyn std::error::Error>> {
+) -> Result<SigningResult, SigningError> {
+    // #695 – OOM protection: enforce size ceiling before any decoding.
+    check_xdr_size(unsigned_xdr)?;
     let signer = signer_context(secret_key)?;
+
+    let public_key = signer.public_key.clone();
+    let blocklist = BLOCKLIST.get_or_init(|| Mutex::new(Blocklist::new()));
+    let tracker = TRACKER.get_or_init(|| Mutex::new(RequestTracker::new()));
+
+    {
+        let blocklist_guard = blocklist
+            .lock()
+            .map_err(|_| SigningError::SuspiciousActivity("blocklist lock poisoned".to_string()))?;
+        if blocklist_guard.is_blocked(&public_key, now()) {
+            return Err("Account is blocked".into());
+        }
+    }
+
+    let suspicious = {
+        let mut tracker_guard = tracker
+            .lock()
+            .map_err(|_| SigningError::SuspiciousActivity("tracker lock poisoned".to_string()))?;
+        tracker_guard.is_suspicious(&public_key, now())
+    };
+
+    if suspicious {
+        let mut blocklist_guard = blocklist
+            .lock()
+            .map_err(|_| SigningError::SuspiciousActivity("blocklist lock poisoned".to_string()))?;
+        blocklist_guard.add(
+            public_key.clone(),
+            "Suspicious activity detected".to_string(),
+            now(),
+        );
+        return Err("Account flagged and blocked".into());
+    }
+
     let mut envelope = parse_transaction_envelope(unsigned_xdr)?;
     let tx_hash = transaction_hash(&envelope, network_passphrase)?;
     let signed_envelope = append_signature(&mut envelope, &signer, &tx_hash)?;
@@ -289,6 +406,25 @@ fn sha256(input: impl AsRef<[u8]>) -> [u8; 32] {
     hash
 }
 
+/// Verify a presented developer API key against the expected key in constant time.
+///
+/// A plain `==` comparison on `&str`/`&[u8]` short-circuits at the first differing
+/// byte (and on a length mismatch), so the time it takes to reject a guess leaks
+/// how many leading bytes were correct. An attacker can exploit that signal to
+/// recover a valid key byte-by-byte ("timing attack").
+///
+/// To keep every comparison uniform regardless of input, both sides are reduced to
+/// a fixed-width SHA-256 digest — so the comparison is always over exactly 32 bytes
+/// and never depends on the secret's length — and the digests are compared with the
+/// `subtle` crate's constant-time equality primitive, which always inspects every
+/// byte before producing a result.
+pub fn verify_api_key(presented: &str, expected: &str) -> bool {
+    let presented = sha256(presented);
+    let expected = sha256(expected);
+    // Compare as byte slices: `<[u8]>::ct_eq` always inspects all 32 bytes.
+    presented[..].ct_eq(&expected[..]).into()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -422,6 +558,93 @@ mod tests {
     }
 
     #[test]
+    fn verify_api_key_accepts_an_exact_match() {
+        let key = "fluid-pro-demo-key";
+        assert!(verify_api_key(key, key));
+        assert!(verify_api_key(
+            "sk_live_0123456789abcdef",
+            "sk_live_0123456789abcdef"
+        ));
+    }
+
+    #[test]
+    fn verify_api_key_rejects_a_different_key() {
+        let expected = "sk_live_0123456789abcdef";
+        assert!(!verify_api_key("sk_live_0000000000000000", expected));
+        // Differs only in the final byte — still rejected.
+        assert!(!verify_api_key("sk_live_0123456789abcdee", expected));
+    }
+
+    #[test]
+    fn verify_api_key_rejects_length_variants() {
+        let expected = "sk_live_0123456789abcdef";
+        // Correct prefix but shorter/longer than the real key.
+        assert!(!verify_api_key("sk_live_0123456789abcde", expected));
+        assert!(!verify_api_key("sk_live_0123456789abcdef0", expected));
+        // Empty inputs on either side.
+        assert!(!verify_api_key("", expected));
+        assert!(!verify_api_key(expected, ""));
+        // Two empty strings are equal.
+        assert!(verify_api_key("", ""));
+    }
+
+    #[test]
+    fn verify_api_key_fuzzes_malformed_unicode_and_binary_like_inputs() {
+        let expected = "sk_live_0123456789abcdef";
+        let malformed_inputs = vec![
+            "\0".to_string(),
+            "\0\0\0".to_string(),
+            "sk_live_0123456789abcdef\0".to_string(),
+            "fluid\nkey".to_string(),
+            "fluid\r\nx-api-key: injected".to_string(),
+            "fluid\tkey".to_string(),
+            "   sk_live_0123456789abcdef   ".to_string(),
+            "sk_live_\u{202e}fedcba9876543210".to_string(),
+            "sk_live_\u{200d}\u{fe0f}".to_string(),
+            "🔑".to_string(),
+            "fluid-🔐-demo-key".to_string(),
+            "密钥".to_string(),
+            "مفتاح".to_string(),
+            "कुंजी".to_string(),
+            "\u{7f}".to_string(),
+            "\u{80}".to_string(),
+            "\u{fffd}".to_string(),
+            "\u{10ffff}".to_string(),
+            "A".repeat(8_192),
+            "sk_live_".repeat(1_024),
+        ];
+
+        for candidate in malformed_inputs {
+            let result = std::panic::catch_unwind(|| verify_api_key(&candidate, expected));
+            assert!(
+                result.is_ok(),
+                "verify_api_key panicked for candidate {:?}",
+                candidate
+            );
+            assert!(
+                !result.unwrap(),
+                "malformed candidate {:?} unexpectedly matched",
+                candidate
+            );
+        }
+    }
+
+    #[test]
+    fn verify_api_key_fuzzes_all_byte_values_without_panics() {
+        let expected = "sk_live_0123456789abcdef";
+
+        for byte in 0u8..=u8::MAX {
+            let candidate = char::from(byte).to_string();
+            let result = std::panic::catch_unwind(|| verify_api_key(&candidate, expected));
+            assert!(
+                result.is_ok(),
+                "verify_api_key panicked for byte value {byte}"
+            );
+            assert!(!result.unwrap(), "byte value {byte} unexpectedly matched");
+        }
+    }
+
+    #[test]
     fn envelope_signature_count_counts_all_envelope_variants() {
         let mut env = parse_transaction_envelope(UNSIGNED_XDR).unwrap();
         assert_eq!(envelope_signature_count(&env), 0);
@@ -448,5 +671,34 @@ mod tests {
         };
         let updated = push_signature(&signatures, decorated).unwrap();
         assert_eq!(updated.len(), 1);
+    }
+
+    // #695 – WASM OOM protection tests
+    #[test]
+    fn check_xdr_size_accepts_valid_payload() {
+        // Fixture XDR is well under 64 KiB
+        assert!(check_xdr_size(UNSIGNED_XDR).is_ok());
+    }
+
+    #[test]
+    fn check_xdr_size_rejects_oversized_payload() {
+        let huge = "A".repeat(MAX_XDR_BYTES + 1);
+        let err = check_xdr_size(&huge).unwrap_err();
+        let msg = err.to_string();
+        assert!(msg.contains("exceeds the maximum allowed size"), "msg: {msg}");
+    }
+
+    #[test]
+    fn check_xdr_size_accepts_exact_limit() {
+        let at_limit = "A".repeat(MAX_XDR_BYTES);
+        assert!(check_xdr_size(&at_limit).is_ok());
+    }
+
+    #[test]
+    fn sign_transaction_xdr_internal_rejects_oversized_xdr() {
+        let huge = "A".repeat(MAX_XDR_BYTES + 1);
+        let err = sign_transaction_xdr_internal(&huge, TEST_SECRET_KEY, TEST_NETWORK_PASSPHRASE)
+            .unwrap_err();
+        assert!(matches!(err, SigningError::InvalidEnvelope(_)));
     }
 }

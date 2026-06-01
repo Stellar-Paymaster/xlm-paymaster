@@ -1,0 +1,34 @@
+AUTOMATED MASTER KEY ROTATION VERIFICATION REPORT
+=================================================
+
+Date: 2026-04-24
+Task: #432 [Security & Compliance] Automated Master Key Rotation
+Status: IMPLEMENTED
+
+SUMMARY OF CHANGES
+------------------
+1. Added `keyRotationService.ts` to `server/src/services/`.
+2. Implemented AES-256-GCM encryption with prepended key versions for zero-downtime decryption capabilities.
+3. Created robust test suites verifying rotation, encryption, and legacy decryption behaviors.
+4. Added architectural documentation outlining the security characteristics and ciphertext payload format.
+
+VERIFIED TERMINAL OUTPUT
+------------------------
+Command:
+  cd server
+  npx vitest run src/services/keyRotationService.test.ts
+
+Result:
+  ✓ src/services/keyRotationService.test.ts > KeyRotationService > should encrypt and decrypt using the active key
+  ✓ src/services/keyRotationService.test.ts > KeyRotationService > should support zero-downtime rotation and decrypt old data
+  ✓ src/services/keyRotationService.test.ts > KeyRotationService > should throw when decrypting with an unknown key id
+  ✓ src/services/keyRotationService.test.ts > KeyRotationService > should throw when trying to encrypt with no active key
+
+  Test Files  1 passed (1)
+       Tests  4 passed (4)
+
+DESIGN / ACCESSIBILITY / SECURITY CHECKS
+----------------------------------------
+- Zero-downtime guarantees: Old keys remain available for decryption automatically.
+- Security standards: `AES-256-GCM` leveraged utilizing completely random IVs and verification tags.
+- Fail-safe behavior: Throws explicitly on unknown key IDs rather than attempting to decrypt with incorrect keys.

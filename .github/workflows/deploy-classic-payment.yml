@@ -1,0 +1,56 @@
+name: Deploy Classic Payment Demo to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - feat/phase15-community-demos-testnet
+    paths:
+      - 'client/examples/react-classic-payment/**'
+      - '.github/workflows/deploy-classic-payment.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'client/examples/react-classic-payment/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: client/examples/react-classic-payment
+        run: npm ci
+
+      - name: Build project
+        working-directory: client/examples/react-classic-payment
+        run: npm run build
+        env:
+          VITE_HORIZON_URL: https://horizon-testnet.stellar.org
+          VITE_FLUID_SERVER_URL: https://testnet.fluid.dev
+          VITE_NETWORK_PASSPHRASE: 'Test SDF Network ; September 2015'
+          VITE_STELLAR_EXPERT_URL: https://stellar.expert/explorer/testnet
+          VITE_BASE_URL: /fluid/react-classic-payment/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'client/examples/react-classic-payment/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

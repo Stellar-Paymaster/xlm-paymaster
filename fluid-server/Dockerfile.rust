@@ -1,0 +1,74 @@
+# =============================================================================
+# fluid-server: Secure distroless Dockerfile for the Rust signing engine
+# =============================================================================
+# Multi-stage build using cargo-chef for dependency caching and a distroless
+# final image for minimal attack surface (no shell, no package manager).
+#
+# Build:  docker build -f Dockerfile.rust -t fluid-server:rust .
+# Run:    docker run -p 3000:3000 \
+#           -e FLUID_FEE_PAYER_SECRET=<secret> \
+#           -e STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org \
+#           fluid-server:rust
+# =============================================================================
+
+# ── Stage 1: Prepare cargo-chef recipe for dependency caching ────────────────
+FROM rust:1.75 AS chef
+RUN cargo install cargo-chef --locked
+WORKDIR /app
+
+# ── Stage 2: Analyze dependencies (only re-run when Cargo.toml changes) ──────
+FROM chef AS planner
+# Copy manifests and source so cargo-chef can compute the full dependency graph
+COPY Cargo.toml Cargo.lock ./
+COPY src/ src/
+RUN cargo chef prepare --recipe-path recipe.json
+
+# ── Stage 3: Build dependencies + application ─────────────────────────────────
+FROM chef AS builder
+
+# Install build dependencies for static linking with OpenSSL
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build dependencies first (cached layer — only rebuilds when recipe changes)
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Copy source and build the release binary.
+# Patch Cargo.toml: replace cdylib with rlib for native build compatibility.
+COPY Cargo.toml Cargo.lock ./
+COPY src/ src/
+
+# Statically link the C runtime so the binary is self-contained in distroless.
+# Override lib crate-type to "rlib" only — cdylib is for WASM and conflicts
+# with static CRT linking on native targets.
+ENV RUSTFLAGS="-C target-feature=+crt-static"
+RUN sed -i 's/crate-type = \["cdylib", "rlib"\]/crate-type = ["rlib"]/' Cargo.toml
+RUN cargo build --release --bin fluid-server \
+    && cp target/release/fluid-server /fluid-server
+
+# Verify the binary is statically linked (ldd should report "not a dynamic executable")
+RUN file /fluid-server && ldd /fluid-server 2>&1 || true
+
+# ── Stage 4: Minimal distroless runtime ──────────────────────────────────────
+FROM gcr.io/distroless/cc-debian12:latest
+
+# Run as non-root for security — distroless provides the 'nonroot' user
+USER nonroot:nonroot
+
+# Copy only the statically-linked binary from the builder
+COPY --from=builder --chown=nonroot:nonroot /fluid-server /fluid-server
+
+# Expose the default Fluid server port
+EXPOSE 3000
+
+# Default environment (override at runtime with -e flags)
+ENV PORT=3000
+ENV RUST_LOG="fluid_server=info,tower_http=info"
+
+# No Docker HEALTHCHECK — distroless has no shell or curl.
+# Use external monitoring against the /health HTTP endpoint instead.
+
+ENTRYPOINT ["/fluid-server"]

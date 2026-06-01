@@ -4,6 +4,7 @@ import {
   resolveDigestEmailTransport,
   type DigestEmailTransport,
 } from "../services/digestService";
+import { BaseWorker } from "./baseWorker";
 
 const logger = createLogger({ component: "digest_worker" });
 
@@ -23,7 +24,7 @@ export interface DigestWorkerOptions {
   scheduler?: CronScheduler;
 }
 
-export class DigestWorker {
+export class DigestWorker extends BaseWorker {
   private task: { stop: () => void } | null = null;
   private readonly cronSchedule: string;
   private readonly enabled: boolean;
@@ -34,6 +35,7 @@ export class DigestWorker {
     emailTransport: DigestEmailTransport,
     options: DigestWorkerOptions = {},
   ) {
+    super();
     this.cronSchedule = options.cronSchedule ?? DEFAULT_CRON_SCHEDULE;
     this.enabled = options.enabled ?? true;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -57,34 +59,35 @@ export class DigestWorker {
 
   start(): void {
     if (!this.enabled) {
-      logger.info("Daily digest worker disabled (DIGEST_ENABLED=false)");
+      this.logger.info("Daily digest worker disabled (DIGEST_ENABLED=false)");
       return;
     }
 
     if (!this.scheduler.validate(this.cronSchedule)) {
-      logger.error(
+      this.logger.error(
         { schedule: this.cronSchedule },
         "Invalid DIGEST_CRON_SCHEDULE — daily digest disabled",
       );
       return;
     }
 
-    logger.info(
+    this.logger.info(
       { schedule: this.cronSchedule },
       "Starting daily digest worker",
     );
 
     this.task = this.scheduler.schedule(this.cronSchedule, () => {
-      void this.runNow();
+      void this.runCycle(() => this.runNow());
     });
   }
 
-  stop(): void {
-    if (!this.task) return;
-    this.task.stop();
-    this.task = null;
-    logger.info("Stopped daily digest worker");
+  protected clearScheduledTasks(): void {
+    if (this.task) {
+      this.task.stop();
+      this.task = null;
+    }
   }
+
 
   /** Runs the digest immediately — useful for manual trigger / testing. */
   async runNow(alertsTriggered: string[] = []): Promise<void> {

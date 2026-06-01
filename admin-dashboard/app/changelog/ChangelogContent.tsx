@@ -57,13 +57,13 @@ export function ChangelogContent({ releases }: ChangelogContentProps) {
       <div className="space-y-12">
         {filteredReleases.length > 0 ? (
           filteredReleases.map((release) => (
-            <Card key={release.id} className="overflow-hidden border-zinc-200/50 dark:border-zinc-800/50 bg-white/50 backdrop-blur-sm dark:bg-zinc-900/50">
-              <CardHeader className="border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-800/50">
+            <Card key={release.id} className="overflow-hidden border-zinc-200/50  bg-white/50 backdrop-blur-sm ">
+              <CardHeader className="border-b border-zinc-200/50  bg-zinc-50/50 ">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <CardTitle className="text-2xl font-bold">{release.name || release.tag_name}</CardTitle>
                     <CardDescription className="mt-1 flex items-center gap-2">
-                       <span className="font-mono text-xs bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700">
+                       <span className="font-mono text-xs bg-zinc-100  px-1.5 py-0.5 rounded border border-zinc-200 ">
                         {release.tag_name}
                       </span>
                       <span>•</span>
@@ -79,7 +79,7 @@ export function ChangelogContent({ releases }: ChangelogContentProps) {
                       <img 
                         src={release.author.avatar_url} 
                         alt={release.author.login} 
-                        className="h-8 w-8 rounded-full border border-zinc-200 dark:border-zinc-700"
+                        className="h-8 w-8 rounded-full border border-zinc-200 "
                       />
                       <span className="hidden text-sm font-medium sm:block">{release.author.login}</span>
                     </div>
@@ -87,10 +87,10 @@ export function ChangelogContent({ releases }: ChangelogContentProps) {
                 </div>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="prose prose-zinc dark:prose-invert max-w-none">
+                <div className="prose prose-zinc  max-w-none">
                   <ReactMarkdown>{release.body}</ReactMarkdown>
                 </div>
-                <div className="mt-8 pt-6 border-t border-zinc-200/50 dark:border-zinc-800/50">
+                <div className="mt-8 pt-6 border-t border-zinc-200/50 ">
                    <a 
                     href={release.html_url} 
                     target="_blank" 
