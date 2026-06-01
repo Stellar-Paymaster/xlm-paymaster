@@ -11,8 +11,11 @@ src/compliance/
 ├── types.ts              # Core interfaces (ComplianceHook, ValidationResult)
 ├── ComplianceRegistry.ts # Registry for managing hooks
 ├── index.ts              # Public exports and runComplianceHooks utility
+├── accessibility/
+│   └── WCAGAudit.ts      # WCAG 2.1 auditing engine (contrast, A11y)
 ├── hooks/
-│   └── brazilian-cpf-hook.ts  # Brazil CPF validation plugin
+│   ├── brazilian-cpf-hook.ts  # Brazil CPF validation plugin
+│   └── wcag-accessibility-hook.ts # US WCAG accessibility compliance hook
 └── __tests__/           # Unit and integration tests
 ```
 
