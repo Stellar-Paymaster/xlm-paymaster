@@ -91,3 +91,18 @@ Features:
 - Congestion level badge with color coding
 - Loading state indicator
 - Error fallback display
+
+## CongestionFeeEstimatorGraph Component
+
+The `CongestionFeeEstimatorGraph` provides a premium, highly interactive dashboard component that visualizes hourly network congestion and projected sponsor fee costs.
+
+```tsx
+import { CongestionFeeEstimatorGraph } from "@/src/fees";
+
+<CongestionFeeEstimatorGraph />
+```
+
+### Key Features
+1. **Interactive Parameters**: Allows operation teams to adjust base fees and dynamically choose a region to forecast overall transaction gas costs.
+2. **Recharts Area Graph**: Maps out a 24-hour cycle showing the rise and fall of peak network traffic and projected fee values.
+3. **Traffic Surge Simulation**: Clicking on any hour on the graph opens the "Surge Simulator" panel, allowing developers to manually slide multiplier overrides from `1.0x` to `4.0x` and observe live visual calculations instantly.
