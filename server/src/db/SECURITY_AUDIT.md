@@ -9,7 +9,7 @@ exposed to SQL injection via dynamic string concatenation.
 
 ## 1. Method
 
-The codebase uses Prisma with the `better-sqlite3` adapter (`src/utils/db.ts`).
+The codebase uses Prisma with a driver adapter selected from the configured connection URL (`src/utils/db.ts`).
 Three families of query API are in use:
 
 | API | Value binding | Identifier binding |

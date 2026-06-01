@@ -44,7 +44,7 @@ All files       |     100 |    89.83 |     100 |     100 |
 
 ## Endpoint verification (for required screenshots)
 
-Note: the main server imports the Prisma SQLite adapter (`@prisma/adapter-better-sqlite3`) at startup via `src/utils/db.ts`, which may require native build tooling on some Windows setups (Python + C++ build tools) depending on your Node version.
+Note: the main server now picks the Prisma adapter from `DATABASE_URL` at startup via `src/utils/db.ts`, so PostgreSQL deployments use the pg adapter while file-based local fallbacks still use SQLite. Depending on your Node version and deployment target, this may require native build tooling on some Windows setups.
 
 To capture functional screenshots, run the server and hit the endpoints:
 

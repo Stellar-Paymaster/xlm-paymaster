@@ -1,4 +1,4 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { createPrismaAdapter } from "./prismaAdapter";
 
 type PrismaClientLike = {
   [key: string]: any;
@@ -39,7 +39,7 @@ const replicaUrl =
   process.env.DATABASE_URL ??
   "file:./dev.db";
 
-const adapter = new PrismaBetterSqlite3({ url: replicaUrl });
+const adapter = createPrismaAdapter(replicaUrl);
 
 export const readPrisma = new PrismaClient({
   adapter,
