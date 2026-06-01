@@ -360,6 +360,7 @@ async fn run() -> Result<(), AppError> {
                 listener,
                 app.into_make_service_with_connect_info::<SocketAddr>(),
             )
+            .with_graceful_shutdown(shutdown_signal())
             .await
             .map_err(|error| {
                 AppError::new(
@@ -380,6 +381,40 @@ async fn run() -> Result<(), AppError> {
         }
     )
     .map(|_| ())
+}
+
+/// Resolves when SIGTERM or SIGINT is received, enabling graceful shutdown.
+///
+/// On receipt of a signal the server stops accepting new connections and waits
+/// for in-flight fee-bump requests to complete before the process exits.
+async fn shutdown_signal() {
+    use tokio::signal;
+
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .expect("failed to install CTRL+C handler")
+            .await;
+    };
+
+    #[cfg(unix)]
+    let sigterm = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let sigterm = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {
+            info!("Received SIGINT (Ctrl-C) — initiating graceful shutdown");
+        }
+        _ = sigterm => {
+            info!("Received SIGTERM — initiating graceful shutdown");
+        }
+    }
 }
 
 fn build_cors_layer(allowed_origins: &[String]) -> CorsLayer {
