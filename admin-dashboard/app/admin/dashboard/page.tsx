@@ -13,6 +13,7 @@ import { Coins, CheckCircle, Wallet, Zap } from "lucide-react";
 import { getSpendForecastData } from "@/lib/spend-chart-data";
 import { getFeeMultiplierData } from "@/lib/fee-multiplier-data";
 import { FeeEstimatorWidget } from "@/components/dashboard/FeeEstimatorWidget";
+import { CongestionFeeEstimatorGraph } from "@/src/fees";
 import { ExpenseBreakdown } from "@/components/dashboard/ExpenseBreakdown";
 import { getExpenseBreakdownData } from "@/lib/expense-breakdown-data";
 import { TelemetryConsentSettings } from "@/components/dashboard/TelemetryConsentSettings";
@@ -139,6 +140,10 @@ export default async function AdminDashboard() {
 
         <section className="mt-6">
           <FeeEstimatorWidget />
+        </section>
+
+        <section className="mt-6">
+          <CongestionFeeEstimatorGraph />
         </section>
 
         <section className="mt-6">
