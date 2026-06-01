@@ -86,7 +86,8 @@ function parseInnerTransaction(xdr: string, config: Config): Transaction {
       config.networkPassphrase,
     ) as Transaction;
   } catch (error: any) {
-    throw new AppError(`Invalid XDR: ${error.message}`, 400, "INVALID_XDR");
+    console.error("Failed to parse fee-bump XDR", error);
+    throw new AppError("Invalid XDR", 400, "INVALID_XDR");
   }
 
   if (
@@ -252,11 +253,7 @@ async function executePreparedFeeBump(
           },
         });
 
-        throw new AppError(
-          `Transaction submission failed: ${error.message}`,
-          500,
-          "SUBMISSION_FAILED",
-        );
+        throw new AppError("Transaction submission failed", 500, "SUBMISSION_FAILED");
       }
     }
 
@@ -345,7 +342,7 @@ export async function feeBumpHandler(
     if (!result.success) {
       return next(
         new AppError(
-          `Validation failed: ${JSON.stringify(result.error.format())}`,
+          "Validation failed",
           400,
           "INVALID_XDR",
         ),
@@ -425,7 +422,8 @@ export async function feeBumpHandler(
           config.networkPassphrase,
         ) as any;
       } catch (error: any) {
-        throw new AppError(`Invalid XDR: ${error.message}`, 400, "INVALID_XDR");
+        console.error("Failed to parse fee-bump XDR", error);
+        throw new AppError("Invalid XDR", 400, "INVALID_XDR");
       }
 
       const isSoroban = innerTransaction.operations.some((op: any) =>
@@ -452,8 +450,9 @@ export async function feeBumpHandler(
           );
           params = { ...params, xdr: updatedXdr };
         } catch (error: any) {
+          console.error("Soroban simulation failed", error);
           throw new AppError(
-            `Soroban simulation failed: ${error.message}. The transaction would fail on-chain or out of gas.`,
+            "Soroban simulation failed. The transaction would fail on-chain or out of gas.",
             400,
             "INVALID_XDR",
           );
@@ -623,7 +622,7 @@ export async function feeBumpBatchHandler(
     if (!parsedBody.success) {
       return next(
         new AppError(
-          `Validation failed: ${JSON.stringify(parsedBody.error.format())}`,
+          "Validation failed",
           400,
           "INVALID_XDR",
         ),

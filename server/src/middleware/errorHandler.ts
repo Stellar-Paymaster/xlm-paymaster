@@ -73,9 +73,8 @@ export function createGlobalErrorHandler(slackNotifier?: SlackNotifierLike) {
     notify5xx(slackNotifier, req, 500, err);
 
     res.status(500).json({
-      error: isProd ? "An unexpected error occurred" : err.message,
+      error: "An unexpected error occurred",
       code: "INTERNAL_ERROR",
-      ...(isProd ? {} : { stack: err.stack }),
     });
   };
 }

@@ -1,10 +1,42 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getRequestIp } from "./lib/request-ip";
+
+const SESSION_COOKIE_PREFIXES = [
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+];
+
+function clearSessionCookies(response: NextResponse, request: NextRequest): void {
+  for (const cookie of request.cookies.getAll()) {
+    if (
+      SESSION_COOKIE_PREFIXES.some((prefix) => cookie.name.startsWith(prefix))
+    ) {
+      response.cookies.set(cookie.name, "", {
+        expires: new Date(0),
+        httpOnly: true,
+        path: "/",
+        sameSite: "lax",
+        secure: request.nextUrl.protocol === "https:",
+      });
+    }
+  }
+}
 
 export const middlewareCallback = (req: NextRequest & { auth: any }) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
+  const requestIp = getRequestIp(req);
+
+  if (session?.user?.ipAddress && requestIp && session.user.ipAddress !== requestIp) {
+    const loginUrl = new URL("/login", req.url);
+    const response = NextResponse.redirect(loginUrl);
+    clearSessionCookies(response, req);
+    return response;
+  }
 
   // Force redirect to HTTPS in production
   if (process.env.NODE_ENV === "production") {
