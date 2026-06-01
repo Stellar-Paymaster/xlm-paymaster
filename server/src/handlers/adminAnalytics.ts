@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Config } from "../config";
 import { calculateSpendForecast } from "../services/spendForecast";
+import readPrisma from "../utils/readDb";
 import { replicaDb as prisma } from "../utils/db";
 
 function requireAdminToken(req: Request, res: Response): boolean {
@@ -34,7 +35,7 @@ export function getSpendForecastHandler(config: Config) {
       windowStart.setUTCDate(windowStart.getUTCDate() - 29);
       windowStart.setUTCHours(0, 0, 0, 0);
 
-      const transactions = await prisma.transaction.findMany({
+      const transactions = await readPrisma.transaction.findMany({
         where: {
           status: "SUCCESS",
           createdAt: { gte: windowStart },
