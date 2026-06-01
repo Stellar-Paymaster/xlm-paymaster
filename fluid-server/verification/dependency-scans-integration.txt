@@ -1,0 +1,25 @@
+Issue #674 – Automated Dependency Vulnerability Scanners in CI
+================================================================
+
+Workflow
+--------
+.github/workflows/dependency-audit.yml
+
+Matrix scanners
+---------------
+- cargo-audit (fluid-server/)
+- npm audit (fluid-server/wasm-demo/)
+
+Local verification (from fluid-server/)
+-----------------------------------------
+cargo install cargo-audit --locked
+cargo audit
+
+cd wasm-demo && npm ci && npm audit --audit-level=high
+
+CI behavior
+-----------
+- Runs on pull requests and pushes touching fluid-server/**
+- Uploads JSON audit reports as workflow artifacts
+- Fails the job on high/critical Rust advisories (`cargo audit --deny warnings`)
+- Fails the job on high+ npm vulnerabilities (`npm audit --audit-level=high`)

@@ -1,0 +1,18 @@
+Issue #686 – Pre-flight Validation of Inner Transaction Signer Weight
+=======================================================================
+
+Implementation
+--------------
+- fluid-server/src/signer_weight.rs
+- fluid-server/src/horizon.rs (fetch_account_auth)
+- fluid-server/src/main.rs (process_fee_bump_request hook)
+- fluid-server/docs/inner-transaction-signer-weight-validation.md
+
+Verification (run from fluid-server/)
+-------------------------------------
+cargo test signer_weight -- --nocapture
+cargo test signer_weight_integration -- --nocapture
+
+Expected:
+- Unit tests cover sufficient weight, insufficient weight, multi-signer sums, and no matching signers.
+- Integration tests exercise /fee-bump with mock Horizon account overrides.
