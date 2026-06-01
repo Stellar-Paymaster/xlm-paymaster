@@ -18,6 +18,7 @@ use stellar_xdr::curr::{
 fn build_secret(seed_byte: u8) -> String {
     Strkey::PrivateKeyEd25519(ed25519::PrivateKey([seed_byte; 32]))
         .to_string()
+        .to_string()
 }
 
 fn build_signed_transaction_xdr() -> String {
@@ -200,6 +201,9 @@ async fn test_rate_limits_bypassed_when_configured() {
     println!("Bypassed limit behavior statuses: {:?}", statuses);
     // All requests must succeed with HTTP 200
     for status in statuses {
-        assert_eq!(status, 200, "expected HTTP 200 since rate limiting and quota checking are disabled");
+        assert_eq!(
+            status, 200,
+            "expected HTTP 200 since rate limiting and quota checking are disabled"
+        );
     }
 }

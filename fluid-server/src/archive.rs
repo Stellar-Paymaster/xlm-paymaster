@@ -4,8 +4,8 @@
 use aws_config::BehaviorVersion;
 use aws_sdk_s3::Client as S3Client;
 use chrono::{DateTime, Duration, Utc};
-use sqlx::{PgPool, query, query_as};
-use tracing::{info, error};
+use sqlx::{query, query_as, PgPool};
+use tracing::{error, info};
 
 const BATCH_SIZE: i64 = 1000;
 const OLDER_THAN_DAYS: i64 = 730; // 2 years
@@ -32,8 +32,8 @@ pub async fn run_archival_job(pool: &PgPool) -> Result<(), Box<dyn std::error::E
     // Configure AWS S3
     let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let s3_client = S3Client::new(&config);
-    let bucket_name = std::env::var("S3_ARCHIVE_BUCKET")
-        .expect("S3_ARCHIVE_BUCKET environment variable not set");
+    let bucket_name =
+        std::env::var("S3_ARCHIVE_BUCKET").expect("S3_ARCHIVE_BUCKET environment variable not set");
     let prefix = std::env::var("S3_ARCHIVE_PREFIX").unwrap_or_else(|_| "transactions/".to_string());
 
     let mut total_archived = 0;
@@ -68,13 +68,18 @@ pub async fn run_archival_job(pool: &PgPool) -> Result<(), Box<dyn std::error::E
         let body = json_lines.join("\n");
 
         // Upload to S3
-        let key = format!("{}{}_{}.jsonl", prefix, Utc::now().format("%Y%m%d_%H%M%S"), batch_num);
-        
+        let key = format!(
+            "{}{}_{}.jsonl",
+            prefix,
+            Utc::now().format("%Y%m%d_%H%M%S"),
+            batch_num
+        );
+
         s3_client
             .put_object()
             .bucket(&bucket_name)
             .key(&key)
-            .body(body.into())
+            .body(aws_sdk_s3::primitives::ByteStream::from(body.into_bytes()))
             .content_type("application/x-ndjson")
             .send()
             .await?;
@@ -90,10 +95,18 @@ pub async fn run_archival_job(pool: &PgPool) -> Result<(), Box<dyn std::error::E
 
         total_archived += transactions.len();
         batch_num += 1;
-        info!("Batch {}: Archived {} transactions to s3://{}/{}", 
-              batch_num, transactions.len(), bucket_name, key);
+        info!(
+            "Batch {}: Archived {} transactions to s3://{}/{}",
+            batch_num,
+            transactions.len(),
+            bucket_name,
+            key
+        );
     }
 
-    info!("Archival job completed. Total archived: {} transactions", total_archived);
+    info!(
+        "Archival job completed. Total archived: {} transactions",
+        total_archived
+    );
     Ok(())
 }
