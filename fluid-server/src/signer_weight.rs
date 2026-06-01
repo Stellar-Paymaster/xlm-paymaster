@@ -56,7 +56,7 @@ impl SignerWeightError {
             Self::UnsupportedSourceAccount => AppError::new(
                 StatusCode::BAD_REQUEST,
                 "UNSUPPORTED_SOURCE_ACCOUNT",
-                "Only classic ed25519 source accounts are supported for signer-weight validation",
+                "Source account type is not supported for signer-weight validation",
             ),
             Self::NoMatchingSigners => AppError::new(
                 StatusCode::BAD_REQUEST,
@@ -147,12 +147,29 @@ fn signature_hint_matches(public_key: &[u8; 32], hint: &SignatureHint) -> bool {
 }
 
 /// Extract the classic ed25519 account id (G...) from a fee-bump inner envelope.
+///
+/// Supports both plain `Ed25519` source accounts and `MuxedEd25519` (M...)
+/// accounts — for the latter the underlying ed25519 key is extracted so that
+/// Horizon can be queried for the base account's thresholds and signers.
 pub fn inner_source_account_id(inner: &TransactionV1Envelope) -> Result<String, SignerWeightError> {
-    match &inner.tx.source_account {
-        stellar_xdr::curr::MuxedAccount::Ed25519(key) => Ok(Strkey::PublicKeyEd25519(PublicKey(key.0))
-            .to_string()
-            .to_string()),
-        _ => Err(SignerWeightError::UnsupportedSourceAccount),
+    muxed_account_to_account_id(&inner.tx.source_account)
+}
+
+/// Resolve a [`MuxedAccount`] to its underlying classic G... account id.
+///
+/// * `Ed25519` — returned directly.
+/// * `MuxedEd25519` — the embedded ed25519 key is extracted; the mux id is
+///   discarded because Horizon account lookups always use the base account.
+pub fn muxed_account_to_account_id(
+    account: &stellar_xdr::curr::MuxedAccount,
+) -> Result<String, SignerWeightError> {
+    use stellar_xdr::curr::MuxedAccount;
+    match account {
+        MuxedAccount::Ed25519(key) => Ok(Strkey::PublicKeyEd25519(PublicKey(key.0)).to_string()),
+        MuxedAccount::MuxedEd25519(muxed) => {
+            // Extract the underlying 32-byte ed25519 key from the muxed account.
+            Ok(Strkey::PublicKeyEd25519(PublicKey(muxed.ed25519.0)).to_string())
+        }
     }
 }
 
@@ -317,6 +334,52 @@ mod tests {
         let _ = other_public;
         let err = validate_inner_envelope_signer_weight(&inner, &auth).unwrap_err();
         assert!(matches!(err, SignerWeightError::NoMatchingSigners));
+    }
+
+    #[test]
+    fn muxed_account_resolves_to_base_account_id() {
+        use stellar_xdr::curr::{MuxedAccountMed25519, VecM};
+        let secret = [11_u8; 32];
+        let signing_key = SigningKey::from_bytes(&secret);
+        let public_bytes = signing_key.verifying_key().to_bytes();
+
+        // Build a transaction whose source is a MuxedEd25519 account.
+        let tx = Transaction {
+            source_account: stellar_xdr::curr::MuxedAccount::MuxedEd25519(
+                MuxedAccountMed25519 {
+                    id: 42,
+                    ed25519: Uint256(public_bytes),
+                },
+            ),
+            fee: 100,
+            seq_num: SequenceNumber(1),
+            cond: Preconditions::None,
+            memo: Memo::None,
+            operations: vec![Operation {
+                source_account: None,
+                body: OperationBody::Payment(PaymentOp {
+                    destination: MuxedAccount::Ed25519(Uint256([2u8; 32])),
+                    asset: Asset::Native,
+                    amount: 1,
+                }),
+            }]
+            .try_into()
+            .unwrap(),
+            ext: TransactionExt::V0,
+        };
+
+        let inner = TransactionV1Envelope {
+            tx,
+            signatures: VecM::default(),
+        };
+
+        // inner_source_account_id must return the base G... key, not an error.
+        let account_id = inner_source_account_id(&inner).expect("muxed account should resolve");
+        // The resolved id must be a valid G... address.
+        assert!(account_id.starts_with('G'), "expected G... address, got {account_id}");
+        // And it must match the underlying ed25519 key.
+        let expected = Strkey::PublicKeyEd25519(PublicKey(public_bytes)).to_string();
+        assert_eq!(account_id, expected);
     }
 
     #[test]

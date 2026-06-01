@@ -1,5 +1,8 @@
 use std::{
     fmt,
+    fs::{File, OpenOptions},
+    io::Write,
+    path::PathBuf,
     str::FromStr,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
@@ -351,23 +354,46 @@ async fn export_worker(config: LogAggregationConfig, mut receiver: mpsc::Receive
         return;
     };
 
+    // Consecutive remote-export failures before falling back to disk.
+    let mut consecutive_failures: u32 = 0;
+    const FALLBACK_THRESHOLD: u32 = 3;
+
     let mut batch = Vec::with_capacity(config.batch_size);
     loop {
         tokio::select! {
             Some(record) = receiver.recv() => {
                 batch.push(record);
                 if batch.len() >= config.batch_size {
-                    flush_batch(&client, &config, &mut batch).await;
+                    let failed = flush_batch(&client, &config, &mut batch).await;
+                    if failed {
+                        consecutive_failures += 1;
+                        if consecutive_failures >= FALLBACK_THRESHOLD {
+                            flush_batch_to_disk(&config, &mut batch);
+                        }
+                    } else {
+                        consecutive_failures = 0;
+                    }
                 }
             }
             _ = interval.tick() => {
                 if !batch.is_empty() {
-                    flush_batch(&client, &config, &mut batch).await;
+                    let failed = flush_batch(&client, &config, &mut batch).await;
+                    if failed {
+                        consecutive_failures += 1;
+                        if consecutive_failures >= FALLBACK_THRESHOLD {
+                            flush_batch_to_disk(&config, &mut batch);
+                        }
+                    } else {
+                        consecutive_failures = 0;
+                    }
                 }
             }
             else => {
                 if !batch.is_empty() {
-                    flush_batch(&client, &config, &mut batch).await;
+                    let failed = flush_batch(&client, &config, &mut batch).await;
+                    if failed {
+                        flush_batch_to_disk(&config, &mut batch);
+                    }
                 }
                 break;
             }
@@ -375,19 +401,19 @@ async fn export_worker(config: LogAggregationConfig, mut receiver: mpsc::Receive
     }
 }
 
-async fn flush_batch(client: &reqwest::Client, config: &LogAggregationConfig, batch: &mut Vec<AggregatedLog>) {
+async fn flush_batch(client: &reqwest::Client, config: &LogAggregationConfig, batch: &mut Vec<AggregatedLog>) -> bool {
     let payload = match build_payload(config, batch) {
         Ok(payload) => payload,
         Err(error) => {
             eprintln!("[log-aggregation] failed to build payload: {error}");
             batch.clear();
-            return;
+            return true; // treat serialisation failure as a remote failure
         }
     };
 
     let Some(endpoint) = config.endpoint.as_deref() else {
         batch.clear();
-        return;
+        return false;
     };
 
     let mut request = client.post(endpoint);
@@ -411,19 +437,72 @@ async fn flush_batch(client: &reqwest::Client, config: &LogAggregationConfig, ba
     }
 
     let started = Instant::now();
-    match request.body(payload).send().await {
+    let failed = match request.body(payload).send().await {
         Ok(response) if response.status().is_success() => {
             let elapsed = started.elapsed().as_millis();
             tracing::debug!("log batch exported in {elapsed}ms");
+            false
         }
         Ok(response) => {
             eprintln!(
                 "[log-aggregation] export failed with status {}",
                 response.status()
             );
+            true
         }
         Err(error) => {
             eprintln!("[log-aggregation] export request failed: {error}");
+            true
+        }
+    };
+
+    batch.clear();
+    failed
+}
+
+/// Write a batch of log records to a local fallback file when the remote
+/// aggregation service is unavailable.
+///
+/// The file path is controlled by `FLUID_LOG_FALLBACK_PATH` (default:
+/// `fluid-server-fallback.log` in the current working directory).  Each
+/// record is written as a single JSON line (NDJSON) so the file can be
+/// ingested by any log shipper once the remote service recovers.
+fn flush_batch_to_disk(config: &LogAggregationConfig, batch: &mut Vec<AggregatedLog>) {
+    if batch.is_empty() {
+        return;
+    }
+
+    let path: PathBuf = std::env::var("FLUID_LOG_FALLBACK_PATH")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from("fluid-server-fallback.log"));
+
+    let file_result = OpenOptions::new().create(true).append(true).open(&path);
+
+    match file_result {
+        Ok(mut file) => {
+            for record in batch.iter() {
+                match serde_json::to_string(record) {
+                    Ok(line) => {
+                        if let Err(e) = writeln!(file, "{line}") {
+                            eprintln!("[log-aggregation] disk write error: {e}");
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("[log-aggregation] failed to serialise record for disk: {e}");
+                    }
+                }
+            }
+            eprintln!(
+                "[log-aggregation] remote unavailable — {} record(s) written to {}",
+                batch.len(),
+                path.display()
+            );
+        }
+        Err(e) => {
+            eprintln!(
+                "[log-aggregation] could not open fallback log file {}: {e}",
+                path.display()
+            );
         }
     }
 
