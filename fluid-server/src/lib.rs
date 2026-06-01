@@ -47,6 +47,8 @@ pub mod config;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod error;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod gateway_config;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod grpc;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod logging;
