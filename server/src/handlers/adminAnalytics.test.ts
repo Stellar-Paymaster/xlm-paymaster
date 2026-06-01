@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Config } from "../config";
 
-vi.mock("../utils/db", () => ({
+vi.mock("../utils/readDb", () => ({
   default: {
     transaction: {
       findMany: vi.fn(),
@@ -9,7 +9,7 @@ vi.mock("../utils/db", () => ({
   },
 }));
 
-import prisma from "../utils/db";
+import readPrisma from "../utils/readDb";
 import { getSpendForecastHandler } from "./adminAnalytics";
 
 function buildConfig(currentBalanceStroops: string): Config {
@@ -44,7 +44,7 @@ describe("getSpendForecastHandler", () => {
   });
 
   it("returns runway message and projection payload", async () => {
-    (prisma as any).transaction.findMany.mockResolvedValue([
+    (readPrisma as any).transaction.findMany.mockResolvedValue([
       {
         costStroops: BigInt(100_000_000),
         createdAt: new Date("2026-03-28T00:00:00.000Z"),

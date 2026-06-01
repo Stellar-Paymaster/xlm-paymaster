@@ -1,8 +1,10 @@
 mod config;
+mod contract_cache;
 mod db;
 mod error;
 mod horizon;
 mod metrics;
+mod notifications;
 mod state;
 mod stellar;
 mod xdr;
@@ -18,9 +20,13 @@ use axum::{
     Json, Router,
 };
 use config::load_config;
+use contract_cache::{
+    ContractCacheStatsResponse, FootprintSchema, UpsertDefinitionRequest, UpsertFootprintRequest,
+};
 use db::create_pool;
 use error::AppError;
 use horizon::HorizonNodeStatus;
+use notifications::{Backend, NotificationEngine, WebhookBackend};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use state::{
@@ -183,7 +189,19 @@ async fn run() -> Result<(), AppError> {
     let (config, secrets) = load_config()?;
     let port = config.port;
     let allowed_origins = config.allowed_origins.clone();
-    let state = AppState::new(config, &secrets)?;
+
+    // Build the notification engine and attach a Slack webhook backend when
+    // the SLACK_WEBHOOK_URL env var is present. Additional backends can be
+    // registered here as the platform grows.
+    let (notification_engine, notification_handle) = NotificationEngine::new(256);
+    let notification_engine = if let Ok(slack_url) = std::env::var("SLACK_WEBHOOK_URL") {
+        notification_engine.register(Backend::Webhook(WebhookBackend::new("slack", slack_url)))
+    } else {
+        notification_engine
+    };
+    notification_engine.spawn();
+
+    let state = AppState::new(config, &secrets)?.with_notification_handle(notification_handle);
 
     // Background task: periodically revalidate signer accounts and refresh balances
     {
@@ -204,6 +222,20 @@ async fn run() -> Result<(), AppError> {
         });
     }
 
+    // Background task: evict expired contract cache entries every 60 seconds.
+    {
+        let cache = Arc::clone(&state.contract_cache);
+        tokio::spawn(async move {
+            let mut interval =
+                tokio::time::interval(std::time::Duration::from_secs(60));
+            interval.tick().await;
+            loop {
+                interval.tick().await;
+                cache.evict_expired().await;
+            }
+        });
+    }
+
     let app = Router::new()
         .route("/", get(dashboard))
         .route("/dashboard", get(dashboard))
@@ -212,6 +244,9 @@ async fn run() -> Result<(), AppError> {
         .route("/verify-db", get(verify_db))
         .route("/fee-bump", post(fee_bump))
         .route("/fee-bump/batch", post(fee_bump_batch))
+        .route("/contract/definition", post(upsert_contract_definition))
+        .route("/contract/footprint", post(upsert_contract_footprint))
+        .route("/contract/cache/stats", get(contract_cache_stats))
         .route("/test/add-transaction", post(add_transaction))
         .route("/test/transactions", get(list_transactions))
         .fallback(not_found)
@@ -568,6 +603,65 @@ async fn process_fee_bump_request(
     });
     signer_lease.release().await;
     Ok(response)
+}
+
+async fn upsert_contract_definition(
+    State(state): State<AppState>,
+    Json(body): Json<UpsertDefinitionRequest>,
+) -> Result<Json<contract_cache::ContractDefinition>, AppError> {
+    if body.contract_id.trim().is_empty() {
+        return Err(AppError::new(
+            axum::http::StatusCode::BAD_REQUEST,
+            "INVALID_REQUEST",
+            "contract_id is required",
+        ));
+    }
+    if body.wasm_hash.trim().is_empty() {
+        return Err(AppError::new(
+            axum::http::StatusCode::BAD_REQUEST,
+            "INVALID_REQUEST",
+            "wasm_hash is required",
+        ));
+    }
+    let definition = contract_cache::ContractDefinition {
+        contract_id: body.contract_id.clone(),
+        wasm_hash: body.wasm_hash,
+        network: body.network,
+        wasm_bytes: body.wasm_bytes,
+        cached_at_ms: state::now_ms(),
+    };
+    state.contract_cache.set_definition(definition.clone()).await;
+    Ok(Json(definition))
+}
+
+async fn upsert_contract_footprint(
+    State(state): State<AppState>,
+    Json(body): Json<UpsertFootprintRequest>,
+) -> Result<Json<FootprintSchema>, AppError> {
+    if body.contract_id.trim().is_empty() {
+        return Err(AppError::new(
+            axum::http::StatusCode::BAD_REQUEST,
+            "INVALID_REQUEST",
+            "contract_id is required",
+        ));
+    }
+    let footprint = FootprintSchema {
+        contract_id: body.contract_id.clone(),
+        read_only: body.read_only,
+        read_write: body.read_write,
+        cached_at_ms: state::now_ms(),
+    };
+    state.contract_cache.set_footprint(footprint.clone()).await;
+    Ok(Json(footprint))
+}
+
+async fn contract_cache_stats(
+    State(state): State<AppState>,
+) -> Json<ContractCacheStatsResponse> {
+    Json(ContractCacheStatsResponse {
+        definition_count: state.contract_cache.definition_count().await,
+        footprint_count: state.contract_cache.footprint_count().await,
+    })
 }
 
 async fn not_found(uri: Uri, request: Request) -> Response {

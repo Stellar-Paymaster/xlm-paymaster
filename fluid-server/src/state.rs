@@ -9,14 +9,23 @@ use serde::{Deserialize, Serialize};
 use stellar_strkey::{ed25519, Strkey};
 use tokio::sync::Mutex;
 
-use crate::{config::Config, error::AppError, horizon::HorizonCluster, metrics::AppMetrics};
+use crate::{
+    config::Config,
+    contract_cache::ContractCache,
+    error::AppError,
+    horizon::HorizonCluster,
+    metrics::AppMetrics,
+    notifications::NotificationHandle,
+};
 
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<Config>,
+    pub contract_cache: Arc<ContractCache>,
     pub global_limiter: Arc<RateLimiter>,
     pub horizon: Arc<HorizonCluster>,
     pub metrics: Arc<AppMetrics>,
+    pub notification_handle: Option<NotificationHandle>,
     pub quota_ledger: Arc<Mutex<Vec<SponsoredTransactionRecord>>>,
     pub signer_pool: Arc<SignerPool>,
     pub transaction_store: Arc<Mutex<HashMap<String, TransactionRecord>>>,
@@ -130,9 +139,14 @@ pub struct RateLimitResult {
 impl AppState {
     pub fn new(config: Config, secrets: &[String]) -> Result<Self, AppError> {
         let config = Arc::new(config);
+        let ttl_secs = std::env::var("CONTRACT_CACHE_TTL_SECS")
+            .ok()
+            .and_then(|v| v.parse::<u64>().ok())
+            .unwrap_or(crate::contract_cache::CONTRACT_CACHE_TTL_SECS);
         Ok(Self {
             api_key_limiter: Arc::new(Mutex::new(HashMap::new())),
             config: Arc::clone(&config),
+            contract_cache: Arc::new(ContractCache::new(ttl_secs)),
             global_limiter: Arc::new(RateLimiter::new(
                 config.global_rate_limit_max,
                 config.global_rate_limit_window_ms,
@@ -147,10 +161,16 @@ impl AppState {
                     .and_then(|value| value.parse::<f64>().ok())
                     .unwrap_or(0.0),
             )),
+            notification_handle: None,
             quota_ledger: Arc::new(Mutex::new(Vec::new())),
             signer_pool: Arc::new(SignerPool::new(secrets)?),
             transaction_store: Arc::new(Mutex::new(HashMap::new())),
         })
+    }
+
+    pub fn with_notification_handle(mut self, handle: NotificationHandle) -> Self {
+        self.notification_handle = Some(handle);
+        self
     }
 }
 
