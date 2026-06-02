@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    sync::Arc,
+    sync::{Arc, RwLock},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
@@ -20,7 +20,7 @@ use crate::{
 
 #[derive(Clone)]
 pub struct AppState {
-    pub config: Arc<Config>,
+    pub config: Arc<RwLock<Config>>,
     pub contract_cache: Arc<ContractCache>,
     pub global_limiter: Arc<RateLimiter>,
     pub horizon: Arc<HorizonCluster>,
@@ -139,14 +139,14 @@ pub struct RateLimitResult {
 
 impl AppState {
     pub fn new(config: Config, secrets: &[String]) -> Result<Self, AppError> {
-        let config = Arc::new(config);
+        let config_arc = Arc::new(RwLock::new(config.clone()));
         let ttl_secs = std::env::var("CONTRACT_CACHE_TTL_SECS")
             .ok()
             .and_then(|v| v.parse::<u64>().ok())
             .unwrap_or(crate::contract_cache::CONTRACT_CACHE_TTL_SECS);
         Ok(Self {
             api_key_limiter: Arc::new(Mutex::new(HashMap::new())),
-            config: Arc::clone(&config),
+            config: config_arc,
             contract_cache: Arc::new(ContractCache::new(ttl_secs)),
             global_limiter: Arc::new(RateLimiter::new(
                 config.global_rate_limit_max,
@@ -172,6 +172,12 @@ impl AppState {
     pub fn with_notification_handle(mut self, handle: NotificationHandle) -> Self {
         self.notification_handle = Some(handle);
         self
+    }
+
+    pub fn reload_config(&self, new_config: Config) {
+        if let Ok(mut config_guard) = self.config.write() {
+            *config_guard = new_config;
+        }
     }
 }
 
