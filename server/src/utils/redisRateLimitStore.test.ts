@@ -1,7 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RedisRateLimitStore } from "./redisRateLimitStore";
 import type { RedisClient } from "./redisClientFactory";
+import { logger } from "./logger";
 
+vi.mock("./logger", () => ({
+  logger: {
+    error: vi.fn(),
+  },
+  serializeError: (e: any) => e,
+}));
 /**
  * In-memory Redis mock with controllable time for fixed-window boundary tests.
  */
@@ -118,5 +125,74 @@ describe("RedisRateLimitStore — fixed window boundary behavior", () => {
 
     const afterReset = await store.increment(key);
     expect(afterReset.totalHits).toBe(1);
+  });
+});
+
+describe("RedisRateLimitStore — Redis fallback behavior", () => {
+  let store: RedisRateLimitStore;
+  let mockRedis: any;
+  const WINDOW_SECONDS = 60;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+    
+    // Create a mock redis client that throws
+    mockRedis = {
+      incr: vi.fn().mockRejectedValue(new Error("Redis connection lost")),
+      expire: vi.fn(),
+      ttl: vi.fn(),
+      decr: vi.fn().mockRejectedValue(new Error("Redis connection lost")),
+      del: vi.fn().mockRejectedValue(new Error("Redis connection lost")),
+    };
+    
+    store = new RedisRateLimitStore(mockRedis as unknown as RedisClient, WINDOW_SECONDS);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("catches increment errors, alerts, and falls back to strict 2-request limit", async () => {
+    const key = "ip:fallback-test";
+    
+    // First request should be allowed (totalHits = 1)
+    const req1 = await store.increment(key);
+    expect(req1.totalHits).toBe(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alert: true,
+        event: "REDIS_CLUSTER_NODE_FAILURE"
+      })
+    );
+
+    // Second request should be allowed (totalHits = 1 as well in fallback or at least not blocked)
+    const req2 = await store.increment(key);
+    // Since fallback returns result.allowed ? 1 : Number.MAX_SAFE_INTEGER, it should be 1
+    expect(req2.totalHits).toBe(1);
+
+    // Third request should be blocked (totalHits = Number.MAX_SAFE_INTEGER)
+    const req3 = await store.increment(key);
+    expect(req3.totalHits).toBe(Number.MAX_SAFE_INTEGER);
+  });
+
+  it("catches decrement errors and alerts", async () => {
+    await store.decrement("ip:fallback-test");
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alert: true,
+        event: "REDIS_CLUSTER_NODE_FAILURE"
+      })
+    );
+  });
+
+  it("catches resetKey errors and alerts", async () => {
+    await store.resetKey("ip:fallback-test");
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alert: true,
+        event: "REDIS_CLUSTER_NODE_FAILURE"
+      })
+    );
   });
 });
