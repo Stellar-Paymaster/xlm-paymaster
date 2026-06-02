@@ -276,7 +276,7 @@ async fn run() -> Result<(), AppError> {
     // Background task: periodically revalidate signer accounts and refresh balances
     {
         let pool: Arc<SignerPool> = Arc::clone(&state.signer_pool);
-        let horizon_urls = state.config.horizon_urls.clone();
+        let horizon_urls = state.config.read().unwrap().horizon_urls.clone();
         let client = reqwest::Client::new();
         tokio::spawn(async move {
             let mut interval =
@@ -536,7 +536,7 @@ async fn fee_bump(
 
     let api_key = extract_api_key(&headers)?;
     let api_key_config = find_api_key(&api_key)?;
-    let (ip_limit, api_limit) = if state.config.disable_rate_limits {
+    let (ip_limit, api_limit) = if state.config.read().unwrap().disable_rate_limits {
         (
             RateLimitResult {
                 limit: 999_999_999,
@@ -599,7 +599,7 @@ async fn fee_bump_batch(
 
     let api_key = extract_api_key(&headers)?;
     let api_key_config = find_api_key(&api_key)?;
-    let (ip_limit, api_limit) = if state.config.disable_rate_limits {
+    let (ip_limit, api_limit) = if state.config.read().unwrap().disable_rate_limits {
         (
             RateLimitResult {
                 limit: 999_999_999,
@@ -676,7 +676,7 @@ async fn process_fee_bump_request(
             });
 
         if let Some(count) = op_count {
-            let limit = state.config.max_operations_per_envelope;
+            let limit = state.config.read().unwrap().max_operations_per_envelope;
             if count > limit {
                 return Err(AppError::new(
                     axum::http::StatusCode::BAD_REQUEST,
@@ -691,7 +691,7 @@ async fn process_fee_bump_request(
     }
 
     // #686 – Pre-flight validation: inner tx signature weight vs source med_threshold.
-    if !state.config.horizon_urls.is_empty() {
+    if !state.config.read().unwrap().horizon_urls.is_empty() {
         use base64::{engine::general_purpose::STANDARD, Engine as _};
         use stellar_xdr::curr::{Limits, ReadXdr, TransactionEnvelope};
 
@@ -723,9 +723,9 @@ async fn process_fee_bump_request(
 
     let result = match stellar::create_fee_bump_transaction(
         &xdr,
-        &state.config.network_passphrase,
-        state.config.base_fee,
-        state.config.fee_multiplier,
+        &state.config.read().unwrap().network_passphrase,
+        state.config.read().unwrap().base_fee,
+        state.config.read().unwrap().fee_multiplier,
         &signer_lease.account.secret,
         &signer_lease.account.public_key_bytes,
     ) {
@@ -754,7 +754,7 @@ async fn process_fee_bump_request(
         .map(|record| record.fee_stroops)
         .sum();
 
-    if !state.config.disable_rate_limits
+    if !state.config.read().unwrap().disable_rate_limits
         && current_spend + result.fee_amount > api_key_config.daily_quota_stroops
     {
         signer_lease.release().await;
@@ -788,7 +788,7 @@ async fn process_fee_bump_request(
         return Ok(response);
     }
 
-    if state.config.horizon_urls.is_empty() {
+    if state.config.read().unwrap().horizon_urls.is_empty() {
         signer_lease.release().await;
         return Err(AppError::new(
             axum::http::StatusCode::INTERNAL_SERVER_ERROR,

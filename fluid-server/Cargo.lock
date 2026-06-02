@@ -2760,6 +2760,7 @@ version = "0.2.115"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e3a6c758eb2f701ed3d052ff5737f5bfe6614326ea7f3bbac7156192dc32e67"
 
+[[package]]
 name = "unicode-xid"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
