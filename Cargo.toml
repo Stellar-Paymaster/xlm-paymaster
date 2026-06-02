@@ -1,5 +1,5 @@
 [workspace]
-members = ["fluid-core", "fluid-server"]
+members = ["fluid-server"]
 resolver = "2"
 
 [workspace.package]
