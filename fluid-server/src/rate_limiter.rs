@@ -220,4 +220,37 @@ mod tests {
 
         assert_eq!(limiter.get_tracked_keys_count().await, 3);
     }
+
+    #[test]
+    fn test_sliding_window_boundary_at_59th_and_60th_second() {
+        let mut window = RateLimitWindow::new(3, 60_000);
+        let start = 1_000_000u64;
+
+        assert!(window.is_allowed(start));
+        assert!(window.is_allowed(start + 1));
+        assert!(window.is_allowed(start + 2));
+        assert!(!window.is_allowed(start + 3));
+
+        // At 59s all three requests are still inside the 60s window
+        assert!(!window.is_allowed(start + 59_000));
+
+        // At 60s the earliest request expires; one slot opens
+        assert!(window.is_allowed(start + 60_000));
+        assert!(!window.is_allowed(start + 60_001));
+    }
+
+    #[test]
+    fn test_sliding_window_expires_stale_requests_precisely() {
+        let mut window = RateLimitWindow::new(2, 1_000);
+        let t0 = 0u64;
+
+        assert!(window.is_allowed(t0));
+        assert!(window.is_allowed(t0 + 100));
+        assert!(!window.is_allowed(t0 + 200));
+
+        // After full window elapses, both requests expire
+        assert!(window.is_allowed(t0 + 1_001));
+        assert!(window.is_allowed(t0 + 1_002));
+        assert!(!window.is_allowed(t0 + 1_003));
+    }
 }

@@ -23,6 +23,7 @@
     "dev": "ts-node src/index.ts",
     "watch": "tsc --watch",
     "test": "vitest",
+    "congestion:simulate": "ts-node src/verification/congestionFeeSimulator.ts",
     "audit:prisma-indexes": "ts-node src/services/prismaIndexAudit.ts",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
