@@ -13,7 +13,7 @@ hex = "0.4"
 sha2 = "0.10"
 subtle = "2"
 stellar-strkey = "0.0.16"
-stellar-xdr = { version = "26.0.0", features = ["base64", "curr"] }
+stellar-xdr = { version = "26.0.1", features = ["base64", "curr"] }
 wasm-bindgen = "0.2.105"
 
 dotenvy = "0.15"
