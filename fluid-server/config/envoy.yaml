@@ -1,0 +1,111 @@
+# Envoy API gateway configuration for Fluid (#715)
+#
+# Offloads basic API key validation and rate limiting from the Rust process.
+# Run: envoy -c /path/to/envoy.yaml
+
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+
+static_resources:
+  listeners:
+    - name: fluid_gateway_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: fluid_gateway
+                route_config:
+                  name: fluid_routes
+                  virtual_hosts:
+                    - name: fluid_api
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: fluid_server
+                            timeout: 30s
+                http_filters:
+                  # Global IP rate limit (100 req/min)
+                  - name: envoy.filters.http.local_ratelimit
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+                      stat_prefix: global_ip_rate_limit
+                      token_bucket:
+                        max_tokens: 100
+                        tokens_per_fill: 100
+                        fill_interval: 60s
+
+                  # API key validation via Lua
+                  - name: envoy.filters.http.lua
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                      inline_code: |
+                        local ALLOWED_KEYS = {
+                          ["fluid-free-demo-key"] = { max = 2, tier = "free" },
+                          ["fluid-pro-demo-key"] = { max = 5, tier = "pro" },
+                        }
+
+                        function envoy_on_request(request_handle)
+                          local api_key = request_handle:headers():get("x-api-key")
+                          if api_key == nil or api_key == "" then
+                            request_handle:respond(
+                              {[":status"] = "401"},
+                              '{"error":"Missing API key.","code":"AUTH_FAILED"}'
+                            )
+                            return
+                          end
+
+                          local tier = ALLOWED_KEYS[api_key]
+                          if tier == nil then
+                            request_handle:respond(
+                              {[":status"] = "403"},
+                              '{"error":"Invalid API key.","code":"AUTH_FAILED"}'
+                            )
+                            return
+                          end
+
+                          request_handle:headers():add("x-envoy-auth-status", "allowed")
+                          request_handle:headers():add("x-ratelimit-limit", tostring(tier.max))
+                        end
+
+                  # Per-API-key rate limit (keyed on x-api-key header)
+                  - name: envoy.filters.http.local_ratelimit
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+                      stat_prefix: api_key_rate_limit
+                      token_bucket:
+                        max_tokens: 5
+                        tokens_per_fill: 5
+                        fill_interval: 60s
+                      descriptors:
+                        - entries:
+                            - key: header_match
+                              value: x-api-key
+
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  clusters:
+    - name: fluid_server
+      connect_timeout: 5s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: fluid_server
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: fluid-server
+                      port_value: 3000
