@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres-primary:
+    image: postgres:15-alpine
+    container_name: paymaster-postgres-primary
+    environment:
+      POSTGRES_DB: paymaster
+      POSTGRES_USER: paymaster
+      POSTGRES_PASSWORD: paymaster_secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_primary_data:/var/lib/postgresql/data
+
+  postgres-replica:
+    image: postgres:15-alpine
+    container_name: paymaster-postgres-replica
+    environment:
+      POSTGRES_DB: paymaster
+      POSTGRES_USER: paymaster
+      POSTGRES_PASSWORD: paymaster_secure_password
+    ports:
+      - "5433:5432"
+    depends_on:
+      - postgres-primary
+
+  redis-cluster-node:
+    image: redis:7-alpine
+    container_name: paymaster-redis-scale
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_primary_data:
