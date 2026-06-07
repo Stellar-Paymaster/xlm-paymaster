@@ -1,11 +1,11 @@
 import "dotenv/config";
 import { createLogger, serializeError } from "../src/utils/logger";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 import { randomBytes, createHash } from "crypto";
+import { createPrismaAdapter } from "../src/utils/prismaAdapter";
 
 const dbUrl = process.env["DATABASE_URL"] ?? "file:./dev.db";
-const adapter = new PrismaBetterSqlite3({ url: dbUrl });
+const adapter = createPrismaAdapter(dbUrl);
 const prisma = new PrismaClient({ adapter });
 const logger = createLogger({ component: "prisma_seed" });
 
