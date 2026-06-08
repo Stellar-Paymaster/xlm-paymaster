@@ -10,6 +10,7 @@ mod metrics;
 mod notifications;
 mod profiling;
 mod state;
+mod signer_weight;
 mod stellar;
 mod tracing_ctx;
 pub use fluid_server::xdr;
@@ -651,6 +652,34 @@ async fn process_fee_bump_request(
                          maximum of {limit} per envelope (FLUID_MAX_OPERATIONS_PER_ENVELOPE)."
                     ),
                 ));
+            }
+        }
+    }
+
+    // #686 – Pre-flight validation: inner tx signature weight vs source med_threshold.
+    if !state.config.horizon_urls.is_empty() {
+        use base64::{engine::general_purpose::STANDARD, Engine as _};
+        use stellar_xdr::curr::{Limits, ReadXdr, TransactionEnvelope};
+
+        if let Ok(bytes) = STANDARD.decode(xdr.trim()) {
+            if let Ok(envelope) = TransactionEnvelope::from_xdr(bytes, Limits::none()) {
+                if let TransactionEnvelope::Tx(inner) = &envelope {
+                    match signer_weight::inner_source_account_id(inner) {
+                        Ok(source_account) => {
+                            let account_auth = state
+                                .horizon
+                                .fetch_account_auth(&source_account)
+                                .await?;
+                            if let Err(err) = signer_weight::validate_inner_envelope_signer_weight(
+                                inner,
+                                &account_auth,
+                            ) {
+                                return Err(err.into_app_error());
+                            }
+                        }
+                        Err(err) => return Err(err.into_app_error()),
+                    }
+                }
             }
         }
     }

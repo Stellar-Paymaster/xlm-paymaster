@@ -91,6 +91,7 @@ struct ServerState {
     config: Arc<Mutex<MockHorizonConfig>>,
     requests: Arc<Mutex<Vec<CapturedRequest>>>,
     request_count: Arc<AtomicUsize>,
+    account_overrides: Arc<Mutex<HashMap<String, serde_json::Value>>>,
 }
 
 // ---------------------------------------------------------------------------
@@ -112,6 +113,7 @@ impl MockHorizonServer {
                 config: Arc::new(Mutex::new(MockHorizonConfig::default())),
                 requests: Arc::new(Mutex::new(Vec::new())),
                 request_count: Arc::new(AtomicUsize::new(0)),
+                account_overrides: Arc::new(Mutex::new(HashMap::new())),
             },
             shutdown_tx: None,
             addr: None,
@@ -184,6 +186,16 @@ impl MockHorizonServer {
         drop(cfg);
         self.state.request_count.store(0, Ordering::SeqCst);
         self.state.requests.lock().unwrap().clear();
+        self.state.account_overrides.lock().unwrap().clear();
+    }
+
+    /// Override Horizon account auth fields (`thresholds`, `signers`) for a public key.
+    pub fn set_account_auth(&self, account_id: &str, auth: serde_json::Value) {
+        self.state
+            .account_overrides
+            .lock()
+            .unwrap()
+            .insert(account_id.to_string(), auth);
     }
 }
 
@@ -238,12 +250,12 @@ async fn handle_request(State(state): State<ServerState>, req: Request<Body>) ->
         sleep(Duration::from_millis(latency_ms)).await;
     }
 
-    build_response(&path, scenario).await
+    build_response(&state, &path, scenario).await
 }
 
-async fn build_response(path: &str, scenario: HorizonScenario) -> Response {
+async fn build_response(state: &ServerState, path: &str, scenario: HorizonScenario) -> Response {
     match scenario {
-        HorizonScenario::Success => success_response(path),
+        HorizonScenario::Success => success_response(state, path),
 
         HorizonScenario::RateLimit => (
             StatusCode::TOO_MANY_REQUESTS,
@@ -339,7 +351,7 @@ async fn build_response(path: &str, scenario: HorizonScenario) -> Response {
     }
 }
 
-fn success_response(path: &str) -> Response {
+fn success_response(state: &ServerState, path: &str) -> Response {
     let body = match path {
         "/fee_stats" => json!({
             "last_ledger": "123456",
@@ -378,11 +390,33 @@ fn success_response(path: &str) -> Response {
                 "p99": "200"
             }
         }),
-        p if p.starts_with("/accounts/") => json!({
-            "id": "GABC",
-            "sequence": "1234567890",
-            "balances": [{"asset_type": "native", "balance": "100.0000000"}]
-        }),
+        p if p.starts_with("/accounts/") => {
+            let account_id = p.trim_start_matches("/accounts/");
+            let mut account = json!({
+                "id": account_id,
+                "sequence": "1234567890",
+                "balances": [{"asset_type": "native", "balance": "100.0000000"}],
+                "thresholds": {
+                    "low_threshold": 0,
+                    "med_threshold": 0,
+                    "high_threshold": 0
+                },
+                "signers": [{
+                    "weight": 1,
+                    "key": account_id,
+                    "type": "ed25519_public_key"
+                }]
+            });
+            if let Some(override_auth) = state.account_overrides.lock().unwrap().get(account_id) {
+                if let Some(thresholds) = override_auth.get("thresholds") {
+                    account["thresholds"] = thresholds.clone();
+                }
+                if let Some(signers) = override_auth.get("signers") {
+                    account["signers"] = signers.clone();
+                }
+            }
+            account
+        }
         "/transactions" => json!({
             "hash": "abc123def456abc123def456abc123def456abc123def456abc123def456abc1",
             "successful": true,
