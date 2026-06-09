@@ -9,8 +9,8 @@ mod logging;
 mod metrics;
 mod notifications;
 mod profiling;
-mod state;
 mod signer_weight;
+mod state;
 mod stellar;
 mod tracing_ctx;
 pub use fluid_server::xdr;
@@ -220,7 +220,7 @@ async fn main() {
 }
 
 async fn run() -> Result<(), AppError> {
-    let (config, secrets) = load_config()?;
+    let (config, secrets) = load_config().await?;
     let port = config.port;
     let allowed_origins = config.allowed_origins.clone();
 
@@ -666,10 +666,8 @@ async fn process_fee_bump_request(
                 if let TransactionEnvelope::Tx(inner) = &envelope {
                     match signer_weight::inner_source_account_id(inner) {
                         Ok(source_account) => {
-                            let account_auth = state
-                                .horizon
-                                .fetch_account_auth(&source_account)
-                                .await?;
+                            let account_auth =
+                                state.horizon.fetch_account_auth(&source_account).await?;
                             if let Err(err) = signer_weight::validate_inner_envelope_signer_weight(
                                 inner,
                                 &account_auth,
