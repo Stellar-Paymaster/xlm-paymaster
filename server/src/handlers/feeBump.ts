@@ -38,6 +38,9 @@ import {
 } from "../queues/feeBumpQueue";
 import { getFcmNotifier } from "../services/fcmNotifier";
 import { persistTransactionAsync } from "../utils/asyncDbPersist";
+import {
+  markTransactionHashProcessed,
+} from "../utils/redis";
 
 const FEEBUMP_JOB_TIMEOUT_MS = parseInt(
   process.env.FEEBUMP_JOB_TIMEOUT_MS ?? "30000",
@@ -306,6 +309,17 @@ export async function processFeeBump(
   shadowMode?: boolean,
 ): Promise<FeeBumpResponse> {
   const prepared = prepareFeeBump(xdr, config);
+
+  // #688 – Replay-attack prevention: reject duplicate transaction hashes.
+  const isNew = await markTransactionHashProcessed(prepared.innerTxHash);
+  if (!isNew) {
+    throw new AppError(
+      `Duplicate request: transaction ${prepared.innerTxHash} has already been processed.`,
+      409,
+      "DUPLICATE_TRANSACTION",
+    );
+  }
+
   const quotaCheck = await checkTenantDailyQuota(tenant, prepared.feeAmount);
   if (!quotaCheck.allowed) {
     throw new AppError(
