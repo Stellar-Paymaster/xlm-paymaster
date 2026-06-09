@@ -1,4 +1,9 @@
 import "dotenv/config";
+import { createStatusRouter } from "./routes/statusRoutes";
+import { createFeeBumpRouter } from "./routes/feeBumpRoutes";
+import { adminUsersRouter } from "./routes/admin/adminUsersRoutes";
+import { adminApiKeysRouter } from "./routes/admin/adminApiKeysRoutes";
+import { adminChainsRouter } from "./routes/admin/adminChainsRoutes";
 
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
@@ -328,59 +333,10 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 // Public status page routes (no authentication required)
-app.get("/status", (req: Request, res: Response, next: NextFunction) => {
-  void statusPageHandler(req, res, next, config);
-});
-
-app.get("/status/uptime", (req: Request, res: Response, next: NextFunction) => {
-  void uptimeHandler(req, res, next, config);
-});
-
-app.get(
-  "/status/incidents",
-  (req: Request, res: Response, next: NextFunction) => {
-    void incidentsHandler(req, res, next, config);
-  },
-);
-
-app.post(
-  "/status/subscribe",
-  (req: Request, res: Response, next: NextFunction) => {
-    void subscribeHandler(req, res, next);
-  },
-);
-
-app.post(
-  "/status/unsubscribe",
-  (req: Request, res: Response, next: NextFunction) => {
-    void unsubscribeHandler(req, res, next);
-  },
-);
+app.use("/status", createStatusRouter(config));
 
 // Fee bump endpoint
-app.post(
-  "/fee-bump",
-  apiKeyMiddleware,
-  sandboxRateLimit,
-  apiKeyRateLimit,
-  tenantTierTxLimit,
-  limiter as any,
-  (req: Request, res: Response, next: NextFunction) => {
-    void feeBumpHandler(req, res, next, config);
-  },
-);
-
-app.post(
-  "/fee-bump/batch",
-  apiKeyMiddleware,
-  sandboxRateLimit,
-  apiKeyRateLimit,
-  tenantTierTxLimit,
-  limiter as any,
-  (req: Request, res: Response, next: NextFunction) => {
-    feeBumpBatchHandler(req, res, next, config);
-  },
-);
+app.use("/fee-bump", createFeeBumpRouter(config, limiter));
 
 app.post(
   "/sandbox/reset",
@@ -426,19 +382,9 @@ app.use(
   bullBoardAdapter.getRouter(),
 );
 
-app.post("/admin/auth/login", adminLoginHandler);
-app.post("/admin/auth/change-password", requireAuthenticatedAdmin(), changeAdminPasswordHandler);
-app.get("/admin/users", requirePermission("manage_users"), listAdminUsersHandler);
-app.post("/admin/users", requirePermission("manage_users"), createAdminUserHandler);
-app.patch("/admin/users/:id/role", requirePermission("manage_users"), updateAdminUserRoleHandler);
-app.delete("/admin/users/:id", requirePermission("manage_users"), deactivateAdminUserHandler);
+app.use("/admin", adminUsersRouter);
 
-app.get("/admin/api-keys", requirePermission("view_api_keys"), listApiKeysHandler);
-app.post("/admin/api-keys", requirePermission("manage_api_keys"), upsertApiKeyHandler);
-app.post("/admin/sandbox/api-keys", createSandboxApiKeyHandler);
-app.patch("/admin/api-keys/:key/revoke", requirePermission("manage_api_keys"), revokeApiKeyHandler);
-app.patch("/admin/api-keys/:key/chains", requirePermission("manage_api_keys"), updateApiKeyChainsHandler);
-app.delete("/admin/api-keys/:key", requirePermission("manage_api_keys"), revokeApiKeyHandler);
+app.use("/admin", adminApiKeysRouter);
 
 app.get("/admin/subscription-tiers", requirePermission("view_tenants"), listSubscriptionTiersHandler);
 app.patch(
@@ -542,18 +488,7 @@ app.post("/admin/rate-limit/manual-score", (req: Request, res: Response) => {
   })();
 });
 
-app.get("/admin/chains", (req: Request, res: Response) => {
-  void listChainsHandler(req, res);
-});
-app.post("/admin/chains", (req: Request, res: Response) => {
-  void createChainHandler(req, res);
-});
-app.patch("/admin/chains/:id", (req: Request, res: Response) => {
-  void updateChainHandler(req, res);
-});
-app.delete("/admin/chains/:id", (req: Request, res: Response) => {
-  void deleteChainHandler(req, res);
-});
+app.use("/admin", adminChainsRouter);
 
 app.get("/admin/sar/stats", (req: Request, res: Response) => {
   void getSARStatsHandler(req, res);
