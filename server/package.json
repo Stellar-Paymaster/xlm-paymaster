@@ -1,7 +1,7 @@
 {
-  "name": "fluid-server-ts",
+  "name": "xlm-paymaster-server-ts",
   "version": "0.1.1",
-  "description": "Fluid - Stellar fee sponsorship server (TypeScript)",
+  "description": "xlm-paymaster - Stellar fee sponsorship server (TypeScript)",
   "main": "dist/index.js",
   "scripts": {
     "build": "npm run native:build && tsc",

@@ -1,8 +1,8 @@
 [package]
-name = "fluid-core"
+name = "xlm-paymaster-core"
 version.workspace = true
 edition.workspace = true
-description = "Core signing and transaction logic for Stellar Fluid"
+description = "Core signing and transaction logic for xlm-paymaster"
 license.workspace = true
 repository.workspace = true
 documentation = "https://docs.rs/fluid-core"
