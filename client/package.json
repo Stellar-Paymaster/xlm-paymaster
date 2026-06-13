@@ -1,7 +1,7 @@
 {
-  "name": "fluid-client",
+  "name": "xlm-paymaster-client",
   "version": "0.1.1",
-  "description": "Fluid client library for gasless Stellar transactions with Web Worker support",
+  "description": "xlm-paymaster client library for gasless Stellar transactions with Web Worker support",
   "main": "dist/index.js",
   "bin": {
     "fluid": "./dist/cli.js"

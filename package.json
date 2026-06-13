@@ -1,5 +1,5 @@
 {
-  "name": "fluid",
+  "name": "xlm-paymaster",
   "version": "1.22.0",
   "private": true,
   "description": "Fluid - Stellar fee sponsorship platform",
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Stellar-Fluid/fluid.git"
+    "url": "https://github.com/Stellar-Paymaster/xlm-paymaster.git"
   },
   "license": "MIT",
   "dependencies": {
