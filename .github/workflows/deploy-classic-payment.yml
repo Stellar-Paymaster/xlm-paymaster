@@ -41,10 +41,10 @@ jobs:
         run: npm run build
         env:
           VITE_HORIZON_URL: https://horizon-testnet.stellar.org
-          VITE_FLUID_SERVER_URL: https://testnet.fluid.dev
+          VITE_PAYMASTER_SERVER_URL: https://testnet.xlm-paymaster.com
           VITE_NETWORK_PASSPHRASE: 'Test SDF Network ; September 2015'
           VITE_STELLAR_EXPERT_URL: https://stellar.expert/explorer/testnet
-          VITE_BASE_URL: /fluid/react-classic-payment/
+          VITE_BASE_URL: /xlm-paymaster/react-classic-payment/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
