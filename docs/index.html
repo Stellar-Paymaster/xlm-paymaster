@@ -3,147 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluid Documentation Portal</title>
+    <title>XLM Paymaster Documentation Portal</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --fluid-blue: hsl(220, 91%, 54%);
-            --fluid-cyan: hsl(186, 94%, 41%);
-            --background: #ffffff;
-            --foreground: hsl(224, 71%, 4%);
-            --card-bg: #f8fafc;
-            --border: #e2e8f0;
+            --primary-glow: radial-gradient(circle, rgba(2, 132, 199, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            --accent-blue: hsl(200, 95%, 48%);
+            --accent-cyan: hsl(180, 90%, 45%);
+            --background: #0b0f19;
+            --card-bg: rgba(30, 41, 59, 0.4);
+            --card-hover-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(226, 232, 240, 0.08);
+            --border-hover: rgba(2, 132, 199, 0.4);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--background);
-            color: var(--foreground);
+            color: var(--text-primary);
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glow Background Effect */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            top: -200px;
+            left: calc(50% - 400px);
+            background: var(--primary-glow);
+            z-index: 0;
+            pointer-events: none;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 90%;
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 2rem;
+            z-index: 1;
         }
 
         header {
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
         }
 
         h1 {
-            font-size: 3rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
             margin: 0;
-            background: linear-gradient(135deg, var(--fluid-blue), var(--fluid-cyan));
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-blue) 70%, var(--accent-cyan) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .tagline {
+            display: inline-block;
+            background: rgba(2, 132, 199, 0.1);
+            border: 1px solid rgba(2, 132, 199, 0.2);
+            color: #38bdf8;
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         p.subtitle {
-            font-size: 1.2rem;
-            color: #64748b;
-            margin-top: 0.5rem;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 1rem auto 0 auto;
+            line-height: 1.6;
+            font-weight: 300;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
             text-decoration: none;
             color: inherit;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1rem;
+            gap: 1.25rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .card:hover {
-            transform: translateY(-4px);
-            border-color: var(--fluid-blue);
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+            transform: translateY(-6px);
+            background: var(--card-hover-bg);
+            border-color: var(--border-hover);
+            box-shadow: 0 20px 25px -5px rgba(2, 132, 199, 0.1), 
+                        0 8px 10px -6px rgba(2, 132, 199, 0.1);
         }
 
         .card h2 {
+            font-family: 'Outfit', sans-serif;
             margin: 0;
-            font-size: 1.25rem;
-            color: var(--fluid-blue);
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.2s ease;
+        }
+
+        .card:hover h2 {
+            color: #38bdf8;
         }
 
         .card p {
             margin: 0;
-            font-size: 0.9rem;
-            color: #64748b;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
         .icon {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            background: white;
-            color: var(--fluid-blue);
-            font-size: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            background: rgba(2, 132, 199, 0.1);
+            color: #38bdf8;
+            font-size: 1.75rem;
+            border: 1px solid rgba(2, 132, 199, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .icon {
+            background: rgba(2, 132, 199, 0.2);
+            transform: scale(1.05);
         }
 
         footer {
-            margin-top: 4rem;
-            font-size: 0.875rem;
-            color: #94a3b8;
+            margin-top: 5rem;
+            font-size: 0.85rem;
+            color: #475569;
+            border-top: 1px solid rgba(226, 232, 240, 0.05);
+            padding-top: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        footer a:hover {
+            color: #38bdf8;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Fluid Docs</h1>
-            <p class="subtitle">Automated Documentation Portal</p>
+            <span class="tagline">Developer Portal</span>
+            <h1>XLM Paymaster Docs</h1>
+            <p class="subtitle">Stellar transaction fee sponsorship engine & documentation hub.</p>
         </header>
 
         <div class="grid">
             <a href="client/index.html" class="card">
                 <div class="icon">📦</div>
                 <h2>Client SDK</h2>
-                <p>TypeScript library for Stellar fee sponsorship</p>
+                <p>TypeScript library for seamless client-side Stellar fee sponsorship integration.</p>
             </a>
             <a href="server/index.html" class="card">
                 <div class="icon">☁️</div>
                 <h2>Server API</h2>
-                <p>Backend API and transaction orchestration</p>
+                <p>Backend API specification, endpoint controllers, and transaction signers.</p>
             </a>
             <a href="dashboard/index.html" class="card">
                 <div class="icon">📊</div>
-                <h2>Dashboard</h2>
-                <p>Admin interface for management and monitoring</p>
+                <h2>Admin Dashboard</h2>
+                <p>Enterprise console for usage charts, key rotations, and quota management.</p>
             </a>
-            <a href="rust/fluid_core/index.html" class="card">
+            <a href="rust/xlm_paymaster_core/index.html" class="card">
                 <div class="icon">🦀</div>
                 <h2>Rust Core</h2>
-                <p>Performance-critical core components</p>
+                <p>Performance-critical ledger state caching and cryptographic validation modules.</p>
             </a>
         </div>
 
         <footer>
-            &copy; 2026 Fluid Project. Generated from source comments.
+            &copy; 2026 XLM Paymaster. Built for the Stellar network. View the <a href="https://github.com/Stellar-Paymaster/xlm-paymaster">GitHub Repository</a>.
         </footer>
     </div>
 </body>
