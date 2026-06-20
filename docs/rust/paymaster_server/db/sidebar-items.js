@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["create_pool"],"struct":["ApiKey","ApiKeyRepo","SponsoredTransaction","SponsoredTransactionRepo","Tenant","TenantRepo","Transaction","TransactionRepo"]};

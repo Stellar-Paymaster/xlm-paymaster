@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["API_KEYS","FAILURE_THRESHOLD","REVALIDATION_INTERVAL_SECS"],"fn":["decode_secret","iso_now","now_ms","utc_day_start_ms"],"struct":["ApiKeyConfig","AppState","HealthFeePayer","RateLimitEntry","RateLimitResult","RateLimiter","SignerAccount","SignerLease","SignerPool","SponsoredTransactionRecord","TransactionRecord"]};

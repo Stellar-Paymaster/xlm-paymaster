@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["CongestionLevel"],"fn":["calculate_fee"],"struct":["FeeCalculator","FeeInput","FeeResult"]};

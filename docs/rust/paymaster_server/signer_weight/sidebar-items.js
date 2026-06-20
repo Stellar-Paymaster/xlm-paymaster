@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["SignerWeightError"],"fn":["inner_source_account_id","muxed_account_to_account_id","signature_hint_matches","total_signature_weight","validate_inner_envelope_signer_weight","validate_transaction_envelope_signer_weight","weight_for_hint"],"struct":["AccountThresholds","HorizonAccountAuth","HorizonSigner"]};

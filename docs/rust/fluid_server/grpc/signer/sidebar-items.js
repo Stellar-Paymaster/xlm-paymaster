@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["signer_service_server"],"struct":["SignRequest","SignResponse"]};

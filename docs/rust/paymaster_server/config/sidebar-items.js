@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["HorizonSelectionStrategy"],"fn":["env_parse","fetch_secrets_from_vault","load_config","parse_csv_env"],"struct":["Config"]};

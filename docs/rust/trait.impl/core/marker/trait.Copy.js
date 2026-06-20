@@ -1,9 +1,0 @@
-(function() {
-    const implementors = Object.fromEntries([["fluid_server",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/marker/trait.Copy.html\" title=\"trait core::marker::Copy\">Copy</a> for <a class=\"enum\" href=\"fluid_server/config/enum.HorizonSelectionStrategy.html\" title=\"enum fluid_server::config::HorizonSelectionStrategy\">HorizonSelectionStrategy</a>",0],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/marker/trait.Copy.html\" title=\"trait core::marker::Copy\">Copy</a> for <a class=\"enum\" href=\"fluid_server/fee_calculator/enum.CongestionLevel.html\" title=\"enum fluid_server::fee_calculator::CongestionLevel\">CongestionLevel</a>",0],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/marker/trait.Copy.html\" title=\"trait core::marker::Copy\">Copy</a> for <a class=\"enum\" href=\"fluid_server/logging/enum.LogProvider.html\" title=\"enum fluid_server::logging::LogProvider\">LogProvider</a>",0]]],["paymaster_server",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/marker/trait.Copy.html\" title=\"trait core::marker::Copy\">Copy</a> for <a class=\"enum\" href=\"paymaster_server/config/enum.HorizonSelectionStrategy.html\" title=\"enum paymaster_server::config::HorizonSelectionStrategy\">HorizonSelectionStrategy</a>",0],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.96.0/core/marker/trait.Copy.html\" title=\"trait core::marker::Copy\">Copy</a> for <a class=\"enum\" href=\"paymaster_server/logging/enum.LogProvider.html\" title=\"enum paymaster_server::logging::LogProvider\">LogProvider</a>",0]]]]);
-    if (window.register_implementors) {
-        window.register_implementors(implementors);
-    } else {
-        window.pending_implementors = implementors;
-    }
-})()
-//{"start":59,"fragment_lengths":[933,644]}

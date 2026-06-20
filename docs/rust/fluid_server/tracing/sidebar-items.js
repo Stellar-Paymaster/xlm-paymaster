@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["TRACEPARENT_HEADER","TRACESTATE_HEADER"],"fn":["extract_span_context","inject_traceparent","record_trace_ids"],"struct":["SpanContext","SpanId","TraceId"]};

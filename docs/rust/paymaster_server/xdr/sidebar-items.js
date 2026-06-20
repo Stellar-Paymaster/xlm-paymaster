@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["MAX_XDR_INPUT_BYTES"],"enum":["ParsedTransaction","XdrError"],"fn":["log_xdr_breakdown","parse_xdr","parse_xdr_from_bytes","parse_xdr_zero_copy","summarize_transaction","validate_xdr_input"],"struct":["TransactionSummary","ZeroCopyDecoder"]};

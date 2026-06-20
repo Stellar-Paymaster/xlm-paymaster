@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["HorizonSelectionStrategy"],"fn":["load_config"],"struct":["Config"]};

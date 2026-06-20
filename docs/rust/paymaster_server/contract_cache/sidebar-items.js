@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["CONTRACT_CACHE_TTL_SECS"],"struct":["CacheEntry","ContractCache","ContractCacheStatsResponse","ContractDefinition","FootprintSchema","UpsertDefinitionRequest","UpsertFootprintRequest"]};

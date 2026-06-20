@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["benchmark_xdr_parsing"],"struct":["MemoryStats","TrackingAllocator"]};

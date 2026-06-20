@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["handle_ai_query","parse_nl_query"],"struct":["QueryFilters","QueryRequest"]};
