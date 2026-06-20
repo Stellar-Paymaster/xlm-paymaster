@@ -76,7 +76,7 @@ The admin dashboard includes an always-available support widget in the bottom-ri
 
 - Selected local docs from the repository and server quickstart
 - Current node configuration and live health metadata when available
-- The latest 100 transactions from the admin API when `FLUID_SERVER_URL` and `FLUID_ADMIN_TOKEN` are configured
+- The latest 100 transactions from the admin API when `PAYMASTER_SERVER_URL` and `PAYMASTER_ADMIN_TOKEN` are configured
 
 Conversation history is persisted in `sessionStorage` per admin browser session, so reloading or moving between admin pages keeps the current thread.
 

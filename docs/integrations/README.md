@@ -26,5 +26,5 @@ The user's signature is on the **inner** transaction; the fee-payer's signature 
 
 1. Copy [`docs/adr/template.md`](../adr/template.md) as a starting point, or use the pattern above.
 2. Include a complete working code example (TypeScript preferred).
-3. Document any relevant configuration knobs (`FLUID_RATE_LIMIT_MAX`, `FLUID_FEE_MULTIPLIER`, etc.).
+3. Document any relevant configuration knobs (`PAYMASTER_RATE_LIMIT_MAX`, `PAYMASTER_FEE_MULTIPLIER`, etc.).
 4. Open a PR targeting `main`.

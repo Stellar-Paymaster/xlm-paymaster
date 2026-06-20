@@ -137,7 +137,7 @@ export function signTransactionWithNode(
 
 function getGrpcEngineSignerClient(config: Config): GrpcEngineSignerClient {
   if (!config.grpcEngine) {
-    throw new Error("gRPC engine signing requested without FLUID_GRPC_ENGINE_ADDRESS");
+    throw new Error("gRPC engine signing requested without PAYMASTER_GRPC_ENGINE_ADDRESS");
   }
 
   if (!grpcEngineSignerClient) {

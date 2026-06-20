@@ -42,8 +42,8 @@ export interface ApiKeysPageData {
 }
 
 export async function getApiKeysPageData(): Promise<ApiKeysPageData> {
-  const serverUrl = process.env.FLUID_SERVER_URL?.replace(/\/$/, "") ?? "";
-  const adminToken = process.env.FLUID_ADMIN_TOKEN ?? "";
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.replace(/\/$/, "") ?? "";
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN ?? "";
 
   if (!serverUrl || !adminToken) {
     return { keys: SAMPLE_API_KEYS, source: "sample", serverUrl, adminToken };

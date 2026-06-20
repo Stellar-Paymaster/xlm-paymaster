@@ -16,6 +16,6 @@ paths = [
   '''^server/src/utils/settlementVerifier\.test\.ts$''',
   '''^server/src/benchmarks/''',
   '''^server/benches/''',
-  '''^fluid-server/wasm-demo/''',
-  '''^fluid-server/src/lib\.rs$''',
+  '''^paymaster-server/wasm-demo/''',
+  '''^paymaster-server/src/lib\.rs$''',
 ]

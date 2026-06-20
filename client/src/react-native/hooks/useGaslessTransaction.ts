@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { useFluidClient } from "../FluidProvider";
-import { FeeBumpResponse } from "../../FluidClient";
+import { usePaymasterClient } from "../PaymasterProvider";
+import { FeeBumpResponse } from "../../PaymasterClient";
 
 export type GaslessTransactionStatus =
   | "idle"
@@ -39,7 +39,7 @@ export interface UseGaslessTransactionOptions {
  */
 export function useGaslessTransaction(options: UseGaslessTransactionOptions = {}) {
   const { submit = true, onSuccess, onError } = options;
-  const client = useFluidClient();
+  const client = usePaymasterClient();
 
   const [state, setState] = useState<GaslessTransactionState>({
     status: "idle",

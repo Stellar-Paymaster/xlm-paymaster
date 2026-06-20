@@ -1,4 +1,4 @@
-package fluid
+package paymaster
 
 import (
 	"bytes"
@@ -11,14 +11,14 @@ import (
 	"github.com/stellar/go/txnbuild"
 )
 
-// Client represents a Fluid fee-bump client.
+// Client represents a Paymaster fee-bump client.
 type Client struct {
 	BaseURL    string
 	APIKey     string
 	HTTPClient *http.Client
 }
 
-// NewClient initializes a new Fluid client.
+// NewClient initializes a new Paymaster client.
 func NewClient(baseURL, apiKey string) *Client {
 	return &Client{
 		BaseURL:    baseURL,
@@ -34,7 +34,7 @@ type FeeBumpRequest struct {
 	Token  string `json:"token,omitempty"`
 }
 
-// FeeBumpResponse defines the result returned by the Fluid server.
+// FeeBumpResponse defines the result returned by the Paymaster server.
 type FeeBumpResponse struct {
 	XDR      string `json:"xdr"`
 	Status   string `json:"status"`
@@ -42,7 +42,7 @@ type FeeBumpResponse struct {
 	FeePayer string `json:"fee_payer,omitempty"`
 }
 
-// ErrorResponse represents an error returned by the Fluid server.
+// ErrorResponse represents an error returned by the Paymaster server.
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Status  int    `json:"status"`
@@ -50,7 +50,7 @@ type ErrorResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-// RequestFeeBump sends a signed transaction XDR to the Fluid server to be fee-bumped.
+// RequestFeeBump sends a signed transaction XDR to the Paymaster server to be fee-bumped.
 func (c *Client) RequestFeeBump(ctx context.Context, signedXDR string, submit bool) (*FeeBumpResponse, error) {
 	return c.RequestFeeBumpWithToken(ctx, signedXDR, submit, "")
 }
@@ -98,7 +98,7 @@ func (c *Client) RequestFeeBumpWithToken(ctx context.Context, signedXDR string, 
 		if errResp.Message != "" {
 			errMsg = errResp.Message
 		}
-		return nil, fmt.Errorf("fluid server error (%s): %s (status %d)", errResp.Code, errMsg, resp.StatusCode)
+		return nil, fmt.Errorf("paymaster server error (%s): %s (status %d)", errResp.Code, errMsg, resp.StatusCode)
 	}
 
 	var feeBumpResp FeeBumpResponse

@@ -4,7 +4,7 @@
 
 The Affiliate Referral Program allows existing XLM Paymaster tenants to invite new developers to the platform. Each tenant receives a unique referral link. When a referred developer signs up, verifies their email, and completes their first successful fee-sponsorship bump, the referring tenant earns a 1 000-stroop XLM quota bonus. Tenants can view their referral history and bonus credits from a dedicated page in the developer portal.
 
-This feature is part of Phase 9: Developer Portal and is implemented entirely within the Next.js 15 admin-dashboard, following the existing in-memory data-store pattern (no Prisma in the dashboard). The dashboard proxies quota-credit operations to the backend via `FLUID_SERVER_URL`.
+This feature is part of Phase 9: Developer Portal and is implemented entirely within the Next.js 15 admin-dashboard, following the existing in-memory data-store pattern (no Prisma in the dashboard). The dashboard proxies quota-credit operations to the backend via `PAYMASTER_SERVER_URL`.
 
 ---
 
@@ -14,13 +14,13 @@ This feature is part of Phase 9: Developer Portal and is implemented entirely wi
 - **Referral_Link**: A public URL of the form `{NEXT_PUBLIC_SITE_URL}/register?ref={Referral_Code}` that a tenant shares with prospective developers.
 - **Referrer**: The existing tenant whose Referral_Code was used during sign-up.
 - **Referred_User**: A new developer who registered using a Referral_Link.
-- **Attribution_Cookie**: An HTTP-only, short-lived cookie (`fluid_ref`) set when a visitor lands on the registration page with a valid `ref` query parameter.
+- **Attribution_Cookie**: An HTTP-only, short-lived cookie (`paymaster_ref`) set when a visitor lands on the registration page with a valid `ref` query parameter.
 - **Verified_Email**: The state of a Referred_User's account after they have clicked the confirmation link sent to their email address.
 - **First_Bump**: The first successful fee-sponsorship transaction submitted by a Referred_User after their email is verified.
 - **Quota_Bonus**: A one-time credit of 1 000 stroops added to the Referrer's XLM quota upon a qualifying First_Bump.
 - **Referral_Store**: The in-memory data store (`lib/referral-data.ts`) that persists referral codes, attributions, and bonus history for the lifetime of the server process.
 - **Referral_History_Page**: The tenant-facing page at `/referrals` that displays a tenant's Referral_Link, total bonuses earned, and a list of past referral events.
-- **Fluid_Server**: The backend service reachable at `FLUID_SERVER_URL` that owns tenant quota and processes bump transactions.
+- **Paymaster_Server**: The backend service reachable at `PAYMASTER_SERVER_URL` that owns tenant quota and processes bump transactions.
 
 ---
 
@@ -58,7 +58,7 @@ This feature is part of Phase 9: Developer Portal and is implemented entirely wi
 #### Acceptance Criteria
 
 1. WHEN a visitor loads the registration page with a `ref` query parameter, THE Registration_Handler SHALL validate the parameter against known Referral_Codes.
-2. WHEN the `ref` parameter matches a known Referral_Code, THE Registration_Handler SHALL set an HTTP-only `fluid_ref` Attribution_Cookie with a 30-day expiry containing the validated Referral_Code.
+2. WHEN the `ref` parameter matches a known Referral_Code, THE Registration_Handler SHALL set an HTTP-only `paymaster_ref` Attribution_Cookie with a 30-day expiry containing the validated Referral_Code.
 3. WHEN the `ref` parameter does not match any known Referral_Code, THE Registration_Handler SHALL ignore the parameter and SHALL NOT set the Attribution_Cookie.
 4. WHEN a new tenant account is created and an Attribution_Cookie is present, THE Registration_Handler SHALL record the association between the new tenant and the Referrer in the Referral_Store.
 5. WHEN a new tenant account is created without an Attribution_Cookie, THE Registration_Handler SHALL create the account with no referral attribution.
@@ -72,9 +72,9 @@ This feature is part of Phase 9: Developer Portal and is implemented entirely wi
 
 #### Acceptance Criteria
 
-1. WHEN a Referred_User's First_Bump is confirmed as successful by the Fluid_Server, THE Bonus_Handler SHALL credit 1 000 stroops to the Referrer's quota via the Fluid_Server API.
+1. WHEN a Referred_User's First_Bump is confirmed as successful by the Paymaster_Server, THE Bonus_Handler SHALL credit 1 000 stroops to the Referrer's quota via the Paymaster_Server API.
 2. THE Bonus_Handler SHALL credit the Quota_Bonus exactly once per Referred_User, regardless of how many subsequent bumps the Referred_User performs.
-3. WHEN the Fluid_Server returns an error while crediting the Quota_Bonus, THE Bonus_Handler SHALL log the error and SHALL NOT mark the referral as rewarded, so that the credit can be retried.
+3. WHEN the Paymaster_Server returns an error while crediting the Quota_Bonus, THE Bonus_Handler SHALL log the error and SHALL NOT mark the referral as rewarded, so that the credit can be retried.
 4. WHEN the Referred_User's email is not yet verified at the time of the First_Bump, THE Bonus_Handler SHALL NOT credit the Quota_Bonus.
 5. THE Bonus_Handler SHALL record the bonus event (referrer tenant ID, referred tenant ID, bonus amount in stroops, timestamp) in the Referral_Store.
 
@@ -110,12 +110,12 @@ This feature is part of Phase 9: Developer Portal and is implemented entirely wi
 
 ### Requirement 7: Proxy Route for Quota Credit
 
-**User Story:** As the system, I want the dashboard to proxy quota-credit requests to the Fluid_Server, so that the dashboard never directly mutates backend state and the existing proxy pattern is preserved.
+**User Story:** As the system, I want the dashboard to proxy quota-credit requests to the Paymaster_Server, so that the dashboard never directly mutates backend state and the existing proxy pattern is preserved.
 
 #### Acceptance Criteria
 
 1. THE Quota_Proxy SHALL expose a `POST /api/referrals/credit` route that accepts `{ referrerId: string, bonusStroops: number }`.
-2. WHEN the request is valid, THE Quota_Proxy SHALL forward the credit request to `{FLUID_SERVER_URL}/admin/tenants/{referrerId}/quota-bonus` using the `FLUID_ADMIN_TOKEN` header.
-3. WHEN the Fluid_Server responds with a non-2xx status, THE Quota_Proxy SHALL return the upstream status code and error body to the caller unchanged.
+2. WHEN the request is valid, THE Quota_Proxy SHALL forward the credit request to `{PAYMASTER_SERVER_URL}/admin/tenants/{referrerId}/quota-bonus` using the `PAYMASTER_ADMIN_TOKEN` header.
+3. WHEN the Paymaster_Server responds with a non-2xx status, THE Quota_Proxy SHALL return the upstream status code and error body to the caller unchanged.
 4. WHEN `referrerId` is missing or `bonusStroops` is not a positive integer, THE Quota_Proxy SHALL return HTTP 400 with a descriptive error message.
 5. THE Quota_Proxy route SHALL require admin authentication before processing any request.

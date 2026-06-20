@@ -26,9 +26,9 @@ We will use gRPC with Protocol Buffers over a mutual-TLS (mTLS) channel for all 
 
 - Proto definitions live in `/proto/` and are the single source of truth for the RPC contract.
 - Both sides present certificates signed by a private internal CA (`server/certs/`).
-- Certificate fingerprints are pinned via `FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256` and `FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256` environment variables to prevent MITM attacks even if the CA is compromised.
-- The Rust engine listens on `FLUID_GRPC_ENGINE_LISTEN_ADDR` (default `127.0.0.1:50051`).
-- The Node.js side uses the `@grpc/grpc-js` client configured via `FLUID_GRPC_ENGINE_*` environment variables.
+- Certificate fingerprints are pinned via `PAYMASTER_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256` and `PAYMASTER_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256` environment variables to prevent MITM attacks even if the CA is compromised.
+- The Rust engine listens on `PAYMASTER_GRPC_ENGINE_LISTEN_ADDR` (default `127.0.0.1:50051`).
+- The Node.js side uses the `@grpc/grpc-js` client configured via `PAYMASTER_GRPC_ENGINE_*` environment variables.
 
 See [`docs/grpc-mtls.md`](../grpc-mtls.md) for the full certificate provisioning guide.
 

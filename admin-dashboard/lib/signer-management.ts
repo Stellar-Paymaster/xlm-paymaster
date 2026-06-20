@@ -66,11 +66,11 @@ const SAMPLE_SIGNERS: ManagedSigner[] = [
 ];
 
 function getServerUrl() {
-  return process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "") || null;
+  return process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "") || null;
 }
 
 function getAdminToken() {
-  return process.env.FLUID_ADMIN_TOKEN?.trim() || null;
+  return process.env.PAYMASTER_ADMIN_TOKEN?.trim() || null;
 }
 
 function normalizeBalance(value: string | null) {

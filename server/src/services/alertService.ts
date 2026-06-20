@@ -101,7 +101,7 @@ function parsePositiveInt(value: string | undefined): number | undefined {
 
 function resolveDashboardUrl(env: NodeJS.ProcessEnv = process.env): string | undefined {
   const explicit =
-    env.FLUID_ALERT_DASHBOARD_URL?.trim() ||
+    env.PAYMASTER_ALERT_DASHBOARD_URL?.trim() ||
     env.DASHBOARD_URL?.trim() ||
     undefined;
 
@@ -109,7 +109,7 @@ function resolveDashboardUrl(env: NodeJS.ProcessEnv = process.env): string | und
     return explicit;
   }
 
-  const firstAllowedOrigin = parseCommaSeparatedList(env.FLUID_ALLOWED_ORIGINS)[0];
+  const firstAllowedOrigin = parseCommaSeparatedList(env.PAYMASTER_ALLOWED_ORIGINS)[0];
   if (!firstAllowedOrigin) {
     return undefined;
   }
@@ -125,10 +125,10 @@ function resolveEmailTransportConfig(
   const resendApiKey = env.RESEND_API_KEY?.trim();
   const resendFrom =
     env.RESEND_EMAIL_FROM?.trim() ||
-    env.FLUID_ALERT_EMAIL_FROM?.trim() ||
+    env.PAYMASTER_ALERT_EMAIL_FROM?.trim() ||
     undefined;
   const resendTo = parseCommaSeparatedList(
-    env.RESEND_EMAIL_TO || env.FLUID_ALERT_EMAIL_TO,
+    env.RESEND_EMAIL_TO || env.PAYMASTER_ALERT_EMAIL_TO,
   );
 
   if (resendApiKey && resendFrom && resendTo.length > 0) {
@@ -150,9 +150,9 @@ function resolveEmailTransportConfig(
     };
   }
 
-  const host = env.FLUID_ALERT_SMTP_HOST?.trim();
-  const from = env.FLUID_ALERT_EMAIL_FROM?.trim();
-  const to = parseCommaSeparatedList(env.FLUID_ALERT_EMAIL_TO);
+  const host = env.PAYMASTER_ALERT_SMTP_HOST?.trim();
+  const from = env.PAYMASTER_ALERT_EMAIL_FROM?.trim();
+  const to = parseCommaSeparatedList(env.PAYMASTER_ALERT_EMAIL_TO);
 
   if (!host || !from || to.length === 0) {
     return undefined;
@@ -163,11 +163,11 @@ function resolveEmailTransportConfig(
     from,
     host,
     kind: "smtp",
-    pass: env.FLUID_ALERT_SMTP_PASS?.trim() || undefined,
-    port: parsePositiveInt(env.FLUID_ALERT_SMTP_PORT) ?? 587,
-    secure: env.FLUID_ALERT_SMTP_SECURE === "true",
+    pass: env.PAYMASTER_ALERT_SMTP_PASS?.trim() || undefined,
+    port: parsePositiveInt(env.PAYMASTER_ALERT_SMTP_PORT) ?? 587,
+    secure: env.PAYMASTER_ALERT_SMTP_SECURE === "true",
     to,
-    user: env.FLUID_ALERT_SMTP_USER?.trim() || undefined,
+    user: env.PAYMASTER_ALERT_SMTP_USER?.trim() || undefined,
   };
 }
 
@@ -178,7 +178,7 @@ export function resolveLowBalanceThresholdXlm(
   return (
     parseOptionalNumber(env.LOW_BALANCE_ALERT_XLM) ??
     fallback ??
-    parseOptionalNumber(env.FLUID_LOW_BALANCE_THRESHOLD_XLM)
+    parseOptionalNumber(env.PAYMASTER_LOW_BALANCE_THRESHOLD_XLM)
   );
 }
 
@@ -188,7 +188,7 @@ export function resolveLowBalanceCheckIntervalMs(
 ): number {
   return (
     parsePositiveInt(env.LOW_BALANCE_ALERT_CHECK_INTERVAL_MS) ??
-    parsePositiveInt(env.FLUID_LOW_BALANCE_CHECK_INTERVAL_MS) ??
+    parsePositiveInt(env.PAYMASTER_LOW_BALANCE_CHECK_INTERVAL_MS) ??
     fallback ??
     DEFAULT_LOW_BALANCE_CHECK_INTERVAL_MS
   );
@@ -200,7 +200,7 @@ export function resolveLowBalanceCooldownMs(
 ): number {
   const configured =
     parsePositiveInt(env.LOW_BALANCE_ALERT_COOLDOWN_MS) ??
-    parsePositiveInt(env.FLUID_LOW_BALANCE_ALERT_COOLDOWN_MS) ??
+    parsePositiveInt(env.PAYMASTER_LOW_BALANCE_ALERT_COOLDOWN_MS) ??
     fallback ??
     MIN_LOW_BALANCE_COOLDOWN_MS;
 
@@ -504,7 +504,7 @@ export class AlertService {
     payload: LowBalanceAlertPayload,
     transportConfig: EmailTransportConfig,
   ): Promise<void> {
-    const subject = `[Fluid] Low fee payer balance: ${payload.balanceXlm.toFixed(2)} XLM`;
+    const subject = `[Paymaster] Low fee payer balance: ${payload.balanceXlm.toFixed(2)} XLM`;
     const text = this.buildPlainTextMessage(payload);
     const html = this.buildHtmlMessage(payload);
 
@@ -563,7 +563,7 @@ export class AlertService {
 
   private buildPlainTextMessage(payload: LowBalanceAlertPayload): string {
     const lines = [
-      "Fluid low balance alert",
+      "Paymaster low balance alert",
       "",
       `Fee payer:       ${payload.accountPublicKey}`,
       `Current balance: ${payload.balanceXlm.toFixed(7)} XLM`,
@@ -593,7 +593,7 @@ export class AlertService {
       : "";
 
     return [
-      "<h2>Fluid low balance alert</h2>",
+      "<h2>Paymaster low balance alert</h2>",
       `<p><strong>Fee payer:</strong> ${escapeHtml(payload.accountPublicKey)}</p>`,
       `<p><strong>Current balance:</strong> ${payload.balanceXlm.toFixed(7)} XLM</p>`,
       `<p><strong>Threshold:</strong> ${payload.thresholdXlm.toFixed(7)} XLM</p>`,

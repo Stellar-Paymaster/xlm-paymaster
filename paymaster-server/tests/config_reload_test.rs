@@ -1,5 +1,5 @@
-use fluid_server::config::Config;
-use fluid_server::state::AppState;
+use paymaster_server::config::Config;
+use paymaster_server::state::AppState;
 
 #[tokio::test]
 async fn live_config_reload_updates_base_fee() {
@@ -9,7 +9,7 @@ async fn live_config_reload_updates_base_fee() {
         fee_multiplier: 1.0,
         global_rate_limit_max: 10,
         global_rate_limit_window_ms: 60_000,
-        horizon_selection_strategy: fluid_server::config::HorizonSelectionStrategy::Priority,
+        horizon_selection_strategy: paymaster_server::config::HorizonSelectionStrategy::Priority,
         horizon_urls: vec!["http://localhost:8000".to_string()],
         max_operations_per_envelope: 100,
         network_passphrase: "Test SDF Network ; September 2015".to_string(),

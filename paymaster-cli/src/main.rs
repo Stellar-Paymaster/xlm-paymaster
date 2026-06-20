@@ -4,10 +4,10 @@ use std::thread;
 use std::time::Duration;
 
 #[derive(Parser)]
-#[command(name = "fluid-cli")]
+#[command(name = "paymaster-cli")]
 #[command(author = "Victor Okeke")]
 #[command(version = "0.1.0")]
-#[command(about = "CLI tool to manage the Fluid server", long_about = None)]
+#[command(about = "CLI tool to manage the Paymaster server", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

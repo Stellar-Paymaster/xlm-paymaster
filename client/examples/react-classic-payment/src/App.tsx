@@ -4,7 +4,7 @@ import {
   signTransactionWithFreighter,
   isFreighterAvailable
 } from '../../src/freighter';
-import { FluidClient } from 'xlm-paymaster-client';
+import { PaymasterClient } from 'xlm-paymaster-client';
 import * as StellarSdk from 'stellar-sdk';
 import './App.css';
 
@@ -33,7 +33,7 @@ function App() {
 
   // Environment variables
   const horizonUrl = import.meta.env.VITE_HORIZON_URL || 'https://horizon-testnet.stellar.org';
-  const fluidServerUrl = import.meta.env.VITE_FLUID_SERVER_URL || 'https://testnet.fluid.dev';
+  const paymasterServerUrl = import.meta.env.VITE_PAYMASTER_SERVER_URL || 'https://testnet.paymaster.dev';
   const networkPassphrase = import.meta.env.VITE_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015';
   const stellarExpertUrl = import.meta.env.VITE_STELLAR_EXPERT_URL || 'https://stellar.expert/explorer/testnet';
 
@@ -92,8 +92,8 @@ function App() {
       }));
 
       const horizonServer = new StellarSdk.Horizon.Server(horizonUrl);
-      const fluidClient = new FluidClient({
-        serverUrl: fluidServerUrl,
+      const paymasterClient = new PaymasterClient({
+        serverUrl: paymasterServerUrl,
         horizonUrl: horizonUrl,
       });
 
@@ -123,8 +123,8 @@ function App() {
         networkPassphrase
       );
 
-      // Request fee-bump from Fluid
-      const response = await fetch(`${fluidServerUrl}/fee-bump`, {
+      // Request fee-bump from Paymaster
+      const response = await fetch(`${paymasterServerUrl}/fee-bump`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ function App() {
     <div className="container">
       <div className="card">
         <div className="header">
-          <h1>💧 Fluid Gasless Payment</h1>
+          <h1>💧 Paymaster Gasless Payment</h1>
           <p>Send XLM with zero transaction fees</p>
         </div>
 

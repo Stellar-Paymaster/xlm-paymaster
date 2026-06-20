@@ -1,7 +1,7 @@
 import { TenantOnboardingWizard } from "@/components/TenantOnboardingWizard";
 
 export const metadata = {
-  title: "Tenant Onboarding - Fluid Admin",
+  title: "Tenant Onboarding - Paymaster Admin",
 };
 
 export default function OnboardingPage() {

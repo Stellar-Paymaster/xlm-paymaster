@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const serverUrl = process.env.FLUID_SERVER_URL ?? "http://localhost:3000";
+  const serverUrl = process.env.PAYMASTER_SERVER_URL ?? "http://localhost:3000";
   const forwardedFor = req.headers.get("x-forwarded-for");
   const realIp = req.headers.get("x-real-ip");
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(data, { status: upstream.status });
   } catch {
     return NextResponse.json(
-      { error: "Could not reach the Fluid server. Please try again later." },
+      { error: "Could not reach the Paymaster server. Please try again later." },
       { status: 502 },
     );
   }

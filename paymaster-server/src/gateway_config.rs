@@ -29,13 +29,13 @@ pub struct GatewayConfig {
 impl GatewayConfig {
     /// Load gateway config from environment, falling back to demo API key tiers.
     pub fn from_env() -> Self {
-        let global_rate_limit_max = env_parse("FLUID_GATEWAY_GLOBAL_RATE_LIMIT_MAX", 100_u32);
+        let global_rate_limit_max = env_parse("PAYMASTER_GATEWAY_GLOBAL_RATE_LIMIT_MAX", 100_u32);
         let global_rate_limit_window_ms =
-            env_parse("FLUID_GATEWAY_GLOBAL_RATE_LIMIT_WINDOW_MS", 60_000_u64);
-        let trusted_gateway_header = std::env::var("FLUID_GATEWAY_TRUSTED_HEADER")
+            env_parse("PAYMASTER_GATEWAY_GLOBAL_RATE_LIMIT_WINDOW_MS", 60_000_u64);
+        let trusted_gateway_header = std::env::var("PAYMASTER_GATEWAY_TRUSTED_HEADER")
             .unwrap_or_else(|_| "x-envoy-auth-status".to_string());
         let enforce_gateway_auth =
-            env_parse("FLUID_GATEWAY_ENFORCE_AUTH", false);
+            env_parse("PAYMASTER_GATEWAY_ENFORCE_AUTH", false);
 
         Self {
             global_rate_limit_max,
@@ -95,7 +95,7 @@ impl GatewayConfig {
 fn default_api_key_tiers() -> Vec<GatewayRateLimitTier> {
     vec![
         GatewayRateLimitTier {
-            api_key: "fluid-free-demo-key".to_string(),
+            api_key: "paymaster-free-demo-key".to_string(),
             tenant_id: "tenant-demo-free".to_string(),
             tier: "free".to_string(),
             max_requests: 2,
@@ -103,7 +103,7 @@ fn default_api_key_tiers() -> Vec<GatewayRateLimitTier> {
             daily_quota_stroops: 200,
         },
         GatewayRateLimitTier {
-            api_key: "fluid-pro-demo-key".to_string(),
+            api_key: "paymaster-pro-demo-key".to_string(),
             tenant_id: "tenant-demo-pro".to_string(),
             tier: "pro".to_string(),
             max_requests: 5,
@@ -133,11 +133,11 @@ mod tests {
     #[test]
     fn finds_demo_api_key_tiers() {
         let config = GatewayConfig::from_env();
-        let free = config.find_tier("fluid-free-demo-key").unwrap();
+        let free = config.find_tier("paymaster-free-demo-key").unwrap();
         assert_eq!(free.max_requests, 2);
         assert_eq!(free.tier, "free");
 
-        let pro = config.find_tier("fluid-pro-demo-key").unwrap();
+        let pro = config.find_tier("paymaster-pro-demo-key").unwrap();
         assert_eq!(pro.max_requests, 5);
     }
 
@@ -145,7 +145,7 @@ mod tests {
     fn rejects_unknown_api_keys() {
         let config = GatewayConfig::from_env();
         assert!(!config.is_api_key_allowed("unknown-key"));
-        assert!(config.is_api_key_allowed("fluid-free-demo-key"));
+        assert!(config.is_api_key_allowed("paymaster-free-demo-key"));
     }
 
     #[test]
@@ -192,12 +192,12 @@ mod tests {
     }
 
     #[test]
-    fn tier_rate_limits_match_fluid_server_defaults() {
+    fn tier_rate_limits_match_paymaster_server_defaults() {
         let config = GatewayConfig::from_env();
-        let free = config.find_tier("fluid-free-demo-key").unwrap();
-        let pro = config.find_tier("fluid-pro-demo-key").unwrap();
+        let free = config.find_tier("paymaster-free-demo-key").unwrap();
+        let pro = config.find_tier("paymaster-pro-demo-key").unwrap();
 
-        // Must stay in sync with fluid-server/src/state.rs API_KEYS
+        // Must stay in sync with paymaster-server/src/state.rs API_KEYS
         assert_eq!(free.max_requests, 2);
         assert_eq!(pro.max_requests, 5);
         assert_eq!(free.window_ms, 60_000);

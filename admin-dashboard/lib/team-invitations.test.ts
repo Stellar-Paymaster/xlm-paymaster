@@ -9,8 +9,8 @@ import {
 
 describe("team invitations", () => {
   it("normalizes and validates invitation email", () => {
-    expect(normalizeInvitationEmail("  Admin@Fluid.dev ")).toBe("admin@fluid.dev");
-    expect(isValidInvitationEmail("admin@fluid.dev")).toBe(true);
+    expect(normalizeInvitationEmail("  Admin@Paymaster.dev ")).toBe("admin@paymaster.dev");
+    expect(isValidInvitationEmail("admin@paymaster.dev")).toBe(true);
     expect(isValidInvitationEmail("invalid-email")).toBe(false);
   });
 
@@ -22,18 +22,18 @@ describe("team invitations", () => {
 
   it("creates invitation links with expiry and token", () => {
     const invitation = createTeamInvitation({
-      email: "ops@fluid.dev",
+      email: "ops@paymaster.dev",
       role: "ADMIN",
-      invitedBy: "owner@fluid.dev",
+      invitedBy: "owner@paymaster.dev",
       ttlHours: 24,
       now: new Date("2026-04-27T12:00:00Z"),
-      appOrigin: "https://dashboard.fluid.dev",
+      appOrigin: "https://dashboard.paymaster.dev",
     });
 
-    expect(invitation.email).toBe("ops@fluid.dev");
+    expect(invitation.email).toBe("ops@paymaster.dev");
     expect(invitation.role).toBe("ADMIN");
     expect(invitation.expiresAt).toBe("2026-04-28T12:00:00.000Z");
-    expect(invitation.inviteUrl.startsWith("https://dashboard.fluid.dev/signup?invite=")).toBe(true);
+    expect(invitation.inviteUrl.startsWith("https://dashboard.paymaster.dev/signup?invite=")).toBe(true);
   });
 
   it("detects expiration state", () => {

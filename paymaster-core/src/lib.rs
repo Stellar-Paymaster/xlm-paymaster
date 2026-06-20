@@ -1,6 +1,6 @@
-//! # fluid-core
+//! # paymaster-core
 //!
-//! Core signing and transaction building logic for [Stellar Fluid](https://github.com/Stellar-Fluid/fluid).
+//! Core signing and transaction building logic for [Stellar Paymaster](https://github.com/Stellar-Paymaster/paymaster).
 //!
 //! This crate provides the foundational types and operations for building and signing
 //! Stellar fee-bump transactions. Fee-bump transactions allow a third party to pay
@@ -10,8 +10,8 @@
 //! ## Quick Start
 //!
 //! ```no_run
-//! use fluid_core::{TransactionBuilder, Ed25519Signer, Signer, Keypair};
-//! use fluid_core::{NetworkPassphrase, FeeConfig};
+//! use paymaster_core::{TransactionBuilder, Ed25519Signer, Signer, Keypair};
+//! use paymaster_core::{NetworkPassphrase, FeeConfig};
 //!
 //! // Create a signer from a secret key (in practice, load from secure storage)
 //! let keypair = Keypair::from_raw_keys([1u8; 32], [2u8; 32]);
@@ -43,7 +43,7 @@ pub mod transaction_builder;
 pub mod types;
 
 // Re-exports for convenient access
-pub use error::FluidError;
+pub use error::PaymasterError;
 
 pub use signer::{
     AsyncSigner,

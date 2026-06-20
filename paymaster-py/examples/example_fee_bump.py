@@ -1,17 +1,17 @@
-"""Example: request a fee-bump for a Stellar transaction using fluid-py.
+"""Example: request a fee-bump for a Stellar transaction using paymaster-py.
 
 This script demonstrates the typical integration with the stellar-sdk Python
-library.  It builds a minimal XDR transaction, hands it to FluidClient, and
-prints the fee-bumped envelope returned by the Fluid server.
+library.  It builds a minimal XDR transaction, hands it to PaymasterClient, and
+prints the fee-bumped envelope returned by the Paymaster server.
 
 Prerequisites
 -------------
-    pip install fluid-py stellar-sdk
+    pip install paymaster-py stellar-sdk
 
 Usage
 -----
-    # Against a local or staging Fluid server:
-    FLUID_SERVER_URL=http://localhost:3000 python example_fee_bump.py
+    # Against a local or staging Paymaster server:
+    PAYMASTER_SERVER_URL=http://localhost:3000 python example_fee_bump.py
 
     # Or edit the constants below directly.
 """
@@ -24,7 +24,7 @@ import sys
 # ---------------------------------------------------------------------------
 # Configuration — edit these or set the corresponding environment variables
 # ---------------------------------------------------------------------------
-FLUID_SERVER_URL: str = os.getenv("FLUID_SERVER_URL", "http://localhost:3000")
+PAYMASTER_SERVER_URL: str = os.getenv("PAYMASTER_SERVER_URL", "http://localhost:3000")
 NETWORK_PASSPHRASE: str = os.getenv(
     "STELLAR_NETWORK_PASSPHRASE", "Test SDF Network ; September 2015"
 )
@@ -106,9 +106,9 @@ def build_inner_xdr() -> str:
 # ---------------------------------------------------------------------------
 def main() -> None:
     """Request a fee-bump and print the result."""
-    from fluid_py import FluidClient, FluidClientConfig
+    from paymaster_py import PaymasterClient, PaymasterClientConfig
 
-    print(f"Fluid server : {FLUID_SERVER_URL}")
+    print(f"Paymaster server : {PAYMASTER_SERVER_URL}")
     print(f"Network      : {NETWORK_PASSPHRASE}\n")
 
     # 1. Build (or load) the inner transaction XDR
@@ -116,13 +116,13 @@ def main() -> None:
     inner_xdr = build_inner_xdr()
     print(f"Inner XDR    : {inner_xdr[:60]}…\n")
 
-    # 2. Create the FluidClient
-    config = FluidClientConfig(
-        server_url=FLUID_SERVER_URL,
+    # 2. Create the PaymasterClient
+    config = PaymasterClientConfig(
+        server_url=PAYMASTER_SERVER_URL,
         network_passphrase=NETWORK_PASSPHRASE,
         horizon_url=HORIZON_URL,
     )
-    client = FluidClient(config)
+    client = PaymasterClient(config)
     print(f"Client       : {client}\n")
 
     # 3. Request the fee-bump
@@ -140,7 +140,7 @@ def main() -> None:
     if response.submitted_via:
         print(f"Submitted  : {response.submitted_via}")
 
-    print("\nSuccess! fee-bump envelope received from Fluid server.")
+    print("\nSuccess! fee-bump envelope received from Paymaster server.")
 
 
 if __name__ == "__main__":

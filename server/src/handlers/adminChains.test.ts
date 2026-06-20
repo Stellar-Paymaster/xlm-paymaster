@@ -93,8 +93,8 @@ describe("adminChains handlers", () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    process.env.FLUID_ADMIN_TOKEN = ADMIN_TOKEN;
-    process.env.FLUID_SIGNER_ENCRYPTION_KEY = "test-encryption-key-32chars-long!!";
+    process.env.PAYMASTER_ADMIN_TOKEN = ADMIN_TOKEN;
+    process.env.PAYMASTER_SIGNER_ENCRYPTION_KEY = "test-encryption-key-32chars-long!!";
   });
 
   // ── Authorization ──────────────────────────────────────────────────────────

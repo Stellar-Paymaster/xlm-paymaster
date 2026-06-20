@@ -53,7 +53,7 @@ test("WCAGAudit audits negative tabIndexes for keyboard accessibility", () => {
 });
 
 test("WCAGAudit audits images for alt descriptive labels", () => {
-  const validHtml1 = `<img src="logo.png" alt="Fluid Logo" />`;
+  const validHtml1 = `<img src="logo.png" alt="Paymaster Logo" />`;
   const validHtml2 = `<img src="spacer.png" aria-hidden="true" />`;
   const invalidHtml = `<img src="ad.png" />`;
 

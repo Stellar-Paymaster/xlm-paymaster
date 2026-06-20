@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const AUTH_FILE = path.join(__dirname, ".auth", "admin.json");
 
 export default async function globalSetup(config: FullConfig): Promise<void> {
-  const email = process.env.ADMIN_EMAIL ?? "e2e-admin@fluid.dev";
+  const email = process.env.ADMIN_EMAIL ?? "e2e-admin@paymaster.dev";
   const password = process.env.ADMIN_PASSWORD ?? "e2e-test-password";
   const authSecret =
     process.env.AUTH_SECRET ?? "e2e-test-auth-secret-min-32-chars-long";

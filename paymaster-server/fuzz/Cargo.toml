@@ -1,5 +1,5 @@
 [package]
-name = "fluid-server-fuzz"
+name = "paymaster-server-fuzz"
 version = "0.0.0"
 publish = false
 edition = "2021"
@@ -10,7 +10,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 
-[dependencies.fluid-server]
+[dependencies.paymaster-server]
 path = ".."
 
 [[bin]]

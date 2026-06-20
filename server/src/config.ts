@@ -253,41 +253,41 @@ function loadVaultConfig(): VaultConfig | undefined {
 }
 
 function loadGrpcEngineConfig(): GrpcEngineConfig | undefined {
-  const address = process.env.FLUID_GRPC_ENGINE_ADDRESS?.trim();
+  const address = process.env.PAYMASTER_GRPC_ENGINE_ADDRESS?.trim();
   if (!address) {
     return undefined;
   }
 
   return {
     address,
-    secondaryAddress: process.env.FLUID_GRPC_ENGINE_SECONDARY_ADDRESS?.trim(),
+    secondaryAddress: process.env.PAYMASTER_GRPC_ENGINE_SECONDARY_ADDRESS?.trim(),
     pinnedServerCertSha256: parseCommaSeparatedList(
-      process.env.FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256,
+      process.env.PAYMASTER_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256,
     ).map((value) =>
       value.replace(/^sha256:/i, "").replace(/[^a-fA-F0-9]/g, "").toLowerCase(),
     ),
     serverName:
-      process.env.FLUID_GRPC_ENGINE_TLS_SERVER_NAME?.trim() ||
-      "fluid-grpc-engine.internal",
+      process.env.PAYMASTER_GRPC_ENGINE_TLS_SERVER_NAME?.trim() ||
+      "paymaster-grpc-engine.internal",
     tlsCaPath: parseRequiredPath(
-      process.env.FLUID_GRPC_ENGINE_CLIENT_CA_PATH,
-      "FLUID_GRPC_ENGINE_CLIENT_CA_PATH",
+      process.env.PAYMASTER_GRPC_ENGINE_CLIENT_CA_PATH,
+      "PAYMASTER_GRPC_ENGINE_CLIENT_CA_PATH",
     ),
     tlsCertPath: parseRequiredPath(
-      process.env.FLUID_GRPC_ENGINE_CLIENT_CERT_PATH,
-      "FLUID_GRPC_ENGINE_CLIENT_CERT_PATH",
+      process.env.PAYMASTER_GRPC_ENGINE_CLIENT_CERT_PATH,
+      "PAYMASTER_GRPC_ENGINE_CLIENT_CERT_PATH",
     ),
     tlsKeyPath: parseRequiredPath(
-      process.env.FLUID_GRPC_ENGINE_CLIENT_KEY_PATH,
-      "FLUID_GRPC_ENGINE_CLIENT_KEY_PATH",
+      process.env.PAYMASTER_GRPC_ENGINE_CLIENT_KEY_PATH,
+      "PAYMASTER_GRPC_ENGINE_CLIENT_KEY_PATH",
     ),
   };
 }
 
 function loadAlertEmailConfig(): AlertEmailConfig | undefined {
-  const host = process.env.FLUID_ALERT_SMTP_HOST?.trim();
-  const from = process.env.FLUID_ALERT_EMAIL_FROM?.trim();
-  const to = parseCommaSeparatedList(process.env.FLUID_ALERT_EMAIL_TO);
+  const host = process.env.PAYMASTER_ALERT_SMTP_HOST?.trim();
+  const from = process.env.PAYMASTER_ALERT_EMAIL_FROM?.trim();
+  const to = parseCommaSeparatedList(process.env.PAYMASTER_ALERT_EMAIL_TO);
 
   if (!host || !from || to.length === 0) {
     return undefined;
@@ -295,10 +295,10 @@ function loadAlertEmailConfig(): AlertEmailConfig | undefined {
 
   return {
     host,
-    port: parsePositiveInt(process.env.FLUID_ALERT_SMTP_PORT, 587),
-    secure: process.env.FLUID_ALERT_SMTP_SECURE === "true",
-    user: process.env.FLUID_ALERT_SMTP_USER?.trim() || undefined,
-    pass: process.env.FLUID_ALERT_SMTP_PASS?.trim() || undefined,
+    port: parsePositiveInt(process.env.PAYMASTER_ALERT_SMTP_PORT, 587),
+    secure: process.env.PAYMASTER_ALERT_SMTP_SECURE === "true",
+    user: process.env.PAYMASTER_ALERT_SMTP_USER?.trim() || undefined,
+    pass: process.env.PAYMASTER_ALERT_SMTP_PASS?.trim() || undefined,
     from,
     to,
   };
@@ -327,21 +327,21 @@ function loadTwilioConfig(): TwilioConfig | undefined {
 function loadAlertingConfig(): AlertingConfig {
   return {
     lowBalanceThresholdXlm: parseOptionalNumber(
-      process.env.FLUID_LOW_BALANCE_THRESHOLD_XLM,
+      process.env.PAYMASTER_LOW_BALANCE_THRESHOLD_XLM,
     ),
     criticalBalanceThresholdXlm: parseOptionalNumber(
       process.env.CRITICAL_BALANCE_XLM,
     ),
     checkIntervalMs: parsePositiveInt(
-      process.env.FLUID_LOW_BALANCE_CHECK_INTERVAL_MS,
+      process.env.PAYMASTER_LOW_BALANCE_CHECK_INTERVAL_MS,
       60 * 60 * 1000,
     ),
     cooldownMs: parsePositiveInt(
-      process.env.FLUID_LOW_BALANCE_ALERT_COOLDOWN_MS,
+      process.env.PAYMASTER_LOW_BALANCE_ALERT_COOLDOWN_MS,
       6 * 60 * 60 * 1000,
     ),
     slackWebhookUrl:
-      process.env.FLUID_ALERT_SLACK_WEBHOOK_URL?.trim() || undefined,
+      process.env.PAYMASTER_ALERT_SLACK_WEBHOOK_URL?.trim() || undefined,
     email: loadAlertEmailConfig(),
     twilio: loadTwilioConfig(),
   };
@@ -357,35 +357,35 @@ function loadDigestConfig(): DigestConfig {
 function loadWorkerConfig(): WorkerConfig {
   return {
     ledgerMonitorConcurrency: parseBoundedPositiveInt(
-      process.env.FLUID_LEDGER_MONITOR_CONCURRENCY ??
+      process.env.PAYMASTER_LEDGER_MONITOR_CONCURRENCY ??
         process.env.LEDGER_MONITOR_THREADS,
       5,
       1,
       64,
     ),
     memoryProfiling: {
-      enabled: parseBoolean(process.env.FLUID_MEMORY_PROFILING_ENABLED, false),
-      logIntervalMs: parsePositiveInt(process.env.FLUID_MEMORY_PROFILING_LOG_INTERVAL_MS, 60000),
-      heapSnapshotIntervalMs: parsePositiveInt(process.env.FLUID_MEMORY_PROFILING_SNAPSHOT_INTERVAL_MS, 3600000),
-      snapshotPath: process.env.FLUID_MEMORY_PROFILING_SNAPSHOT_PATH?.trim() || undefined,
+      enabled: parseBoolean(process.env.PAYMASTER_MEMORY_PROFILING_ENABLED, false),
+      logIntervalMs: parsePositiveInt(process.env.PAYMASTER_MEMORY_PROFILING_LOG_INTERVAL_MS, 60000),
+      heapSnapshotIntervalMs: parsePositiveInt(process.env.PAYMASTER_MEMORY_PROFILING_SNAPSHOT_INTERVAL_MS, 3600000),
+      snapshotPath: process.env.PAYMASTER_MEMORY_PROFILING_SNAPSHOT_PATH?.trim() || undefined,
     },
   };
 }
 
 function loadNetworkSimulationConfig(): NetworkSimulationConfig {
   return {
-    latencyMs: parsePositiveInt(process.env.FLUID_NETWORK_LATENCY_MS, 0),
+    latencyMs: parsePositiveInt(process.env.PAYMASTER_NETWORK_LATENCY_MS, 0),
     packetLossRate: Number.parseFloat(
-      process.env.FLUID_NETWORK_PACKET_LOSS_RATE || "0",
+      process.env.PAYMASTER_NETWORK_PACKET_LOSS_RATE || "0",
     ),
-    enabled: process.env.FLUID_NETWORK_SIMULATION_ENABLED === "true",
+    enabled: process.env.PAYMASTER_NETWORK_SIMULATION_ENABLED === "true",
   };
 }
 
 export function loadConfig(): Config {
-  const baseFee = parsePositiveInt(process.env.FLUID_BASE_FEE, 100);
+  const baseFee = parsePositiveInt(process.env.PAYMASTER_BASE_FEE, 100);
   const feeMultiplier = Number.parseFloat(
-    process.env.FLUID_FEE_MULTIPLIER || "2.0",
+    process.env.PAYMASTER_FEE_MULTIPLIER || "2.0",
   );
   const networkPassphrase =
     process.env.STELLAR_NETWORK_PASSPHRASE ||
@@ -403,31 +403,31 @@ export function loadConfig(): Config {
         : [];
 
   const horizonSelectionStrategy: HorizonSelectionStrategy =
-    process.env.FLUID_HORIZON_SELECTION === "round_robin"
+    process.env.PAYMASTER_HORIZON_SELECTION === "round_robin"
       ? "round_robin"
       : "priority";
   const signerSelectionStrategy: SignerSelectionStrategy =
-    process.env.FLUID_SIGNER_SELECTION === "round_robin"
+    process.env.PAYMASTER_SIGNER_SELECTION === "round_robin"
       ? "round_robin"
       : "least_used";
 
   const rateLimitWindowMs = parsePositiveInt(
-    process.env.FLUID_RATE_LIMIT_WINDOW_MS,
+    process.env.PAYMASTER_RATE_LIMIT_WINDOW_MS,
     60_000,
   );
-  const rateLimitMax = parsePositiveInt(process.env.FLUID_RATE_LIMIT_MAX, 5);
+  const rateLimitMax = parsePositiveInt(process.env.PAYMASTER_RATE_LIMIT_MAX, 5);
   const allowedOrigins = parseCommaSeparatedList(
-    process.env.FLUID_ALLOWED_ORIGINS,
+    process.env.PAYMASTER_ALLOWED_ORIGINS,
   );
-  const maxXdrSize = parsePositiveInt(process.env.FLUID_MAX_XDR_SIZE, 10_240);
+  const maxXdrSize = parsePositiveInt(process.env.PAYMASTER_MAX_XDR_SIZE, 10_240);
   const maxOperations = parsePositiveInt(
-    process.env.FLUID_MAX_OPERATIONS,
+    process.env.PAYMASTER_MAX_OPERATIONS,
     100,
   );
   const vault = loadVaultConfig();
   const grpcEngine = loadGrpcEngineConfig();
   const supportedAssets = parseSupportedAssets(
-    process.env.FLUID_SUPPORTED_ASSETS,
+    process.env.PAYMASTER_SUPPORTED_ASSETS,
   );
 
   const ipAllowlist = parseCommaSeparatedList(process.env.IP_ALLOWLIST);
@@ -466,17 +466,17 @@ export function loadConfig(): Config {
 
   // ---- Vault mode ----------------------------------------------------------
   const vaultSecretPaths = parseCommaSeparatedList(
-    process.env.FLUID_FEE_PAYER_VAULT_SECRET_PATHS,
+    process.env.PAYMASTER_FEE_PAYER_VAULT_SECRET_PATHS,
   );
   const vaultPublicKeys = parseCommaSeparatedList(
-    process.env.FLUID_FEE_PAYER_PUBLIC_KEYS,
+    process.env.PAYMASTER_FEE_PAYER_PUBLIC_KEYS,
   );
 
   if (vault && vaultSecretPaths.length > 0 && vaultPublicKeys.length > 0) {
     if (vaultSecretPaths.length !== vaultPublicKeys.length) {
       throw new Error(
-        "Vault mode requires FLUID_FEE_PAYER_VAULT_SECRET_PATHS and " +
-          "FLUID_FEE_PAYER_PUBLIC_KEYS to have the same number of entries",
+        "Vault mode requires PAYMASTER_FEE_PAYER_VAULT_SECRET_PATHS and " +
+          "PAYMASTER_FEE_PAYER_PUBLIC_KEYS to have the same number of entries",
       );
     }
 
@@ -508,10 +508,10 @@ export function loadConfig(): Config {
   }
 
   // ---- Env secret mode -----------------------------------------------------
-  const secretEnv = process.env.FLUID_FEE_PAYER_SECRET?.trim();
+  const secretEnv = process.env.PAYMASTER_FEE_PAYER_SECRET?.trim();
   if (!secretEnv) {
     throw new Error(
-      "No fee payer configured. Set FLUID_FEE_PAYER_SECRET or configure Vault.",
+      "No fee payer configured. Set PAYMASTER_FEE_PAYER_SECRET or configure Vault.",
     );
   }
 

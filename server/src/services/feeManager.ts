@@ -42,7 +42,7 @@ class FeeManager {
     this.intervalMs = Math.max(
       1_000,
       Number.parseInt(
-        process.env.FLUID_FEE_STATS_POLL_INTERVAL_MS ?? `${DEFAULT_POLL_INTERVAL_MS}`,
+        process.env.PAYMASTER_FEE_STATS_POLL_INTERVAL_MS ?? `${DEFAULT_POLL_INTERVAL_MS}`,
         10
       ) || DEFAULT_POLL_INTERVAL_MS
     );

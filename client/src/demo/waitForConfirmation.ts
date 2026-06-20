@@ -1,7 +1,7 @@
 import StellarSdk from "@stellar/stellar-sdk";
 import dotenv from "dotenv";
 
-import { FluidClient } from "../index";
+import { PaymasterClient } from "../index";
 
 dotenv.config();
 
@@ -10,11 +10,11 @@ async function main() {
     process.env.HORIZON_URL ?? "https://horizon-testnet.stellar.org";
   const networkPassphrase =
     process.env.NETWORK_PASSPHRASE ?? StellarSdk.Networks.TESTNET;
-  const fluidServerUrl =
-    process.env.FLUID_SERVER_URL ?? "http://localhost:3000";
+  const paymasterServerUrl =
+    process.env.PAYMASTER_SERVER_URL ?? "http://localhost:3000";
 
-  const client = new FluidClient({
-    serverUrl: fluidServerUrl,
+  const client = new PaymasterClient({
+    serverUrl: paymasterServerUrl,
     networkPassphrase,
     horizonUrl,
   });
@@ -49,7 +49,7 @@ async function main() {
 
   transaction.sign(userKeypair);
 
-  console.log("[demo] requesting fee bump from fluid server...");
+  console.log("[demo] requesting fee bump from paymaster server...");
   const feeBump = await client.requestFeeBump(transaction.toXDR(), false);
   console.log(
     "[demo] fee bump xdr received:",

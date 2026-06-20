@@ -36,7 +36,7 @@
     "seed": "ts-node --transpile-only prisma/seed.ts"
   },
   "napi": {
-    "name": "fluid_signer"
+    "name": "paymaster_signer"
   },
   "keywords": [
     "stellar",

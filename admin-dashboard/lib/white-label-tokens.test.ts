@@ -15,7 +15,7 @@ const validTokens: WhiteLabelTokens = { ...DEFAULT_TOKENS };
 // ─── validateTokens ───────────────────────────────────────────────────────────
 
 describe("validateTokens", () => {
-  it("accepts the default Fluid token set", () => {
+  it("accepts the default Paymaster token set", () => {
     const result = validateTokens(validTokens);
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -141,7 +141,7 @@ describe("applyTokensToElement", () => {
 
   afterEach(() => {
     container.remove();
-    document.getElementById("fluid-wl-test-partner")?.remove();
+    document.getElementById("paymaster-wl-test-partner")?.remove();
   });
 
   it("sets data-partner attribute on the element", () => {
@@ -151,7 +151,7 @@ describe("applyTokensToElement", () => {
 
   it("injects a <style> tag into <head>", () => {
     applyTokensToElement(container, validTokens, "test-partner");
-    const styleEl = document.getElementById("fluid-wl-test-partner");
+    const styleEl = document.getElementById("paymaster-wl-test-partner");
     expect(styleEl).not.toBeNull();
     expect(styleEl?.textContent).toContain("--primary:");
   });
@@ -161,7 +161,7 @@ describe("applyTokensToElement", () => {
     const updatedTokens = { ...validTokens, primary: "#ff0000" };
     applyTokensToElement(container, updatedTokens, "test-partner");
 
-    const styleTags = document.querySelectorAll("#fluid-wl-test-partner");
+    const styleTags = document.querySelectorAll("#paymaster-wl-test-partner");
     expect(styleTags.length).toBe(1);
     expect(styleTags[0].textContent).toContain("#ff0000");
   });
@@ -185,7 +185,7 @@ describe("removeTokensFromElement", () => {
 
   afterEach(() => {
     container.remove();
-    document.getElementById("fluid-wl-rm-partner")?.remove();
+    document.getElementById("paymaster-wl-rm-partner")?.remove();
   });
 
   it("removes the data-partner attribute", () => {
@@ -195,7 +195,7 @@ describe("removeTokensFromElement", () => {
 
   it("removes the injected style tag", () => {
     removeTokensFromElement(container, "rm-partner");
-    expect(document.getElementById("fluid-wl-rm-partner")).toBeNull();
+    expect(document.getElementById("paymaster-wl-rm-partner")).toBeNull();
   });
 });
 

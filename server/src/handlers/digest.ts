@@ -62,7 +62,7 @@ export async function digestUnsubscribeHandler(
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// POST /admin/digest/send-now   (admin-only, uses FLUID_ADMIN_TOKEN)
+// POST /admin/digest/send-now   (admin-only, uses PAYMASTER_ADMIN_TOKEN)
 // ────────────────────────────────────────────────────────────────────────────
 
 export async function sendDigestNowHandler(

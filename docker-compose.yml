@@ -22,14 +22,14 @@ services:
     container_name: xlm-paymaster-postgres
     environment:
       POSTGRES_USER: "${POSTGRES_USER:-xlm-paymaster}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
-      POSTGRES_DB: "${POSTGRES_DB:-fluid_db}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-paymaster_pass}"
+      POSTGRES_DB: "${POSTGRES_DB:-paymaster_db}"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xlm-paymaster} -d ${POSTGRES_DB:-fluid_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xlm-paymaster} -d ${POSTGRES_DB:-paymaster_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -59,16 +59,16 @@ services:
       dockerfile: Dockerfile
     container_name: xlm-paymaster-rust-engine
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-fluid_pass}@postgres:5432/${POSTGRES_DB:-fluid_db}"
-      FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-paymaster_pass}@postgres:5432/${POSTGRES_DB:-paymaster_db}"
+      PAYMASTER_FEE_PAYER_SECRET: "${PAYMASTER_FEE_PAYER_SECRET}"
       STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
       STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
-      FLUID_BASE_FEE: "${FLUID_BASE_FEE:-100}"
-      FLUID_FEE_MULTIPLIER: "${FLUID_FEE_MULTIPLIER:-2.0}"
-      FLUID_HORIZON_SELECTION: "${FLUID_HORIZON_SELECTION:-priority}"
-      FLUID_RATE_LIMIT_WINDOW_MS: "${FLUID_RATE_LIMIT_WINDOW_MS:-60000}"
-      FLUID_RATE_LIMIT_MAX: "${FLUID_RATE_LIMIT_MAX:-5}"
-      FLUID_ALLOWED_ORIGINS: "${FLUID_ALLOWED_ORIGINS:-*}"
+      PAYMASTER_BASE_FEE: "${PAYMASTER_BASE_FEE:-100}"
+      PAYMASTER_FEE_MULTIPLIER: "${PAYMASTER_FEE_MULTIPLIER:-2.0}"
+      PAYMASTER_HORIZON_SELECTION: "${PAYMASTER_HORIZON_SELECTION:-priority}"
+      PAYMASTER_RATE_LIMIT_WINDOW_MS: "${PAYMASTER_RATE_LIMIT_WINDOW_MS:-60000}"
+      PAYMASTER_RATE_LIMIT_MAX: "${PAYMASTER_RATE_LIMIT_MAX:-5}"
+      PAYMASTER_ALLOWED_ORIGINS: "${PAYMASTER_ALLOWED_ORIGINS:-*}"
       PORT: "3000"
     ports:
       - "3000:3000"
@@ -96,8 +96,8 @@ services:
       DB_HOST: "postgres"
       DB_PORT: "5432"
       DB_USER: "${POSTGRES_USER:-xlm-paymaster}"
-      DB_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
-      DB_NAME: "${POSTGRES_DB:-fluid_db}"
+      DB_PASSWORD: "${POSTGRES_PASSWORD:-paymaster_pass}"
+      DB_NAME: "${POSTGRES_DB:-paymaster_db}"
       POOL_MODE: "transaction"
       MAX_CLIENT_CONN: "1000"
       DEFAULT_POOL_SIZE: "20"
@@ -128,13 +128,13 @@ services:
       # Connect through PgBouncer (port 6432) instead of Postgres directly.
       # The ?pgbouncer=true flag disables Prisma's prepared statements, which
       # are incompatible with PgBouncer transaction-mode pooling.
-      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-fluid_pass}@pgbouncer:6432/${POSTGRES_DB:-fluid_db}?pgbouncer=true"
-      FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-paymaster_pass}@pgbouncer:6432/${POSTGRES_DB:-paymaster_db}?pgbouncer=true"
+      PAYMASTER_FEE_PAYER_SECRET: "${PAYMASTER_FEE_PAYER_SECRET}"
       STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
       STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
-      FLUID_BASE_FEE: "${FLUID_BASE_FEE:-100}"
-      FLUID_FEE_MULTIPLIER: "${FLUID_FEE_MULTIPLIER:-2.0}"
-      FLUID_ALLOWED_ORIGINS: "${FLUID_ALLOWED_ORIGINS:-*}"
+      PAYMASTER_BASE_FEE: "${PAYMASTER_BASE_FEE:-100}"
+      PAYMASTER_FEE_MULTIPLIER: "${PAYMASTER_FEE_MULTIPLIER:-2.0}"
+      PAYMASTER_ALLOWED_ORIGINS: "${PAYMASTER_ALLOWED_ORIGINS:-*}"
     ports:
       - "3001:3001"
     healthcheck:
@@ -165,7 +165,7 @@ services:
       ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@xlm-paymaster.dev}"
       ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH}"
       NEXTAUTH_URL: "${NEXTAUTH_URL:-http://localhost:3002}"
-      FLUID_SERVER_URL: "http://rust-engine:3000"
+      PAYMASTER_SERVER_URL: "http://rust-engine:3000"
     ports:
       - "3002:3002"
     healthcheck:

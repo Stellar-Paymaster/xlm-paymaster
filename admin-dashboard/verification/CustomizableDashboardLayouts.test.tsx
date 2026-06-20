@@ -37,7 +37,7 @@ describe('CustomizableDashboardLayouts Component', () => {
       { id: 'w-4', title: 'Quick Actions', content: 'Add Asset | Invite User' },
       { id: 'w-1', title: 'System Overview', content: 'CPU: 45% | Mem: 2GB' },
     ];
-    localStorageMock['fluid-dashboard-layout'] = JSON.stringify(customLayout);
+    localStorageMock['paymaster-dashboard-layout'] = JSON.stringify(customLayout);
 
     render(<CustomizableDashboardLayouts />);
     
@@ -49,7 +49,7 @@ describe('CustomizableDashboardLayouts Component', () => {
 
   it('resets to default layout', () => {
     const customLayout = [{ id: 'w-4', title: 'Quick Actions', content: 'Add Asset | Invite User' }];
-    localStorageMock['fluid-dashboard-layout'] = JSON.stringify(customLayout);
+    localStorageMock['paymaster-dashboard-layout'] = JSON.stringify(customLayout);
 
     render(<CustomizableDashboardLayouts />);
     assert.equal(screen.getAllByRole('heading', { level: 3 }).length, 1);
@@ -59,7 +59,7 @@ describe('CustomizableDashboardLayouts Component', () => {
   });
 
   it('handles corrupted localStorage gracefully', () => {
-    localStorageMock['fluid-dashboard-layout'] = 'invalid-json';
+    localStorageMock['paymaster-dashboard-layout'] = 'invalid-json';
     render(<CustomizableDashboardLayouts />);
     assert.equal(screen.getAllByRole('heading', { level: 3 }).length, 4);
   });

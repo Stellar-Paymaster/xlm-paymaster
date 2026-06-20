@@ -16,7 +16,7 @@ Deploys the complete XLM Paymaster stack on Kubernetes: node-api, rust-engine, P
 # 1. Create a values override for secrets
 cat > my-values.yaml <<EOF
 secrets:
-  fluidFeePayerSecret: "SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  paymasterFeePayerSecret: "SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
   authSecret: "change-me-random-32-chars"
   adminEmail: "admin@example.com"
   adminPasswordHash: "\$2a\$12\$..."

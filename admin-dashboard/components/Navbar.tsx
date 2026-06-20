@@ -21,9 +21,9 @@ export function Navbar() {
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-2">
                     <Link href="/" className="group flex items-center space-x-2 transition-opacity hover:opacity-90">
-                        <Image src="/logo.png" alt="Fluid Logo" width={32} height={32} className="rounded-lg shadow-sm" />
+                        <Image src="/logo.png" alt="Paymaster Logo" width={32} height={32} className="rounded-lg shadow-sm" />
                         <span className="text-xl font-bold tracking-tight text-foreground">
-                            Fluid
+                            Paymaster
                         </span>
                         {badge ? (
                         <span className="hidden max-w-[11rem] truncate rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:inline-block">

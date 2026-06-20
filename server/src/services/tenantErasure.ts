@@ -64,7 +64,7 @@ function buildConfirmationEmail(opts: {
   projectName: string;
   scheduledPurgeAt: Date;
 }): { subject: string; html: string; text: string } {
-  const subject = "[Fluid] Your tenant data deletion has been scheduled";
+  const subject = "[Paymaster] Your tenant data deletion has been scheduled";
   const purgeDate = opts.scheduledPurgeAt.toISOString().slice(0, 10);
   const safeProjectName = opts.projectName
     .replace(/&/g, "&amp;")
@@ -100,8 +100,8 @@ async function sendEmail(opts: {
   const resendApiKey = process.env.RESEND_API_KEY?.trim();
   const from =
     process.env.RESEND_EMAIL_FROM ||
-    process.env.FLUID_ALERT_EMAIL_FROM ||
-    "noreply@fluid.dev";
+    process.env.PAYMASTER_ALERT_EMAIL_FROM ||
+    "noreply@paymaster.dev";
 
   if (resendApiKey) {
     const response = await fetch("https://api.resend.com/emails", {
@@ -127,7 +127,7 @@ async function sendEmail(opts: {
     return true;
   }
 
-  const smtpHost = process.env.FLUID_ALERT_SMTP_HOST;
+  const smtpHost = process.env.PAYMASTER_ALERT_SMTP_HOST;
   if (smtpHost) {
     const nodemailer = require("nodemailer") as {
       createTransport: (config: any) => { sendMail: (msg: any) => Promise<unknown> };
@@ -135,13 +135,13 @@ async function sendEmail(opts: {
 
     const transport = nodemailer.createTransport({
       host: smtpHost,
-      port: Number(process.env.FLUID_ALERT_SMTP_PORT ?? 587),
-      secure: process.env.FLUID_ALERT_SMTP_SECURE === "true",
-      ...(process.env.FLUID_ALERT_SMTP_USER
+      port: Number(process.env.PAYMASTER_ALERT_SMTP_PORT ?? 587),
+      secure: process.env.PAYMASTER_ALERT_SMTP_SECURE === "true",
+      ...(process.env.PAYMASTER_ALERT_SMTP_USER
         ? {
             auth: {
-              user: process.env.FLUID_ALERT_SMTP_USER,
-              pass: process.env.FLUID_ALERT_SMTP_PASS ?? "",
+              user: process.env.PAYMASTER_ALERT_SMTP_USER,
+              pass: process.env.PAYMASTER_ALERT_SMTP_PASS ?? "",
             },
           }
         : {}),

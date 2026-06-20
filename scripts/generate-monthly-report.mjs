@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Monthly transparency report generator for Fluid (#256).
+ * Monthly transparency report generator for Paymaster (#256).
  *
- * Queries the Fluid database (or the /metrics Prometheus endpoint) to produce
+ * Queries the Paymaster database (or the /metrics Prometheus endpoint) to produce
  * a Markdown report covering the previous calendar month, then:
  *
  *  1. Writes the report to docs/reports/YYYY-MM.md
@@ -12,13 +12,13 @@
  *   node scripts/generate-monthly-report.mjs
  *
  * Required env vars:
- *   DATABASE_URL    — Postgres connection string (same as fluid-server)
+ *   DATABASE_URL    — Postgres connection string (same as paymaster-server)
  *
  * Optional env vars:
  *   REPORT_EMAIL_FROM   — sender address
  *   REPORT_EMAIL_TO     — comma-separated list of subscriber addresses
  *   SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS — nodemailer transport
- *   FLUID_METRICS_URL   — base URL of the Fluid server (e.g. http://localhost:3000)
+ *   PAYMASTER_METRICS_URL   — base URL of the Paymaster server (e.g. http://localhost:3000)
  *                         used to fetch live Prometheus metrics as a fallback
  */
 
@@ -120,7 +120,7 @@ async function collectDatabaseStats() {
  * Fetch metrics from the Prometheus /metrics endpoint as a secondary source.
  */
 async function collectPrometheusStats() {
-  const base = process.env.FLUID_METRICS_URL;
+  const base = process.env.PAYMASTER_METRICS_URL;
   if (!base) return null;
 
   try {
@@ -134,8 +134,8 @@ async function collectPrometheusStats() {
     };
 
     return {
-      totalTxs: Math.round(extract("fluid_total_transactions_total")),
-      failedTxs: Math.round(extract("fluid_failed_transactions_total")),
+      totalTxs: Math.round(extract("paymaster_total_transactions_total")),
+      failedTxs: Math.round(extract("paymaster_failed_transactions_total")),
     };
   } catch {
     return null;
@@ -161,7 +161,7 @@ function buildMarkdown(stats, prometheusStats) {
         ].join("\n")
       : "_No use-case data available for this period._";
 
-  return `# Fluid Transparency Report — ${monthLabel}
+  return `# Paymaster Transparency Report — ${monthLabel}
 
 > Auto-generated on ${ts}
 
@@ -194,7 +194,7 @@ See the [Sponsors section](../../README.md#sponsors) of the README for how to co
 
 ---
 
-_[View all reports](./index.md) · [Fluid on GitHub](https://github.com/Stellar-Fluid/fluid)_
+_[View all reports](./index.md) · [Paymaster on GitHub](https://github.com/Stellar-Paymaster/paymaster)_
 `;
 }
 
@@ -254,7 +254,7 @@ function updateIndex() {
   if (!existsSync(indexPath)) {
     writeFileSync(
       indexPath,
-      `# Fluid Monthly Transparency Reports\n\nHistorical network activity reports, newest first.\n\n${entry}\n`
+      `# Paymaster Monthly Transparency Reports\n\nHistorical network activity reports, newest first.\n\n${entry}\n`
     );
     return;
   }
@@ -294,7 +294,7 @@ function updateIndex() {
   log(`Report written to ${outPath}`);
 
   updateIndex();
-  await sendEmail(`Fluid Transparency Report — ${monthLabel}`, markdown);
+  await sendEmail(`Paymaster Transparency Report — ${monthLabel}`, markdown);
 
   log("Done.");
 })();

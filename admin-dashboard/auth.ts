@@ -47,8 +47,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials.password as string;
 
         // 1. Try DB-based admin users via the backend login endpoint
-        const serverUrl = process.env.FLUID_SERVER_URL;
-        const adminToken = process.env.FLUID_ADMIN_TOKEN;
+        const serverUrl = process.env.PAYMASTER_SERVER_URL;
+        const adminToken = process.env.PAYMASTER_ADMIN_TOKEN;
 
         if (serverUrl && adminToken) {
           try {
@@ -121,7 +121,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           // If using backend admin JWT, attempt to refresh it
           if (token.adminJwt && typeof token.adminJwt === "string") {
-            const serverUrl = process.env.FLUID_SERVER_URL;
+            const serverUrl = process.env.PAYMASTER_SERVER_URL;
             if (serverUrl) {
               try {
                 const resp = await fetch(

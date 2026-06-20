@@ -11,7 +11,7 @@ import {
   TextStyle,
 } from "react-native";
 import { useGaslessTransaction } from "../hooks/useGaslessTransaction";
-import { FeeBumpResponse } from "../../FluidClient";
+import { FeeBumpResponse } from "../../PaymasterClient";
 
 export interface SponsorButtonProps {
   /**

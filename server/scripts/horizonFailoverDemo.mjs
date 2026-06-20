@@ -7,7 +7,7 @@ const logger = pino({
   base: {
     component: "horizon_failover_demo",
     env: process.env.NODE_ENV ?? "development",
-    service: "fluid-server",
+    service: "paymaster-server",
   },
   formatters: {
     level: (level) => ({ level }),

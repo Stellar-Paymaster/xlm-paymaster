@@ -16,7 +16,7 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` and set `FLUID_FEE_PAYER_SECRET`.
+Edit `.env` and set `PAYMASTER_FEE_PAYER_SECRET`.
 
 3. Build and run:
 
@@ -38,32 +38,32 @@ See `.env.example` for all configuration options.
 Required:
 
 - Fee payer key material:
-  - Development-only fallback: `FLUID_FEE_PAYER_SECRET` (comma-separated Stellar secrets)
+  - Development-only fallback: `PAYMASTER_FEE_PAYER_SECRET` (comma-separated Stellar secrets)
   - Production (recommended): HashiCorp Vault KV (see `docs/vault.md`)
 
 Optional:
 
-- `FLUID_BASE_FEE` - Base fee in stroops (default: 100)
-- `FLUID_FEE_MULTIPLIER` - Fee multiplier (default: 2.0)
+- `PAYMASTER_BASE_FEE` - Base fee in stroops (default: 100)
+- `PAYMASTER_FEE_MULTIPLIER` - Fee multiplier (default: 2.0)
 - `LOG_LEVEL` - Logger level: `debug`, `info`, `warn`, or `error` (default: `debug` in development, `info` in production)
 - `LOG_PRETTY` - Enable `pino-pretty` in non-production environments (default: `false`, which preserves JSON logs)
 - `STELLAR_NETWORK_PASSPHRASE` - Network passphrase (default: Testnet)
 - `STELLAR_HORIZON_URL` - Legacy single Horizon URL
 - `STELLAR_HORIZON_URLS` - Comma-separated Horizon URL list for failover
-- `FLUID_HORIZON_SELECTION` - `priority` or `round_robin` node selection (default: `priority`)
+- `PAYMASTER_HORIZON_SELECTION` - `priority` or `round_robin` node selection (default: `priority`)
 - `PORT` - Server port (default: 3000)
-- `FLUID_RATE_LIMIT_WINDOW_MS` - Rate limit window in milliseconds (default: 60000)
-- `FLUID_RATE_LIMIT_MAX` - Max requests per window per IP (default: 5)
-- `FLUID_ALLOWED_ORIGINS` - Comma-separated CORS allowlist
-- `FLUID_GRPC_ENGINE_ADDRESS` - Internal Rust gRPC signer target such as `127.0.0.1:50051`
-- `FLUID_GRPC_ENGINE_TLS_SERVER_NAME` - Expected Rust engine TLS server name / SAN (default: `xlm-paymaster-grpc-engine.internal`)
-- `FLUID_GRPC_ENGINE_CLIENT_CA_PATH` - PEM bundle for the pinned internal CA trust anchor
-- `FLUID_GRPC_ENGINE_CLIENT_CERT_PATH` / `FLUID_GRPC_ENGINE_CLIENT_KEY_PATH` - Node API client certificate and private key used for mTLS
-- `FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for the Rust engine server certificate; include both old and new values during rotation
+- `PAYMASTER_RATE_LIMIT_WINDOW_MS` - Rate limit window in milliseconds (default: 60000)
+- `PAYMASTER_RATE_LIMIT_MAX` - Max requests per window per IP (default: 5)
+- `PAYMASTER_ALLOWED_ORIGINS` - Comma-separated CORS allowlist
+- `PAYMASTER_GRPC_ENGINE_ADDRESS` - Internal Rust gRPC signer target such as `127.0.0.1:50051`
+- `PAYMASTER_GRPC_ENGINE_TLS_SERVER_NAME` - Expected Rust engine TLS server name / SAN (default: `xlm-paymaster-grpc-engine.internal`)
+- `PAYMASTER_GRPC_ENGINE_CLIENT_CA_PATH` - PEM bundle for the pinned internal CA trust anchor
+- `PAYMASTER_GRPC_ENGINE_CLIENT_CERT_PATH` / `PAYMASTER_GRPC_ENGINE_CLIENT_KEY_PATH` - Node API client certificate and private key used for mTLS
+- `PAYMASTER_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for the Rust engine server certificate; include both old and new values during rotation
 - `LOW_BALANCE_ALERT_XLM` - Primary low balance threshold env var for fee payer balances
-- `FLUID_LOW_BALANCE_THRESHOLD_XLM` - Backward-compatible low balance threshold env var
-- `LOW_BALANCE_ALERT_CHECK_INTERVAL_MS` / `FLUID_LOW_BALANCE_CHECK_INTERVAL_MS` - Balance polling interval (default: 300000 / 5 minutes)
-- `LOW_BALANCE_ALERT_COOLDOWN_MS` / `FLUID_LOW_BALANCE_ALERT_COOLDOWN_MS` - Minimum time between repeated alerts per account (minimum enforced: 3600000 / 1 hour)
+- `PAYMASTER_LOW_BALANCE_THRESHOLD_XLM` - Backward-compatible low balance threshold env var
+- `LOW_BALANCE_ALERT_CHECK_INTERVAL_MS` / `PAYMASTER_LOW_BALANCE_CHECK_INTERVAL_MS` - Balance polling interval (default: 300000 / 5 minutes)
+- `LOW_BALANCE_ALERT_COOLDOWN_MS` / `PAYMASTER_LOW_BALANCE_ALERT_COOLDOWN_MS` - Minimum time between repeated alerts per account (minimum enforced: 3600000 / 1 hour)
 - `PAGERDUTY_ROUTING_KEY` - PagerDuty Events API v2 routing key for P1 incident alerts
 - `PAGERDUTY_SERVICE_NAME` - Service name shown in PagerDuty payloads (default: `XLM Paymaster server`)
 - `PAGERDUTY_SOURCE` - PagerDuty payload source (default: `paymaster-server`)
@@ -73,22 +73,22 @@ Optional:
 - `SLACK_ALERT_5XX_ENABLED` - Enable or disable 5xx error Slack alerts (default: `true`)
 - `SLACK_ALERT_SERVER_LIFECYCLE_ENABLED` - Enable or disable server start/stop Slack alerts (default: `true`)
 - `SLACK_ALERT_FAILED_TRANSACTION_ENABLED` - Enable or disable failed transaction alerts (default: `true`)
-- `FLUID_ALERT_SLACK_WEBHOOK_URL` - Backward-compatible alias for `SLACK_WEBHOOK_URL`
-- `FLUID_ALERT_SMTP_HOST` / `FLUID_ALERT_SMTP_PORT` / `FLUID_ALERT_SMTP_SECURE` - SMTP connection settings
-- `FLUID_ALERT_SMTP_USER` / `FLUID_ALERT_SMTP_PASS` - Optional SMTP auth
-- `FLUID_ALERT_EMAIL_FROM` / `FLUID_ALERT_EMAIL_TO` - Email sender and comma-separated recipients
+- `PAYMASTER_ALERT_SLACK_WEBHOOK_URL` - Backward-compatible alias for `SLACK_WEBHOOK_URL`
+- `PAYMASTER_ALERT_SMTP_HOST` / `PAYMASTER_ALERT_SMTP_PORT` / `PAYMASTER_ALERT_SMTP_SECURE` - SMTP connection settings
+- `PAYMASTER_ALERT_SMTP_USER` / `PAYMASTER_ALERT_SMTP_PASS` - Optional SMTP auth
+- `PAYMASTER_ALERT_EMAIL_FROM` / `PAYMASTER_ALERT_EMAIL_TO` - Email sender and comma-separated recipients
 - `RESEND_API_KEY` / `RESEND_EMAIL_FROM` / `RESEND_EMAIL_TO` - Optional Resend API transport for low-balance alerts
-- `FLUID_ALERT_DASHBOARD_URL` - Dashboard link included in low-balance emails
-- `FLUID_NETWORK_SIMULATION_ENABLED` - Enable network latency and packet loss simulation (default: `false`)
-- `FLUID_NETWORK_LATENCY_MS` - Artificial delay in milliseconds (default: `0`)
-- `FLUID_NETWORK_PACKET_LOSS_RATE` - Probability of dropping a request, 0.0 to 1.0 (default: `0`)
+- `PAYMASTER_ALERT_DASHBOARD_URL` - Dashboard link included in low-balance emails
+- `PAYMASTER_NETWORK_SIMULATION_ENABLED` - Enable network latency and packet loss simulation (default: `false`)
+- `PAYMASTER_NETWORK_LATENCY_MS` - Artificial delay in milliseconds (default: `0`)
+- `PAYMASTER_NETWORK_PACKET_LOSS_RATE` - Probability of dropping a request, 0.0 to 1.0 (default: `0`)
 
 Rust gRPC engine env vars:
 
-- `FLUID_GRPC_ENGINE_LISTEN_ADDR` - Bind address for the Rust signer engine (default: `127.0.0.1:50051`)
-- `FLUID_GRPC_ENGINE_TLS_CERT_PATH` / `FLUID_GRPC_ENGINE_TLS_KEY_PATH` - Rust engine server certificate and private key
-- `FLUID_GRPC_ENGINE_TLS_CLIENT_CA_PATH` - PEM bundle used by the Rust engine to verify Node API client certificates
-- `FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for allowed Node API client certificates
+- `PAYMASTER_GRPC_ENGINE_LISTEN_ADDR` - Bind address for the Rust signer engine (default: `127.0.0.1:50051`)
+- `PAYMASTER_GRPC_ENGINE_TLS_CERT_PATH` / `PAYMASTER_GRPC_ENGINE_TLS_KEY_PATH` - Rust engine server certificate and private key
+- `PAYMASTER_GRPC_ENGINE_TLS_CLIENT_CA_PATH` - PEM bundle used by the Rust engine to verify Node API client certificates
+- `PAYMASTER_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for allowed Node API client certificates
 
 Mock API keys for local development:
 
@@ -130,7 +130,7 @@ Response:
 
 Sends a manual low-balance alert through the configured Slack webhook and/or email transport. This is useful for capturing the required review screenshot without draining a real account first.
 
-Low-balance emails support SMTP and Resend transport configuration. Each fee-payer account is debounced to at most one alert per hour, and the message includes the fee payer public key, current balance, threshold, and a dashboard link when `FLUID_ALERT_DASHBOARD_URL` is configured.
+Low-balance emails support SMTP and Resend transport configuration. Each fee-payer account is debounced to at most one alert per hour, and the message includes the fee payer public key, current balance, threshold, and a dashboard link when `PAYMASTER_ALERT_DASHBOARD_URL` is configured.
 
 ## PagerDuty Incidents
 
@@ -167,7 +167,7 @@ If a tenant has a webhook URL but no `webhookSecret`, XLM Paymaster logs the mis
 ```js
 import crypto from "node:crypto";
 
-function verifyFluidWebhook(rawBody, signatureHeader, secret) {
+function verifyPaymasterWebhook(rawBody, signatureHeader, secret) {
   const expected = `sha256=${crypto
     .createHmac("sha256", secret)
     .update(rawBody)
@@ -196,7 +196,7 @@ import hmac
 from hashlib import sha256
 
 
-def verify_fluid_webhook(raw_body: bytes, signature_header: str | None, secret: str) -> bool:
+def verify_paymaster_webhook(raw_body: bytes, signature_header: str | None, secret: str) -> bool:
     expected = "sha256=" + hmac.new(
         secret.encode("utf-8"),
         raw_body,
@@ -261,8 +261,8 @@ If `submit: true` and Horizon URLs are configured, the server will submit the tr
 The server now supports redundant Horizon submission and monitoring:
 
 - Configure multiple nodes with `STELLAR_HORIZON_URLS`
-- Use `FLUID_HORIZON_SELECTION=priority` to always prefer the first healthy node
-- Use `FLUID_HORIZON_SELECTION=round_robin` to rotate the starting node each request
+- Use `PAYMASTER_HORIZON_SELECTION=priority` to always prefer the first healthy node
+- Use `PAYMASTER_HORIZON_SELECTION=round_robin` to rotate the starting node each request
 - Retry only retryable failures such as connection resets, timeouts, DNS failures, and 5xx/429 gateway responses
 - Do not retry final submission errors such as invalid transaction payloads returned as 4xx responses
 
@@ -290,9 +290,9 @@ The server can simulate degraded network conditions to test client resilience. T
 Enable it with:
 
 ```bash
-FLUID_NETWORK_SIMULATION_ENABLED=true
-FLUID_NETWORK_LATENCY_MS=500
-FLUID_NETWORK_PACKET_LOSS_RATE=0.1
+PAYMASTER_NETWORK_SIMULATION_ENABLED=true
+PAYMASTER_NETWORK_LATENCY_MS=500
+PAYMASTER_NETWORK_PACKET_LOSS_RATE=0.1
 ```
 
 With these settings:

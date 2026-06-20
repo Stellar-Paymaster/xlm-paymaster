@@ -7,8 +7,8 @@ export async function GET() {
   const { siteUrl } = getPortalLinks();
 
   const feed = new RSS({
-    title: "Fluid Changelog",
-    description: "Latest updates and improvements for Fluid",
+    title: "Paymaster Changelog",
+    description: "Latest updates and improvements for Paymaster",
     site_url: siteUrl,
     feed_url: `${siteUrl}/changelog/rss.xml`,
     language: "en",

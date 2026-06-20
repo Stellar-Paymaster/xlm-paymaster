@@ -62,7 +62,7 @@ function buildSvg(style: BadgeStyle, txCount: number | null, portalUrl: string):
   const height = 28;
   const logoSize = 14;
   const logoPad = 9;
-  const labelText = "Powered by Fluid";
+  const labelText = "Powered by Paymaster";
   const charWidth = 6.6; // approx px per char at 12px
   const labelWidth = Math.ceil(labelText.length * charWidth);
   const labelPad = 8;
@@ -82,7 +82,7 @@ function buildSvg(style: BadgeStyle, txCount: number | null, portalUrl: string):
   const borderRadius = style === "minimal" ? 0 : 6;
   const mid = height / 2;
 
-  // Fluid logo mark — simplified droplet/wave shape
+  // Paymaster logo mark — simplified droplet/wave shape
   const lx = logoPad;
   const ly = (height - logoSize) / 2;
 
@@ -176,7 +176,7 @@ export async function badgeHandler(
     }
   }
 
-  const portalUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://fluid.dev";
+  const portalUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://paymaster.dev";
   const svg = buildSvg(style, txCount, portalUrl);
 
   // Cache for 60 s (stats refresh); immutable for style-only badges

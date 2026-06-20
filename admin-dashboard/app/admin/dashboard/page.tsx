@@ -38,7 +38,7 @@ export default async function AdminDashboard() {
           <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                Fluid Admin
+                Paymaster Admin
               </p>
               <h1 className="mt-2 text-4xl font-black tracking-tighter text-foreground">
                 Node Operations Dashboard

@@ -26,15 +26,15 @@ function getFilePath(relativePath: string): string {
   return targetPath;
 }
 
-const fluidClientSource = readFileSync(getFilePath("./FluidClient.ts"), "utf8");
+const paymasterClientSource = readFileSync(getFilePath("./PaymasterClient.ts"), "utf8");
 const indexSource = readFileSync(getFilePath("./index.ts"), "utf8");
 const readmeSource = readFileSync(getFilePath("../README.md"), "utf8");
 
-test("FluidClient exposes an optional grpc-web transport mode", () => {
-  assert.match(fluidClientSource, /transport\?: "http" \| "grpc-web"/);
-  assert.match(fluidClientSource, /grpc\?: GrpcTransportConfig/);
-  assert.match(fluidClientSource, /this\.transportMode = config\.transport \?\? "http"/);
-  assert.match(fluidClientSource, /performGrpcWebUnary\(/);
+test("PaymasterClient exposes an optional grpc-web transport mode", () => {
+  assert.match(paymasterClientSource, /transport\?: "http" \| "grpc-web"/);
+  assert.match(paymasterClientSource, /grpc\?: GrpcTransportConfig/);
+  assert.match(paymasterClientSource, /this\.transportMode = config\.transport \?\? "http"/);
+  assert.match(paymasterClientSource, /performGrpcWebUnary\(/);
 });
 
 test("package exports the grpc transport helpers", () => {

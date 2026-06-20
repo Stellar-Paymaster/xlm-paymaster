@@ -11,10 +11,10 @@ npm install
 ## Usage
 
 ```typescript
-import { FluidClient } from "paymaster-client";
+import { PaymasterClient } from "paymaster-client";
 import StellarSdk from "@stellar/stellar-sdk";
 
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: "http://localhost:3000",
   networkPassphrase: StellarSdk.Networks.TESTNET,
   horizonUrl: "https://horizon-testnet.stellar.org",
@@ -38,9 +38,9 @@ const submitResult = await client.submitFeeBumpTransaction(result.xdr);
 
 ```typescript
 import StellarSdk from "@stellar/stellar-sdk";
-import { FluidClient } from "./src";
+import { PaymasterClient } from "./src";
 
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: "http://localhost:3000",
   networkPassphrase: StellarSdk.Networks.TESTNET,
   sorobanRpcUrl: "https://soroban-testnet.stellar.org",
@@ -76,7 +76,7 @@ Soroban-specific options:
 For latency-sensitive deployments, the client can speak gRPC-web instead of JSON over HTTP.
 
 ```ts
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: "https://grpc.xlm-paymaster.example",
   networkPassphrase: StellarSdk.Networks.TESTNET,
   transport: "grpc-web",
@@ -96,12 +96,12 @@ npm run demo:sac-transfer-xdr
 
 ## API
 
-### `FluidClient`
+### `PaymasterClient`
 
 #### Constructor
 
 ```typescript
-new FluidClient(config: {
+new PaymasterClient(config: {
   serverUrl: string;
   networkPassphrase: string;
   horizonUrl?: string;
@@ -120,14 +120,14 @@ new FluidClient(config: {
 - `buildAndRequestFeeBump(transaction, submit?)` - Build, sign, and request fee-bump
 - `reportBug(message, context?)` - Report a bug or diagnostic info (requires `enableDiagnostics: true`)
 
-### `FluidMockClient` (New!)
+### `PaymasterMockClient` (New!)
 
 For unit testing without network calls:
 
 ```typescript
-import { FluidMockClient } from "paymaster-client";
+import { PaymasterMockClient } from "paymaster-client";
 
-const mockClient = new FluidMockClient();
+const mockClient = new PaymasterMockClient();
 mockClient.setMockResponse("requestFeeBump", { status: "success", hash: "mock-hash" });
 
 const result = await mockClient.requestFeeBump(tx);

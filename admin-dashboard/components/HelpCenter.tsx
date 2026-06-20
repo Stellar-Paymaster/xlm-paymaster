@@ -41,7 +41,7 @@ export function HelpCenter() {
             Help & Support
           </h3>
           <p className="text-xs text-muted-foreground mt-1">
-            Need help with Fluid? We're here to assist you.
+            Need help with Paymaster? We're here to assist you.
           </p>
         </div>
         

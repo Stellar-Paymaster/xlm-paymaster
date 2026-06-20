@@ -33,7 +33,7 @@ export function PluginMarketplace({ plugins }: PluginMarketplaceProps) {
               Plugins & Integrations
             </h1>
             <p className="mt-2 text-muted-foreground max-w-2xl text-balance">
-              Extend Fluid with community-built adapters for React, Vue, Python, Go, and more.
+              Extend Paymaster with community-built adapters for React, Vue, Python, Go, and more.
             </p>
           </div>
           <Button size="lg" className="shadow-lg group" asChild>
@@ -64,7 +64,7 @@ export function PluginMarketplace({ plugins }: PluginMarketplaceProps) {
               Featured plugins
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Handpicked integrations recommended by the Fluid team.
+              Handpicked integrations recommended by the Paymaster team.
             </p>
           </motion.div>
 
@@ -160,7 +160,7 @@ export function PluginMarketplace({ plugins }: PluginMarketplaceProps) {
               id="submit-heading"
               className="text-2xl font-bold tracking-tight sm:text-3xl"
             >
-              Built something for Fluid?
+              Built something for Paymaster?
             </h2>
             <p className="mt-4 text-muted-foreground">
               Open a GitHub issue using our plugin-submission template and we'll
@@ -186,7 +186,7 @@ export function PluginMarketplace({ plugins }: PluginMarketplaceProps) {
       <footer className="mt-auto border-t border-border bg-card/50" role="contentinfo">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>
-            <p className="text-sm font-semibold text-foreground">Fluid</p>
+            <p className="text-sm font-semibold text-foreground">Paymaster</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Fee sponsorship infrastructure for Stellar developers.
             </p>

@@ -6,7 +6,7 @@ import { AdminUsersTable, type AdminUser } from "./AdminUsersTable";
 const USERS: AdminUser[] = [
   {
     id: "u_1",
-    email: "owner@fluid.dev",
+    email: "owner@paymaster.dev",
     role: "SUPER_ADMIN",
     active: true,
     createdAt: "2026-04-01T00:00:00.000Z",
@@ -38,12 +38,12 @@ describe("AdminUsersTable invitations", () => {
     fireEvent.click(screen.getByText("Invite Member"));
 
     fireEvent.change(screen.getByPlaceholderText("ops@company.com"), {
-      target: { value: "ops@fluid.dev" },
+      target: { value: "ops@paymaster.dev" },
     });
 
     fireEvent.click(screen.getByText("Generate Invite"));
 
-    expect(await screen.findByText("ops@fluid.dev")).toBeInTheDocument();
+    expect(await screen.findByText("ops@paymaster.dev")).toBeInTheDocument();
     expect(screen.getByText("Pending Invitations")).toBeInTheDocument();
   });
 });

@@ -5,7 +5,7 @@ variable "environment" {
 }
 
 variable "domain_name" {
-  description = "Base domain name (e.g. fluid.example.com)"
+  description = "Base domain name (e.g. paymaster.example.com)"
   type        = string
 }
 

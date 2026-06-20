@@ -32,8 +32,8 @@ class GrpcSigner {
   private readonly client: SignerServiceClient;
 
   constructor() {
-    this.address = process.env.FLUID_SIGNER_GRPC_ADDR || "127.0.0.1:50051";
-    this.timeoutMs = Number(process.env.FLUID_SIGNER_GRPC_TIMEOUT_MS || "3000");
+    this.address = process.env.PAYMASTER_SIGNER_GRPC_ADDR || "127.0.0.1:50051";
+    this.timeoutMs = Number(process.env.PAYMASTER_SIGNER_GRPC_TIMEOUT_MS || "3000");
 
     const protoPath = join(__dirname, "../../../proto/signer.proto");
     const packageDefinition = protoLoader.loadSync(protoPath, {

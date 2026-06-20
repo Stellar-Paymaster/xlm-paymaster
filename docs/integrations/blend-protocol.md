@@ -24,7 +24,7 @@ All Blend interactions follow the same three-step pattern:
 
 ```ts
 import { Contract, Networks, TransactionBuilder, Keypair } from "@stellar/stellar-sdk";
-import { FluidClient } from "paymaster-client";
+import { PaymasterClient } from "paymaster-client";
 
 const NETWORK = Networks.TESTNET;
 const HORIZON = "https://horizon-testnet.stellar.org";
@@ -32,7 +32,7 @@ const BLEND_POOL_CONTRACT = "CBLEND..."; // replace with actual contract ID
 
 async function gaslessSupply(userSecret: string, assetCode: string, amount: bigint) {
   const userKp  = Keypair.fromSecret(userSecret);
-  const xlm-paymaster   = new FluidClient({ serverUrl: process.env.FLUID_URL!, networkPassphrase: NETWORK, horizonUrl: HORIZON });
+  const xlm-paymaster   = new PaymasterClient({ serverUrl: process.env.PAYMASTER_URL!, networkPassphrase: NETWORK, horizonUrl: HORIZON });
 
   // Build the Soroban supply invocation
   const contract = new Contract(BLEND_POOL_CONTRACT);
@@ -59,7 +59,7 @@ async function gaslessSupply(userSecret: string, assetCode: string, amount: bigi
 ```ts
 async function gaslessBorrow(userSecret: string, assetCode: string, amount: bigint) {
   const userKp = Keypair.fromSecret(userSecret);
-  const xlm-paymaster  = new FluidClient({ serverUrl: process.env.FLUID_URL!, networkPassphrase: NETWORK, horizonUrl: HORIZON });
+  const xlm-paymaster  = new PaymasterClient({ serverUrl: process.env.PAYMASTER_URL!, networkPassphrase: NETWORK, horizonUrl: HORIZON });
 
   const contract = new Contract(BLEND_POOL_CONTRACT);
   const account  = await getAccount(userKp.publicKey());
@@ -81,7 +81,7 @@ async function gaslessBorrow(userSecret: string, assetCode: string, amount: bigi
 ```ts
 async function gaslessRepay(userSecret: string, assetCode: string, amount: bigint) {
   const userKp = Keypair.fromSecret(userSecret);
-  const xlm-paymaster  = new FluidClient({ serverUrl: process.env.FLUID_URL!, networkPassphrase: NETWORK, horizonUrl: HORIZON });
+  const xlm-paymaster  = new PaymasterClient({ serverUrl: process.env.PAYMASTER_URL!, networkPassphrase: NETWORK, horizonUrl: HORIZON });
 
   const contract = new Contract(BLEND_POOL_CONTRACT);
   const account  = await getAccount(userKp.publicKey());
@@ -113,7 +113,7 @@ try {
     // Rate limited — back off and retry
   }
   if (err.message?.includes("insufficient fee")) {
-    // Raise FLUID_BASE_FEE or FLUID_FEE_MULTIPLIER
+    // Raise PAYMASTER_BASE_FEE or PAYMASTER_FEE_MULTIPLIER
   }
   throw err;
 }

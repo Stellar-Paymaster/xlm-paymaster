@@ -20,7 +20,7 @@ static TOKIO_INIT: Once = Once::new();
 fn initialize_optimized_tokio_runtime() {
     TOKIO_INIT.call_once(|| {
         let worker_threads = std::env
-            ::var("FLUID_TOKIO_WORKER_THREADS")
+            ::var("PAYMASTER_TOKIO_WORKER_THREADS")
             .ok()
             .and_then(|s| s.parse().ok())
             .unwrap_or_else(|| {
@@ -33,13 +33,13 @@ fn initialize_optimized_tokio_runtime() {
             });
 
         let max_blocking_threads = std::env
-            ::var("FLUID_TOKIO_MAX_BLOCKING_THREADS")
+            ::var("PAYMASTER_TOKIO_MAX_BLOCKING_THREADS")
             .ok()
             .and_then(|s| s.parse().ok())
             .unwrap_or_else(|| worker_threads * 4);
 
         let thread_stack_size = std::env
-            ::var("FLUID_TOKIO_STACK_SIZE")
+            ::var("PAYMASTER_TOKIO_STACK_SIZE")
             .ok()
             .and_then(|s| s.parse().ok())
             .unwrap_or(2 * 1024 * 1024); // 2MB default
@@ -54,12 +54,12 @@ fn initialize_optimized_tokio_runtime() {
                     0
                 );
                 let id = ATOMIC_ID.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                format!("fluid-signer-{}", id)
+                format!("paymaster-signer-{}", id)
             })
             .on_thread_start(|| {
                 #[cfg(target_os = "linux")]
                 {
-                    if let Ok(cpu_id) = std::env::var("FLUID_TOKIO_CPU_PINNING") {
+                    if let Ok(cpu_id) = std::env::var("PAYMASTER_TOKIO_CPU_PINNING") {
                         if let Ok(core_id) = cpu_id.parse::<usize>() {
                             if !core_affinity::set_for_current(core_affinity::CoreId {
                                 id: core_id,

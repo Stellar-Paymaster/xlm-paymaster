@@ -173,7 +173,7 @@ export class TwilioNotifier implements TwilioNotifierLike {
 
   private buildSmsMessage(payload: LowBalanceSmsPayload): string {
     const lines = [
-      "⚠️ Fluid Alert: Critical Low Balance",
+      "⚠️ Paymaster Alert: Critical Low Balance",
       "",
       `Account: ${payload.accountPublicKey.slice(0, 8)}...${payload.accountPublicKey.slice(-8)}`,
       `Balance: ${payload.balanceXlm.toFixed(2)} XLM`,

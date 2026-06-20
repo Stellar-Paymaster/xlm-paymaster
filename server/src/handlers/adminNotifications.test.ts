@@ -46,7 +46,7 @@ const NOTIF_2 = {
   id: "notif-2",
   type: "info",
   title: "Server started",
-  message: "Fluid server came online",
+  message: "Paymaster server came online",
   read: true,
   metadata: null,
   createdAt: new Date("2026-01-01T00:01:00Z"),
@@ -82,7 +82,7 @@ describe("adminNotifications handlers", () => {
   let app: ReturnType<typeof buildApp>;
 
   beforeEach(() => {
-    process.env.FLUID_ADMIN_TOKEN = ADMIN_TOKEN;
+    process.env.PAYMASTER_ADMIN_TOKEN = ADMIN_TOKEN;
     app = buildApp();
     vi.clearAllMocks();
 
@@ -92,7 +92,7 @@ describe("adminNotifications handlers", () => {
   });
 
   afterEach(() => {
-    delete process.env.FLUID_ADMIN_TOKEN;
+    delete process.env.PAYMASTER_ADMIN_TOKEN;
   });
 
   // ── Authentication ──────────────────────────────────────────────────────────

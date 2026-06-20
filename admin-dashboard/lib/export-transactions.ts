@@ -60,7 +60,7 @@ export function exportToCSV(rows: TransactionHistoryRow[], filename?: string) {
   triggerDownload(
     blob,
     filename ??
-      `fluid-transactions-${new Date().toISOString().slice(0, 10)}.csv`,
+      `paymaster-transactions-${new Date().toISOString().slice(0, 10)}.csv`,
   );
 }
 
@@ -74,10 +74,10 @@ export async function exportToPDF(
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Fluid branding header
+  // Paymaster branding header
   doc.setFontSize(20);
   doc.setTextColor(14, 116, 144); // sky-700
-  doc.text("Fluid", 14, 18);
+  doc.text("Paymaster", 14, 18);
 
   doc.setFontSize(10);
   doc.setTextColor(100, 116, 139); // slate-500
@@ -145,7 +145,7 @@ export async function exportToPDF(
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184); // slate-400
       doc.text(
-        `Fluid — Stellar Fee Sponsorship Service | Page ${data.pageNumber}`,
+        `Paymaster — Stellar Fee Sponsorship Service | Page ${data.pageNumber}`,
         pageWidth / 2,
         doc.internal.pageSize.getHeight() - 8,
         { align: "center" },
@@ -155,6 +155,6 @@ export async function exportToPDF(
 
   doc.save(
     filename ??
-      `fluid-transactions-${new Date().toISOString().slice(0, 10)}.pdf`,
+      `paymaster-transactions-${new Date().toISOString().slice(0, 10)}.pdf`,
   );
 }

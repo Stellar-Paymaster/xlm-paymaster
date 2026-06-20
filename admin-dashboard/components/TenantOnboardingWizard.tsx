@@ -102,7 +102,7 @@ export function TenantOnboardingWizard() {
       case "welcome":
         return (
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Welcome to Fluid</h2>
+            <h2 className="text-2xl font-bold">Welcome to Paymaster</h2>
             <p className="text-gray-600">
               Get your first API key in just a few steps. This wizard will guide
               you through creating your first tenant and generating an API key.
@@ -200,7 +200,7 @@ export function TenantOnboardingWizard() {
             <h2 className="text-2xl font-bold">Generate API Key</h2>
             <p className="text-gray-600">
               Click the button below to generate your first API key. This key
-              will allow you to authenticate requests to the Fluid API.
+              will allow you to authenticate requests to the Paymaster API.
             </p>
             <div className="bg-amber-50 p-4 rounded-lg">
               <p className="text-sm font-medium">Important:</p>

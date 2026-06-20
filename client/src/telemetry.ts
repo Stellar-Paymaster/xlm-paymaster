@@ -1,7 +1,7 @@
 /**
  * Anonymous Usage Telemetry Module
  * 
- * This module implements a non-intrusive, anonymous telemetry system for the Fluid SDK.
+ * This module implements a non-intrusive, anonymous telemetry system for the Paymaster SDK.
  * It collects minimal, non-personal data to help maintainers understand SDK usage patterns.
  * 
  * Data collected:
@@ -56,7 +56,7 @@ export interface DiagnosticData extends TelemetryData {
   severity: "info" | "warning" | "error" | "critical";
 }
 
-const TELEMETRY_STORAGE_KEY = 'fluid_telemetry_last_ping';
+const TELEMETRY_STORAGE_KEY = 'paymaster_telemetry_last_ping';
 const TELEMETRY_VERSION = '1.0.0';
 
 /**

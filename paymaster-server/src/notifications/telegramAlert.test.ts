@@ -20,7 +20,7 @@ const mockedPost = axios.post as jest.MockedFunction<typeof axios.post>;
 const mockConfig: TelegramConfig = {
   botToken: "123456:TEST_TOKEN",
   chatId: "-100123456789",
-  dashboardUrl: "https://fluid.example.com",
+  dashboardUrl: "https://paymaster.example.com",
   lowBalanceThreshold: 10,
 };
 

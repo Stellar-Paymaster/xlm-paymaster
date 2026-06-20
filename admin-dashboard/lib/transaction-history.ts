@@ -152,12 +152,12 @@ const SAMPLE_ROWS: TransactionHistoryRow[] = [
 ];
 
 function getBaseUrl() {
-  const value = process.env.FLUID_SERVER_URL?.trim();
+  const value = process.env.PAYMASTER_SERVER_URL?.trim();
   return value ? value.replace(/\/$/, "") : null;
 }
 
 function getAdminToken() {
-  const value = process.env.FLUID_ADMIN_TOKEN?.trim();
+  const value = process.env.PAYMASTER_ADMIN_TOKEN?.trim();
   return value && value.length > 0 ? value : null;
 }
 

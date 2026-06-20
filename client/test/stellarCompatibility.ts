@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  FluidClient,
+  PaymasterClient,
   buildFeeBumpTransaction,
   createHorizonServer,
   fromTransactionXdr,
@@ -88,8 +88,8 @@ async function runCompatibilityCase(sdkCase: SdkCase): Promise<void> {
     `${sdkCase.label}: Horizon server should expose submitTransaction()`
   );
 
-  const requestClient = new FluidClient({
-    serverUrl: "https://fluid.example",
+  const requestClient = new PaymasterClient({
+    serverUrl: "https://paymaster.example",
     networkPassphrase: sdk.Networks.TESTNET,
     stellarSdk: rawModule,
   });
@@ -112,8 +112,8 @@ async function runCompatibilityCase(sdkCase: SdkCase): Promise<void> {
   );
   assert.equal(requestResult.xdr, feeBumpXdr, `${sdkCase.label}: request result should be returned`);
 
-  const submitClient = new FluidClient({
-    serverUrl: "https://fluid.example",
+  const submitClient = new PaymasterClient({
+    serverUrl: "https://paymaster.example",
     networkPassphrase: sdk.Networks.TESTNET,
     horizonUrl: "https://horizon-testnet.stellar.org",
     stellarSdk: rawModule,

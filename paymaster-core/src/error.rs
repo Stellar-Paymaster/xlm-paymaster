@@ -1,12 +1,12 @@
-//! Error types for fluid-core operations.
+//! Error types for paymaster-core operations.
 //!
-//! This module defines [`FluidError`], the unified error type used throughout
-//! the crate. All public functions return `Result<T, FluidError>` rather than
+//! This module defines [`PaymasterError`], the unified error type used throughout
+//! the crate. All public functions return `Result<T, PaymasterError>` rather than
 //! panicking.
 
 use thiserror::Error;
 
-/// All errors that can occur in fluid-core operations.
+/// All errors that can occur in paymaster-core operations.
 ///
 /// This enum covers every failure mode that can occur when building transactions,
 /// signing payloads, or working with Stellar XDR data.
@@ -14,15 +14,15 @@ use thiserror::Error;
 /// # Examples
 ///
 /// ```
-/// use fluid_core::FluidError;
+/// use paymaster_core::PaymasterError;
 ///
-/// fn might_fail() -> Result<(), FluidError> {
-///     // Returns FluidError::InvalidTransaction if validation fails
-///     Err(FluidError::InvalidTransaction("missing source account".to_string()))
+/// fn might_fail() -> Result<(), PaymasterError> {
+///     // Returns PaymasterError::InvalidTransaction if validation fails
+///     Err(PaymasterError::InvalidTransaction("missing source account".to_string()))
 /// }
 /// ```
 #[derive(Debug, Error)]
-pub enum FluidError {
+pub enum PaymasterError {
     /// The transaction could not be built due to missing or invalid fields.
     ///
     /// This error is returned when:
@@ -91,7 +91,7 @@ pub enum FluidError {
     Network(String),
 }
 
-impl FluidError {
+impl PaymasterError {
     /// Create an invalid transaction error with a message.
     ///
     /// # Arguments
@@ -101,10 +101,10 @@ impl FluidError {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::FluidError;
+    /// use paymaster_core::PaymasterError;
     ///
-    /// let err = FluidError::invalid_tx("missing sequence number");
-    /// assert!(matches!(err, FluidError::InvalidTransaction(_)));
+    /// let err = PaymasterError::invalid_tx("missing sequence number");
+    /// assert!(matches!(err, PaymasterError::InvalidTransaction(_)));
     /// ```
     pub fn invalid_tx<S: Into<String>>(msg: S) -> Self {
         Self::InvalidTransaction(msg.into())

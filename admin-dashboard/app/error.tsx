@@ -9,5 +9,5 @@ export default function RootError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <ErrorBoundaryScreen error={error} reset={reset} scope="the Fluid app" />;
+  return <ErrorBoundaryScreen error={error} reset={reset} scope="the Paymaster app" />;
 }

@@ -26,7 +26,7 @@ const adminUser = (prisma as any).adminUser;
 describe("session fixation protection integration", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRET", "test-secret");
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRET", "test-secret");
   });
 
   it("invalidates the old token after password change and accepts the refreshed token", async () => {

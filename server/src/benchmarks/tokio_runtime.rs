@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Runtime;
 
-use fluid_signer::sign_payload;
+use paymaster_signer::sign_payload;
 
 fn create_optimized_runtime(worker_threads: usize, max_blocking: usize, stack_size: usize) -> Runtime {
     tokio::runtime::Builder::new_multi_thread()

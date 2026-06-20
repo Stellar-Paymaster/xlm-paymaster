@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { FluidClient } from "../FluidClient";
+import { PaymasterClient } from "../PaymasterClient";
 
 const NETWORK = "Test SDF Network ; September 2015";
-const SERVER_URL = "https://fluid.example.com";
+const SERVER_URL = "https://paymaster.example.com";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function makeClient(useWorker: boolean) {
-  return new FluidClient({ serverUrl: SERVER_URL, networkPassphrase: NETWORK, useWorker });
+  return new PaymasterClient({ serverUrl: SERVER_URL, networkPassphrase: NETWORK, useWorker });
 }
 
 // ─── Worker availability detection ──────────────────────────────────────────
@@ -107,7 +107,7 @@ describe("Web Worker fallback – runtime worker error", () => {
       onerror: ((e: ErrorEvent) => void) | null = null;
 
       constructor() {
-        // Capture the onerror handler set by FluidClient
+        // Capture the onerror handler set by PaymasterClient
         Promise.resolve().then(() => {
           capturedOnerror = this.onerror;
         });

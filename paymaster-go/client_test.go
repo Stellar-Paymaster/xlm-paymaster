@@ -1,4 +1,4 @@
-package fluid
+package paymaster
 
 import (
 	"context"

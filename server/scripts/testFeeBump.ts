@@ -11,10 +11,10 @@ const logger = createLogger({ component: "test_fee_bump_script" });
 const serverUrl = "http://localhost:3000/fee-bump";
 
 // Ensure secret exists
-const sourceSecret = process.env.FLUID_FEE_PAYER_SECRET;
+const sourceSecret = process.env.PAYMASTER_FEE_PAYER_SECRET;
 
 if (!sourceSecret) {
-  throw new Error("FLUID_FEE_PAYER_SECRET is not set in environment variables");
+  throw new Error("PAYMASTER_FEE_PAYER_SECRET is not set in environment variables");
 }
 
 // Create keypair
@@ -84,7 +84,7 @@ async function main () {
     },
     {
       headers: {
-        "x-api-key": "fluid-free-demo-key",
+        "x-api-key": "paymaster-free-demo-key",
       },
     },
   );

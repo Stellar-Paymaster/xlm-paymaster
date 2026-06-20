@@ -135,7 +135,7 @@ describe("IncidentMonitor", () => {
     });
 
     await (monitor as any).triggerIncident("server_restart", {
-      summary: "Fluid server restarted",
+      summary: "Paymaster server restarted",
     });
     (monitor as any).restartPending = true;
 
@@ -144,7 +144,7 @@ describe("IncidentMonitor", () => {
     expect(resolve).toHaveBeenCalledWith(
       "server_restart" as PagerDutyEventType,
       expect.objectContaining({
-        summary: "Fluid server recovered after restart",
+        summary: "Paymaster server recovered after restart",
       }),
     );
   });

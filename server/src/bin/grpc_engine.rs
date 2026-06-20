@@ -5,7 +5,7 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use fluid_signer::{sign_payload, sign_payload_from_vault};
+use paymaster_signer::{sign_payload, sign_payload_from_vault};
 use napi::bindgen_prelude::Buffer;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer};
 use rustls::server::WebPkiClientVerifier;
@@ -22,7 +22,7 @@ use tonic::{Request, Response, Status};
 use tracing::{error, info, warn};
 
 pub mod proto {
-    tonic::include_proto!("fluid.internal.signer.v1");
+    tonic::include_proto!("paymaster.internal.signer.v1");
 }
 
 use proto::internal_signer_server::{InternalSigner, InternalSignerServer};
@@ -42,16 +42,16 @@ struct EngineConfig {
 
 impl EngineConfig {
     fn from_env() -> Result<Self, String> {
-        let listen_addr = std::env::var("FLUID_GRPC_ENGINE_LISTEN_ADDR")
+        let listen_addr = std::env::var("PAYMASTER_GRPC_ENGINE_LISTEN_ADDR")
             .unwrap_or_else(|_| "127.0.0.1:50051".to_string())
             .parse::<SocketAddr>()
-            .map_err(|error| format!("invalid FLUID_GRPC_ENGINE_LISTEN_ADDR: {error}"))?;
+            .map_err(|error| format!("invalid PAYMASTER_GRPC_ENGINE_LISTEN_ADDR: {error}"))?;
 
-        let tls_cert_path = required_path("FLUID_GRPC_ENGINE_TLS_CERT_PATH")?;
-        let tls_key_path = required_path("FLUID_GRPC_ENGINE_TLS_KEY_PATH")?;
-        let tls_client_ca_path = required_path("FLUID_GRPC_ENGINE_TLS_CLIENT_CA_PATH")?;
+        let tls_cert_path = required_path("PAYMASTER_GRPC_ENGINE_TLS_CERT_PATH")?;
+        let tls_key_path = required_path("PAYMASTER_GRPC_ENGINE_TLS_KEY_PATH")?;
+        let tls_client_ca_path = required_path("PAYMASTER_GRPC_ENGINE_TLS_CLIENT_CA_PATH")?;
         let pinned_client_cert_sha256 = parse_fingerprint_set(
-            std::env::var("FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256").ok(),
+            std::env::var("PAYMASTER_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256").ok(),
         );
 
         Ok(Self {

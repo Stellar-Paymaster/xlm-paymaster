@@ -1,10 +1,10 @@
-import { FluidClient, FluidClientConfig, FeeBumpResponse, FeeBumpRequestInput } from "./FluidClient";
-import { FluidConfigurationError, FluidNetworkError, FluidServerError, FluidWalletError } from "./errors";
+import { PaymasterClient, PaymasterClientConfig, FeeBumpResponse, FeeBumpRequestInput } from "./PaymasterClient";
+import { PaymasterConfigurationError, PaymasterNetworkError, PaymasterServerError, PaymasterWalletError } from "./errors";
 
 /**
  * Flutter-specific configuration options
  */
-export interface FlutterFluidClientConfig extends FluidClientConfig {
+export interface FlutterPaymasterClientConfig extends PaymasterClientConfig {
   /** Enable automatic retry with exponential backoff for network operations */
   enableAutoRetry?: boolean;
   /** Maximum number of retry attempts (default: 3) */
@@ -46,13 +46,13 @@ export interface FlutterTransactionResult {
 }
 
 /**
- * FlutterFluidClient - Production-ready Flutter SDK wrapper for Fluid
+ * FlutterPaymasterClient - Production-ready Flutter SDK wrapper for Paymaster
  * 
  * Provides a simplified, Flutter-friendly API for gasless Stellar transactions
  * with comprehensive error handling, network resilience, and async operation support.
  */
-export class FlutterFluidClient {
-  private readonly nativeClient: FluidClient;
+export class FlutterPaymasterClient {
+  private readonly nativeClient: PaymasterClient;
   private readonly config: {
     enableAutoRetry: boolean;
     maxRetries: number;
@@ -72,7 +72,7 @@ export class FlutterFluidClient {
   };
   private readonly platformCheckPassed: boolean;
 
-  constructor(config: FlutterFluidClientConfig) {
+  constructor(config: FlutterPaymasterClientConfig) {
     this.config = {
       enableAutoRetry: config.enableAutoRetry ?? true,
       maxRetries: config.maxRetries ?? 3,
@@ -95,10 +95,10 @@ export class FlutterFluidClient {
     this.platformCheckPassed = this.checkPlatformCompatibility();
     
     if (!this.platformCheckPassed && this.config.verboseErrors) {
-      console.warn("[FlutterFluidClient] Platform compatibility check warnings");
+      console.warn("[FlutterPaymasterClient] Platform compatibility check warnings");
     }
 
-    this.nativeClient = new FluidClient({
+    this.nativeClient = new PaymasterClient({
       serverUrl: config.serverUrl,
       serverUrls: config.serverUrls,
       networkPassphrase: config.networkPassphrase,
@@ -149,7 +149,7 @@ export class FlutterFluidClient {
     
     if (!allPassed && this.config.verboseErrors) {
       const failed = checks.filter((c) => !c.pass).map((c) => c.name).join(", ");
-      console.warn(`[FlutterFluidClient] Missing platform features: ${failed}`);
+      console.warn(`[FlutterPaymasterClient] Missing platform features: ${failed}`);
     }
 
     return allPassed;
@@ -424,8 +424,8 @@ export class FlutterFluidClient {
         lastError = error;
 
          // Don't retry on certain errors
-         if (error instanceof FluidConfigurationError ||
-             error instanceof FluidWalletError ||
+         if (error instanceof PaymasterConfigurationError ||
+             error instanceof PaymasterWalletError ||
              (typeof error === 'object' && error !== null && 'message' in error && typeof (error as any).message === 'string' && (error as any).message.includes("Timed out"))) {
            throw error;
         }
@@ -456,7 +456,7 @@ export class FlutterFluidClient {
     }
 
     // Known error types
-    if (error instanceof FluidConfigurationError) {
+    if (error instanceof PaymasterConfigurationError) {
       return {
         success: false,
         error: error.message,
@@ -465,7 +465,7 @@ export class FlutterFluidClient {
       };
     }
 
-    if (error instanceof FluidNetworkError) {
+    if (error instanceof PaymasterNetworkError) {
       return {
         success: false,
         error: error.message,
@@ -474,7 +474,7 @@ export class FlutterFluidClient {
       };
     }
 
-    if (error instanceof FluidServerError) {
+    if (error instanceof PaymasterServerError) {
       return {
         success: false,
         error: error.message,
@@ -487,7 +487,7 @@ export class FlutterFluidClient {
       };
     }
 
-    if (error instanceof FluidWalletError) {
+    if (error instanceof PaymasterWalletError) {
       return {
         success: false,
         error: error.message,
@@ -537,9 +537,9 @@ export class FlutterFluidClient {
   }
 
   /**
-   * Get the native FluidClient instance (for advanced use cases)
+   * Get the native PaymasterClient instance (for advanced use cases)
    */
-  getNativeClient(): FluidClient {
+  getNativeClient(): PaymasterClient {
     return this.nativeClient;
   }
 
@@ -553,7 +553,7 @@ export class FlutterFluidClient {
   /**
    * Get client configuration
    */
-  getConfig(): FlutterFluidClientConfig {
+  getConfig(): FlutterPaymasterClientConfig {
     return { ...this.config };
   }
 }

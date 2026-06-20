@@ -1,9 +1,9 @@
-//! Integration tests for fluid-core.
+//! Integration tests for paymaster-core.
 //!
 //! These tests use only the public API to verify the crate's functionality.
 
-use fluid_core::{
-    AsyncSigner, DecoratedSignature, Ed25519Signer, FeeConfig, FeePayerAccount, FluidError,
+use paymaster_core::{
+    AsyncSigner, DecoratedSignature, Ed25519Signer, FeeConfig, FeePayerAccount, PaymasterError,
     Keypair, MultiSigner, NetworkPassphrase, PublicKey, SecretKey, Signer, TestSigner,
     TransactionBuilder, TransactionHash, validate_not_fee_bump,
 };
@@ -63,7 +63,7 @@ fn test_keypair_signature_hint() {
 
 #[test]
 fn test_account_id() {
-    let account = fluid_core::AccountId::new("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    let account = paymaster_core::AccountId::new("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     assert_eq!(account.as_str(), "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 }
 
@@ -295,7 +295,7 @@ fn test_transaction_builder_validation_missing_inner() {
 
     // Missing inner transaction - should return InvalidTransaction
     let result = builder.validate();
-    assert!(matches!(result, Err(FluidError::InvalidTransaction(_))));
+    assert!(matches!(result, Err(PaymasterError::InvalidTransaction(_))));
 }
 
 #[test]
@@ -305,7 +305,7 @@ fn test_transaction_builder_validation_missing_fee_payer() {
         .add_signature(DecoratedSignature::new([0x11; 4], [0x22; 64]));
 
     let result = builder.validate();
-    assert!(matches!(result, Err(FluidError::InvalidTransaction(_))));
+    assert!(matches!(result, Err(PaymasterError::InvalidTransaction(_))));
 }
 
 #[test]
@@ -338,7 +338,7 @@ fn test_validate_not_fee_bump() {
     // Fee-bumped transaction should fail
     assert!(matches!(
         validate_not_fee_bump("feeBump:something"),
-        Err(FluidError::AlreadyFeeBumped)
+        Err(PaymasterError::AlreadyFeeBumped)
     ));
 }
 
@@ -347,26 +347,26 @@ fn test_validate_not_fee_bump() {
 // ============================================================================
 
 #[test]
-fn test_fluid_error_invalid_tx() {
-    let err = FluidError::invalid_tx("test message");
-    assert!(matches!(err, FluidError::InvalidTransaction(msg) if msg == "test message"));
+fn test_paymaster_error_invalid_tx() {
+    let err = PaymasterError::invalid_tx("test message");
+    assert!(matches!(err, PaymasterError::InvalidTransaction(msg) if msg == "test message"));
 }
 
 #[test]
-fn test_fluid_error_signing_failed() {
-    let err = FluidError::signing_failed("key not found");
-    assert!(matches!(err, FluidError::SigningFailed(msg) if msg == "key not found"));
+fn test_paymaster_error_signing_failed() {
+    let err = PaymasterError::signing_failed("key not found");
+    assert!(matches!(err, PaymasterError::SigningFailed(msg) if msg == "key not found"));
 }
 
 #[test]
-fn test_fluid_error_xdr() {
-    let err = FluidError::xdr("parse failed");
-    assert!(matches!(err, FluidError::Xdr(msg) if msg == "parse failed"));
+fn test_paymaster_error_xdr() {
+    let err = PaymasterError::xdr("parse failed");
+    assert!(matches!(err, PaymasterError::Xdr(msg) if msg == "parse failed"));
 }
 
 #[test]
-fn test_fluid_error_display() {
-    let err = FluidError::AlreadyFeeBumped;
+fn test_paymaster_error_display() {
+    let err = PaymasterError::AlreadyFeeBumped;
     let msg = format!("{}", err);
     assert!(msg.contains("cannot fee-bump an already fee-bumped transaction"));
 }

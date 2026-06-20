@@ -4,7 +4,7 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Fluid Fee Sponsorship API",
+      title: "Paymaster Fee Sponsorship API",
       version: "0.1.0",
       description:
         "Stellar fee-bump sponsorship service. Wraps inner transactions with a fee-bump envelope so end-users pay zero network fees.",
@@ -22,7 +22,7 @@ const options: swaggerJsdoc.Options = {
           in: "header",
           name: "x-api-key",
           description:
-            "Tenant API key issued by the Fluid admin dashboard. Required for all fee-bump endpoints.",
+            "Tenant API key issued by the Paymaster admin dashboard. Required for all fee-bump endpoints.",
         },
       },
       schemas: {
@@ -120,7 +120,7 @@ const options: swaggerJsdoc.Options = {
             evmSettlement: {
               type: "object",
               description:
-                "Optional EVM-side fee payment requirement. When present, Fluid queues the Stellar fee-bump until the ERC-20 payment confirms.",
+                "Optional EVM-side fee payment requirement. When present, Paymaster queues the Stellar fee-bump until the ERC-20 payment confirms.",
               properties: {
                 chainId: {
                   type: "integer",

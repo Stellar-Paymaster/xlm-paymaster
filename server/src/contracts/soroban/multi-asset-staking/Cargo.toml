@@ -1,6 +1,6 @@
 [workspace]
 [package]
-name = "fluid-multi-asset-staking"
+name = "paymaster-multi-asset-staking"
 version = "0.1.0"
 edition = "2021"
 

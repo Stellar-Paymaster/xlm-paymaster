@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-const STORAGE_STEP_KEY = "fluid_qs_step";
-const STORAGE_DONE_KEY = "fluid_qs_done";
+const STORAGE_STEP_KEY = "paymaster_qs_step";
+const STORAGE_DONE_KEY = "paymaster_qs_done";
 const TOTAL_STEPS = 3;
 const POLL_INTERVAL_MS = 3_000;
 
@@ -213,7 +213,7 @@ export function QuickstartWizard({ apiKey }: QuickstartWizardProps) {
     pnpm: "pnpm add @stellar/stellar-sdk",
   };
 
-  const codeSnippet = `const response = await fetch("https://your-fluid-server/fee-bump", {
+  const codeSnippet = `const response = await fetch("https://your-paymaster-server/fee-bump", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -348,7 +348,7 @@ console.log("Fee-bump hash:", result.hash);`;
                     First fee-bump detected!
                   </p>
                   <p className="text-sm text-emerald-700">
-                    Your Fluid integration is working.
+                    Your Paymaster integration is working.
                   </p>
                 </div>
               ) : (

@@ -41,5 +41,5 @@ const server = http.createServer(async (request, response) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Fluid WASM demo server listening on http://127.0.0.1:${port}`);
+  console.log(`Paymaster WASM demo server listening on http://127.0.0.1:${port}`);
 });

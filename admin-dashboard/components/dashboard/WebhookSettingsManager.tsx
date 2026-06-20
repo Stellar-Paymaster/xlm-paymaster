@@ -159,7 +159,7 @@ export function WebhookSettingsManager({
                 <Input
                   value={row.webhookUrl ?? ""}
                   onChange={(event) => updateWebhookUrl(row.tenantId, event.target.value)}
-                  placeholder="https://tenant.example.com/webhooks/fluid"
+                  placeholder="https://tenant.example.com/webhooks/paymaster"
                 />
                 <p className="text-xs text-muted-foreground">
                   Leave empty to disable webhook delivery for this tenant.

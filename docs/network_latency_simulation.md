@@ -16,24 +16,24 @@ Network simulation is controlled via environment variables. These can be set in 
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
-| `FLUID_NETWORK_SIMULATION_ENABLED` | boolean | `false` | Master switch to enable/disable simulation. |
-| `FLUID_NETWORK_LATENCY_MS` | number | `0` | Delay in milliseconds added to every request. |
-| `FLUID_NETWORK_PACKET_LOSS_RATE` | float | `0.0` | Probability (0.0 to 1.0) of a request failing. |
+| `PAYMASTER_NETWORK_SIMULATION_ENABLED` | boolean | `false` | Master switch to enable/disable simulation. |
+| `PAYMASTER_NETWORK_LATENCY_MS` | number | `0` | Delay in milliseconds added to every request. |
+| `PAYMASTER_NETWORK_PACKET_LOSS_RATE` | float | `0.0` | Probability (0.0 to 1.0) of a request failing. |
 
 ### Examples
 
 #### Simulating a High-Latency Connection (e.g., 3G)
 ```bash
-FLUID_NETWORK_SIMULATION_ENABLED=true
-FLUID_NETWORK_LATENCY_MS=800
-FLUID_NETWORK_PACKET_LOSS_RATE=0.01
+PAYMASTER_NETWORK_SIMULATION_ENABLED=true
+PAYMASTER_NETWORK_LATENCY_MS=800
+PAYMASTER_NETWORK_PACKET_LOSS_RATE=0.01
 ```
 
 #### Simulating an Unstable Network
 ```bash
-FLUID_NETWORK_SIMULATION_ENABLED=true
-FLUID_NETWORK_LATENCY_MS=100
-FLUID_NETWORK_PACKET_LOSS_RATE=0.2
+PAYMASTER_NETWORK_SIMULATION_ENABLED=true
+PAYMASTER_NETWORK_LATENCY_MS=100
+PAYMASTER_NETWORK_PACKET_LOSS_RATE=0.2
 ```
 
 ## How it Works

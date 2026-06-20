@@ -1,7 +1,7 @@
-import { FluidClient } from "../FluidClient";
+import { PaymasterClient } from "../PaymasterClient";
 
-const PRIMARY_SERVER_URL = "https://primary-fluid.example";
-const SECONDARY_SERVER_URL = "https://secondary-fluid.example";
+const PRIMARY_SERVER_URL = "https://primary-paymaster.example";
+const SECONDARY_SERVER_URL = "https://secondary-paymaster.example";
 
 const responses = [
   new Response(JSON.stringify({ error: "primary unavailable" }), {
@@ -33,7 +33,7 @@ globalThis.fetch = async (input: string | URL | Request): Promise<Response> => {
 };
 
 async function main(): Promise<void> {
-  const client = new FluidClient({
+  const client = new PaymasterClient({
     serverUrls: [PRIMARY_SERVER_URL, SECONDARY_SERVER_URL],
     networkPassphrase: "Test SDF Network ; September 2015",
   });

@@ -52,7 +52,7 @@ export function SdkRegistry({ sdks }: SdkRegistryProps) {
               transition={{ delay: 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
             >
-              Official Fluid SDKs
+              Official Paymaster SDKs
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -231,7 +231,7 @@ export function SdkRegistry({ sdks }: SdkRegistryProps) {
       <footer className="mt-auto border-t border-border bg-card/50" role="contentinfo">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>
-            <p className="text-sm font-semibold text-foreground">Fluid</p>
+            <p className="text-sm font-semibold text-foreground">Paymaster</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Fee sponsorship infrastructure for Stellar developers.
             </p>

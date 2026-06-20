@@ -51,12 +51,12 @@ describe("badgeHandler", () => {
     expect(res._body()).toContain("</svg>");
   });
 
-  it("renders 'Powered by Fluid' label", async () => {
+  it("renders 'Powered by Paymaster' label", async () => {
     const req = makeReq();
     const res = makeRes();
     await badgeHandler(req as Request, res as unknown as Response, makeConfig());
 
-    expect(res._body()).toContain("Powered by Fluid");
+    expect(res._body()).toContain("Powered by Paymaster");
   });
 
   it("includes tx stats by default", async () => {
@@ -105,21 +105,21 @@ describe("badgeHandler", () => {
   });
 
   it("wraps badge in an anchor pointing to portal URL", async () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://fluid.example.com");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://paymaster.example.com");
     const req = makeReq({ stats: "false" });
     const res = makeRes();
     await badgeHandler(req as Request, res as unknown as Response, makeConfig());
 
-    expect(res._body()).toContain('href="https://fluid.example.com"');
+    expect(res._body()).toContain('href="https://paymaster.example.com"');
   });
 
-  it("falls back to fluid.dev when NEXT_PUBLIC_SITE_URL is unset", async () => {
+  it("falls back to paymaster.dev when NEXT_PUBLIC_SITE_URL is unset", async () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
     const req = makeReq({ stats: "false" });
     const res = makeRes();
     await badgeHandler(req as Request, res as unknown as Response, makeConfig());
 
-    expect(res._body()).toContain('href="https://fluid.dev"');
+    expect(res._body()).toContain('href="https://paymaster.dev"');
   });
 
   it("sets short Cache-Control when stats are shown", async () => {

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createProgram } from "../src/cli/index";
-import { FluidClient } from "../src/FluidClient";
+import { PaymasterClient } from "../src/PaymasterClient";
 
-vi.mock("../src/FluidClient");
+vi.mock("../src/PaymasterClient");
 
-describe("Fluid CLI - simulate", () => {
+describe("Paymaster CLI - simulate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, "log").mockImplementation(() => {});
@@ -20,7 +20,7 @@ describe("Fluid CLI - simulate", () => {
       fee_payer: "test-payer",
     });
 
-    (FluidClient as any).mockImplementation(function() {
+    (PaymasterClient as any).mockImplementation(function() {
       return {
         requestFeeBump: mockRequestFeeBump,
       };
@@ -28,7 +28,7 @@ describe("Fluid CLI - simulate", () => {
 
     await createProgram().parseAsync([
       "node",
-      "fluid",
+      "paymaster",
       "simulate",
       "inner-xdr",
       "--server",
@@ -37,7 +37,7 @@ describe("Fluid CLI - simulate", () => {
       "custom-network",
     ]);
 
-    expect(FluidClient).toHaveBeenCalledWith({
+    expect(PaymasterClient).toHaveBeenCalledWith({
       serverUrl: "https://custom.server",
       networkPassphrase: "custom-network",
     });
@@ -51,7 +51,7 @@ describe("Fluid CLI - simulate", () => {
       xdr: "test-xdr",
     };
 
-    (FluidClient as any).mockImplementation(function() {
+    (PaymasterClient as any).mockImplementation(function() {
       return {
         requestFeeBump: vi.fn().mockResolvedValue(mockResponse),
       };
@@ -59,7 +59,7 @@ describe("Fluid CLI - simulate", () => {
 
     await createProgram().parseAsync([
       "node",
-      "fluid",
+      "paymaster",
       "simulate",
       "inner-xdr",
       "--json",
@@ -69,7 +69,7 @@ describe("Fluid CLI - simulate", () => {
   });
 
   it("should handle errors gracefully", async () => {
-    (FluidClient as any).mockImplementation(function() {
+    (PaymasterClient as any).mockImplementation(function() {
       return {
         requestFeeBump: vi.fn().mockRejectedValue(new Error("Network error")),
       };
@@ -77,7 +77,7 @@ describe("Fluid CLI - simulate", () => {
 
     await createProgram().parseAsync([
       "node",
-      "fluid",
+      "paymaster",
       "simulate",
       "inner-xdr",
     ]);

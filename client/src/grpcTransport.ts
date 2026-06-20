@@ -80,7 +80,7 @@ export interface GrpcFeeBumpBatchResponse {
   responses: GrpcFeeBumpResponse[];
 }
 
-export const DEFAULT_GRPC_SERVICE_NAME = "fluid.v1.FeeBumpService";
+export const DEFAULT_GRPC_SERVICE_NAME = "paymaster.v1.FeeBumpService";
 export const DEFAULT_GRPC_METHOD_NAMES: Required<GrpcTransportMethodNames> = {
   requestFeeBump: "RequestFeeBump",
   requestFeeBumpBatch: "RequestFeeBumpBatch",

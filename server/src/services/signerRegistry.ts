@@ -34,10 +34,10 @@ function getSignerSecretDelegate() {
 }
 
 function getEncryptionKey(): Buffer {
-  const rawKey = process.env.FLUID_SIGNER_ENCRYPTION_KEY?.trim();
+  const rawKey = process.env.PAYMASTER_SIGNER_ENCRYPTION_KEY?.trim();
   if (!rawKey) {
     throw new Error(
-      "FLUID_SIGNER_ENCRYPTION_KEY is required to persist signer secrets in the database.",
+      "PAYMASTER_SIGNER_ENCRYPTION_KEY is required to persist signer secrets in the database.",
     );
   }
 

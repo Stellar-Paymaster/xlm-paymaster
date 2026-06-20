@@ -17,7 +17,7 @@ export default async function AdminApiKeysPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                Fluid Admin
+                Paymaster Admin
               </p>
               <h1 className="mt-2 text-3xl font-bold text-foreground">
                 API Key Management

@@ -1,6 +1,6 @@
 import "server-only";
 
-export interface FluidNode {
+export interface PaymasterNode {
   id: string;
   operatorName: string;
   apiEndpoint: string;
@@ -37,7 +37,7 @@ export interface NodePingResult {
 
 // In-process singleton store (reset on server restart — suitable for stateless deployments
 // where a real DB migration is pending; replace with Prisma/DB calls once schema is in place).
-const registry = new Map<string, FluidNode>();
+const registry = new Map<string, PaymasterNode>();
 
 function generateId(): string {
   return `node_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -101,7 +101,7 @@ export function validateNodeInput(input: unknown): NodeRegistrationInput {
   };
 }
 
-export function registerNode(input: NodeRegistrationInput): FluidNode {
+export function registerNode(input: NodeRegistrationInput): PaymasterNode {
   // Prevent duplicate endpoints
   for (const existing of registry.values()) {
     if (existing.apiEndpoint === input.apiEndpoint) {
@@ -109,7 +109,7 @@ export function registerNode(input: NodeRegistrationInput): FluidNode {
     }
   }
 
-  const node: FluidNode = {
+  const node: PaymasterNode = {
     id: generateId(),
     ...input,
     registeredAt: new Date().toISOString(),
@@ -122,13 +122,13 @@ export function registerNode(input: NodeRegistrationInput): FluidNode {
   return node;
 }
 
-export function listNodes(): FluidNode[] {
+export function listNodes(): PaymasterNode[] {
   return Array.from(registry.values()).sort(
     (a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime(),
   );
 }
 
-export function getNode(id: string): FluidNode | undefined {
+export function getNode(id: string): PaymasterNode | undefined {
   return registry.get(id);
 }
 
@@ -162,7 +162,7 @@ export async function pingNode(id: string): Promise<NodePingResult> {
   const sample = online ? 100 : 0;
   const newUptime = Math.round(prevUptime * 0.8 + sample * 0.2);
 
-  const updated: FluidNode = {
+  const updated: PaymasterNode = {
     ...node,
     lastPingedAt: new Date().toISOString(),
     latencyMs,
@@ -179,20 +179,20 @@ export function seedDemoNodes(): void {
 
   const demos: NodeRegistrationInput[] = [
     {
-      operatorName: "Fluid Foundation (US-East)",
-      apiEndpoint: "https://node-us-east.fluid.dev",
+      operatorName: "Paymaster Foundation (US-East)",
+      apiEndpoint: "https://node-us-east.paymaster.dev",
       location: { city: "Ashburn", country: "US", lat: 39.0438, lng: -77.4874 },
       supportedChains: ["stellar", "soroban"],
     },
     {
-      operatorName: "Fluid Foundation (EU-West)",
-      apiEndpoint: "https://node-eu-west.fluid.dev",
+      operatorName: "Paymaster Foundation (EU-West)",
+      apiEndpoint: "https://node-eu-west.paymaster.dev",
       location: { city: "Frankfurt", country: "DE", lat: 50.1109, lng: 8.6821 },
       supportedChains: ["stellar", "soroban"],
     },
     {
       operatorName: "Community Node (AP-South)",
-      apiEndpoint: "https://fluid-ap.example.com",
+      apiEndpoint: "https://paymaster-ap.example.com",
       location: { city: "Singapore", country: "SG", lat: 1.3521, lng: 103.8198 },
       supportedChains: ["stellar"],
     },

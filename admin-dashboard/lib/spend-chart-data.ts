@@ -62,8 +62,8 @@ function buildSampleData(): SpendForecastData {
 }
 
 export async function getSpendForecastData(): Promise<SpendForecastData> {
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
-  const adminToken = process.env.FLUID_ADMIN_TOKEN?.trim() ?? "";
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN?.trim() ?? "";
 
   if (!serverUrl || !adminToken) {
     return buildSampleData();

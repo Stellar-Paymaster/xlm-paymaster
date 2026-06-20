@@ -10,14 +10,14 @@ A detailed, honest comparison of using XLM Paymaster against implementing fee-bu
 |---|---|---|
 | **Setup complexity** | High — write signing logic, key management, submission retry, and error handling from scratch | Low — one `npm install`, one server deploy |
 | **Lines of code (per integration)** | ~150–300 (see code comparison below) | ~10–15 |
-| **Fee accuracy** | Error-prone — static `base_fee` gets congested during surges; manual multiplier tuning required | Automatic — `FLUID_FEE_MULTIPLIER` applies dynamically; Horizon failover keeps submissions alive |
+| **Fee accuracy** | Error-prone — static `base_fee` gets congested during surges; manual multiplier tuning required | Automatic — `PAYMASTER_FEE_MULTIPLIER` applies dynamically; Horizon failover keeps submissions alive |
 | **Key security** | Fee-payer secret in application code or env; rotation requires code deploy | Secret isolated in the XLM Paymaster server process; rotated by updating one env var |
-| **Horizon failover** | Not included — single-endpoint submissions fail silently during outages | Built-in — `FLUID_HORIZON_URLS` + `FLUID_HORIZON_SELECTION=priority` retries automatically |
-| **Rate limiting** | None — fee-payer can be drained by runaway clients | Configurable per-route via `FLUID_RATE_LIMIT_MAX` and `FLUID_RATE_LIMIT_WINDOW_MS` |
+| **Horizon failover** | Not included — single-endpoint submissions fail silently during outages | Built-in — `PAYMASTER_HORIZON_URLS` + `PAYMASTER_HORIZON_SELECTION=priority` retries automatically |
+| **Rate limiting** | None — fee-payer can be drained by runaway clients | Configurable per-route via `PAYMASTER_RATE_LIMIT_MAX` and `PAYMASTER_RATE_LIMIT_WINDOW_MS` |
 | **Multi-tenant support** | Requires custom routing + per-tenant key management | Tenant isolation via API keys with per-tenant billing (Phase 9+) |
 | **Multi-asset support** | XLM only (native fee currency) | XLM today; designed for multi-chain extension (see ADR-001) |
 | **Observability** | Custom logging required | Prometheus metrics at `/metrics`, Grafana dashboards, Slack/email alerts |
-| **Balance monitoring** | Manual cron job | Built-in low-balance alerts (`FLUID_LOW_BALANCE_THRESHOLD_XLM`) |
+| **Balance monitoring** | Manual cron job | Built-in low-balance alerts (`PAYMASTER_LOW_BALANCE_THRESHOLD_XLM`) |
 | **Scalability** | Sequence-number contention beyond ~10 TPS | Horizontal scaling via managed accounts + load balancing (see `docker-compose.scale.yml`) |
 | **Maintenance burden** | High — owned entirely by the integrator | Low — community-maintained, versioned releases |
 
@@ -100,9 +100,9 @@ async function checkBalance() {
 ### With XLM Paymaster (~10 lines)
 
 ```ts
-import { FluidClient } from "paymaster-client";
+import { PaymasterClient } from "paymaster-client";
 
-const xlm-paymaster = new FluidClient({
+const xlm-paymaster = new PaymasterClient({
   serverUrl:         "https://your-paymaster-server.example.com",
   networkPassphrase: "Test SDF Network ; September 2015",
   horizonUrl:        "https://horizon-testnet.stellar.org",

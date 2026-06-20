@@ -31,7 +31,7 @@ export interface RectLike {
 }
 
 export const ADMIN_GUIDED_TOUR_VERSION = 1;
-export const ADMIN_GUIDED_TOUR_STORAGE_PREFIX = "fluid-admin-guided-tour";
+export const ADMIN_GUIDED_TOUR_STORAGE_PREFIX = "paymaster-admin-guided-tour";
 
 const TOUR_CARD_WIDTH = 360;
 const TOUR_CARD_HEIGHT = 248;

@@ -43,7 +43,7 @@ describe("GrpcEngineSignerClient - Active-Passive Failover", () => {
       address: "primary-address",
       secondaryAddress: "secondary-address",
       pinnedServerCertSha256: [],
-      serverName: "fluid-grpc-engine.internal",
+      serverName: "paymaster-grpc-engine.internal",
       tlsCaPath: "/ca",
       tlsCertPath: "/cert",
       tlsKeyPath: "/key",

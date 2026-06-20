@@ -21,8 +21,8 @@ describe("PagerDutyNotifier", () => {
   it("sends trigger events with stable dedup keys", async () => {
     const notifier = new PagerDutyNotifier({
       routingKey: "routing-key-test",
-      serviceName: "Fluid test",
-      source: "fluid-test",
+      serviceName: "Paymaster test",
+      source: "paymaster-test",
       component: "fee-sponsor",
     });
 
@@ -40,7 +40,7 @@ describe("PagerDutyNotifier", () => {
 
     expect(payload.event_action).toBe("trigger");
     expect(payload.routing_key).toBe("routing-key-test");
-    expect(payload.dedup_key).toBe("fluid:signer_pool_empty");
+    expect(payload.dedup_key).toBe("paymaster:signer_pool_empty");
     expect(payload.payload.summary).toBe("No usable signers");
     expect(payload.payload.custom_details.active_signers).toBe(0);
   });
@@ -62,7 +62,7 @@ describe("PagerDutyNotifier", () => {
     const payload = JSON.parse(String(request?.body));
 
     expect(payload.event_action).toBe("resolve");
-    expect(payload.dedup_key).toBe("fluid:horizon_unreachable");
+    expect(payload.dedup_key).toBe("paymaster:horizon_unreachable");
     expect(payload.payload.summary).toBe("Horizon recovered");
   });
 });

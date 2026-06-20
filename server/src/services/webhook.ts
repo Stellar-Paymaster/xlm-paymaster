@@ -41,7 +41,7 @@ interface WebhookPayload {
   status: WebhookStatus;
 }
 
-const WEBHOOK_SIGNATURE_HEADER = "X-Fluid-Signature-256";
+const WEBHOOK_SIGNATURE_HEADER = "X-Paymaster-Signature-256";
 const WEBHOOK_SIGNATURE_PREFIX = "sha256=";
 const MAX_RETRY_ATTEMPTS = WEBHOOK_RETRY_CONFIG.maxAttempts;
 const DLQ_EXPIRY_DAYS = parseInt(process.env.WEBHOOK_DLQ_EXPIRY_DAYS || "30", 10);

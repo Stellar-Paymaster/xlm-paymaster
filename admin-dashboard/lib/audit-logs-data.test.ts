@@ -11,7 +11,7 @@ import {
 const entries: AuditLogEntry[] = [
   {
     actionCategory: "Auth",
-    actor: "admin@fluid.dev",
+    actor: "admin@paymaster.dev",
     action: "auth.login_failed",
     aiSummary: "Failed login",
     createdAt: "2026-05-31T10:00:00.000Z",
@@ -19,7 +19,7 @@ const entries: AuditLogEntry[] = [
     ipAddress: "203.0.113.10",
     metadata: null,
     riskScore: 92,
-    target: "admin@fluid.dev",
+    target: "admin@paymaster.dev",
   },
   {
     actionCategory: "API Key",
@@ -35,7 +35,7 @@ const entries: AuditLogEntry[] = [
   },
   {
     actionCategory: "Signer",
-    actor: "operator@fluid.dev",
+    actor: "operator@paymaster.dev",
     action: "signer.add",
     aiSummary: null,
     createdAt: "2026-04-01T10:00:00.000Z",
@@ -119,11 +119,11 @@ test("getAuditLogsData forwards detailed filters to the live audit endpoint", as
           items: [
             {
               action: "auth.login_failed",
-              actor: "admin@fluid.dev",
+              actor: "admin@paymaster.dev",
               createdAt: "2026-05-31T10:00:00.000Z",
               id: "live-one",
               metadata: null,
-              target: "admin@fluid.dev",
+              target: "admin@paymaster.dev",
             },
           ],
           limit: 25,
@@ -135,8 +135,8 @@ test("getAuditLogsData forwards detailed filters to the live audit endpoint", as
 
     await withEnv(
       {
-        FLUID_ADMIN_TOKEN: "admin-token",
-        FLUID_SERVER_URL: "https://server.fluid.test/",
+        PAYMASTER_ADMIN_TOKEN: "admin-token",
+        PAYMASTER_SERVER_URL: "https://server.paymaster.test/",
       },
       async () => {
         const data = await getAuditLogsData(25, 0, {

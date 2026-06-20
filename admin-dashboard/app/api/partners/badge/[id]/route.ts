@@ -15,7 +15,7 @@ export async function GET(
 
   const { siteUrl } = getPortalLinks();
   const verifyUrl = `${siteUrl}/partners?verify=${encodeURIComponent(id)}`;
-  const label = "Fluid Certified Partner";
+  const label = "Paymaster Certified Partner";
   const name = partner.projectName.replace(/[<>&"]/g, (c) =>
     ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c] ?? c),
   );
@@ -34,7 +34,7 @@ export async function GET(
   <circle cx="14" cy="14" r="8" fill="rgba(255,255,255,0.2)"/>
   <polyline points="10,14 13,17 18,11" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- label text -->
-  <text x="28" y="10" font-family="system-ui,sans-serif" font-size="7" font-weight="600" fill="rgba(255,255,255,0.85)" letter-spacing="0.5">FLUID CERTIFIED PARTNER</text>
+  <text x="28" y="10" font-family="system-ui,sans-serif" font-size="7" font-weight="600" fill="rgba(255,255,255,0.85)" letter-spacing="0.5">PAYMASTER CERTIFIED PARTNER</text>
   <!-- project name -->
   <text x="28" y="21" font-family="system-ui,sans-serif" font-size="9" font-weight="700" fill="white">${name}</text>
   <!-- verify link hint -->

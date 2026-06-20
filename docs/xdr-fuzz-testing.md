@@ -33,7 +33,7 @@ done
 
 ## Architecture
 
-The `xdr` module is exposed from `paymaster-server` library (`lib.rs`) so fuzz harnesses can depend on it. The binary re-exports via `pub use fluid_server::xdr`.
+The `xdr` module is exposed from `paymaster-server` library (`lib.rs`) so fuzz harnesses can depend on it. The binary re-exports via `pub use paymaster_server::xdr`.
 
 All parser functions return `Result` — no panics on malformed input. Fuzzing validates this invariant under arbitrary byte inputs up to 64 KiB.
 

@@ -43,7 +43,7 @@ function generateToken(): string {
 
 function generateApiKey(): { key: string; prefix: string } {
   const random = crypto.randomBytes(20).toString("hex");
-  const key = `fluid_live_${random}`;
+  const key = `paymaster_live_${random}`;
   const prefix = key.slice(0, 12);
   return { key, prefix };
 }
@@ -56,7 +56,7 @@ async function sendEmail(opts: {
   text: string;
 }): Promise<void> {
   const resendApiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_EMAIL_FROM || process.env.FLUID_ALERT_EMAIL_FROM || "noreply@fluid.dev";
+  const from = process.env.RESEND_EMAIL_FROM || process.env.PAYMASTER_ALERT_EMAIL_FROM || "noreply@paymaster.dev";
 
   if (resendApiKey) {
     const response = await fetch("https://api.resend.com/emails", {
@@ -82,7 +82,7 @@ async function sendEmail(opts: {
   }
 
   // SMTP fallback via nodemailer
-  const smtpHost = process.env.FLUID_ALERT_SMTP_HOST;
+  const smtpHost = process.env.PAYMASTER_ALERT_SMTP_HOST;
   if (smtpHost) {
     const nodemailer = require("nodemailer") as {
       createTransport: (config: any) => { sendMail: (msg: any) => Promise<unknown> };
@@ -90,13 +90,13 @@ async function sendEmail(opts: {
 
     const transport = nodemailer.createTransport({
       host: smtpHost,
-      port: Number(process.env.FLUID_ALERT_SMTP_PORT ?? 587),
-      secure: process.env.FLUID_ALERT_SMTP_SECURE === "true",
-      ...(process.env.FLUID_ALERT_SMTP_USER
+      port: Number(process.env.PAYMASTER_ALERT_SMTP_PORT ?? 587),
+      secure: process.env.PAYMASTER_ALERT_SMTP_SECURE === "true",
+      ...(process.env.PAYMASTER_ALERT_SMTP_USER
         ? {
             auth: {
-              user: process.env.FLUID_ALERT_SMTP_USER,
-              pass: process.env.FLUID_ALERT_SMTP_PASS ?? "",
+              user: process.env.PAYMASTER_ALERT_SMTP_USER,
+              pass: process.env.PAYMASTER_ALERT_SMTP_PASS ?? "",
             },
           }
         : {}),
@@ -132,7 +132,7 @@ function buildVerificationEmail(opts: {
   projectName: string;
   verifyUrl: string;
 }): { subject: string; html: string; text: string } {
-  const subject = "[Fluid] Verify your email address";
+  const subject = "[Paymaster] Verify your email address";
   const safeProject = escapeHtml(opts.projectName);
   const safeUrl = escapeHtml(opts.verifyUrl);
 
@@ -140,7 +140,7 @@ function buildVerificationEmail(opts: {
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:600px;margin:40px auto;color:#1e293b;">
-  <h1 style="color:#2563eb;">Welcome to Fluid</h1>
+  <h1 style="color:#2563eb;">Welcome to Paymaster</h1>
   <p>Thanks for registering <strong>${safeProject}</strong>!</p>
   <p>Click the button below to verify your email address and receive your API key:</p>
   <p style="margin:24px 0;">
@@ -156,7 +156,7 @@ function buildVerificationEmail(opts: {
 </body>
 </html>`;
 
-  const text = `Welcome to Fluid!\n\nThanks for registering ${opts.projectName}.\n\nVerify your email to receive your API key:\n${opts.verifyUrl}\n\nThis link expires in 24 hours.`;
+  const text = `Welcome to Paymaster!\n\nThanks for registering ${opts.projectName}.\n\nVerify your email to receive your API key:\n${opts.verifyUrl}\n\nThis link expires in 24 hours.`;
 
   return { subject, html, text };
 }
@@ -167,7 +167,7 @@ function buildWelcomeEmail(opts: {
   apiKey: string;
   docsUrl: string;
 }): { subject: string; html: string; text: string } {
-  const subject = "[Fluid] Your API key is ready";
+  const subject = "[Paymaster] Your API key is ready";
   const safeProject = escapeHtml(opts.projectName);
   const safeKey = escapeHtml(opts.apiKey);
   const safeDocsUrl = escapeHtml(opts.docsUrl);
@@ -176,11 +176,11 @@ function buildWelcomeEmail(opts: {
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:600px;margin:40px auto;color:#1e293b;">
-  <h1 style="color:#2563eb;">Your Fluid API key is ready</h1>
+  <h1 style="color:#2563eb;">Your Paymaster API key is ready</h1>
   <p>Your project <strong>${safeProject}</strong> has been provisioned on the Free tier.</p>
   <p>Here is your API key — keep it safe, it will only be shown once:</p>
   <pre style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:16px;font-size:14px;overflow-x:auto;">${safeKey}</pre>
-  <p>Use it in the <code>x-api-key</code> header when calling the Fluid fee-bump endpoint.</p>
+  <p>Use it in the <code>x-api-key</code> header when calling the Paymaster fee-bump endpoint.</p>
   <p>
     <a href="${safeDocsUrl}" style="color:#2563eb;">Read the quickstart docs →</a>
   </p>
@@ -190,7 +190,7 @@ function buildWelcomeEmail(opts: {
 </body>
 </html>`;
 
-  const text = `Your Fluid API key is ready!\n\nProject: ${opts.projectName}\n\nAPI Key (save this — shown only once):\n${opts.apiKey}\n\nUse it as the x-api-key header.\n\nDocs: ${opts.docsUrl}`;
+  const text = `Your Paymaster API key is ready!\n\nProject: ${opts.projectName}\n\nAPI Key (save this — shown only once):\n${opts.apiKey}\n\nUse it as the x-api-key header.\n\nDocs: ${opts.docsUrl}`;
 
   return { subject, html, text };
 }
@@ -406,8 +406,8 @@ export async function verifyRegistration(token: string): Promise<VerifyResult> {
   // Send welcome email (fire-and-forget to avoid blocking the response)
   const docsUrl =
     process.env.NEXT_PUBLIC_DOCS_URL ||
-    process.env.FLUID_DOCS_URL ||
-    "https://docs.fluid.dev";
+    process.env.PAYMASTER_DOCS_URL ||
+    "https://docs.paymaster.dev";
 
   const { subject, html, text } = buildWelcomeEmail({
     email: record.email,

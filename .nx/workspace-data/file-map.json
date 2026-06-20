@@ -3473,11 +3473,11 @@
           "hash": "9762875242259628377"
         },
         {
-          "file": "client/docs/classes/FluidClient.html",
+          "file": "client/docs/classes/PaymasterClient.html",
           "hash": "8751816999242073796"
         },
         {
-          "file": "client/docs/classes/FluidQueue.html",
+          "file": "client/docs/classes/PaymasterQueue.html",
           "hash": "3843742033226300692"
         },
         {
@@ -3557,11 +3557,11 @@
           "hash": "10245956310659670881"
         },
         {
-          "file": "client/docs/interfaces/FluidClientConfig.html",
+          "file": "client/docs/interfaces/PaymasterClientConfig.html",
           "hash": "16638992610840470997"
         },
         {
-          "file": "client/docs/interfaces/FluidQueueCallbacks.html",
+          "file": "client/docs/interfaces/PaymasterQueueCallbacks.html",
           "hash": "14358799017305300524"
         },
         {
@@ -3650,7 +3650,7 @@
           "hash": "7748771390789485078"
         },
         {
-          "file": "client/src/FluidClient.ts",
+          "file": "client/src/PaymasterClient.ts",
           "hash": "17223007502669225917",
           "deps": [
             "npm:@stellar/stellar-sdk@11.3.0"
@@ -3686,7 +3686,7 @@
           ]
         },
         {
-          "file": "client/src/context/FluidContext.tsx",
+          "file": "client/src/context/PaymasterContext.tsx",
           "hash": "12838344596540571302",
           "deps": [
             "npm:react"
@@ -3818,7 +3818,7 @@
           "hash": "17650046617633319819"
         },
         {
-          "file": "client/src/react-native/FluidProvider.tsx",
+          "file": "client/src/react-native/PaymasterProvider.tsx",
           "hash": "8946190016432043634",
           "deps": [
             "npm:react"
@@ -3893,7 +3893,7 @@
           "hash": "18152686091977786575"
         },
         {
-          "file": "client/src/testUtils/FluidMockClient.ts",
+          "file": "client/src/testUtils/PaymasterMockClient.ts",
           "hash": "2293223890334695105"
         },
         {
@@ -3944,7 +3944,7 @@
           "hash": "17362066572265775050"
         },
         {
-          "file": "client/src/vue/useFluid.ts",
+          "file": "client/src/vue/usePaymaster.ts",
           "hash": "15583497904888284256",
           "deps": [
             "npm:vue"
@@ -4079,7 +4079,7 @@
           "hash": "15847699439490627917"
         },
         {
-          "file": "client/verification/react_devtools_fluid_context.png",
+          "file": "client/verification/react_devtools_paymaster_context.png",
           "hash": "13971702773132584556"
         },
         {
@@ -7154,23 +7154,23 @@
         "hash": "18311826569532497627"
       },
       {
-        "file": "paymaster-py/examples/mock_fluid_server.py",
+        "file": "paymaster-py/examples/mock_paymaster_server.py",
         "hash": "17775830132686811995"
       },
       {
-        "file": "paymaster-py/fluid_py/__init__.py",
+        "file": "paymaster-py/paymaster_py/__init__.py",
         "hash": "1568426773875525718"
       },
       {
-        "file": "paymaster-py/fluid_py/client.py",
+        "file": "paymaster-py/paymaster_py/client.py",
         "hash": "18093111121704077112"
       },
       {
-        "file": "paymaster-py/fluid_py/exceptions.py",
+        "file": "paymaster-py/paymaster_py/exceptions.py",
         "hash": "13671032890996851820"
       },
       {
-        "file": "paymaster-py/fluid_py/models.py",
+        "file": "paymaster-py/paymaster_py/models.py",
         "hash": "14953779761782232779"
       },
       {

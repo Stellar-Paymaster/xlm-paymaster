@@ -5,7 +5,7 @@ async function adminHeaders(): Promise<Record<string, string>> {
   const session = await auth();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "x-admin-token": process.env.FLUID_ADMIN_TOKEN?.trim() ?? "",
+    "x-admin-token": process.env.PAYMASTER_ADMIN_TOKEN?.trim() ?? "",
   };
   if (session?.user?.adminJwt) headers["x-admin-jwt"] = session.user.adminJwt;
   return headers;
@@ -16,8 +16,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
-    if (!serverUrl) throw new Error("FLUID_SERVER_URL not configured");
+    const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
+    if (!serverUrl) throw new Error("PAYMASTER_SERVER_URL not configured");
     const body = await req.json();
     const response = await fetch(`${serverUrl}/admin/users/${params.id}/role`, {
       method: "PATCH",

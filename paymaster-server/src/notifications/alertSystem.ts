@@ -1,6 +1,6 @@
 /**
  * SMTP and Slack Stateful Alert Notification System
- * Fluid Resilience & Cooldown Module | Issue #156
+ * Paymaster Resilience & Cooldown Module | Issue #156
  * 
  * Provides stateful balance drop alerts with a configurable 6-hour cooldown window
  * to prevent alert flooding.

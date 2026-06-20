@@ -37,7 +37,7 @@ function makeRes() {
 
 describe("signAdminJwt / verifyAdminJwt", () => {
   beforeEach(() => {
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRET", "test-secret");
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRET", "test-secret");
   });
 
   it("round-trips a token and preserves sessionVersion", () => {
@@ -63,8 +63,8 @@ describe("signAdminJwt / verifyAdminJwt", () => {
     expect(verifyAdminJwt("not.a.jwt")).toBeNull();
   });
 
-  it("supports multi-key rotation via FLUID_ADMIN_JWT_SECRETS", () => {
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRETS", "new-secret, old-secret");
+  it("supports multi-key rotation via PAYMASTER_ADMIN_JWT_SECRETS", () => {
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRETS", "new-secret, old-secret");
 
     const payload = { sub: "u1", email: "a@test.com", role: "ADMIN" as const, sessionVersion: 1 };
     
@@ -91,8 +91,8 @@ describe("signAdminJwt / verifyAdminJwt", () => {
 describe("resolveAdminRole", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.stubEnv("FLUID_ADMIN_TOKEN", "static-token");
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRET", "test-secret");
+    vi.stubEnv("PAYMASTER_ADMIN_TOKEN", "static-token");
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRET", "test-secret");
   });
 
   it("resolves the current DB role for a valid admin jwt", async () => {
@@ -151,8 +151,8 @@ describe("resolveAdminRole", () => {
 describe("requirePermission", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.stubEnv("FLUID_ADMIN_TOKEN", "static-token");
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRET", "test-secret");
+    vi.stubEnv("PAYMASTER_ADMIN_TOKEN", "static-token");
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRET", "test-secret");
   });
 
   it("calls next when the current DB role has the permission", async () => {
@@ -244,7 +244,7 @@ describe("requirePermission", () => {
 describe("requireAuthenticatedAdmin", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRET", "test-secret");
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRET", "test-secret");
   });
 
   it("attaches authenticated jwt admin context", async () => {

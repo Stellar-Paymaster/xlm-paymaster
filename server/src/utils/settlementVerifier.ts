@@ -16,7 +16,7 @@ export interface SettlementRequirement {
 
 /**
  * Verifies that an inner transaction includes a proper settlement payment
- * to the Fluid node's fee payer account in the specified token.
+ * to the Paymaster node's fee payer account in the specified token.
  */
 export function verifySettlementPayment(
   innerTransaction: Transaction,

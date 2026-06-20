@@ -11,7 +11,7 @@ The Web Worker integration moves CPU-intensive cryptographic operations (signing
 ```
 Main Thread                    Web Worker Thread
 -----------                    ---------------
-FluidClient                   signingWorker.ts
+PaymasterClient                   signingWorker.ts
     |                               |
     |--- Message passing --->       |
     |                               |--- WASM Module
@@ -34,10 +34,10 @@ FluidClient                   signingWorker.ts
 ### Basic Usage with Web Worker
 
 ```typescript
-import { FluidClient } from 'paymaster-client';
+import { PaymasterClient } from 'paymaster-client';
 import StellarSdk from '@stellar/stellar-sdk';
 
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: 'https://your-paymaster-server.com',
   networkPassphrase: StellarSdk.Networks.PUBLIC,
   horizonUrl: 'https://horizon.stellar.org',
@@ -54,7 +54,7 @@ If the Web Worker fails to initialize or encounters an error, the client automat
 
 ```typescript
 // Worker failure is handled automatically
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: 'https://your-paymaster-server.com',
   networkPassphrase: StellarSdk.Networks.PUBLIC,
   useWorker: true // Will fallback to false if worker fails
@@ -76,10 +76,10 @@ console.log('Signing time:', metrics.signingTime);
 
 ## Configuration Options
 
-### FluidClientConfig
+### PaymasterClientConfig
 
 ```typescript
-interface FluidClientConfig {
+interface PaymasterClientConfig {
   serverUrl: string;
   networkPassphrase: string;
   horizonUrl?: string;
@@ -131,7 +131,7 @@ npm run test:performance
 
 ```
 client/src/
-├── index.ts                 # Main FluidClient class
+├── index.ts                 # Main PaymasterClient class
 ├── workers/
 │   └── signingWorker.ts    # Web Worker implementation
 ├── wasm/
@@ -171,7 +171,7 @@ client/src/
 
 ```typescript
 // Automatic fallback with warning
-console.warn('[FluidClient] Failed to initialize worker, falling back to main thread');
+console.warn('[PaymasterClient] Failed to initialize worker, falling back to main thread');
 ```
 
 ### Runtime Worker Errors
@@ -179,7 +179,7 @@ console.warn('[FluidClient] Failed to initialize worker, falling back to main th
 ```typescript
 // Worker errors trigger automatic fallback
 worker.onerror = (error) => {
-  console.error('[FluidClient] Worker error:', error);
+  console.error('[PaymasterClient] Worker error:', error);
   this.useWorker = false;
   this.worker?.terminate();
 };
@@ -238,8 +238,8 @@ console.log('[SigningWorker] WASM module initialized successfully');
 console.log('[SigningWorker] Processing sign_transaction request');
 
 // Client logging
-console.log('[FluidClient] Web Worker initialized for signing operations');
-console.log('[FluidClient] Worker signing failed, falling back to main thread');
+console.log('[PaymasterClient] Web Worker initialized for signing operations');
+console.log('[PaymasterClient] Worker signing failed, falling back to main thread');
 ```
 
 ## Future Enhancements

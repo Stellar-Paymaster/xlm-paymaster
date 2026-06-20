@@ -225,7 +225,7 @@ function CreateInvitationModal({ onClose, onCreated, inviterEmail, existingEmail
       const fallbackInvitation = createTeamInvitation({
         email: normalizedEmail,
         role,
-        invitedBy: inviterEmail || "admin@fluid.dev",
+        invitedBy: inviterEmail || "admin@paymaster.dev",
         ttlHours,
         appOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
       });
@@ -235,7 +235,7 @@ function CreateInvitationModal({ onClose, onCreated, inviterEmail, existingEmail
       const fallbackInvitation = createTeamInvitation({
         email: normalizedEmail,
         role,
-        invitedBy: inviterEmail || "admin@fluid.dev",
+        invitedBy: inviterEmail || "admin@paymaster.dev",
         ttlHours,
         appOrigin: typeof window !== "undefined" ? window.location.origin : undefined,
       });
@@ -570,7 +570,7 @@ export function AdminUsersTable({ users: initialUsers, currentUserRole }: AdminU
         <CreateInvitationModal
           onClose={() => setShowInviteModal(false)}
           onCreated={handleInvitationCreated}
-          inviterEmail={users[0]?.email ?? "admin@fluid.dev"}
+          inviterEmail={users[0]?.email ?? "admin@paymaster.dev"}
           existingEmails={activeInvitationEmails}
         />
       )}

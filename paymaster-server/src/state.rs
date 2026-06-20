@@ -47,7 +47,7 @@ pub struct ApiKeyConfig {
 pub const API_KEYS: [ApiKeyConfig; 2] = [
     ApiKeyConfig {
         daily_quota_stroops: 200,
-        key: "fluid-free-demo-key",
+        key: "paymaster-free-demo-key",
         max_requests: 2,
         name: "Demo Free dApp",
         tenant_id: "tenant-demo-free",
@@ -56,7 +56,7 @@ pub const API_KEYS: [ApiKeyConfig; 2] = [
     },
     ApiKeyConfig {
         daily_quota_stroops: 2_000,
-        key: "fluid-pro-demo-key",
+        key: "paymaster-pro-demo-key",
         max_requests: 5,
         name: "Demo Pro dApp",
         tenant_id: "tenant-demo-pro",
@@ -157,7 +157,7 @@ impl AppState {
                 config.horizon_selection_strategy,
             )),
             metrics: Arc::new(AppMetrics::new(
-                std::env::var("FLUID_AVAILABLE_ACCOUNT_BALANCE")
+                std::env::var("PAYMASTER_AVAILABLE_ACCOUNT_BALANCE")
                     .ok()
                     .and_then(|value| value.parse::<f64>().ok())
                     .unwrap_or(0.0),

@@ -29,11 +29,11 @@ describe('Accessibility Audit (A11y)', () => {
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <title>Fluid Enterprise Dashboard</title>
+        <title>Paymaster Enterprise Dashboard</title>
       </head>
       <body>
         <main>
-          <h1>Fluid Enterprise Dashboard</h1>
+          <h1>Paymaster Enterprise Dashboard</h1>
           <form>
             <label for="tenantId">Tenant ID</label>
             <input type="text" id="tenantId" name="tenantId" aria-required="true" />

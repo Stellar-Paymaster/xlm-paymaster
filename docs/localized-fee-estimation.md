@@ -24,8 +24,8 @@ Default multipliers by region:
 Multipliers are configurable via environment variable:
 
 ```bash
-# FLUID_CONGESTION_CONFIG must be valid JSON array
-FLUID_CONGESTION_CONFIG='[{"region":"BR","low":1.3,"medium":1.5,"high":1.7}]'
+# PAYMASTER_CONGESTION_CONFIG must be valid JSON array
+PAYMASTER_CONGESTION_CONFIG='[{"region":"BR","low":1.3,"medium":1.5,"high":1.7}]'
 ```
 
 Or create a config file:

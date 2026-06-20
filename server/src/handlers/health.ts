@@ -8,7 +8,7 @@ import { getHealthStatus } from "../services/healthService";
  *   get:
  *     summary: Service health check
  *     description: >
- *       Returns the overall health of the Fluid server, including Horizon
+ *       Returns the overall health of the Paymaster server, including Horizon
  *       connectivity status and per-fee-payer account balances.
  *       No authentication required.
  *     tags:

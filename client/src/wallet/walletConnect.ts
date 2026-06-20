@@ -2,9 +2,9 @@
  * WalletConnect bindings for universal Stellar signing.
  *
  * This module implements the standard WalletConnect Stellar namespace so that
- * Fluid example applications can sign fee-bump payloads through any
+ * Paymaster example applications can sign fee-bump payloads through any
  * WalletConnect-compatible wallet without taking a hard dependency on the
- * `@walletconnect/*` packages. The provider is injected, which keeps the Fluid
+ * `@walletconnect/*` packages. The provider is injected, which keeps the Paymaster
  * client tree-shakeable and lets tests run against a lightweight mock.
  *
  * Standard reference:

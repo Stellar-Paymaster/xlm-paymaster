@@ -14,7 +14,7 @@ export default async function AdminWebhookDlqPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-sky-600">
-                Fluid Admin
+                Paymaster Admin
               </p>
               <h1 className="mt-2 text-3xl font-bold text-slate-900">
                 Webhook Dead-Letter Queue

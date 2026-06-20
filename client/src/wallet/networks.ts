@@ -4,7 +4,7 @@
  * WalletConnect identifies chains using CAIP-2 strings. The Stellar namespace
  * registers two chains: `stellar:pubnet` (mainnet) and `stellar:testnet`.
  * These helpers translate between a Stellar network passphrase — the value the
- * Fluid client already works with — and the corresponding CAIP-2 chain id.
+ * Paymaster client already works with — and the corresponding CAIP-2 chain id.
  *
  * Reference: https://github.com/ChainAgnostic/namespaces/blob/main/stellar/caip2.md
  */

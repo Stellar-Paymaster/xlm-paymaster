@@ -45,12 +45,12 @@ export class DigestWorker extends BaseWorker {
       new DigestService({
         emailTransport,
         dashboardUrl:
-          process.env.FLUID_ALERT_DASHBOARD_URL?.trim() ||
+          process.env.PAYMASTER_ALERT_DASHBOARD_URL?.trim() ||
           process.env.DASHBOARD_URL?.trim() ||
           undefined,
         unsubscribeBaseUrl:
           process.env.REGISTRATION_VERIFY_BASE_URL?.trim() ||
-          process.env.FLUID_ALERT_DASHBOARD_URL?.trim() ||
+          process.env.PAYMASTER_ALERT_DASHBOARD_URL?.trim() ||
           undefined,
         unsubscribeSecret:
           process.env.DIGEST_UNSUBSCRIBE_SECRET?.trim() || "digest-unsubscribe",

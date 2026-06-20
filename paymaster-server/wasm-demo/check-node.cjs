@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const StellarSdk = require("@stellar/stellar-sdk");
-const init = require("../pkg/node/fluid_server.js");
+const init = require("../pkg/node/paymaster_server.js");
 
 async function main() {
   const { buildUnsignedTransaction, TEST_NETWORK_PASSPHRASE, TEST_SECRET_KEY } = await import(

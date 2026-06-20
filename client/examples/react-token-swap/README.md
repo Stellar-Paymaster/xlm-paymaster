@@ -22,7 +22,7 @@ A React demo showing gasless token swaps on Soroswap DEX powered by XLM Paymaste
 VITE_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 VITE_SOROSWAP_ROUTER_CONTRACT=<router-contract-id>
 VITE_USDC_CONTRACT=<usdc-contract-id>
-VITE_FLUID_SERVER_URL=https://testnet.xlm-paymaster.dev
+VITE_PAYMASTER_SERVER_URL=https://testnet.xlm-paymaster.dev
 VITE_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 VITE_STELLAR_EXPERT_URL=https://stellar.expert/explorer/testnet
 VITE_HORIZON_URL=https://horizon-testnet.stellar.org
@@ -61,7 +61,7 @@ Set environment variables in Vercel dashboard:
 - `VITE_SOROBAN_RPC_URL`
 - `VITE_SOROSWAP_ROUTER_CONTRACT`
 - `VITE_USDC_CONTRACT`
-- `VITE_FLUID_SERVER_URL`
+- `VITE_PAYMASTER_SERVER_URL`
 - `VITE_NETWORK_PASSPHRASE`
 - `VITE_STELLAR_EXPERT_URL`
 - `VITE_HORIZON_URL`

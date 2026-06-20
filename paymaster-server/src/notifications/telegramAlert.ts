@@ -190,7 +190,7 @@ export async function sendDailySummaryAlert(
     `💸 *Volume:* ${totalVolume.toFixed(2)} ${currency}`,
     `💰 *Closing Balance:* ${balance.toFixed(2)} ${currency}`,
     ``,
-    `_Fluid Operator Report_`,
+    `_Paymaster Operator Report_`,
   ].join("\n");
 
   await sendTelegramMessage(config, text, [

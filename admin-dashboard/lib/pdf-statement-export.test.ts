@@ -117,7 +117,7 @@ describe("pdf statement helpers", () => {
 
     expect(formatStatementDate("2026-02-14T12:15:00Z")).toBe("Feb 14, 2026");
     expect(formatStatementDate("bad-date")).toBe("Unknown date");
-    expect(getBillingStatementFilename(statement)).toBe("fluid-billing-statement-2026-02.pdf");
+    expect(getBillingStatementFilename(statement)).toBe("paymaster-billing-statement-2026-02.pdf");
   });
 });
 
@@ -192,7 +192,7 @@ describe("exportBillingStatementToPDF", () => {
 
     expect(autoTable).toHaveBeenCalledTimes(2);
     expect(text).toHaveBeenCalledWith("Monthly Billing Statement", 14, 25);
-    expect(saveAnchor.download).toBe("fluid-billing-statement-2026-03.pdf");
+    expect(saveAnchor.download).toBe("paymaster-billing-statement-2026-03.pdf");
     expect(saveAnchor.click).toHaveBeenCalledTimes(1);
     expect(appendChild).toHaveBeenCalledWith(saveAnchor);
     expect(removeChild).toHaveBeenCalledWith(saveAnchor);

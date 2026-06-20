@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fluid Admin Dashboard",
+  title: "Paymaster Admin Dashboard",
   description: "Stellar fee sponsorship admin dashboard",
 };
 

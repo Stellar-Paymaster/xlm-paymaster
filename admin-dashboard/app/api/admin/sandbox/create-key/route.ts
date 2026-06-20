@@ -1,10 +1,10 @@
 /**
  * Dashboard proxy: POST /api/admin/sandbox/create-key
- * Creates a new sandbox API key for a tenant via the Fluid server.
+ * Creates a new sandbox API key for a tenant via the Paymaster server.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { fluidServerUrl, fluidAdminToken } from "@/lib/server-env";
+import { paymasterServerUrl, paymasterAdminToken } from "@/lib/server-env";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -14,10 +14,10 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  const upstream = await fetch(`${fluidServerUrl}/admin/sandbox/api-keys`, {
+  const upstream = await fetch(`${paymasterServerUrl}/admin/sandbox/api-keys`, {
     method: "POST",
     headers: {
-      "x-admin-token": fluidAdminToken,
+      "x-admin-token": paymasterAdminToken,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),

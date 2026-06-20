@@ -52,7 +52,7 @@ docker compose -f docker-compose.scale.yml logs node-api
 
 `infra/nginx.conf` is a minimal nginx configuration suitable for production use. Key settings:
 
-- `upstream fluid_node_api` — round-robin across all `node-api` replicas
+- `upstream paymaster_node_api` — round-robin across all `node-api` replicas
 - `keepalive 32` — persistent upstream connections to reduce per-request overhead
 - `proxy_set_header X-Forwarded-For` — real client IP forwarded for IP filtering middleware
 - Timeouts tuned for the expected fee-bump signing latency

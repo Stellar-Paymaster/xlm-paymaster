@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import {
   FeeBumpRequestInput,
   FeeBumpResponse,
-  FluidClient,
-} from "../FluidClient";
+  PaymasterClient,
+} from "../PaymasterClient";
 
 export interface UseFeeBumpResult {
   requestFeeBump: (
@@ -15,7 +15,7 @@ export interface UseFeeBumpResult {
   result: FeeBumpResponse | null;
 }
 
-export function useFeeBump(client: FluidClient): UseFeeBumpResult {
+export function useFeeBump(client: PaymasterClient): UseFeeBumpResult {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [result, setResult] = useState<FeeBumpResponse | null>(null);

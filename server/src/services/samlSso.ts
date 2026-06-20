@@ -18,7 +18,7 @@ export class SamlSsoService {
    */
   public getSamlRedirectUrl(): string {
     const entryPoint = process.env.SAML_ENTRY_POINT || "https://mock-okta.com/sso/saml";
-    const issuer = process.env.SAML_ISSUER || "urn:fluid:server";
+    const issuer = process.env.SAML_ISSUER || "urn:paymaster:server";
     const callbackUrl = process.env.SAML_CALLBACK_URL || "http://localhost:3000/admin/auth/saml/callback";
 
     const id = "_" + randomUUID().replace(/-/g, "");

@@ -1,6 +1,6 @@
 [workspace]
 [package]
-name = "fluid-escrow-factory"
+name = "paymaster-escrow-factory"
 version = "0.1.0"
 edition = "2021"
 

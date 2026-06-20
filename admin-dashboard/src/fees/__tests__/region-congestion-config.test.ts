@@ -32,13 +32,13 @@ test("getCongestionMultiplier is case insensitive", () => {
 });
 
 test("getCongestionConfig handles invalid JSON env var", () => {
-  const originalEnv = process.env.FLUID_CONGESTION_CONFIG;
+  const originalEnv = process.env.PAYMASTER_CONGESTION_CONFIG;
   // @ts-expect-error - testing with invalid value
-  process.env.FLUID_CONGESTION_CONFIG = "invalid-json";
+  process.env.PAYMASTER_CONGESTION_CONFIG = "invalid-json";
   
   const config = getCongestionConfig();
   assert.ok(Array.isArray(config));
   assert.ok(config.length > 0);
   
-  process.env.FLUID_CONGESTION_CONFIG = originalEnv;
+  process.env.PAYMASTER_CONGESTION_CONFIG = originalEnv;
 });

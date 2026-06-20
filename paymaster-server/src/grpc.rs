@@ -14,18 +14,18 @@ pub mod signer {
 use signer::signer_service_server::{SignerService, SignerServiceServer};
 use signer::{SignRequest, SignResponse};
 
-pub struct FluidSignerGrpc {
+pub struct PaymasterSignerGrpc {
     rate_limiter: Arc<RateLimiter>,
 }
 
-impl FluidSignerGrpc {
+impl PaymasterSignerGrpc {
     pub fn new(rate_limiter: Arc<RateLimiter>) -> Self {
-        FluidSignerGrpc { rate_limiter }
+        PaymasterSignerGrpc { rate_limiter }
     }
 }
 
 #[tonic::async_trait]
-impl SignerService for FluidSignerGrpc {
+impl SignerService for PaymasterSignerGrpc {
     async fn sign(&self, request: Request<SignRequest>) -> Result<Response<SignResponse>, Status> {
         // Extract client IP or use a default key
         let client_ip = request
@@ -96,12 +96,12 @@ fn map_signing_error(error: SigningError) -> Status {
 }
 
 pub async fn serve_grpc(addr: SocketAddr) -> Result<(), Box<dyn std::error::Error>> {
-    info!("Fluid signer gRPC listening on {addr}");
+    info!("Paymaster signer gRPC listening on {addr}");
 
     // Initialize rate limiter: 100 requests per 60 seconds per IP
     let rate_limiter = Arc::new(RateLimiter::new(100, 60_000));
 
-    let signer = FluidSignerGrpc::new(rate_limiter.clone());
+    let signer = PaymasterSignerGrpc::new(rate_limiter.clone());
 
     Server::builder()
         .add_service(SignerServiceServer::new(signer))

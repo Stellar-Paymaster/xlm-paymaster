@@ -150,7 +150,7 @@ mod tests {
         let client = IdentityRegistryDIDClient::new(&env, &contract_id);
 
         let identity = Address::generate(&env);
-        let did = Symbol::new(&env, "did_fluid_user123");
+        let did = Symbol::new(&env, "did_paymaster_user123");
         let pubkey = BytesN::from_array(&env, &[0u8; 32]);
 
         client.register_did(&identity, &did, &pubkey);
@@ -178,8 +178,8 @@ mod tests {
         let client = IdentityRegistryDIDClient::new(&env, &contract_id);
 
         let identity = Address::generate(&env);
-        let did1 = Symbol::new(&env, "did_fluid_1");
-        let did2 = Symbol::new(&env, "did_fluid_2");
+        let did1 = Symbol::new(&env, "did_paymaster_1");
+        let did2 = Symbol::new(&env, "did_paymaster_2");
         let pubkey = BytesN::from_array(&env, &[0u8; 32]);
 
         client.register_did(&identity, &did1, &pubkey);

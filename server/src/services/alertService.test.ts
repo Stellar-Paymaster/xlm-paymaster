@@ -89,14 +89,14 @@ describe("AlertService", () => {
       },
       notifier,
       {
-        dashboardUrl: "https://dashboard.fluid.test/admin/dashboard",
+        dashboardUrl: "https://dashboard.paymaster.test/admin/dashboard",
         emailTransport: {
-          from: "alerts@fluid.test",
-          host: "smtp.fluid.test",
+          from: "alerts@paymaster.test",
+          host: "smtp.paymaster.test",
           kind: "smtp",
           port: 587,
           secure: false,
-          to: ["ops@fluid.test"],
+          to: ["ops@paymaster.test"],
         },
         loadNodeMailer: () => ({
           createTransport: () => ({
@@ -111,7 +111,7 @@ describe("AlertService", () => {
 
     const [message] = sendMail.mock.calls[0];
     expect(message.text).toContain(
-      "Dashboard: https://dashboard.fluid.test/admin/dashboard",
+      "Dashboard: https://dashboard.paymaster.test/admin/dashboard",
     );
     expect(message.html).toContain("Open operator dashboard");
   });
@@ -133,13 +133,13 @@ describe("AlertService", () => {
       },
       notifier,
       {
-        dashboardUrl: "https://dashboard.fluid.test/admin/dashboard",
+        dashboardUrl: "https://dashboard.paymaster.test/admin/dashboard",
         emailTransport: {
           apiKey: "re_test_123",
           apiUrl: "https://api.resend.test/emails",
-          from: "alerts@fluid.test",
+          from: "alerts@paymaster.test",
           kind: "resend",
-          to: ["ops@fluid.test"],
+          to: ["ops@paymaster.test"],
         },
         fetchImpl: fetchMock as typeof fetch,
       },
@@ -154,7 +154,7 @@ describe("AlertService", () => {
 
     const body = JSON.parse(String(request.body));
     expect(body.text).toContain(
-      "Dashboard: https://dashboard.fluid.test/admin/dashboard",
+      "Dashboard: https://dashboard.paymaster.test/admin/dashboard",
     );
     expect(body.html).toContain("Open operator dashboard");
   });
@@ -194,7 +194,7 @@ describe("low-balance env resolution", () => {
 
   it("prefers LOW_BALANCE_ALERT_XLM over the legacy threshold env name", () => {
     vi.stubEnv("LOW_BALANCE_ALERT_XLM", "12.5");
-    vi.stubEnv("FLUID_LOW_BALANCE_THRESHOLD_XLM", "50");
+    vi.stubEnv("PAYMASTER_LOW_BALANCE_THRESHOLD_XLM", "50");
 
     expect(resolveLowBalanceThresholdXlm(undefined)).toBe(12.5);
   });

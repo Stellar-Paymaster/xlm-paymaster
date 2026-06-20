@@ -15,10 +15,10 @@ export interface OfflinePrepareOptions {
   now?: number;
 }
 
-const STORAGE_KEY = "fluid_offline_prepared_txns";
+const STORAGE_KEY = "paymaster_offline_prepared_txns";
 
 function generateId(): string {
-  return `fluid_offline_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  return `paymaster_offline_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function readStorage(storage: Pick<Storage, "getItem">): OfflinePreparedTransaction[] {

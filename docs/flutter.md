@@ -34,8 +34,8 @@ final platform = MethodChannel('com.your.app/xlm-paymaster');
 For Flutter Web apps, use Dart's JavaScript interop:
 
 ```dart
-@JS('FlutterFluidClient')
-library flutter_fluid_client;
+@JS('FlutterPaymasterClient')
+library flutter_paymaster_client;
 
 import 'package:js/js.dart';
 ```
@@ -45,7 +45,7 @@ import 'package:js/js.dart';
 ### 1. Initialize the SDK
 
 ```dart
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrl: 'https://your-paymaster-server.com',
   horizonUrl: 'https://horizon-testnet.stellar.org',
@@ -104,12 +104,12 @@ if (transactionResult.success) {
 
 ## API Reference
 
-### `FlutterFluidClient`
+### `FlutterPaymasterClient`
 
 #### Constructor
 
 ```dart
-FlutterFluidClient({
+FlutterPaymasterClient({
   required String networkPassphrase,
   String? serverUrl,
   List<String>? serverUrls,
@@ -355,7 +355,7 @@ The SDK includes automatic retry logic for improved network resilience:
 
 ```dart
 // Configure retry behavior
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrls: [
     'https://xlm-paymaster-primary.example',
@@ -373,7 +373,7 @@ final client = FlutterFluidClient(
 The SDK automatically fails over to alternative servers:
 
 ```dart
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   serverUrls: [
     'https://xlm-paymaster-primary.example',  // Try first
     'https://xlm-paymaster-secondary.example', // Fallback 1
@@ -388,7 +388,7 @@ final client = FlutterFluidClient(
 The SDK checks for required platform features:
 
 ```dart
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrl: 'https://xlm-paymaster.example',
 );
@@ -416,7 +416,7 @@ if (!client.isPlatformCompatible()) {
 final horizonUrl = await _secureStorage.read(key: 'horizon_url');
 final apiKey = await _secureStorage.read(key: 'api_key');
 
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrl: horizonUrl,
   horizonUrl: horizonUrl,
@@ -446,7 +446,7 @@ if (result.success) {
 
 ```dart
 // Enable verbose errors for debugging
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrl: 'https://xlm-paymaster.example',
   verboseErrors: true,  // Only in debug builds
@@ -464,7 +464,7 @@ client.reportBug(
 ### 1. Use Workers for Signing (Web)
 
 ```dart
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrl: 'https://xlm-paymaster.example',
   useWorker: true,  // Offload signing to Web Worker
@@ -484,7 +484,7 @@ final result = await client.signTransactions(
 ### 3. Configure Timeouts
 
 ```dart
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrl: 'https://xlm-paymaster.example',
   networkTimeoutMs: 15000,  // 15 second timeout for faster failure
@@ -497,7 +497,7 @@ final client = FlutterFluidClient(
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:your_app/fluid_sdk.dart';
+import 'package:your_app/paymaster_sdk.dart';
 
 class PaymentScreen extends StatefulWidget {
   @override
@@ -505,7 +505,7 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  late FlutterFluidClient _client;
+  late FlutterPaymasterClient _client;
   bool _isLoading = false;
   String? _transactionHash;
 
@@ -516,7 +516,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> _initClient() async {
-    _client = FlutterFluidClient(
+    _client = FlutterPaymasterClient(
       networkPassphrase: 'Test Network',
       serverUrl: 'https://xlm-paymaster.example',
       horizonUrl: 'https://horizon-testnet.stellar.org',
@@ -597,10 +597,10 @@ For Flutter Web apps, the SDK works seamlessly with Dart-JS interop:
 
 ```dart
 // Import the generated JS interop
-declare var FlutterFluidClient: any;
+declare var FlutterPaymasterClient: any;
 
-class FluidSDK {
-  static final _client = FlutterFluidClient({
+class PaymasterSDK {
+  static final _client = FlutterPaymasterClient({
     networkPassphrase: 'Test Network',
     serverUrl: 'https://xlm-paymaster.example',
   });
@@ -662,7 +662,7 @@ class AppErrorHandler {
 ```dart
 // Stream confirmation progress
 Stream<ConfirmationProgress> streamConfirmation(String hash) async* {
-  final client = FlutterFluidClient(
+  final client = FlutterPaymasterClient(
     networkPassphrase: 'Test Network',
     serverUrl: 'https://xlm-paymaster.example',
   );

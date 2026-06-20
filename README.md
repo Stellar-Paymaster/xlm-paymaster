@@ -32,28 +32,28 @@ The Rust server listens on `http://localhost:3000` by default.
 The Rust server uses the same environment variable names as the legacy Node server:
 
 ```bash
-FLUID_FEE_PAYER_SECRET=YOUR_STELLAR_SECRET_KEY
-FLUID_BASE_FEE=100
-FLUID_FEE_MULTIPLIER=2.0
+PAYMASTER_FEE_PAYER_SECRET=YOUR_STELLAR_SECRET_KEY
+PAYMASTER_BASE_FEE=100
+PAYMASTER_FEE_MULTIPLIER=2.0
 STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
 STELLAR_HORIZON_URLS=
-FLUID_HORIZON_SELECTION=priority
-FLUID_RATE_LIMIT_WINDOW_MS=60000
-FLUID_RATE_LIMIT_MAX=5
-FLUID_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+PAYMASTER_HORIZON_SELECTION=priority
+PAYMASTER_RATE_LIMIT_WINDOW_MS=60000
+PAYMASTER_RATE_LIMIT_MAX=5
+PAYMASTER_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 PORT=3000
-FLUID_LOW_BALANCE_THRESHOLD_XLM=50
-FLUID_LOW_BALANCE_CHECK_INTERVAL_MS=3600000
-FLUID_LOW_BALANCE_ALERT_COOLDOWN_MS=21600000
-FLUID_ALERT_SLACK_WEBHOOK_URL=
-FLUID_ALERT_SMTP_HOST=
-FLUID_ALERT_SMTP_PORT=587
-FLUID_ALERT_SMTP_SECURE=false
-FLUID_ALERT_SMTP_USER=
-FLUID_ALERT_SMTP_PASS=
-FLUID_ALERT_EMAIL_FROM=
-FLUID_ALERT_EMAIL_TO=
+PAYMASTER_LOW_BALANCE_THRESHOLD_XLM=50
+PAYMASTER_LOW_BALANCE_CHECK_INTERVAL_MS=3600000
+PAYMASTER_LOW_BALANCE_ALERT_COOLDOWN_MS=21600000
+PAYMASTER_ALERT_SLACK_WEBHOOK_URL=
+PAYMASTER_ALERT_SMTP_HOST=
+PAYMASTER_ALERT_SMTP_PORT=587
+PAYMASTER_ALERT_SMTP_SECURE=false
+PAYMASTER_ALERT_SMTP_USER=
+PAYMASTER_ALERT_SMTP_PASS=
+PAYMASTER_ALERT_EMAIL_FROM=
+PAYMASTER_ALERT_EMAIL_TO=
 ```
 ```
 
@@ -119,7 +119,7 @@ The bundle exposes a global `XLM Paymaster` object:
   // All exports are available under the XLM Paymaster namespace
   console.log(XLM Paymaster.VERSION); // "0.1.0"
 
-  const client = new XLM Paymaster.FluidClient({
+  const client = new XLM Paymaster.PaymasterClient({
     serverUrl: 'https://your-paymaster-server.example.com',
     networkPassphrase: 'Test SDF Network ; September 2015',
     horizonUrl: 'https://horizon-testnet.stellar.org',
@@ -200,9 +200,9 @@ Access XLM Paymaster for free via our managed public testnet endpoint:
 
 2. **Use in Your App**
    ```typescript
-   import { FluidClient } from '@xlm-paymaster-sdk/client';
+   import { PaymasterClient } from '@xlm-paymaster-sdk/client';
 
-   const xlm-paymaster = new FluidClient({
+   const xlm-paymaster = new PaymasterClient({
      serverUrl: 'https://testnet.xlm-paymaster.dev',
      horizonUrl: 'https://horizon-testnet.stellar.org',
      apiKey: 'your-api-key-here'

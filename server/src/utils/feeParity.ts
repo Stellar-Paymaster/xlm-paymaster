@@ -1,6 +1,6 @@
 /**
  * Rust fee-bump formula mirror for cross-stack parity checks.
- * Matches fluid-server/src/stellar.rs create_fee_bump_transaction logic.
+ * Matches paymaster-server/src/stellar.rs create_fee_bump_transaction logic.
  */
 export function calculateRustFeeBumpAmount(
   operationCount: number,

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# scripts/setup.sh — One-command local dev setup for Fluid
+# scripts/setup.sh — One-command local dev setup for Paymaster
 #
 # Usage:
 #   chmod +x scripts/setup.sh && ./scripts/setup.sh
@@ -73,7 +73,7 @@ info "${BOLD}Starting infrastructure (Postgres, Redis, Stellar quickstart)...${R
 $COMPOSE up -d postgres redis stellar-quickstart
 
 info "Waiting for Postgres to be healthy..."
-until $COMPOSE exec -T postgres pg_isready -U "${POSTGRES_USER:-fluid}" -d "${POSTGRES_DB:-fluid_db}" &>/dev/null; do
+until $COMPOSE exec -T postgres pg_isready -U "${POSTGRES_USER:-paymaster}" -d "${POSTGRES_DB:-paymaster_db}" &>/dev/null; do
   sleep 2
 done
 success "Postgres is ready."
@@ -116,7 +116,7 @@ run_server() {
   "$@" 2>&1 | sed "s/^/[${label}] /" &
 }
 
-run_server "rust"      cargo run --manifest-path fluid-server/Cargo.toml
+run_server "rust"      cargo run --manifest-path paymaster-server/Cargo.toml
 run_server "node-api"  npm run --prefix server dev
 run_server "dashboard" npm run --prefix admin-dashboard dev
 

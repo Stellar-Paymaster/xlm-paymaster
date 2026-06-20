@@ -12,7 +12,7 @@ async function waitForServer(serverProcess) {
     const timeout = setTimeout(() => reject(new Error("Timed out waiting for the demo server")), 30000); // Increased to 30s
     serverProcess.stdout.on("data", (chunk) => {
       const message = chunk.toString();
-      if (message.includes("Fluid WASM demo server listening")) {
+      if (message.includes("Paymaster WASM demo server listening")) {
         clearTimeout(timeout);
         resolve();
       }

@@ -32,7 +32,7 @@ spec:
           env:
             - name: PORT
               value: {{ .Values.dashboard.port | quote }}
-            - name: FLUID_SERVER_URL
+            - name: PAYMASTER_SERVER_URL
               value: "http://{{ include "xlm-paymaster.fullname" . }}-rust-engine:{{ .Values.rustEngine.service.port }}"
             - name: AUTH_SECRET
               valueFrom:

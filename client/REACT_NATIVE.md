@@ -22,9 +22,9 @@ This must come before any XLM Paymaster SDK imports.
 
 ```js
 import 'react-native-get-random-values';
-import { FluidClient } from '@xlm-paymaster-dev/sdk/react-native';
+import { PaymasterClient } from '@xlm-paymaster-dev/sdk/react-native';
 
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: 'https://your-paymaster-server.com',
   networkPassphrase: 'Test SDF Network ; September 2015',
   horizonUrl: 'https://horizon-testnet.stellar.org',

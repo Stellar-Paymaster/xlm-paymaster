@@ -23,7 +23,7 @@ export default async function SARPage({
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                Fluid Admin — Compliance
+                Paymaster Admin — Compliance
               </p>
               <h1 className="mt-2 text-4xl font-black tracking-tighter text-foreground">
                 Suspicious Activity Reports

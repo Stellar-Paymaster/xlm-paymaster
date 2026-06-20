@@ -105,11 +105,11 @@ function parseOptionalPositiveInt(value: string | undefined): number | undefined
  * Convenience loader — reads PgBouncer-style knobs from the environment so
  * pool sizing is tunable without a rebuild.
  *
- *   FLUID_DB_POOL_MAX              default 20  (max_client_conn)
- *   FLUID_DB_POOL_MIN              default 0   (default_pool_size floor)
- *   FLUID_DB_POOL_ACQUIRE_TIMEOUT  default 5000  (query_wait_timeout ms)
- *   FLUID_DB_POOL_IDLE_TIMEOUT     unset → disabled  (server_idle_timeout ms)
- *   FLUID_DB_POOL_MAX_LIFETIME     unset → disabled  (server_lifetime ms)
+ *   PAYMASTER_DB_POOL_MAX              default 20  (max_client_conn)
+ *   PAYMASTER_DB_POOL_MIN              default 0   (default_pool_size floor)
+ *   PAYMASTER_DB_POOL_ACQUIRE_TIMEOUT  default 5000  (query_wait_timeout ms)
+ *   PAYMASTER_DB_POOL_IDLE_TIMEOUT     unset → disabled  (server_idle_timeout ms)
+ *   PAYMASTER_DB_POOL_MAX_LIFETIME     unset → disabled  (server_lifetime ms)
  */
 export function loadPooledDatabaseFromEnv<TPrisma extends PrismaLike>(
   client: TPrisma,
@@ -117,13 +117,13 @@ export function loadPooledDatabaseFromEnv<TPrisma extends PrismaLike>(
   return createPooledDatabase<TPrisma>({
     client,
     name: "prisma",
-    maxSize: parsePositiveInt(process.env.FLUID_DB_POOL_MAX, 20),
-    minSize: parsePositiveInt(process.env.FLUID_DB_POOL_MIN, 0),
+    maxSize: parsePositiveInt(process.env.PAYMASTER_DB_POOL_MAX, 20),
+    minSize: parsePositiveInt(process.env.PAYMASTER_DB_POOL_MIN, 0),
     acquireTimeoutMs: parsePositiveInt(
-      process.env.FLUID_DB_POOL_ACQUIRE_TIMEOUT,
+      process.env.PAYMASTER_DB_POOL_ACQUIRE_TIMEOUT,
       5_000,
     ),
-    idleTimeoutMs: parseOptionalPositiveInt(process.env.FLUID_DB_POOL_IDLE_TIMEOUT),
-    maxLifetimeMs: parseOptionalPositiveInt(process.env.FLUID_DB_POOL_MAX_LIFETIME),
+    idleTimeoutMs: parseOptionalPositiveInt(process.env.PAYMASTER_DB_POOL_IDLE_TIMEOUT),
+    maxLifetimeMs: parseOptionalPositiveInt(process.env.PAYMASTER_DB_POOL_MAX_LIFETIME),
   });
 }

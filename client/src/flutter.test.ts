@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { FlutterFluidClient } from './flutter';
-import { FluidConfigurationError, FluidNetworkError, FluidServerError, FluidWalletError } from './errors';
+import { FlutterPaymasterClient } from './flutter';
+import { PaymasterConfigurationError, PaymasterNetworkError, PaymasterServerError, PaymasterWalletError } from './errors';
 
-describe('FlutterFluidClient', () => {
+describe('FlutterPaymasterClient', () => {
   const mockConfig = {
     networkPassphrase: 'Test SDF Network ; September 2015',
     serverUrl: 'http://localhost:9999',
@@ -17,12 +17,12 @@ describe('FlutterFluidClient', () => {
 
   describe('constructor', () => {
     it('should create instance with minimal config', () => {
-      const client = new FlutterFluidClient(mockConfig);
-      expect(client).toBeInstanceOf(FlutterFluidClient);
+      const client = new FlutterPaymasterClient(mockConfig);
+      expect(client).toBeInstanceOf(FlutterPaymasterClient);
     });
 
     it('should set default values correctly', () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const config = client.getConfig();
 
       expect(config.enableAutoRetry).toBe(true);
@@ -32,7 +32,7 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should override default values', () => {
-      const client = new FlutterFluidClient({
+      const client = new FlutterPaymasterClient({
         ...mockConfig,
         enableAutoRetry: false,
         maxRetries: 5,
@@ -50,7 +50,7 @@ describe('FlutterFluidClient', () => {
 
   describe('initialize', () => {
     it('should return success on valid platform', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const result = await client.initialize();
 
       expect(result).toMatchObject({
@@ -61,10 +61,10 @@ describe('FlutterFluidClient', () => {
 
   describe('buildAndRequestFeeBump', () => {
     it('should handle network errors gracefully', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
-        new FluidNetworkError('Network error', 'http://localhost:9999')
+        new PaymasterNetworkError('Network error', 'http://localhost:9999')
       );
 
       const result = await client.buildAndRequestFeeBump('test-xdr' as any);
@@ -76,7 +76,7 @@ describe('FlutterFluidClient', () => {
 
     it('should retry on network errors when auto-retry is enabled', async () => {
       vi.useFakeTimers();
-      const client = new FlutterFluidClient({
+      const client = new FlutterPaymasterClient({
         ...mockConfig,
         enableAutoRetry: true,
         maxRetries: 3,
@@ -105,7 +105,7 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should not retry on configuration errors', async () => {
-      const client = new FlutterFluidClient({
+      const client = new FlutterPaymasterClient({
         ...mockConfig,
         enableAutoRetry: true,
         maxRetries: 3,
@@ -113,7 +113,7 @@ describe('FlutterFluidClient', () => {
 
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
-        new FluidConfigurationError('Invalid config')
+        new PaymasterConfigurationError('Invalid config')
       );
 
       const result = await client.buildAndRequestFeeBump('test-xdr' as any);
@@ -126,7 +126,7 @@ describe('FlutterFluidClient', () => {
 
   describe('requestFeeBump', () => {
     it('should handle submission flag', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       const spy = vi.spyOn(nativeClient, 'requestFeeBump').mockResolvedValue({
         xdr: 'test',
@@ -141,10 +141,10 @@ describe('FlutterFluidClient', () => {
 
   describe('buildTokenTransfer', () => {
     it('should handle errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildSACTransferTx').mockRejectedValue(
-        new FluidServerError('Invalid token', 400, 'https://soroban.example')
+        new PaymasterServerError('Invalid token', 400, 'https://soroban.example')
       );
 
       const result = await client.buildTokenTransfer({
@@ -161,10 +161,10 @@ describe('FlutterFluidClient', () => {
 
   describe('submitTransaction', () => {
     it('should handle submission errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'submitFeeBumpTransaction').mockRejectedValue(
-        new FluidNetworkError('Submission failed', 'https://horizon.example')
+        new PaymasterNetworkError('Submission failed', 'https://horizon.example')
       );
 
       const result = await client.submitTransaction('fee-bump-xdr');
@@ -176,7 +176,7 @@ describe('FlutterFluidClient', () => {
 
   describe('waitForConfirmation', () => {
     it('should handle timeout', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'waitForConfirmation').mockRejectedValue(
         new Error('Timed out waiting for transaction confirmation')
@@ -191,11 +191,11 @@ describe('FlutterFluidClient', () => {
 
   describe('sendTransaction', () => {
     it('should handle build failure', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
 
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
-        new FluidWalletError('Signing failed')
+        new PaymasterWalletError('Signing failed')
       );
       const submitSpy = vi.spyOn(nativeClient, 'submitFeeBumpTransaction');
 
@@ -207,7 +207,7 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should handle submit failure', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
 
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockResolvedValue({
@@ -215,7 +215,7 @@ describe('FlutterFluidClient', () => {
         status: 'ready',
       });
       vi.spyOn(nativeClient, 'submitFeeBumpTransaction').mockRejectedValue(
-        new FluidNetworkError('Submit failed', 'https://horizon.example')
+        new PaymasterNetworkError('Submit failed', 'https://horizon.example')
       );
 
       const result = await client.sendTransaction('test-xdr' as any);
@@ -227,11 +227,11 @@ describe('FlutterFluidClient', () => {
 
   describe('signTransactions', () => {
     it('should handle signing errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
 
       vi.spyOn(nativeClient, 'signMultipleTransactions').mockRejectedValue(
-        new FluidWalletError('Signing failed')
+        new PaymasterWalletError('Signing failed')
       );
 
       const result = await client.signTransactions(['tx1' as any], 'keypair' as any);
@@ -243,10 +243,10 @@ describe('FlutterFluidClient', () => {
 
   describe('error handling', () => {
     it('should handle configuration errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
-        new FluidConfigurationError('Invalid config')
+        new PaymasterConfigurationError('Invalid config')
       );
 
       const result = await client.buildAndRequestFeeBump('test-xdr' as any);
@@ -256,10 +256,10 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should handle network errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
-        new FluidNetworkError('Network error', 'https://fluid.example')
+        new PaymasterNetworkError('Network error', 'https://paymaster.example')
       );
 
       const result = await client.buildAndRequestFeeBump('test-xdr' as any);
@@ -269,10 +269,10 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should handle server errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
-        new FluidServerError('Server error', 500, 'https://fluid.example')
+        new PaymasterServerError('Server error', 500, 'https://paymaster.example')
       );
 
       const result = await client.buildAndRequestFeeBump('test-xdr' as any);
@@ -283,10 +283,10 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should handle wallet errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
-        new FluidWalletError('Signing failed')
+        new PaymasterWalletError('Signing failed')
       );
 
       const result = await client.buildAndRequestFeeBump('test-xdr' as any);
@@ -296,7 +296,7 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should handle unknown errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
         new Error('Unknown error')
@@ -309,7 +309,7 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should handle timeout errors', async () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       vi.spyOn(nativeClient, 'buildAndRequestFeeBump').mockRejectedValue(
         new Error('Timed out waiting for response')
@@ -324,7 +324,7 @@ describe('FlutterFluidClient', () => {
 
   describe('utility methods', () => {
     it('should report bugs', () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       const spy = vi.spyOn(nativeClient, 'reportBug');
 
@@ -334,7 +334,7 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should terminate', () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = (client as any).getNativeClient();
       const spy = vi.spyOn(nativeClient, 'terminate');
 
@@ -344,14 +344,14 @@ describe('FlutterFluidClient', () => {
     });
 
     it('should get native client', () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const nativeClient = client.getNativeClient();
 
       expect(nativeClient).toBeDefined();
     });
 
     it('should get config', () => {
-      const client = new FlutterFluidClient(mockConfig);
+      const client = new FlutterPaymasterClient(mockConfig);
       const config = client.getConfig();
 
       expect(config).toMatchObject({

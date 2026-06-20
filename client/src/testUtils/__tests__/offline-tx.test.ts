@@ -32,7 +32,7 @@ describe("prepareOfflineTransaction", () => {
     expect(record.preparedAt).toBe(now);
     expect(record.submit).toBe(false);
     expect(typeof record.id).toBe("string");
-    expect(record.id.startsWith("fluid_offline_")).toBe(true);
+    expect(record.id.startsWith("paymaster_offline_")).toBe(true);
     expect(storage.store.has(OFFLINE_TX_STORAGE_KEY)).toBe(true);
   });
 

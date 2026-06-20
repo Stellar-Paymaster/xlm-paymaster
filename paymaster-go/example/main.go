@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Stellar-Fluid/fluid/fluid-go"
+	"github.com/Stellar-Paymaster/paymaster/paymaster-go"
 	"github.com/stellar/go/keypair"
 	"github.com/stellar/go/network"
 	"github.com/stellar/go/txnbuild"
 )
 
 func main() {
-	// Initialize Fluid client
-	client := fluid.NewClient("http://localhost:3000", "your-api-key")
+	// Initialize Paymaster client
+	client := paymaster.NewClient("http://localhost:3000", "your-api-key")
 
 	// 1. Create a transaction using txnbuild
 	sourceKP, _ := keypair.ParseFull("S...") // Replace with actual secret
@@ -44,7 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// 3. Request fee-bump from Fluid server
+	// 3. Request fee-bump from Paymaster server
 	fmt.Println("Requesting fee-bump for transaction...")
 	resp, err := client.BuildAndRequestFeeBump(context.Background(), tx, false)
 	if err != nil {

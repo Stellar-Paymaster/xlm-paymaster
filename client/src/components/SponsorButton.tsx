@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useFeeBump, UseFeeBumpResult } from "../hooks/useFeeBump";
-import { FluidClient, FeeBumpResponse } from "../FluidClient";
+import { PaymasterClient, FeeBumpResponse } from "../PaymasterClient";
 
 // ============================================================================
 // Types
@@ -12,9 +12,9 @@ export type SponsorButtonState = "idle" | "loading" | "success" | "error";
 
 export interface SponsorTransactionActionProps {
   /**
-   * The FluidClient instance to use for fee-bump requests.
+   * The PaymasterClient instance to use for fee-bump requests.
    */
-  client: FluidClient;
+  client: PaymasterClient;
 
   /**
    * The transaction XDR string or an object with a toXDR() method.
@@ -218,12 +218,12 @@ const STATE_STYLES: Record<SponsorButtonState, string> = {
 
 /**
  * A premium, customizable React button component that encapsulates the entire
- * "Sponsor + Submit" flow for Stellar fee-bump transactions using Fluid.
+ * "Sponsor + Submit" flow for Stellar fee-bump transactions using Paymaster.
  *
  * @example
  * ```tsx
  * <SponsorTransactionAction
- *   client={fluidClient}
+ *   client={paymasterClient}
  *   transaction={signedTxXdr}
  *   onSuccess={(response) => console.log("Sponsored!", response.hash)}
  *   onError={(error) => console.error("Failed:", error.message)}

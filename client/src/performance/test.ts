@@ -1,7 +1,7 @@
 // Performance test to verify 60fps UI responsiveness during heavy signing operations
 // This test demonstrates that Web Workers keep the main thread responsive
 
-import { FluidClient } from '../index';
+import { PaymasterClient } from '../index';
 import StellarSdk from '@stellar/stellar-sdk';
 
 interface PerformanceMetrics {
@@ -14,13 +14,13 @@ interface PerformanceMetrics {
 }
 
 export class PerformanceTest {
-  private client: FluidClient;
+  private client: PaymasterClient;
   private frameMetrics: number[] = [];
   private isRunning = false;
   private animationId?: number;
 
   constructor(useWorker: boolean = true) {
-    this.client = new FluidClient({
+    this.client = new PaymasterClient({
       serverUrl: 'http://localhost:3000', // Mock server URL
       networkPassphrase: StellarSdk.Networks.TESTNET,
       horizonUrl: 'https://horizon-testnet.stellar.org',
@@ -204,7 +204,7 @@ export function createPerformanceTestUI(): void {
   const container = document.createElement('div');
   container.innerHTML = `
     <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
-      <h1>Fluid Client Performance Test</h1>
+      <h1>Paymaster Client Performance Test</h1>
       <p>This test verifies that Web Workers maintain 60fps UI responsiveness during heavy signing operations.</p>
       
       <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">

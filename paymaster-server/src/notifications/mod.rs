@@ -1,4 +1,4 @@
-/// Decoupled notification engine for fluid-server.
+/// Decoupled notification engine for paymaster-server.
 ///
 /// Events are enqueued through a `NotificationHandle` and dispatched to one or
 /// more backends by a dedicated background Tokio task, keeping alert delivery

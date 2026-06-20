@@ -19,7 +19,7 @@ export default async function AdminSandboxPage() {
           <div className="flex items-center justify-between py-6">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                Fluid Admin
+                Paymaster Admin
               </p>
               <h1 className="mt-1 text-3xl font-black tracking-tighter text-foreground">
                 Sandbox Environment

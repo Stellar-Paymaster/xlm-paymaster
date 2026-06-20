@@ -136,7 +136,7 @@ export default async function BillingPage() {
                 <div className="flex justify-between items-end">
                   <div>
                     <div className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-1">Card Holder</div>
-                    <div className="text-xs font-bold uppercase tracking-wider">{session?.user?.name ?? "Fluid Tenant"}</div>
+                    <div className="text-xs font-bold uppercase tracking-wider">{session?.user?.name ?? "Paymaster Tenant"}</div>
                   </div>
                   <div>
                     <div className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-1">Expires</div>

@@ -9,11 +9,11 @@ Implemented production-ready Flutter SDK support for the XLM Paymaster client pa
 ## Files Created
 
 ### 1. `client/src/flutter.ts` (574 lines)
-- **FlutterFluidClient** - Main wrapper class for Flutter integration
+- **FlutterPaymasterClient** - Main wrapper class for Flutter integration
 - **FlutterResult<T>** - Type-safe result wrapper with error handling
 - **FlutterTransactionResult** - Simplified transaction result type
 - **FlutterSDKErrorCodes** - Consistent error code enumeration
-- **FlutterFluidClientConfig** - Extended configuration interface
+- **FlutterPaymasterClientConfig** - Extended configuration interface
 
 **Key Features:**
 
@@ -22,7 +22,7 @@ Implemented production-ready Flutter SDK support for the XLM Paymaster client pa
 - Platform compatibility checks (WebSocket, Fetch, Promise, Worker)
 - Comprehensive error handling with typed error codes
 - Full transaction lifecycle support (sendTransaction method)
-- Delegates to native FluidClient for all operations
+- Delegates to native PaymasterClient for all operations
 
 ### 2. `client/src/flutter.test.ts` (25 tests, 574 lines)
 - Constructor tests (default values, overrides)
@@ -82,8 +82,8 @@ DTS Build:   ✅ Success
 
 ### Main Class
 ```typescript
-class FlutterFluidClient {
-  constructor(config: FlutterFluidClientConfig)
+class FlutterPaymasterClient {
+  constructor(config: FlutterPaymasterClientConfig)
   
   // Full transaction lifecycle
   sendTransaction(
@@ -109,8 +109,8 @@ class FlutterFluidClient {
   initialize(): Promise<FlutterResult<void>>
   terminate(): void
   reportBug(message, context?): void
-  getNativeClient(): FluidClient
-  getConfig(): FlutterFluidClientConfig
+  getNativeClient(): PaymasterClient
+  getConfig(): FlutterPaymasterClientConfig
   isPlatformCompatible(): boolean
 }
 ```
@@ -161,7 +161,7 @@ interface FlutterResult<T> {
 
 ## Key Design Decisions
 
-1. **Wrapper Pattern**: Delegates to native FluidClient rather than reimplementing
+1. **Wrapper Pattern**: Delegates to native PaymasterClient rather than reimplementing
 2. **Result Type Pattern**: Consistent FlutterResult<T> for all operations
 3. **Error Codes**: Programmatic error handling via error codes
 4. **Auto-Retry**: Built-in resilience with exponential backoff
@@ -172,7 +172,7 @@ interface FlutterResult<T> {
 ## Usage Example
 
 ```dart
-final client = FlutterFluidClient(
+final client = FlutterPaymasterClient(
   networkPassphrase: 'Test Network',
   serverUrls: [
     'https://xlm-paymaster-primary.example',

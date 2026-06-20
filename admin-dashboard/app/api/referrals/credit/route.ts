@@ -4,7 +4,7 @@ import { markBonusCredited } from "@/lib/referral-data";
 
 /**
  * POST /api/referrals/credit
- * Proxies a quota-bonus credit to the Fluid backend, then marks the referral
+ * Proxies a quota-bonus credit to the Paymaster backend, then marks the referral
  * as credited in the local store.
  *
  * Body: { referrerId: string; bonusStroops: number; referralId: string }
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "referralId is required" }, { status: 400 });
   }
 
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
-  const adminToken = process.env.FLUID_ADMIN_TOKEN?.trim();
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN?.trim();
 
   // If no backend is configured, simulate success (dev/sample mode)
   if (!serverUrl || !adminToken) {

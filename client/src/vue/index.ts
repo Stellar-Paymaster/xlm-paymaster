@@ -1,2 +1,2 @@
-export { useFluid } from './useFluid';
-export type { UseFluidResult } from './useFluid';
+export { usePaymaster } from './usePaymaster';
+export type { UsePaymasterResult } from './usePaymaster';

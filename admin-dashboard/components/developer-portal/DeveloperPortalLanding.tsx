@@ -16,15 +16,15 @@ const NodeNetworkMap = dynamic(
   { ssr: false },
 );
 
-const SDK_SNIPPET = `import { FluidClient } from "fluid-client";
+const SDK_SNIPPET = `import { PaymasterClient } from "paymaster-client";
 
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: "https://api.example.com",
   networkPassphrase: "Test SDF Network ; September 2015",
   horizonUrl: "https://horizon-testnet.stellar.org",
 });
 
-// User-signed transaction XDR → Fluid returns a fee-bump wrapper
+// User-signed transaction XDR → Paymaster returns a fee-bump wrapper
 const { xdr, status, hash } = await client.requestFeeBump(signedXdr, true);
 console.log(status, hash);`;
 
@@ -99,7 +99,7 @@ export function DeveloperPortalLanding() {
             {
               icon: Zap,
               title: "Gasless by design",
-              body: "End users sign transactions; Fluid wraps them in fee-bump transactions so your app covers XLM network costs without exposing fee payer keys.",
+              body: "End users sign transactions; Paymaster wraps them in fee-bump transactions so your app covers XLM network costs without exposing fee payer keys.",
             },
             {
               icon: Layers,
@@ -109,7 +109,7 @@ export function DeveloperPortalLanding() {
             {
               icon: Box,
               title: "Soroban-ready",
-              body: "Pair Horizon and Soroban RPC in one client: build smart contract calls, then let Fluid handle the fee bump so contract invocations stay seamless.",
+              body: "Pair Horizon and Soroban RPC in one client: build smart contract calls, then let Paymaster handle the fee bump so contract invocations stay seamless.",
             },
           ].map((item, index) => (
             <motion.article
@@ -157,7 +157,7 @@ export function DeveloperPortalLanding() {
               Integrate in minutes
             </h2>
             <p className="mt-4 text-muted-foreground">
-              The TypeScript SDK talks to your Fluid deployment over HTTPS—drop
+              The TypeScript SDK talks to your Paymaster deployment over HTTPS—drop
               it into web or Node and start requesting fee bumps.
             </p>
           </motion.div>
@@ -197,7 +197,7 @@ export function DeveloperPortalLanding() {
       >
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>
-            <p className="text-sm font-semibold text-foreground">Fluid</p>
+            <p className="text-sm font-semibold text-foreground">Paymaster</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Fee sponsorship infrastructure for Stellar developers.
             </p>

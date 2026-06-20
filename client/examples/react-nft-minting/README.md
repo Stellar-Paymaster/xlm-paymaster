@@ -21,7 +21,7 @@ A React demo showing gasless Soroban NFT minting powered by XLM Paymaster.
 ```
 VITE_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 VITE_NFT_CONTRACT_ID=<deployed-contract-id>
-VITE_FLUID_SERVER_URL=https://testnet.xlm-paymaster.dev
+VITE_PAYMASTER_SERVER_URL=https://testnet.xlm-paymaster.dev
 VITE_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 VITE_STELLAR_EXPERT_URL=https://stellar.expert/explorer/testnet
 VITE_HORIZON_URL=https://horizon-testnet.stellar.org
@@ -59,7 +59,7 @@ Deployed to Vercel: https://xlm-paymaster-nft-demo.vercel.app/
 Set environment variables in Vercel dashboard:
 - `VITE_SOROBAN_RPC_URL`
 - `VITE_NFT_CONTRACT_ID`
-- `VITE_FLUID_SERVER_URL`
+- `VITE_PAYMASTER_SERVER_URL`
 - `VITE_NETWORK_PASSPHRASE`
 - `VITE_STELLAR_EXPERT_URL`
 - `VITE_HORIZON_URL`

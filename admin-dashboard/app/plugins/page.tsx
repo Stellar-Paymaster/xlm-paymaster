@@ -5,15 +5,15 @@ import { PluginMarketplace } from "@/components/developer-portal/PluginMarketpla
 
 export async function generateMetadata(): Promise<Metadata> {
   const { siteUrl } = getPortalLinks();
-  const title = "Fluid Plugin Marketplace";
+  const title = "Paymaster Plugin Marketplace";
   const description =
-    "Discover community-built plugins, adapters, and integrations for Fluid. Extend fee sponsorship to React, Vue, Python, Go, Soroban, and more.";
+    "Discover community-built plugins, adapters, and integrations for Paymaster. Extend fee sponsorship to React, Vue, Python, Go, Soroban, and more.";
 
   return {
     title,
     description,
     keywords: [
-      "Fluid",
+      "Paymaster",
       "plugin",
       "marketplace",
       "Stellar",
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       url: `${siteUrl}/plugins`,
-      siteName: "Fluid",
+      siteName: "Paymaster",
       type: "website",
     },
     twitter: { card: "summary_large_image", title, description },

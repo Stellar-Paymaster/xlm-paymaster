@@ -130,7 +130,7 @@ export default function VerifyEmailPage() {
   }
 
   // success
-  const docsUrl = process.env.NEXT_PUBLIC_DOCS_URL ?? "https://docs.fluid.dev";
+  const docsUrl = process.env.NEXT_PUBLIC_DOCS_URL ?? "https://docs.paymaster.dev";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
@@ -185,7 +185,7 @@ export default function VerifyEmailPage() {
         <div className="bg-gray-900 rounded-xl p-4 space-y-2">
           <p className="text-xs text-gray-400 font-medium">Quick start</p>
           <pre className="text-xs text-green-400 overflow-x-auto whitespace-pre-wrap">
-{`curl -X POST https://your-fluid-server.example.com/fee-bump \\
+{`curl -X POST https://your-paymaster-server.example.com/fee-bump \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: ${result!.apiKey}" \\
   -d '{"xdr":"<signed-tx-xdr>","submit":false}'`}

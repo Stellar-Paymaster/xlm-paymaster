@@ -1,4 +1,4 @@
-// fluid-server/src/archive.rs
+// paymaster-server/src/archive.rs
 // Transaction Archival Job (Issue #238)
 
 use aws_config::BehaviorVersion;

@@ -1,7 +1,7 @@
 import StellarSdk from "@stellar/stellar-sdk";
 import dotenv from "dotenv";
 
-import { FluidClient } from "../index";
+import { PaymasterClient } from "../index";
 
 dotenv.config();
 
@@ -12,7 +12,7 @@ async function main() {
     process.env.NETWORK_PASSPHRASE ?? StellarSdk.Networks.TESTNET;
 
   // serverUrl isn't used for this demo; we only need Horizon + network.
-  const client = new FluidClient({
+  const client = new PaymasterClient({
     serverUrl: "http://unused.local",
     networkPassphrase,
     horizonUrl,

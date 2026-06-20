@@ -5,8 +5,8 @@ import { getPortalLinks } from "@/lib/portal-links";
 import { ReferralDashboard } from "@/components/developer-portal/ReferralDashboard";
 
 export const metadata: Metadata = {
-  title: "Referral Program — Fluid",
-  description: "Invite developers to Fluid and earn 1,000 stroops of XLM quota for every successful referral.",
+  title: "Referral Program — Paymaster",
+  description: "Invite developers to Paymaster and earn 1,000 stroops of XLM quota for every successful referral.",
   robots: { index: false, follow: false },
 };
 

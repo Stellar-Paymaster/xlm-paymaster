@@ -9,7 +9,7 @@ import { GrpcEngineSignerClient } from "./grpcEngineClient";
 
 const forge = require("node-forge");
 
-const SERVER_NAME = "fluid-grpc-engine.internal";
+const SERVER_NAME = "paymaster-grpc-engine.internal";
 const TEST_SECRET =
   "SDMOYUZMPBA5SDXYC7346UPSFC3LA2QSHWI67M7ZW6G2D55TJ2H3A4IE";
 
@@ -134,7 +134,7 @@ function issueLeafCertificate(options: {
 }
 
 function createCertificateSet(): CertificateSet {
-  const clientCa = createCertificateAuthority("fluid-internal-ca");
+  const clientCa = createCertificateAuthority("paymaster-internal-ca");
   const rogueCa = createCertificateAuthority("rogue-internal-ca");
 
   return {
@@ -142,7 +142,7 @@ function createCertificateSet(): CertificateSet {
     rogueCa,
     rotatedClient: issueLeafCertificate({
       ca: clientCa,
-      commonName: "fluid-node-api-rotated",
+      commonName: "paymaster-node-api-rotated",
       extendedKeyUsage: "clientAuth",
     }),
     rotatedServer: issueLeafCertificate({
@@ -158,7 +158,7 @@ function createCertificateSet(): CertificateSet {
     }),
     validClient: issueLeafCertificate({
       ca: clientCa,
-      commonName: "fluid-node-api",
+      commonName: "paymaster-node-api",
       extendedKeyUsage: "clientAuth",
     }),
     validServer: issueLeafCertificate({
@@ -227,7 +227,7 @@ async function waitFor(
 async function startEngine(): Promise<RunningEngine> {
   const port = await getFreePort();
   const address = `127.0.0.1:${port}`;
-  const tmpRoot = mkdtempSync(join(tmpdir(), "fluid-grpc-engine-"));
+  const tmpRoot = mkdtempSync(join(tmpdir(), "paymaster-grpc-engine-"));
   const certificates = createCertificateSet();
 
   const caPath = join(tmpRoot, "ca.pem");
@@ -254,14 +254,14 @@ async function startEngine(): Promise<RunningEngine> {
       cwd: resolve(process.cwd()),
       env: {
         ...process.env,
-        FLUID_GRPC_ENGINE_LISTEN_ADDR: address,
-        FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256: [
+        PAYMASTER_GRPC_ENGINE_LISTEN_ADDR: address,
+        PAYMASTER_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256: [
           certificates.validClient.certSha256,
           certificates.rotatedClient.certSha256,
         ].join(","),
-        FLUID_GRPC_ENGINE_TLS_CERT_PATH: serverCertPath,
-        FLUID_GRPC_ENGINE_TLS_CLIENT_CA_PATH: caPath,
-        FLUID_GRPC_ENGINE_TLS_KEY_PATH: serverKeyPath,
+        PAYMASTER_GRPC_ENGINE_TLS_CERT_PATH: serverCertPath,
+        PAYMASTER_GRPC_ENGINE_TLS_CLIENT_CA_PATH: caPath,
+        PAYMASTER_GRPC_ENGINE_TLS_KEY_PATH: serverKeyPath,
         RUST_LOG: "info",
       },
       stdio: "pipe",
@@ -368,7 +368,7 @@ describe("GrpcEngineSignerClient", () => {
         tlsKeyPath: engine.paths.clientKeyPath,
       });
 
-      const payload = Buffer.from("fluid-grpc-mtls");
+      const payload = Buffer.from("paymaster-grpc-mtls");
       const signature = await client.signPayload(TEST_SECRET, payload);
       const keypair = StellarSdk.Keypair.fromSecret(TEST_SECRET);
 

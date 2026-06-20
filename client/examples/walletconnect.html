@@ -140,7 +140,7 @@
         setStatus('signed ✓', 'ok');
 
         // In a real app you would now fee-bump:
-        //   const client = new XLM Paymaster.FluidClient({ serverUrl, networkPassphrase: TESTNET });
+        //   const client = new XLM Paymaster.PaymasterClient({ serverUrl, networkPassphrase: TESTNET });
         //   await client.buildAndRequestFeeBumpWithWallet(signer, unsignedXdr);
       } catch (e) {
         print('Error: ' + e.message, 'err');

@@ -5,12 +5,12 @@
 //! This example demonstrates the full transaction builder API, showing
 //! all configuration options and the complete builder chain.
 
-use fluid_core::{
+use paymaster_core::{
     Ed25519Signer, FeeConfig, FeePayerAccount, Keypair, NetworkPassphrase, PublicKey,
-    TransactionBuilder, TransactionHash, DecoratedSignature, FluidError,
+    TransactionBuilder, TransactionHash, DecoratedSignature, PaymasterError,
 };
 
-fn main() -> Result<(), FluidError> {
+fn main() -> Result<(), PaymasterError> {
     println!("=== Transaction Builder Example ===\n");
 
     // Create a fee payer for demonstration
@@ -174,7 +174,7 @@ fn main() -> Result<(), FluidError> {
         .fee_payer(PublicKey::new(fee_payer_public));
 
     match incomplete_builder.validate() {
-        Err(FluidError::UnsignedTransaction) => {
+        Err(PaymasterError::UnsignedTransaction) => {
             println!("   ✓ Correctly detected: Unsigned inner transaction");
         }
         Err(e) => println!("   ✓ Detected error: {}", e),
@@ -188,7 +188,7 @@ fn main() -> Result<(), FluidError> {
         .add_signature(DecoratedSignature::new([0x77; 4], [0x88; 64]));
 
     match no_payer_builder.validate() {
-        Err(FluidError::InvalidTransaction(_)) => {
+        Err(PaymasterError::InvalidTransaction(_)) => {
             println!("   ✓ Correctly detected: Missing fee payer");
         }
         Err(e) => println!("   ✓ Detected error: {}", e),

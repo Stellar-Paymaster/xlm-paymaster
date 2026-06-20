@@ -2,18 +2,18 @@
 //!
 //! Run with: `cargo run --example basic_signing`
 //!
-//! This example shows the simplest possible use of fluid-core:
+//! This example shows the simplest possible use of paymaster-core:
 //! - Creating a signer from a keypair
 //! - Configuring fee-bump transaction parameters
 //! - Building and signing a fee-bump wrapper
 
-use fluid_core::{
+use paymaster_core::{
     Ed25519Signer, FeeConfig, Keypair, NetworkPassphrase, PublicKey, Signer,
-    TransactionBuilder, TransactionHash, DecoratedSignature, FluidError,
+    TransactionBuilder, TransactionHash, DecoratedSignature, PaymasterError,
 };
 
-fn main() -> Result<(), FluidError> {
-    println!("=== Fluid Core Basic Signing Example ===\n");
+fn main() -> Result<(), PaymasterError> {
+    println!("=== Paymaster Core Basic Signing Example ===\n");
 
     // Step 1: Create a fee payer keypair and signer
     // In production, load this from secure storage (HSM, KMS, env var)

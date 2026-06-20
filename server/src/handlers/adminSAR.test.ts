@@ -24,7 +24,7 @@ vi.mock("../utils/db", () => ({
   }
 }));
 
-process.env.FLUID_ADMIN_TOKEN = "test-admin-token";
+process.env.PAYMASTER_ADMIN_TOKEN = "test-admin-token";
 
 function makeReq(overrides: Partial<Request> = {}): Partial<Request> {
   return {

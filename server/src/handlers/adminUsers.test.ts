@@ -176,7 +176,7 @@ describe("deactivateAdminUserHandler", () => {
 
 describe("adminLoginHandler", () => {
   beforeEach(() => {
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRET", "test-secret");
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRET", "test-secret");
   });
 
   it("returns 400 when email or password missing", async () => {
@@ -222,7 +222,7 @@ describe("adminLoginHandler", () => {
 describe("changeAdminPasswordHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv("FLUID_ADMIN_JWT_SECRET", "test-secret");
+    vi.stubEnv("PAYMASTER_ADMIN_JWT_SECRET", "test-secret");
   });
 
   it("rejects missing fields", async () => {

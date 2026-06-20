@@ -48,7 +48,7 @@ protoc-bin-vendored = "3"
 tonic-build = "0.12"
 
 [lib]
-name = "fluid_server"
+name = "paymaster_server"
 crate-type = ["cdylib", "rlib"]
 
 [package.metadata.wasm-pack.profile.release]

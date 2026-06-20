@@ -30,8 +30,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy binary from builder
-COPY --from=builder /app/target/release/fluid-server /app/fluid-server
+COPY --from=builder /app/target/release/paymaster-server /app/paymaster-server
 
 EXPOSE 3000
 
-CMD ["./fluid-server"]
+CMD ["./paymaster-server"]

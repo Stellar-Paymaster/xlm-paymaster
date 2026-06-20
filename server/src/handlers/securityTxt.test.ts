@@ -53,10 +53,10 @@ describe("security.txt", () => {
     const options = getSecurityTxtOptionsFromEnv();
 
     expect(options.contacts[0]).toMatch(
-      /^https:\/\/github\.com\/Stellar-Fluid\/fluid\/security\/advisories\/new$/,
+      /^https:\/\/github\.com\/Stellar-Paymaster\/paymaster\/security\/advisories\/new$/,
     );
     expect(options.policy?.[0]).toMatch(
-      /^https:\/\/github\.com\/Stellar-Fluid\/fluid\/security\/policy$/,
+      /^https:\/\/github\.com\/Stellar-Paymaster\/paymaster\/security\/policy$/,
     );
     expect(options.preferredLanguages).toBe("en");
     expect(options.expires.getTime()).toBeGreaterThan(Date.now());
@@ -72,7 +72,7 @@ describe("security.txt", () => {
     const options = getSecurityTxtOptionsFromEnv();
     // The injected entry should be dropped and default contact used.
     expect(options.contacts[0]).toMatch(
-      /^https:\/\/github\.com\/Stellar-Fluid\/fluid\/security\/advisories\/new$/,
+      /^https:\/\/github\.com\/Stellar-Paymaster\/paymaster\/security\/advisories\/new$/,
     );
   });
 
@@ -87,7 +87,7 @@ describe("security.txt", () => {
 
     const options = getSecurityTxtOptionsFromEnv();
     expect(options.contacts[0]).toMatch(
-      /^https:\/\/github\.com\/Stellar-Fluid\/fluid\/security\/advisories\/new$/,
+      /^https:\/\/github\.com\/Stellar-Paymaster\/paymaster\/security\/advisories\/new$/,
     );
     expect(options.canonical).toBeUndefined();
     expect(options.expires.getTime()).toBeGreaterThan(Date.now());

@@ -76,7 +76,7 @@ describe("exportAuditLogHandler", () => {
     expect(setHeader).toHaveBeenCalledWith("Content-Type", "text/csv");
     expect(setHeader).toHaveBeenCalledWith(
       "Content-Disposition",
-      "attachment; filename=fluid_audit_log.csv",
+      "attachment; filename=paymaster_audit_log.csv",
     );
     expect(send).toHaveBeenCalledWith(expect.stringContaining("event_type,actor,payload,timestamp"));
   });

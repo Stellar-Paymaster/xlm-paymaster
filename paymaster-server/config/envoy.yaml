@@ -11,7 +11,7 @@ admin:
 
 static_resources:
   listeners:
-    - name: fluid_gateway_listener
+    - name: paymaster_gateway_listener
       address:
         socket_address:
           address: 0.0.0.0
@@ -21,17 +21,17 @@ static_resources:
             - name: envoy.filters.network.http_connection_manager
               typed_config:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-                stat_prefix: fluid_gateway
+                stat_prefix: paymaster_gateway
                 route_config:
-                  name: fluid_routes
+                  name: paymaster_routes
                   virtual_hosts:
-                    - name: fluid_api
+                    - name: paymaster_api
                       domains: ["*"]
                       routes:
                         - match:
                             prefix: "/"
                           route:
-                            cluster: fluid_server
+                            cluster: paymaster_server
                             timeout: 30s
                 http_filters:
                   # Global IP rate limit (100 req/min)
@@ -96,12 +96,12 @@ static_resources:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 
   clusters:
-    - name: fluid_server
+    - name: paymaster_server
       connect_timeout: 5s
       type: STRICT_DNS
       lb_policy: ROUND_ROBIN
       load_assignment:
-        cluster_name: fluid_server
+        cluster_name: paymaster_server
         endpoints:
           - lb_endpoints:
               - endpoint:

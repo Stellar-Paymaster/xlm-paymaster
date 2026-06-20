@@ -10,10 +10,10 @@ export interface AuditLog {
 
 // Mock data representing backend audit logs
 const MOCK_LOGS: AuditLog[] = [
-  { id: '1', actor: 'admin@fluid.dev', action: 'LOGIN', timestamp: '2026-05-14T10:00:00Z', details: 'Successful login' },
-  { id: '2', actor: 'operator@fluid.dev', action: 'ADD_ASSET', timestamp: '2026-05-14T11:30:00Z', details: 'Added EURC to whitelist' },
+  { id: '1', actor: 'admin@paymaster.dev', action: 'LOGIN', timestamp: '2026-05-14T10:00:00Z', details: 'Successful login' },
+  { id: '2', actor: 'operator@paymaster.dev', action: 'ADD_ASSET', timestamp: '2026-05-14T11:30:00Z', details: 'Added EURC to whitelist' },
   { id: '3', actor: 'system', action: 'SYNC', timestamp: '2026-05-13T09:00:00Z', details: 'Ledger sync completed' },
-  { id: '4', actor: 'admin@fluid.dev', action: 'UPDATE_SETTINGS', timestamp: '2026-05-12T15:45:00Z', details: 'Updated fee config' },
+  { id: '4', actor: 'admin@paymaster.dev', action: 'UPDATE_SETTINGS', timestamp: '2026-05-12T15:45:00Z', details: 'Updated fee config' },
 ];
 
 export const AuditLogUI: React.FC = () => {

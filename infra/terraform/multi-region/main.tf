@@ -10,7 +10,7 @@ terraform {
 
   backend "s3" {
     # Override via -backend-config or environment variables
-    bucket = "fluid-terraform-state"
+    bucket = "paymaster-terraform-state"
     key    = "multi-region/terraform.tfstate"
     region = "us-east-1"
   }
@@ -31,7 +31,7 @@ provider "aws" {
 # ── Region A (us-east-1) ────────────────────────��────────────────────────────
 
 module "region_a" {
-  source = "./modules/fluid-region"
+  source = "./modules/paymaster-region"
 
   providers = {
     aws = aws.us_east_1
@@ -56,7 +56,7 @@ module "region_a" {
 # ── Region B (eu-west-1) ──────────────────────────��──────────────────────────
 
 module "region_b" {
-  source = "./modules/fluid-region"
+  source = "./modules/paymaster-region"
 
   providers = {
     aws = aws.eu_west_1
@@ -80,7 +80,7 @@ module "region_b" {
 
 # ── Route 53 latency-based routing ───────────────────────────────────────────
 
-resource "aws_route53_zone" "fluid" {
+resource "aws_route53_zone" "paymaster" {
   name = var.domain_name
 }
 
@@ -93,7 +93,7 @@ resource "aws_route53_health_check" "region_a" {
   request_interval  = 10
 
   tags = {
-    Name = "fluid-${var.environment}-us-east-1"
+    Name = "paymaster-${var.environment}-us-east-1"
   }
 }
 
@@ -106,12 +106,12 @@ resource "aws_route53_health_check" "region_b" {
   request_interval  = 10
 
   tags = {
-    Name = "fluid-${var.environment}-eu-west-1"
+    Name = "paymaster-${var.environment}-eu-west-1"
   }
 }
 
 resource "aws_route53_record" "api_us_east_1" {
-  zone_id        = aws_route53_zone.fluid.zone_id
+  zone_id        = aws_route53_zone.paymaster.zone_id
   name           = "api.${var.domain_name}"
   type           = "A"
   set_identifier = "us-east-1"
@@ -130,7 +130,7 @@ resource "aws_route53_record" "api_us_east_1" {
 }
 
 resource "aws_route53_record" "api_eu_west_1" {
-  zone_id        = aws_route53_zone.fluid.zone_id
+  zone_id        = aws_route53_zone.paymaster.zone_id
   name           = "api.${var.domain_name}"
   type           = "A"
   set_identifier = "eu-west-1"

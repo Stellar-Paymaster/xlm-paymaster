@@ -11,7 +11,7 @@ import {
   Globe,
   Database
 } from "lucide-react";
-import { fluidAdminToken, fluidServerUrl } from "@/lib/server-env";
+import { paymasterAdminToken, paymasterServerUrl } from "@/lib/server-env";
 
 interface SyncEvent {
   id: string;
@@ -40,14 +40,14 @@ export default function CrossChainSyncPage() {
 
   const fetchData = async () => {
     try {
-      const historyRes = await fetch(`${fluidServerUrl}/admin/cross-chain-sync/history`, {
-        headers: { "Authorization": `Bearer ${fluidAdminToken}` }
+      const historyRes = await fetch(`${paymasterServerUrl}/admin/cross-chain-sync/history`, {
+        headers: { "Authorization": `Bearer ${paymasterAdminToken}` }
       });
       const historyData = await historyRes.json();
       setHistory(historyData.history || []);
 
-      const statusRes = await fetch(`${fluidServerUrl}/admin/cross-chain-sync/status`, {
-        headers: { "Authorization": `Bearer ${fluidAdminToken}` }
+      const statusRes = await fetch(`${paymasterServerUrl}/admin/cross-chain-sync/status`, {
+        headers: { "Authorization": `Bearer ${paymasterAdminToken}` }
       });
       const statusData = await statusRes.json();
       setStatus(statusData);
@@ -68,9 +68,9 @@ export default function CrossChainSyncPage() {
     setSyncing(true);
     try {
       const endpoint = chain === "stellar" ? "increment-stellar" : "increment-evm";
-      await fetch(`${fluidServerUrl}/admin/cross-chain-sync/${endpoint}`, {
+      await fetch(`${paymasterServerUrl}/admin/cross-chain-sync/${endpoint}`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${fluidAdminToken}` }
+        headers: { "Authorization": `Bearer ${paymasterAdminToken}` }
       });
       await fetchData();
     } catch (error) {

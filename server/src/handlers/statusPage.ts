@@ -22,7 +22,7 @@ function getStatusMonitor(config: Config): StatusMonitorService {
  *   get:
  *     summary: Public status page
  *     description: >
- *       Returns the current status of all Fluid API components including
+ *       Returns the current status of all Paymaster API components including
  *       API status, Horizon connectivity, and database connectivity.
  *       No authentication required. This endpoint provides real-time
  *       status information for tenants to check service availability.

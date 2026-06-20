@@ -3,10 +3,10 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fluid-py"
+name = "paymaster-py"
 version = "0.1.0"
-description = "Python client for the Fluid fee-sponsorship API — sponsor Stellar transaction fees from any Python app or AI agent."
-authors = [{ name = "Stellar-Fluid", email = "dev@fluid.dev" }]
+description = "Python client for the Paymaster fee-sponsorship API — sponsor Stellar transaction fees from any Python app or AI agent."
+authors = [{ name = "Stellar-Paymaster", email = "dev@paymaster.dev" }]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.9"
@@ -39,14 +39,14 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Stellar-Fluid/fluid"
-Documentation = "https://docs.fluid.dev/sdk/python"
-Repository = "https://github.com/Stellar-Fluid/fluid"
-"Bug Tracker" = "https://github.com/Stellar-Fluid/fluid/issues"
+Homepage = "https://github.com/Stellar-Paymaster/paymaster"
+Documentation = "https://docs.paymaster.dev/sdk/python"
+Repository = "https://github.com/Stellar-Paymaster/paymaster"
+"Bug Tracker" = "https://github.com/Stellar-Paymaster/paymaster/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["fluid_py*"]
+include = ["paymaster_py*"]
 
 [tool.mypy]
 python_version = "3.9"

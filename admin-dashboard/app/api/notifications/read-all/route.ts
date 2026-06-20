@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-const FLUID_SERVER_URL =
-  process.env.FLUID_SERVER_URL?.trim() ?? "http://localhost:3000";
-const FLUID_ADMIN_TOKEN = process.env.FLUID_ADMIN_TOKEN?.trim() ?? "";
+const PAYMASTER_SERVER_URL =
+  process.env.PAYMASTER_SERVER_URL?.trim() ?? "http://localhost:3000";
+const PAYMASTER_ADMIN_TOKEN = process.env.PAYMASTER_ADMIN_TOKEN?.trim() ?? "";
 
 /** PATCH /api/notifications/read-all — mark all notifications as read */
 export async function PATCH() {
@@ -14,12 +14,12 @@ export async function PATCH() {
 
   try {
     const response = await fetch(
-      `${FLUID_SERVER_URL}/admin/notifications/read-all`,
+      `${PAYMASTER_SERVER_URL}/admin/notifications/read-all`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-token": FLUID_ADMIN_TOKEN,
+          "x-admin-token": PAYMASTER_ADMIN_TOKEN,
         },
       }
     );

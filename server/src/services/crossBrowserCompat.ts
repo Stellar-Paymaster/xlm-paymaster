@@ -1,7 +1,7 @@
 /**
  * Cross-browser Compatibility Testing Service
  *
- * The Fluid server API serves browser-based clients. This module:
+ * The Paymaster server API serves browser-based clients. This module:
  *
  *   1. Parses incoming User-Agent strings to identify browser family, version,
  *      and engine (Gecko / Blink / WebKit).

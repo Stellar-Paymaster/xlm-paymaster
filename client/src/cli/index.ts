@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import fs from "fs";
 import path from "path";
-import { FluidClient } from "../FluidClient";
+import { PaymasterClient } from "../PaymasterClient";
 import StellarSdk from "@stellar/stellar-sdk";
 import { simulateFeeBump, formatSimulationResult } from "./transactionSimulator";
 import { lookupByCode, searchErrorCodes, formatErrorHelp, listAllCodes } from "../errorCodes";
@@ -11,17 +11,17 @@ export function createProgram() {
   const program = new Command();
 
   program
-    .name("fluid")
-    .description("Fluid Platform CLI for developers")
+    .name("paymaster")
+    .description("Paymaster Platform CLI for developers")
     .version("0.1.0");
 
   const config = program.command("config").description("Manage platform configurations");
 
   config
     .command("upload")
-    .description("Upload a local configuration file to the Fluid platform")
+    .description("Upload a local configuration file to the Paymaster platform")
     .argument("<file>", "Path to the configuration file (JSON)")
-    .option("-s, --server <url>", "Fluid server URL", "http://localhost:3000")
+    .option("-s, --server <url>", "Paymaster server URL", "http://localhost:3000")
     .action(async (file, options) => {
       try {
         const filePath = path.resolve(process.cwd(), file);
@@ -36,12 +36,12 @@ export function createProgram() {
         console.log(`Uploading configuration from ${file} to ${options.server}...`);
         
         // Mocked implementation for config upload
-        // In a real scenario, this would call a protected endpoint on the Fluid server
+        // In a real scenario, this would call a protected endpoint on the Paymaster server
         const response = await fetch(`${options.server}/cli/config/upload`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Fluid-CLI-Version": "0.1.0",
+            "X-Paymaster-CLI-Version": "0.1.0",
           },
           body: JSON.stringify(configData),
         });
@@ -60,8 +60,8 @@ export function createProgram() {
   config
     .command("download")
     .description("Download the latest platform configuration")
-    .argument("[destination]", "Path to save the configuration", "./fluid.config.json")
-    .option("-s, --server <url>", "Fluid server URL", "http://localhost:3000")
+    .argument("[destination]", "Path to save the configuration", "./paymaster.config.json")
+    .option("-s, --server <url>", "Paymaster server URL", "http://localhost:3000")
     .action(async (destination, options) => {
       try {
         console.log(`Downloading configuration from ${options.server}...`);
@@ -69,7 +69,7 @@ export function createProgram() {
         const response = await fetch(`${options.server}/cli/config/download`, {
           method: "GET",
           headers: {
-            "X-Fluid-CLI-Version": "0.1.0",
+            "X-Paymaster-CLI-Version": "0.1.0",
           },
         });
 
@@ -92,10 +92,10 @@ export function createProgram() {
     .command("simulate")
     .description("Simulate a fee-bump request without submitting it to the network")
     .argument("<xdr>", "The inner transaction XDR to fee-bump")
-    .option("-s, --server <url>", "Fluid server URL", "http://localhost:3000")
+    .option("-s, --server <url>", "Paymaster server URL", "http://localhost:3000")
     .option("-n, --network <passphrase>", "Stellar network passphrase", StellarSdk.Networks.TESTNET)
     .option("-j, --json", "Output the result as JSON", false)
-    .option("-l, --local", "Simulate locally offline without contacting the Fluid server", false)
+    .option("-l, --local", "Simulate locally offline without contacting the Paymaster server", false)
     .option("-f, --fee-payer <public-key>", "Fee payer public key (required/used for local simulation)")
     .option("-b, --base-fee <fee>", "Base fee in stroops for local simulation", "100")
     .action(async (xdr, options) => {
@@ -127,7 +127,7 @@ export function createProgram() {
           console.log(`   Network: ${options.network}`);
         }
 
-        const client = new FluidClient({
+        const client = new PaymasterClient({
           serverUrl: options.server,
           networkPassphrase: options.network,
         });
@@ -171,9 +171,9 @@ export function createProgram() {
 
   program
     .command("errors")
-    .description("Look up or search Fluid API error codes wiki")
-    .argument("[query]", "Error code (e.g., FLUID_001) or search query")
-    .option("-l, --list", "List all registered Fluid API error codes", false)
+    .description("Look up or search Paymaster API error codes wiki")
+    .argument("[query]", "Error code (e.g., PAYMASTER_001) or search query")
+    .option("-l, --list", "List all registered Paymaster API error codes", false)
     .option("-s, --search", "Treat the query as a free-text search query rather than a code", false)
     .action((query, options) => {
       if (options.list) {

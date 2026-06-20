@@ -2,7 +2,7 @@ import type { CongestionConfig, CongestionLevel } from "../types.ts";
 
 /**
  * Default congestion multipliers by region.
- * These can be overridden via FLUID_CONGESTION_CONFIG environment variable.
+ * These can be overridden via PAYMASTER_CONGESTION_CONFIG environment variable.
  */
 const DEFAULT_CONGESTION_CONFIG: CongestionConfig[] = [
   { region: "BR", low: 1.2, medium: 1.4, high: 1.6 },
@@ -18,7 +18,7 @@ export const GLOBAL_AVERAGE_MULTIPLIER = 1.1;
  * @returns Parsed congestion configuration array
  */
 export function getCongestionConfig(): CongestionConfig[] {
-  const envConfig = process.env.FLUID_CONGESTION_CONFIG?.trim();
+  const envConfig = process.env.PAYMASTER_CONGESTION_CONFIG?.trim();
   
   if (envConfig) {
     try {

@@ -59,7 +59,7 @@ export function createTeamInvitation(input: TeamInvitationInput): TeamInvitation
   const id = `inv_${randomHex(8)}`;
   const expiresAt = new Date(now.getTime() + ttlHours * 60 * 60 * 1000);
   const email = normalizeInvitationEmail(input.email);
-  const origin = input.appOrigin?.replace(/\/$/, "") ?? "https://admin.fluid.dev";
+  const origin = input.appOrigin?.replace(/\/$/, "") ?? "https://admin.paymaster.dev";
 
   return {
     id,

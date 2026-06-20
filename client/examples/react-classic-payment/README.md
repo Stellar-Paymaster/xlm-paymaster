@@ -18,7 +18,7 @@ A minimal React demo showing gasless Stellar Classic XLM payments powered by XLM
 
 ```
 VITE_HORIZON_URL=https://horizon-testnet.stellar.org
-VITE_FLUID_SERVER_URL=https://testnet.xlm-paymaster.dev
+VITE_PAYMASTER_SERVER_URL=https://testnet.xlm-paymaster.dev
 VITE_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 VITE_STELLAR_EXPERT_URL=https://stellar.expert/explorer/testnet
 ```

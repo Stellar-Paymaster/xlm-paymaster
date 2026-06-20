@@ -75,7 +75,7 @@ const signer = createWalletConnectSigner(signClient, session, {
 ### Signing + fee bump
 
 ```ts
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: "http://localhost:3000",
   networkPassphrase: StellarSdk.Networks.TESTNET,
 });

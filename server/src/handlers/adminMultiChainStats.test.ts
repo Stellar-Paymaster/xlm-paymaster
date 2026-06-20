@@ -21,12 +21,12 @@ function makeRes() {
 
 describe("getMultiChainStatsHandler", () => {
   beforeEach(() => {
-    process.env.FLUID_ADMIN_TOKEN = "test-admin-token";
+    process.env.PAYMASTER_ADMIN_TOKEN = "test-admin-token";
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    delete process.env.FLUID_ADMIN_TOKEN;
+    delete process.env.PAYMASTER_ADMIN_TOKEN;
   });
 
   it("returns treasury overview payload for authorized requests", async () => {

@@ -2,7 +2,7 @@ import os
 from locust import task, between
 from locust.contrib.fasthttp import FastHttpUser
 
-class FluidLoadTestUser(FastHttpUser):
+class PaymasterLoadTestUser(FastHttpUser):
     # Minimal pacing delay to simulate fast-acting clients and high request frequency
     wait_time = between(0.001, 0.005)
 
@@ -21,7 +21,7 @@ class FluidLoadTestUser(FastHttpUser):
         
         headers = {
             "Content-Type": "application/json",
-            "X-API-Key": os.getenv("API_KEY", "fluid-pro-demo-key")
+            "X-API-Key": os.getenv("API_KEY", "paymaster-pro-demo-key")
         }
         
         with self.client.post(url, json=payload, headers=headers, catch_response=True) as response:

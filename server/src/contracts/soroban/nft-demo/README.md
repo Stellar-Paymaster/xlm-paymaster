@@ -32,7 +32,7 @@ soroban contract build
 ```bash
 # Deploy to Testnet
 soroban contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/fluid_nft_demo.wasm \
+  --wasm target/wasm32-unknown-unknown/release/paymaster_nft_demo.wasm \
   --source <SOURCE_ACCOUNT> \
   --network testnet
 ```

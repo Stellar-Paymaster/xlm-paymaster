@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { FluidClient } from "../../index";
-import { createFluidMockServer } from "../mockServer";
+import { PaymasterClient } from "../../index";
+import { createPaymasterMockServer } from "../mockServer";
 
 const TEST_SERVER_URL = "http://localhost:3000";
 
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: TEST_SERVER_URL,
   networkPassphrase: "Test SDF Network ; September 2015",
 });
@@ -12,9 +12,9 @@ const client = new FluidClient({
 const FAKE_XDR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 // ---- Success Case ----
-describe("FluidClient with mock server", () => {
+describe("PaymasterClient with mock server", () => {
   describe("success response", () => {
-    const server = createFluidMockServer({ response: "success" });
+    const server = createPaymasterMockServer({ response: "success" });
     beforeAll(() => server.listen());
     afterEach(() => server.resetHandlers());
     afterAll(() => server.close());
@@ -29,42 +29,42 @@ describe("FluidClient with mock server", () => {
 
   // ---- 400 Bad Request ----
   describe("bad_request response", () => {
-    const server = createFluidMockServer({ response: "bad_request" });
+    const server = createPaymasterMockServer({ response: "bad_request" });
     beforeAll(() => server.listen());
     afterEach(() => server.resetHandlers());
     afterAll(() => server.close());
 
     it("throws an error on 400 bad request", async () => {
       await expect(client.requestFeeBump(FAKE_XDR, false)).rejects.toThrow(
-        "Fluid server error"
+        "Paymaster server error"
       );
     });
   });
 
   // ---- 500 Server Error ----
   describe("server_error response", () => {
-    const server = createFluidMockServer({ response: "server_error" });
+    const server = createPaymasterMockServer({ response: "server_error" });
     beforeAll(() => server.listen());
     afterEach(() => server.resetHandlers());
     afterAll(() => server.close());
 
     it("throws an error on 500 server error", async () => {
       await expect(client.requestFeeBump(FAKE_XDR, false)).rejects.toThrow(
-        "Fluid server error"
+        "Paymaster server error"
       );
     });
   });
 
   // ---- 429 Rate Limit ----
   describe("rate_limit response", () => {
-    const server = createFluidMockServer({ response: "rate_limit" });
+    const server = createPaymasterMockServer({ response: "rate_limit" });
     beforeAll(() => server.listen());
     afterEach(() => server.resetHandlers());
     afterAll(() => server.close());
 
     it("throws an error on 429 rate limit", async () => {
       await expect(client.requestFeeBump(FAKE_XDR, false)).rejects.toThrow(
-        "Fluid server error"
+        "Paymaster server error"
       );
     });
   });

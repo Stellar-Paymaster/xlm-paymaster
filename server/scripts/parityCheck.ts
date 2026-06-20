@@ -226,18 +226,18 @@ async function buildFeeBumpXdr (feePayerSecret: string): Promise<string> {
 async function main (): Promise<void> {
   const serverDir = process.cwd();
   const repoDir = `${serverDir}\\..`;
-  const rustDir = `${repoDir}\\fluid-server`;
+  const rustDir = `${repoDir}\\paymaster-server`;
   const rustBinary =
     process.platform === "win32"
-      ? `${rustDir}\\target\\debug\\fluid-server.exe`
-      : `${rustDir}/target/debug/fluid-server`;
+      ? `${rustDir}\\target\\debug\\paymaster-server.exe`
+      : `${rustDir}/target/debug/paymaster-server`;
   const feePayer = StellarSdk.Keypair.random();
   const portSeed = 3200 + Math.floor(Math.random() * 200);
   const nodePort = String(portSeed);
   const rustPort = String(portSeed + 1);
   const envBase = {
     ...process.env,
-    FLUID_FEE_PAYER_SECRET: feePayer.secret(),
+    PAYMASTER_FEE_PAYER_SECRET: feePayer.secret(),
     NODE_ENV: "test",
     STELLAR_NETWORK_PASSPHRASE: StellarSdk.Networks.TESTNET,
     STELLAR_HORIZON_URL: "",
@@ -335,7 +335,7 @@ async function main (): Promise<void> {
             body: JSON.stringify({ xdr: feeBumpedXdr, submit: false }),
             headers: {
               "content-type": "application/json",
-              "x-api-key": "fluid-pro-demo-key",
+              "x-api-key": "paymaster-pro-demo-key",
             },
             method: "POST",
           }),
@@ -343,7 +343,7 @@ async function main (): Promise<void> {
             body: JSON.stringify({ xdr: feeBumpedXdr, submit: false }),
             headers: {
               "content-type": "application/json",
-              "x-api-key": "fluid-pro-demo-key",
+              "x-api-key": "paymaster-pro-demo-key",
             },
             method: "POST",
           }),
@@ -356,7 +356,7 @@ async function main (): Promise<void> {
             body: JSON.stringify({ xdr: signedXdr, submit: false }),
             headers: {
               "content-type": "application/json",
-              "x-api-key": "fluid-pro-demo-key",
+              "x-api-key": "paymaster-pro-demo-key",
             },
             method: "POST",
           }),
@@ -364,7 +364,7 @@ async function main (): Promise<void> {
             body: JSON.stringify({ xdr: signedXdr, submit: false }),
             headers: {
               "content-type": "application/json",
-              "x-api-key": "fluid-pro-demo-key",
+              "x-api-key": "paymaster-pro-demo-key",
             },
             method: "POST",
           }),

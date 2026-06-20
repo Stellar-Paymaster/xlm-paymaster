@@ -5,8 +5,8 @@ import type { AdminUser } from "@/components/dashboard/AdminUsersTable";
 import { ADMIN_ROLES, ROLE_LABELS, ROLE_DESCRIPTIONS } from "@/lib/permissions";
 
 async function fetchUsers(adminJwt: string): Promise<AdminUser[]> {
-  const serverUrl = process.env.FLUID_SERVER_URL;
-  const adminToken = process.env.FLUID_ADMIN_TOKEN;
+  const serverUrl = process.env.PAYMASTER_SERVER_URL;
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN;
 
   if (!serverUrl || !adminToken) return [];
 
@@ -43,7 +43,7 @@ export default async function AdminUsersPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-sky-600">
-                Fluid Admin — Access Control
+                Paymaster Admin — Access Control
               </p>
               <h1 className="mt-2 text-3xl font-bold text-slate-900">Admin Users</h1>
               <p className="mt-2 max-w-2xl text-sm text-slate-600">

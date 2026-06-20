@@ -7,7 +7,7 @@
 use ed25519_dalek::SigningKey;
 use stellar_strkey::Strkey;
 
-use crate::error::FluidError;
+use crate::error::PaymasterError;
 use crate::types::{DecoratedSignature, Keypair, PublicKey, TransactionHash};
 
 /// Trait for signing Stellar transactions.
@@ -20,8 +20,8 @@ use crate::types::{DecoratedSignature, Keypair, PublicKey, TransactionHash};
 /// ## Implementing a custom signer
 ///
 /// ```
-/// use fluid_core::{Signer, TransactionHash, DecoratedSignature, PublicKey};
-/// use fluid_core::FluidError;
+/// use paymaster_core::{Signer, TransactionHash, DecoratedSignature, PublicKey};
+/// use paymaster_core::PaymasterError;
 ///
 /// struct MyCustomSigner;
 ///
@@ -30,12 +30,12 @@ use crate::types::{DecoratedSignature, Keypair, PublicKey, TransactionHash};
 ///         todo!("Return your signer's public key")
 ///     }
 ///
-///     fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError> {
+///     fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError> {
 ///         // Your custom signing logic here
 ///         todo!("Implement signing")
 ///     }
 ///
-///     fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+///     fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> {
 ///         todo!("Implement signing")
 ///     }
 /// }
@@ -60,8 +60,8 @@ pub trait Signer: Send + Sync {
     ///
     /// # Errors
     ///
-    /// Returns [`FluidError::SigningFailed`] if the signing operation fails.
-    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError>;
+    /// Returns [`PaymasterError::SigningFailed`] if the signing operation fails.
+    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError>;
 
     /// Sign a raw payload directly.
     ///
@@ -78,8 +78,8 @@ pub trait Signer: Send + Sync {
     ///
     /// # Errors
     ///
-    /// Returns [`FluidError::SigningFailed`] if the signing operation fails.
-    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError>;
+    /// Returns [`PaymasterError::SigningFailed`] if the signing operation fails.
+    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError>;
 }
 
 /// A signer implementation using an in-memory Ed25519 keypair.
@@ -96,7 +96,7 @@ pub trait Signer: Send + Sync {
 /// # Examples
 ///
 /// ```
-/// use fluid_core::{Ed25519Signer, Keypair, Signer};
+/// use paymaster_core::{Ed25519Signer, Keypair, Signer};
 ///
 /// // Create from raw key bytes (in practice, load from secure storage)
 /// let secret = [1u8; 32];
@@ -124,7 +124,7 @@ impl Ed25519Signer {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::{Ed25519Signer, Keypair};
+    /// use paymaster_core::{Ed25519Signer, Keypair};
     ///
     /// let keypair = Keypair::from_raw_keys([1u8; 32], [2u8; 32]);
     /// let signer = Ed25519Signer::new(keypair);
@@ -150,18 +150,18 @@ impl Ed25519Signer {
     ///
     /// # Errors
     ///
-    /// Returns [`FluidError::InvalidSecret`] if the secret key is malformed
+    /// Returns [`PaymasterError::InvalidSecret`] if the secret key is malformed
     /// or not a valid Ed25519 private key.
     ///
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::Ed25519Signer;
+    /// use paymaster_core::Ed25519Signer;
     ///
     /// // This would work with a real secret key:
     /// // let signer = Ed25519Signer::from_secret("S...");
     /// ```
-    pub fn from_secret(secret: &str) -> Result<Self, FluidError> {
+    pub fn from_secret(secret: &str) -> Result<Self, PaymasterError> {
         let secret_key = decode_secret(secret)?;
         let signing_key = SigningKey::from_bytes(&secret_key);
         let public_key = PublicKey::new(signing_key.verifying_key().to_bytes());
@@ -185,14 +185,14 @@ impl Signer for Ed25519Signer {
         self.keypair.public_key()
     }
 
-    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError> {
+    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError> {
         let signature = self.sign_payload(hash.as_ref())?;
         let hint = self.keypair.signature_hint();
 
         Ok(DecoratedSignature::new(hint, signature))
     }
 
-    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> {
         use ed25519_dalek::Signer as DalekSigner;
         let signature = self
             .signing_key
@@ -213,16 +213,16 @@ impl Signer for Ed25519Signer {
 ///
 /// # Errors
 ///
-/// Returns [`FluidError::InvalidSecret`] if:
+/// Returns [`PaymasterError::InvalidSecret`] if:
 /// - The string is not valid strkey format
 /// - The key type is not Ed25519 private key
-fn decode_secret(secret: &str) -> Result<[u8; 32], FluidError> {
+fn decode_secret(secret: &str) -> Result<[u8; 32], PaymasterError> {
     match Strkey::from_string(secret) {
         Ok(Strkey::PrivateKeyEd25519(key)) => Ok(key.0),
-        Ok(_) => Err(FluidError::InvalidSecret(
+        Ok(_) => Err(PaymasterError::InvalidSecret(
             "expected a Stellar ed25519 private key".to_string(),
         )),
-        Err(err) => Err(FluidError::InvalidSecret(format!(
+        Err(err) => Err(PaymasterError::InvalidSecret(format!(
             "invalid Stellar secret: {err}"
         ))),
     }
@@ -244,7 +244,7 @@ pub struct AsyncSigner<F> {
 
 impl<F> AsyncSigner<F>
 where
-    F: Fn(&[u8]) -> Result<[u8; 64], FluidError> + Send + Sync,
+    F: Fn(&[u8]) -> Result<[u8; 64], PaymasterError> + Send + Sync,
 {
     /// Create a new async signer.
     ///
@@ -262,20 +262,20 @@ where
 
 impl<F> Signer for AsyncSigner<F>
 where
-    F: Fn(&[u8]) -> Result<[u8; 64], FluidError> + Send + Sync,
+    F: Fn(&[u8]) -> Result<[u8; 64], PaymasterError> + Send + Sync,
 {
     fn public_key(&self) -> &PublicKey {
         &self.public_key
     }
 
-    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError> {
+    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError> {
         let signature = self.sign_payload(hash.as_ref())?;
         let hint = self.public_key.signature_hint();
 
         Ok(DecoratedSignature::new(hint, signature))
     }
 
-    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> {
         (self.signer_fn)(payload)
     }
 }
@@ -323,14 +323,14 @@ impl Signer for TestSigner {
         self.keypair.public_key()
     }
 
-    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError> {
+    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError> {
         let signature = self.sign_payload(hash.as_ref())?;
         let hint = self.keypair.signature_hint();
 
         Ok(DecoratedSignature::new(hint, signature))
     }
 
-    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> {
         use ed25519_dalek::Signer as DalekSigner;
         let signature = self
             .signing_key
@@ -368,7 +368,7 @@ impl MultiSigner {
     /// # Returns
     ///
     /// A vector of decorated signatures, one from each signer.
-    pub fn sign_hash_multi(&self, hash: &TransactionHash) -> Vec<Result<DecoratedSignature, FluidError>> {
+    pub fn sign_hash_multi(&self, hash: &TransactionHash) -> Vec<Result<DecoratedSignature, PaymasterError>> {
         self.signers
             .iter()
             .map(|signer| signer.sign_hash(hash))

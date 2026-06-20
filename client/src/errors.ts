@@ -1,34 +1,34 @@
 /**
- * Base class for all Fluid-related errors.
+ * Base class for all Paymaster-related errors.
  */
 /**
- * Base class for all Fluid-related errors.
+ * Base class for all Paymaster-related errors.
  */
-export class FluidError extends Error {
+export class PaymasterError extends Error {
   public helpUrl?: string;
 
   constructor(message: string) {
     super(message);
-    this.name = "FluidError";
+    this.name = "PaymasterError";
     this.helpUrl = getHelpUrl(this.name);
-    Object.setPrototypeOf(this, FluidError.prototype);
+    Object.setPrototypeOf(this, PaymasterError.prototype);
   }
 }
 
 /**
- * Base class for all Fluid request-related errors (network or server).
+ * Base class for all Paymaster request-related errors (network or server).
  */
-export class FluidRequestError extends FluidError {
+export class PaymasterRequestError extends PaymasterError {
   public readonly statusCode?: number;
   public readonly serverUrl?: string;
 
   constructor(message: string, statusCode?: number, serverUrl?: string) {
     super(message);
-    this.name = "FluidRequestError";
+    this.name = "PaymasterRequestError";
     this.statusCode = statusCode;
     this.serverUrl = serverUrl;
     this.helpUrl = getHelpUrl(this.name);
-    Object.setPrototypeOf(this, FluidRequestError.prototype);
+    Object.setPrototypeOf(this, PaymasterRequestError.prototype);
   }
 
   public get status(): number | undefined {
@@ -44,67 +44,67 @@ export class FluidRequestError extends FluidError {
 /**
  * Error thrown when a network request fails (e.g., DNS, timeout, no connectivity).
  */
-export class FluidNetworkError extends FluidRequestError {
+export class PaymasterNetworkError extends PaymasterRequestError {
   constructor(message: string, serverUrl?: string) {
     super(message, undefined, serverUrl);
-    this.name = "FluidNetworkError";
+    this.name = "PaymasterNetworkError";
     this.helpUrl = getHelpUrl(this.name);
-    Object.setPrototypeOf(this, FluidNetworkError.prototype);
+    Object.setPrototypeOf(this, PaymasterNetworkError.prototype);
   }
 }
 
 /**
- * Error thrown when the Fluid server returns an error response (4xx or 5xx).
+ * Error thrown when the Paymaster server returns an error response (4xx or 5xx).
  */
-export class FluidServerError extends FluidRequestError {
+export class PaymasterServerError extends PaymasterRequestError {
   public readonly responseBody?: any;
 
   constructor(message: string, status: number, serverUrl: string, responseBody?: any) {
     super(message, status, serverUrl);
-    this.name = "FluidServerError";
+    this.name = "PaymasterServerError";
     this.responseBody = responseBody;
     
     // Use server-provided error code for more specific help URL if available
     const errorCode = responseBody?.code || responseBody?.error_code;
     this.helpUrl = getHelpUrl(errorCode || this.name);
     
-    Object.setPrototypeOf(this, FluidServerError.prototype);
+    Object.setPrototypeOf(this, PaymasterServerError.prototype);
   }
 }
 
 /**
  * Error thrown when all configured servers are unavailable or exhausted.
  */
-export class FluidNoAvailableServerError extends FluidRequestError {
+export class PaymasterNoAvailableServerError extends PaymasterRequestError {
   constructor(message: string, serverUrl?: string) {
     super(message, undefined, serverUrl);
-    this.name = "FluidNoAvailableServerError";
+    this.name = "PaymasterNoAvailableServerError";
     this.helpUrl = getHelpUrl(this.name);
-    Object.setPrototypeOf(this, FluidNoAvailableServerError.prototype);
+    Object.setPrototypeOf(this, PaymasterNoAvailableServerError.prototype);
   }
 }
 
 /**
- * Error thrown when the Fluid client is misconfigured.
+ * Error thrown when the Paymaster client is misconfigured.
  */
-export class FluidConfigurationError extends FluidError {
+export class PaymasterConfigurationError extends PaymasterError {
   constructor(message: string) {
     super(message);
-    this.name = "FluidConfigurationError";
+    this.name = "PaymasterConfigurationError";
     this.helpUrl = getHelpUrl(this.name);
-    Object.setPrototypeOf(this, FluidConfigurationError.prototype);
+    Object.setPrototypeOf(this, PaymasterConfigurationError.prototype);
   }
 }
 
 /**
  * Error thrown when a required wallet/keypair is missing or operation is rejected by user.
  */
-export class FluidWalletError extends FluidError {
+export class PaymasterWalletError extends PaymasterError {
   constructor(message: string) {
     super(message);
-    this.name = "FluidWalletError";
+    this.name = "PaymasterWalletError";
     this.helpUrl = getHelpUrl(this.name);
-    Object.setPrototypeOf(this, FluidWalletError.prototype);
+    Object.setPrototypeOf(this, PaymasterWalletError.prototype);
   }
 }
 
@@ -115,7 +115,7 @@ const HELP_BASE_URL = "https://docs.xlm-paymaster.com/errors";
 
 function getHelpUrl(code: string): string {
   const fragment = code
-    .replace(/^Fluid/, "")
+    .replace(/^Paymaster/, "")
     .replace(/Error$/, "")
     .replace(/([a-z])([A-Z])/g, "$1-$2")
     .toLowerCase();

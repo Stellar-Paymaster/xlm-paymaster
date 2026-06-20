@@ -13,7 +13,7 @@ mod signer_weight;
 mod state;
 mod stellar;
 mod tracing_ctx;
-pub use fluid_server::xdr;
+pub use paymaster_server::xdr;
 mod ai_query;
 use axum::{
     extract::{ConnectInfo, Extension, Request, State},
@@ -36,8 +36,8 @@ use contract_cache::{
 };
 use db::create_pool;
 use error::AppError;
-use fluid_server::archive::run_archival_job;
-use fluid_server::grpc::serve_grpc;
+use paymaster_server::archive::run_archival_job;
+use paymaster_server::grpc::serve_grpc;
 use horizon::HorizonNodeStatus;
 use notifications::{Backend, NotificationEngine, WebhookBackend};
 use logging::init_logging_from_env;
@@ -206,7 +206,7 @@ async fn main() {
             let _ = tracing_subscriber::fmt()
                 .with_env_filter(
                     tracing_subscriber::EnvFilter::try_from_default_env()
-                        .unwrap_or_else(|_| "fluid_server=info,tower_http=info".into()),
+                        .unwrap_or_else(|_| "paymaster_server=info,tower_http=info".into()),
                 )
                 .try_init();
         }
@@ -341,8 +341,8 @@ async fn run() -> Result<(), AppError> {
         .unwrap_or(50051);
     let grpc_addr = SocketAddr::from(([0, 0, 0, 0], grpc_port));
 
-    info!("Starting Fluid Rust services");
-    info!("Fluid server (Rust) listening on {http_addr}");
+    info!("Starting Paymaster Rust services");
+    info!("Paymaster server (Rust) listening on {http_addr}");
 
     let listener = tokio::net::TcpListener::bind(http_addr)
         .await
@@ -697,7 +697,7 @@ async fn process_fee_bump_request(
                     "TOO_MANY_OPERATIONS",
                     format!(
                         "Transaction contains {count} operations, which exceeds the configured \
-                         maximum of {limit} per envelope (FLUID_MAX_OPERATIONS_PER_ENVELOPE)."
+                         maximum of {limit} per envelope (PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE)."
                     ),
                 ));
             }
@@ -966,7 +966,7 @@ fn extract_api_key(headers: &HeaderMap) -> Result<String, AppError> {
 fn find_api_key(api_key: &str) -> Result<ApiKeyConfig, AppError> {
     API_KEYS
         .iter()
-        .find(|candidate| fluid_server::verify_api_key(candidate.key, api_key))
+        .find(|candidate| paymaster_server::verify_api_key(candidate.key, api_key))
         .cloned()
         .ok_or_else(|| {
             AppError::new(
@@ -1028,7 +1028,7 @@ const DASHBOARD_HTML: &str = r#"<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Fluid Rust Dashboard</title>
+    <title>Paymaster Rust Dashboard</title>
     <style>
       :root { --ink:#102030; --surface:#f6efe2; --card:rgba(255,255,255,0.82); }
       body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink);
@@ -1045,7 +1045,7 @@ const DASHBOARD_HTML: &str = r#"<!doctype html>
   <body>
     <main>
       <section class="hero">
-        <h1>Fluid Rust Server</h1>
+        <h1>Paymaster Rust Server</h1>
         <p>Bundled dashboard served directly from the Rust binary.</p>
       </section>
       <section class="grid">

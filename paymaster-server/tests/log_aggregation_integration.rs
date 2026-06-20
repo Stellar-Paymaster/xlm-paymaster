@@ -1,18 +1,18 @@
 use std::sync::Mutex;
 
-use fluid_server::logging::{LogAggregationConfig, LogProvider};
+use paymaster_server::logging::{LogAggregationConfig, LogProvider};
 
 static ENV_LOCK: Mutex<()> = Mutex::new(());
 
 fn clear_log_env() {
-    std::env::remove_var("FLUID_LOG_AGGREGATION_PROVIDER");
-    std::env::remove_var("FLUID_LOG_AGGREGATION_ENDPOINT");
-    std::env::remove_var("FLUID_LOG_AGGREGATION_API_KEY");
-    std::env::remove_var("FLUID_LOG_AGGREGATION_BATCH_SIZE");
-    std::env::remove_var("FLUID_LOG_AGGREGATION_FLUSH_MS");
-    std::env::remove_var("FLUID_LOG_AGGREGATION_TIMEOUT_MS");
-    std::env::remove_var("FLUID_LOG_AGGREGATION_ELK_INDEX");
-    std::env::remove_var("FLUID_SERVICE_NAME");
+    std::env::remove_var("PAYMASTER_LOG_AGGREGATION_PROVIDER");
+    std::env::remove_var("PAYMASTER_LOG_AGGREGATION_ENDPOINT");
+    std::env::remove_var("PAYMASTER_LOG_AGGREGATION_API_KEY");
+    std::env::remove_var("PAYMASTER_LOG_AGGREGATION_BATCH_SIZE");
+    std::env::remove_var("PAYMASTER_LOG_AGGREGATION_FLUSH_MS");
+    std::env::remove_var("PAYMASTER_LOG_AGGREGATION_TIMEOUT_MS");
+    std::env::remove_var("PAYMASTER_LOG_AGGREGATION_ELK_INDEX");
+    std::env::remove_var("PAYMASTER_SERVICE_NAME");
 }
 
 #[test]
@@ -20,10 +20,10 @@ fn datadog_env_configuration_is_loaded() {
     let _lock = ENV_LOCK.lock().expect("env lock");
     clear_log_env();
 
-    std::env::set_var("FLUID_LOG_AGGREGATION_PROVIDER", "datadog");
-    std::env::set_var("FLUID_LOG_AGGREGATION_API_KEY", "dd-api-key");
-    std::env::set_var("FLUID_LOG_AGGREGATION_BATCH_SIZE", "10");
-    std::env::set_var("FLUID_SERVICE_NAME", "fluid-prod");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_PROVIDER", "datadog");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_API_KEY", "dd-api-key");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_BATCH_SIZE", "10");
+    std::env::set_var("PAYMASTER_SERVICE_NAME", "paymaster-prod");
 
     let config = LogAggregationConfig::from_env().expect("config should parse");
     assert_eq!(config.provider, LogProvider::Datadog);
@@ -33,7 +33,7 @@ fn datadog_env_configuration_is_loaded() {
     );
     assert_eq!(config.api_key.as_deref(), Some("dd-api-key"));
     assert_eq!(config.batch_size, 10);
-    assert_eq!(config.service_name, "fluid-prod");
+    assert_eq!(config.service_name, "paymaster-prod");
 
     clear_log_env();
 }
@@ -43,10 +43,10 @@ fn elk_env_configuration_uses_bulk_defaults_and_clamps_limits() {
     let _lock = ENV_LOCK.lock().expect("env lock");
     clear_log_env();
 
-    std::env::set_var("FLUID_LOG_AGGREGATION_PROVIDER", "elk");
-    std::env::set_var("FLUID_LOG_AGGREGATION_BATCH_SIZE", "0");
-    std::env::set_var("FLUID_LOG_AGGREGATION_FLUSH_MS", "1");
-    std::env::set_var("FLUID_LOG_AGGREGATION_TIMEOUT_MS", "1");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_PROVIDER", "elk");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_BATCH_SIZE", "0");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_FLUSH_MS", "1");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_TIMEOUT_MS", "1");
 
     let config = LogAggregationConfig::from_env().expect("config should parse");
     assert_eq!(config.provider, LogProvider::Elk);
@@ -63,7 +63,7 @@ fn newrelic_requires_api_key() {
     let _lock = ENV_LOCK.lock().expect("env lock");
     clear_log_env();
 
-    std::env::set_var("FLUID_LOG_AGGREGATION_PROVIDER", "newrelic");
+    std::env::set_var("PAYMASTER_LOG_AGGREGATION_PROVIDER", "newrelic");
 
     let error = LogAggregationConfig::from_env().expect_err("api key should be required");
     assert!(error.contains("API key"));

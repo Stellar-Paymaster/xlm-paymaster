@@ -95,7 +95,7 @@ When using the `--json` flag, errors are also returned as JSON objects with the 
 ```json
 {
   "error": "Detailed error message",
-  "type": "FluidServerError",
+  "type": "PaymasterServerError",
   "serverUrl": "http://localhost:3000",
   "statusCode": 403
 }
@@ -103,7 +103,7 @@ When using the `--json` flag, errors are also returned as JSON objects with the 
 
 ## Resilience
 
-The CLI uses the same `FluidClient` underlying the SDK, meaning it inherits:
+The CLI uses the same `PaymasterClient` underlying the SDK, meaning it inherits:
 - Automatic node failover if multiple servers are configured.
 - Configurable request timeouts.
 - Proper XDR serialization standards.

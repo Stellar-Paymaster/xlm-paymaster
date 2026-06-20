@@ -15,7 +15,7 @@ export async function exportAuditLogHandler(
     res.setHeader("Content-Type", "text/csv");
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=fluid_audit_log.csv",
+      "attachment; filename=paymaster_audit_log.csv",
     );
     res.send(csv);
   } catch (error) {

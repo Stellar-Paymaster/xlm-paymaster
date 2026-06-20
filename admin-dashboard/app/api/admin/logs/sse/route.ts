@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { fluidAdminToken, fluidServerUrl } from "@/lib/server-env";
+import { paymasterAdminToken, paymasterServerUrl } from "@/lib/server-env";
 import { createServerLogEvent, formatSseEvent } from "@/lib/server-log-stream";
 
 export const dynamic = "force-dynamic";
@@ -18,14 +18,14 @@ function sseHeaders() {
 
 async function proxyUpstreamLogStream(): Promise<Response | null> {
   const upstreamUrl =
-    process.env.FLUID_SERVER_LOG_SSE_URL?.trim() || `${fluidServerUrl}/admin/logs/sse`;
+    process.env.PAYMASTER_SERVER_LOG_SSE_URL?.trim() || `${paymasterServerUrl}/admin/logs/sse`;
 
   try {
     const upstream = await fetch(upstreamUrl, {
       headers: {
         Accept: "text/event-stream",
         "Cache-Control": "no-cache",
-        ...(fluidAdminToken ? { "x-admin-token": fluidAdminToken } : {}),
+        ...(paymasterAdminToken ? { "x-admin-token": paymasterAdminToken } : {}),
       },
       // @ts-expect-error Node fetch accepts streaming request options.
       duplex: "half",
@@ -58,7 +58,7 @@ function localLogStream(): Response {
       });
       const upstreamUnavailable = createServerLogEvent({
         level: "warn",
-        message: "Fluid server log stream is unavailable; waiting for upstream logs",
+        message: "Paymaster server log stream is unavailable; waiting for upstream logs",
         service: "admin-dashboard",
       });
 

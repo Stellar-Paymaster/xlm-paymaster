@@ -85,11 +85,11 @@ function resolveExpiresFromEnv(): Date {
 
 function buildDefaultContacts(): string[] {
   // Safe default for open-source repo disclosure.
-  return ["https://github.com/Stellar-Fluid/fluid/security/advisories/new"];
+  return ["https://github.com/Stellar-Paymaster/paymaster/security/advisories/new"];
 }
 
 function buildDefaultPolicy(): string[] {
-  return ["https://github.com/Stellar-Fluid/fluid/security/policy"];
+  return ["https://github.com/Stellar-Paymaster/paymaster/security/policy"];
 }
 
 export function getSecurityTxtOptionsFromEnv(): SecurityTxtOptions {

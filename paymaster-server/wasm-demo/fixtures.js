@@ -18,7 +18,7 @@ export function buildUnsignedTransaction(StellarSdk) {
         amount: "1.2345678"
       })
     )
-    .addMemo(StellarSdk.Memo.text("fluid-wasm"))
+    .addMemo(StellarSdk.Memo.text("paymaster-wasm"))
     .setTimeout(StellarSdk.TimeoutInfinite)
     .build();
 }

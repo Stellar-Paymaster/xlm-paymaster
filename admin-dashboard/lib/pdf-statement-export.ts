@@ -214,7 +214,7 @@ export function buildBillingStatement(
     source: data.source,
     note:
       data.source === "live"
-        ? "Generated from the Fluid billing ledger for finance review."
+        ? "Generated from the Paymaster billing ledger for finance review."
         : "Generated from sample billing data. Do not use for external reporting.",
     rows,
     summary,
@@ -222,7 +222,7 @@ export function buildBillingStatement(
 }
 
 export function getBillingStatementFilename(statement: BillingStatement): string {
-  return `fluid-billing-statement-${statement.month}.pdf`;
+  return `paymaster-billing-statement-${statement.month}.pdf`;
 }
 
 function formatCurrency(amountCents: number): string {
@@ -261,7 +261,7 @@ export async function exportBillingStatementToPDF(
 
   doc.setFontSize(20);
   doc.setTextColor(14, 116, 144);
-  doc.text("Fluid", 14, 18);
+  doc.text("Paymaster", 14, 18);
 
   doc.setFontSize(11);
   doc.setTextColor(71, 85, 105);
@@ -352,7 +352,7 @@ export async function exportBillingStatementToPDF(
     didDrawPage: (context: { pageNumber: number }) => {
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      doc.text(`Fluid billing statement | Page ${context.pageNumber}`, pageWidth / 2, pageHeight - 8, {
+      doc.text(`Paymaster billing statement | Page ${context.pageNumber}`, pageWidth / 2, pageHeight - 8, {
         align: "center",
       });
     },

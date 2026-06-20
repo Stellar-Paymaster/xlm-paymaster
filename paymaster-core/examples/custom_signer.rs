@@ -6,8 +6,8 @@
 //! signing backend. This is the primary use case for library users who have
 //! their own key management systems (HSM, cloud KMS, passkey, etc.).
 
-use fluid_core::{
-    DecoratedSignature, FluidError, PublicKey, Signer, TransactionHash,
+use paymaster_core::{
+    DecoratedSignature, PaymasterError, PublicKey, Signer, TransactionHash,
     TransactionBuilder, NetworkPassphrase,
 };
 use std::sync::{Arc, Mutex};
@@ -48,7 +48,7 @@ impl HsmSigner {
     /// Simulate calling the HSM to sign data.
     ///
     /// In production, this would make an API call to the HSM service.
-    fn call_hsm(&self, data: &[u8]) -> Result<[u8; 64], FluidError> {
+    fn call_hsm(&self, data: &[u8]) -> Result<[u8; 64], PaymasterError> {
         // Increment operation counter for audit purposes
         let mut count = self.operation_count.lock().unwrap();
         *count += 1;
@@ -82,14 +82,14 @@ impl Signer for HsmSigner {
         &self.public_key
     }
 
-    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError> {
+    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError> {
         let signature = self.sign_payload(hash.as_ref())?;
         let hint = self.public_key.signature_hint();
 
         Ok(DecoratedSignature::new(hint, signature))
     }
 
-    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> {
         self.call_hsm(payload)
     }
 }
@@ -113,7 +113,7 @@ impl RemoteSigner {
         }
     }
 
-    fn call_remote_api(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+    fn call_remote_api(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> {
         println!("   [Remote] Calling signing service at: {}", self.endpoint);
         println!("   [Remote] API token: {}...", &self.api_token[..8.min(self.api_token.len())]);
         println!("   [Remote] Payload: {} bytes", payload.len());
@@ -139,19 +139,19 @@ impl Signer for RemoteSigner {
         &self.public_key
     }
 
-    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError> {
+    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError> {
         let signature = self.sign_payload(hash.as_ref())?;
         let hint = self.public_key.signature_hint();
 
         Ok(DecoratedSignature::new(hint, signature))
     }
 
-    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> {
+    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> {
         self.call_remote_api(payload)
     }
 }
 
-fn main() -> Result<(), FluidError> {
+fn main() -> Result<(), PaymasterError> {
     println!("=== Custom Signer Example ===\n");
 
     // Example 1: HSM Signer

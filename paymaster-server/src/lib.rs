@@ -104,7 +104,7 @@ const MAX_SIGNATURES: usize = 20;
 // allocator exhaustion inside a constrained WebAssembly heap.  The limit is
 // set conservatively at 64 KiB – well above any realistic Stellar transaction
 // envelope – and can be overridden at compile-time via the
-// `FLUID_WASM_MAX_XDR_BYTES` env var (only honoured during `cargo build`,
+// `PAYMASTER_WASM_MAX_XDR_BYTES` env var (only honoured during `cargo build`,
 // not at runtime, since WASM has no env access).
 const MAX_XDR_BYTES: usize = 64 * 1024; // 64 KiB
 
@@ -544,7 +544,7 @@ mod tests {
             [0x3A, 0x78, 0xEA, 0x3C]
         );
         assert_eq!(
-            hex::encode(sha256("fluid")),
+            hex::encode(sha256("paymaster")),
             "5e0502adfb96f1f1544d24f00c99b269c12570acfd994666ffb86424e0835370"
         );
     }
@@ -600,7 +600,7 @@ mod tests {
 
     #[test]
     fn verify_api_key_accepts_an_exact_match() {
-        let key = "fluid-pro-demo-key";
+        let key = "paymaster-pro-demo-key";
         assert!(verify_api_key(key, key));
         assert!(verify_api_key(
             "sk_live_0123456789abcdef",
@@ -636,14 +636,14 @@ mod tests {
             "\0".to_string(),
             "\0\0\0".to_string(),
             "sk_live_0123456789abcdef\0".to_string(),
-            "fluid\nkey".to_string(),
-            "fluid\r\nx-api-key: injected".to_string(),
-            "fluid\tkey".to_string(),
+            "paymaster\nkey".to_string(),
+            "paymaster\r\nx-api-key: injected".to_string(),
+            "paymaster\tkey".to_string(),
             "   sk_live_0123456789abcdef   ".to_string(),
             "sk_live_\u{202e}fedcba9876543210".to_string(),
             "sk_live_\u{200d}\u{fe0f}".to_string(),
             "🔑".to_string(),
-            "fluid-🔐-demo-key".to_string(),
+            "paymaster-🔐-demo-key".to_string(),
             "密钥".to_string(),
             "مفتاح".to_string(),
             "कुंजी".to_string(),

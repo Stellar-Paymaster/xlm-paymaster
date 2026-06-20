@@ -30,12 +30,12 @@ DATABASE_URL="file:./dev.db"
 
 1. Update your `.env` file with your PostgreSQL connection string:
 ```bash
-DATABASE_URL="postgresql://user:password@hostname:5432/fluid_db?schema=public"
+DATABASE_URL="postgresql://user:password@hostname:5432/paymaster_db?schema=public"
 ```
 
 2. Ensure the database exists before running migrations:
 ```bash
-createdb fluid_db
+createdb paymaster_db
 ```
 
 ## Creating New Migrations

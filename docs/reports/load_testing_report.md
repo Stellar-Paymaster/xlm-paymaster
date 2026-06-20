@@ -10,7 +10,7 @@ This report documents the load testing results conducted on the XLM Paymaster se
 * **Target Load**: 1,000 requests/sec (RPS)
 * **Maximum Concurrency**: 1,000 Virtual Users (k6) / 200 Users (Locust)
 * **Peak Throughput**: 1,024.15 RPS (k6) / 1,012.44 RPS (Locust)
-* **Error Rate**: 0.00% (with `FLUID_DISABLE_RATE_LIMITS=true` configured)
+* **Error Rate**: 0.00% (with `PAYMASTER_DISABLE_RATE_LIMITS=true` configured)
 * **Average Response Time**: 88.42ms (95th Percentile: 185.10ms)
 * **Peak CPU Utilization**: ~42% on a 4-core virtual machine
 * **Status**: **PASS**
@@ -20,7 +20,7 @@ This report documents the load testing results conducted on the XLM Paymaster se
 ## Test Configuration
 
 To allow continuous performance testing at 1,000 RPS without hitting server-side rate limits and daily sponsorship quotas, the server was run with performance mode active:
-* **Environment Configuration**: `FLUID_DISABLE_RATE_LIMITS=true`
+* **Environment Configuration**: `PAYMASTER_DISABLE_RATE_LIMITS=true`
 * **Hardware**: Staging VM (4 vCPUs, 8 GB RAM)
 * **Test Duration**: 3 minutes
 

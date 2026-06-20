@@ -42,5 +42,5 @@ test("fee estimation test key exists in all locales", () => {
 });
 
 test("LanguageSwitcher storage key is defined", () => {
-  assert.equal(LANGUAGE_STORAGE_KEY, "fluid-admin-locale");
+  assert.equal(LANGUAGE_STORAGE_KEY, "paymaster-admin-locale");
 });

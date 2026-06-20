@@ -210,7 +210,7 @@ export function NotificationBell() {
                   No notifications yet
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Alerts from your Fluid server will appear here.
+                  Alerts from your Paymaster server will appear here.
                 </p>
               </div>
             ) : (

@@ -5,7 +5,7 @@
  *   for Node demos, automated tests, and server-side signing.
  * - {@link Sep43WalletSigner} — adapts any browser wallet that already speaks
  *   the SEP-43 standard interface (Freighter, Albedo, xBull, Stellar Wallets
- *   Kit, …) to the Fluid universal signer contract.
+ *   Kit, …) to the Paymaster universal signer contract.
  */
 
 import StellarSdk, { Keypair } from "@stellar/stellar-sdk";
@@ -89,11 +89,11 @@ export interface Sep43Wallet {
 }
 
 /**
- * Adapts a SEP-43 compliant browser wallet to the Fluid universal signer.
+ * Adapts a SEP-43 compliant browser wallet to the Paymaster universal signer.
  *
  * This is the bridge that lets the standard wallet bindings (Freighter, the
  * Stellar Wallets Kit selector, WalletConnect-over-Kit, …) plug straight into
- * {@link FluidClient.buildAndRequestFeeBumpWithWallet} without bespoke glue.
+ * {@link PaymasterClient.buildAndRequestFeeBumpWithWallet} without bespoke glue.
  */
 export class Sep43WalletSigner implements WalletSigner {
   readonly id: string;

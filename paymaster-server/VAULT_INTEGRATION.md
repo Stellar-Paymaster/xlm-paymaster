@@ -17,7 +17,7 @@ Environment variables
 
 Vault secret format
 
-- KV v2 recommended. The secret object should contain `FLUID_FEE_PAYER_SECRET` or any key whose value is the raw secret string.
+- KV v2 recommended. The secret object should contain `PAYMASTER_FEE_PAYER_SECRET` or any key whose value is the raw secret string.
 
 Local dev example (using `vault` CLI)
 
@@ -31,7 +31,7 @@ vault server -dev -dev-root-token-id="root"
 2. Write a secret (KV v2 namespace `secret/`):
 
 ```bash
-vault kv put secret/xlm-paymaster/fee_payer FLUID_FEE_PAYER_SECRET="SOME_PRIVATE_KEY"
+vault kv put secret/xlm-paymaster/fee_payer PAYMASTER_FEE_PAYER_SECRET="SOME_PRIVATE_KEY"
 ```
 
 3. Run the server with Vault enabled:

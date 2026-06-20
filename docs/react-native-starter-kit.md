@@ -4,7 +4,7 @@ This guide provides everything mobile developers need to implement gasless Stell
 
 ## Features
 
-- **FluidProvider**: Seamless client initialization for mobile.
+- **PaymasterProvider**: Seamless client initialization for mobile.
 - **useGaslessTransaction Hook**: Full transaction lifecycle management.
 - **SponsorButton Component**: Premium, touch-optimized UI.
 - **Secure by Design**: Encapsulates best practices for signing and state handling.
@@ -33,21 +33,21 @@ global.Buffer = Buffer;
 
 ## Setup
 
-Wrap your application with the `FluidProvider`:
+Wrap your application with the `PaymasterProvider`:
 
 ```tsx
 import { ReactNative } from 'paymaster-client';
 
-const fluidConfig = {
+const paymasterConfig = {
   serverUrl: "https://your-paymaster-server.com",
   networkPassphrase: "Test SDF Network ; September 2015",
 };
 
 export default function App() {
   return (
-    <ReactNative.FluidProvider config={fluidConfig}>
+    <ReactNative.PaymasterProvider config={paymasterConfig}>
       <YourAppContent />
-    </ReactNative.FluidProvider>
+    </ReactNative.PaymasterProvider>
   );
 }
 ```
@@ -111,4 +111,4 @@ Never hardcode secret keys. Use libraries like `react-native-keychain` or `expo-
 Always implement the `onError` callback to handle network failures or sponsorship rejections (e.g., if the user has reached their daily limit).
 
 ### 3. Optimization
-`FluidProvider` automatically disables Web Workers for React Native by default, as they are not natively supported in the same way as browsers. This ensures maximum compatibility out-of-the-box.
+`PaymasterProvider` automatically disables Web Workers for React Native by default, as they are not natively supported in the same way as browsers. This ensures maximum compatibility out-of-the-box.

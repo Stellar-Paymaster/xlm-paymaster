@@ -12,7 +12,7 @@ export function TelemetryConsentSettings() {
     >
       <h2 className="text-base font-semibold text-foreground">Telemetry</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Anonymous usage telemetry helps improve Fluid. You can opt out at any time.
+        Anonymous usage telemetry helps improve Paymaster. You can opt out at any time.
       </p>
     </section>
   );

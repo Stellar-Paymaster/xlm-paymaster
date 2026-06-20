@@ -8,8 +8,8 @@ import {
   it,
   vi,
 } from "vitest";
-import { FluidClient } from "../../index";
-import { createFluidMockServer } from "../../testUtils/mockServer";
+import { PaymasterClient } from "../../index";
+import { createPaymasterMockServer } from "../../testUtils/mockServer";
 import { KeypairSigner } from "../signers";
 import { WalletConnectProvider, WalletConnectSigner } from "../walletConnect";
 
@@ -17,7 +17,7 @@ const TEST_SERVER_URL = "http://localhost:3000";
 const NETWORK = StellarSdk.Networks.TESTNET;
 const ADDRESS = "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ";
 
-const client = new FluidClient({
+const client = new PaymasterClient({
   serverUrl: TEST_SERVER_URL,
   networkPassphrase: NETWORK,
 });
@@ -40,8 +40,8 @@ function buildUnsignedPaymentXdr(sourcePublicKey: string): string {
   return tx.toXDR();
 }
 
-describe("FluidClient universal wallet signing", () => {
-  const server = createFluidMockServer({ response: "success" });
+describe("PaymasterClient universal wallet signing", () => {
+  const server = createPaymasterMockServer({ response: "success" });
   beforeAll(() => server.listen());
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());

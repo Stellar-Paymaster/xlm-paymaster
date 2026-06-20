@@ -16,13 +16,13 @@ This document describes the configurable operation-count limit added to the
 
 | Environment Variable | Type | Default | Description |
 |----------------------|------|---------|-------------|
-| `FLUID_MAX_OPERATIONS_PER_ENVELOPE` | `usize` | `100` | Max operations per sponsored envelope |
+| `PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE` | `usize` | `100` | Max operations per sponsored envelope |
 
 Set in `.env` or the deployment environment:
 
 ```env
 # Restrict to 20 ops per envelope for high-security deployments
-FLUID_MAX_OPERATIONS_PER_ENVELOPE=20
+PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE=20
 ```
 
 ## Implementation
@@ -33,7 +33,7 @@ FLUID_MAX_OPERATIONS_PER_ENVELOPE=20
 pub struct Config {
     // …existing fields…
     /// Maximum number of operations allowed inside a single sponsored
-    /// transaction envelope.  Configured via FLUID_MAX_OPERATIONS_PER_ENVELOPE.
+    /// transaction envelope.  Configured via PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE.
     pub max_operations_per_envelope: usize,
 }
 ```
@@ -58,7 +58,7 @@ if count > state.config.max_operations_per_envelope {
 ```json
 {
   "code": "TOO_MANY_OPERATIONS",
-  "error": "Transaction contains 105 operations, which exceeds the configured maximum of 100 per envelope (FLUID_MAX_OPERATIONS_PER_ENVELOPE)."
+  "error": "Transaction contains 105 operations, which exceeds the configured maximum of 100 per envelope (PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE)."
 }
 ```
 

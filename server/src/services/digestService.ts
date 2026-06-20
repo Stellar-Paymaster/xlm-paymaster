@@ -256,8 +256,8 @@ export function resolveDigestEmailTransport(
 ): DigestEmailTransport | undefined {
   const resendKey = env.RESEND_API_KEY?.trim();
   const resendFrom =
-    env.RESEND_EMAIL_FROM?.trim() || env.FLUID_ALERT_EMAIL_FROM?.trim();
-  const resendTo = (env.RESEND_EMAIL_TO || env.FLUID_ALERT_EMAIL_TO || "")
+    env.RESEND_EMAIL_FROM?.trim() || env.PAYMASTER_ALERT_EMAIL_FROM?.trim();
+  const resendTo = (env.RESEND_EMAIL_TO || env.PAYMASTER_ALERT_EMAIL_TO || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
@@ -272,9 +272,9 @@ export function resolveDigestEmailTransport(
     };
   }
 
-  const smtpHost = env.FLUID_ALERT_SMTP_HOST?.trim();
-  const smtpFrom = env.FLUID_ALERT_EMAIL_FROM?.trim();
-  const smtpTo = (env.FLUID_ALERT_EMAIL_TO || "")
+  const smtpHost = env.PAYMASTER_ALERT_SMTP_HOST?.trim();
+  const smtpFrom = env.PAYMASTER_ALERT_EMAIL_FROM?.trim();
+  const smtpTo = (env.PAYMASTER_ALERT_EMAIL_TO || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
@@ -283,10 +283,10 @@ export function resolveDigestEmailTransport(
     return {
       kind: "smtp",
       host: smtpHost,
-      port: parseInt(env.FLUID_ALERT_SMTP_PORT ?? "587", 10),
-      secure: env.FLUID_ALERT_SMTP_SECURE === "true",
-      user: env.FLUID_ALERT_SMTP_USER?.trim() || undefined,
-      pass: env.FLUID_ALERT_SMTP_PASS?.trim() || undefined,
+      port: parseInt(env.PAYMASTER_ALERT_SMTP_PORT ?? "587", 10),
+      secure: env.PAYMASTER_ALERT_SMTP_SECURE === "true",
+      user: env.PAYMASTER_ALERT_SMTP_USER?.trim() || undefined,
+      pass: env.PAYMASTER_ALERT_SMTP_PASS?.trim() || undefined,
       from: smtpFrom,
       to: smtpTo,
     };

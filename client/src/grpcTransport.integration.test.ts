@@ -22,7 +22,7 @@ function createGrpcWebBody(response: object): Uint8Array {
 test("performGrpcWebUnary sends framed requests and parses framed responses", async () => {
   const server = http.createServer((req, res) => {
     assert.equal(req.method, "POST");
-    assert.equal(req.url, "/fluid.v1.FeeBumpService/RequestFeeBump");
+    assert.equal(req.url, "/paymaster.v1.FeeBumpService/RequestFeeBump");
 
     const requestChunks: Buffer[] = [];
     req.on("data", (chunk) => requestChunks.push(Buffer.from(chunk)));
@@ -49,7 +49,7 @@ test("performGrpcWebUnary sends framed requests and parses framed responses", as
 
     const result = await performGrpcWebUnary({
       baseUrl: `http://127.0.0.1:${address.port}`,
-      serviceName: "fluid.v1.FeeBumpService",
+      serviceName: "paymaster.v1.FeeBumpService",
       methodName: "RequestFeeBump",
       timeoutMs: 2_000,
       request: { xdr: "AAAAA", submit: true },
@@ -88,7 +88,7 @@ test("performGrpcWebUnary surfaces grpc errors with mapped HTTP semantics", asyn
     await assert.rejects(
       performGrpcWebUnary({
         baseUrl: `http://127.0.0.1:${address.port}`,
-        serviceName: "fluid.v1.FeeBumpService",
+        serviceName: "paymaster.v1.FeeBumpService",
         methodName: "RequestFeeBump",
         timeoutMs: 2_000,
         request: { xdr: "AAAAA", submit: false },

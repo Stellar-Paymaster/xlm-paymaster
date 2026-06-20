@@ -50,14 +50,14 @@ Integration is configured by environment variables and is resilient by default:
 
 | Variable | Description | Default |
 |---|---|---|
-| FLUID_LOG_AGGREGATION_PROVIDER | disabled, datadog, elk, newrelic | disabled |
-| FLUID_LOG_AGGREGATION_ENDPOINT | Override endpoint URL | Provider default |
-| FLUID_LOG_AGGREGATION_API_KEY | Required for datadog/newrelic | none |
-| FLUID_LOG_AGGREGATION_BATCH_SIZE | Batch size for export worker | 50 |
-| FLUID_LOG_AGGREGATION_FLUSH_MS | Flush interval in milliseconds | 3000 |
-| FLUID_LOG_AGGREGATION_TIMEOUT_MS | HTTP timeout in milliseconds | 5000 |
-| FLUID_LOG_AGGREGATION_ELK_INDEX | Bulk index name for ELK | paymaster-server-logs |
-| FLUID_SERVICE_NAME | Service name attached to records | paymaster-server |
+| PAYMASTER_LOG_AGGREGATION_PROVIDER | disabled, datadog, elk, newrelic | disabled |
+| PAYMASTER_LOG_AGGREGATION_ENDPOINT | Override endpoint URL | Provider default |
+| PAYMASTER_LOG_AGGREGATION_API_KEY | Required for datadog/newrelic | none |
+| PAYMASTER_LOG_AGGREGATION_BATCH_SIZE | Batch size for export worker | 50 |
+| PAYMASTER_LOG_AGGREGATION_FLUSH_MS | Flush interval in milliseconds | 3000 |
+| PAYMASTER_LOG_AGGREGATION_TIMEOUT_MS | HTTP timeout in milliseconds | 5000 |
+| PAYMASTER_LOG_AGGREGATION_ELK_INDEX | Bulk index name for ELK | paymaster-server-logs |
+| PAYMASTER_SERVICE_NAME | Service name attached to records | paymaster-server |
 
 ### Provider Presets
 

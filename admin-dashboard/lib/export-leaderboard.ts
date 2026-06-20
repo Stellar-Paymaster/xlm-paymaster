@@ -59,7 +59,7 @@ export function exportLeaderboardToCSV(
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   triggerDownload(
     blob,
-    filename ?? `fluid-leaderboard-${new Date().toISOString().slice(0, 10)}.csv`,
+    filename ?? `paymaster-leaderboard-${new Date().toISOString().slice(0, 10)}.csv`,
   );
 }
 
@@ -76,7 +76,7 @@ export async function exportLeaderboardToPDF(
 
   doc.setFontSize(20);
   doc.setTextColor(14, 116, 144);
-  doc.text("Fluid", 14, 18);
+  doc.text("Paymaster", 14, 18);
 
   doc.setFontSize(10);
   doc.setTextColor(100, 116, 139);
@@ -141,7 +141,7 @@ export async function exportLeaderboardToPDF(
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text(
-        `Fluid — Tenant Usage Report | Page ${data.pageNumber}`,
+        `Paymaster — Tenant Usage Report | Page ${data.pageNumber}`,
         pageWidth / 2,
         doc.internal.pageSize.getHeight() - 8,
         { align: "center" },
@@ -150,6 +150,6 @@ export async function exportLeaderboardToPDF(
   });
 
   doc.save(
-    filename ?? `fluid-leaderboard-${new Date().toISOString().slice(0, 10)}.pdf`,
+    filename ?? `paymaster-leaderboard-${new Date().toISOString().slice(0, 10)}.pdf`,
   );
 }

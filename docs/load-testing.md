@@ -13,10 +13,10 @@ XLM Paymaster is a high-performance Stellar fee-bump relay server written in Rus
 
 For load testing (e.g. simulating 1,000 RPS), these limits must be bypassed so the tests measure the raw processing speed and signing capacity of the Rust server rather than being blocked by rate limiting rules.
 
-### Performance Test Mode (`FLUID_DISABLE_RATE_LIMITS`)
+### Performance Test Mode (`PAYMASTER_DISABLE_RATE_LIMITS`)
 
 XLM Paymaster supports a performance-testing configuration flag:
-* **Environment Variable**: `FLUID_DISABLE_RATE_LIMITS=true`
+* **Environment Variable**: `PAYMASTER_DISABLE_RATE_LIMITS=true`
 * **Behavior**: Bypasses the IP rate limiter, API key rate limiter, and daily sponsorship quota checks. All requests from validated API keys proceed to signing.
 
 ---
@@ -33,7 +33,7 @@ The k6 script is located at:
 To run the stress test against a local server:
 ```bash
 # 1. Start the XLM Paymaster server with rate limits disabled
-FLUID_DISABLE_RATE_LIMITS=true FLUID_FEE_PAYER_SECRET=... cargo run --release
+PAYMASTER_DISABLE_RATE_LIMITS=true PAYMASTER_FEE_PAYER_SECRET=... cargo run --release
 
 # 2. Run k6 stress test
 k6 run paymaster-server/k6/fee_bump_stress.js
@@ -53,7 +53,7 @@ The Locust script is located at:
 To run the Locust test:
 ```bash
 # 1. Start the XLM Paymaster server with rate limits disabled
-FLUID_DISABLE_RATE_LIMITS=true FLUID_FEE_PAYER_SECRET=... cargo run --release
+PAYMASTER_DISABLE_RATE_LIMITS=true PAYMASTER_FEE_PAYER_SECRET=... cargo run --release
 
 # 2. Run Locust in headless mode targeting 1000 requests/sec
 locust -f paymaster-server/locust/locustfile.py --headless -u 200 -r 50 --run-time 3m --host http://localhost:3000
@@ -65,5 +65,5 @@ locust -f paymaster-server/locust/locustfile.py --headless -u 200 -r 50 --run-ti
 
 The load testing integration handles multiple edge cases gracefully:
 1. **Invalid XDR Payload**: If clients send corrupt transaction envelopes, they are rejected with `HTTP 400 Bad Request` prior to acquiring signer leases, protecting the thread pool from resource starvation.
-2. **Quota Handling**: When rate limits are enabled, clients exceeding daily quotas receive `HTTP 403 Forbidden`. When `FLUID_DISABLE_RATE_LIMITS=true` is set, quotas are bypassed, permitting continuous load simulation.
+2. **Quota Handling**: When rate limits are enabled, clients exceeding daily quotas receive `HTTP 403 Forbidden`. When `PAYMASTER_DISABLE_RATE_LIMITS=true` is set, quotas are bypassed, permitting continuous load simulation.
 3. **API Key Authentication**: Even with rate limits bypassed, clients must supply a valid API key header (`X-API-Key`) to prevent unauthorized access.

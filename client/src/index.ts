@@ -5,15 +5,15 @@ if (typeof process !== "undefined" && process.env) {
   dotenv.config();
 }
 
-export * from "./FluidClient";
+export * from "./PaymasterClient";
 export {
-  FluidError,
-  FluidRequestError,
-  FluidNetworkError,
-  FluidServerError,
-  FluidConfigurationError,
-  FluidWalletError,
-  FluidNoAvailableServerError,
+  PaymasterError,
+  PaymasterRequestError,
+  PaymasterNetworkError,
+  PaymasterServerError,
+  PaymasterConfigurationError,
+  PaymasterWalletError,
+  PaymasterNoAvailableServerError,
 } from "./errors";
 export * from "./soroban";
 export * from "./flutter";
@@ -55,8 +55,8 @@ export type {
   GrpcWebUnaryOptions,
 } from "./grpcTransport";
 
-export { FluidQueue } from "./queue";
-export type { QueuedTransaction, FluidQueueCallbacks } from "./queue";
+export { PaymasterQueue } from "./queue";
+export type { QueuedTransaction, PaymasterQueueCallbacks } from "./queue";
 
 export {
   prepareOfflineTransaction,
@@ -80,7 +80,7 @@ export {
   toTransactionXdr,
 } from "./stellarCompatibility";
 
-export * from "./testUtils/FluidMockClient";
+export * from "./testUtils/PaymasterMockClient";
 export * as ReactNative from "./react-native";
-export * from "./context/FluidContext";
+export * from "./context/PaymasterContext";
 

@@ -38,7 +38,7 @@
 
   <h2>Interactive Test</h2>
   <p>
-    The demo below creates a <code>FluidClient</code> instance, then calls the
+    The demo below creates a <code>PaymasterClient</code> instance, then calls the
     <code>/fee-bump</code> endpoint on a locally running XLM Paymaster server
     (<code>http://localhost:3000</code>). Make sure the server is running before clicking
     <em>Run Fee-Bump</em>.
@@ -75,7 +75,7 @@
       'XLM Paymaster.VERSION = ' + XLM Paymaster.VERSION;
 
     print('XLM Paymaster global available: ' + (typeof XLM Paymaster !== 'undefined'), 'ok');
-    print('XLM Paymaster.FluidClient: ' + typeof XLM Paymaster.FluidClient, 'ok');
+    print('XLM Paymaster.PaymasterClient: ' + typeof XLM Paymaster.PaymasterClient, 'ok');
     print('XLM Paymaster.VERSION: ' + XLM Paymaster.VERSION, 'ok');
 
     // ─── Instantiate client ────────────────────────────────────────────────────
@@ -83,12 +83,12 @@
 
     document.getElementById('btn-init').addEventListener('click', () => {
       try {
-        client = new XLM Paymaster.FluidClient({
+        client = new XLM Paymaster.PaymasterClient({
           serverUrl: 'http://localhost:3000',
           networkPassphrase: 'Test SDF Network ; September 2015',
           horizonUrl: 'https://horizon-testnet.stellar.org',
         });
-        print('FluidClient instantiated successfully ✓', 'ok');
+        print('PaymasterClient instantiated successfully ✓', 'ok');
         setStatus('client ready', 'ok');
         document.getElementById('btn-feebump').disabled = false;
       } catch (e) {

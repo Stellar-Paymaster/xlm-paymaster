@@ -27,7 +27,7 @@ const INITIAL_MESSAGE: WidgetMessage = {
   id: "assistant-welcome",
   role: "assistant",
   content:
-    "I can answer questions about the current node state, the latest 100 transactions, and Fluid docs.",
+    "I can answer questions about the current node state, the latest 100 transactions, and Paymaster docs.",
 };
 
 function parseSseBlock(block: string): ParsedSseEvent | null {
@@ -46,7 +46,7 @@ function parseSseBlock(block: string): ParsedSseEvent | null {
 }
 
 function buildStorageKey(email: string | undefined) {
-  return `fluid-ai-support:${email ?? "anonymous"}`;
+  return `paymaster-ai-support:${email ?? "anonymous"}`;
 }
 
 export function AiSupportWidget() {

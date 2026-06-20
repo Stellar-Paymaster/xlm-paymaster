@@ -345,10 +345,10 @@
                         <span class="badge" style="font-size: 0.6rem;">TypeScript</span>
                     </div>
                     <div class="code-block">
-                        <pre><code><span class="token-keyword">import</span> { FluidClient } <span class="token-keyword">from</span> <span class="token-string">"@stellar-xlm-paymaster/sdk"</span>;
+                        <pre><code><span class="token-keyword">import</span> { PaymasterClient } <span class="token-keyword">from</span> <span class="token-string">"@stellar-xlm-paymaster/sdk"</span>;
 
 <span class="token-comment">// 1. Initialize the client</span>
-<span class="token-keyword">const</span> client = <span class="token-keyword">new</span> <span class="token-function">FluidClient</span>({
+<span class="token-keyword">const</span> client = <span class="token-keyword">new</span> <span class="token-function">PaymasterClient</span>({
   serverUrl: <span class="token-string">"https://api.xlm-paymaster.dev"</span>,
   networkPassphrase: <span class="token-string">"Public Global Stellar Network..."</span>
 });

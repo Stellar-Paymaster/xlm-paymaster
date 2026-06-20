@@ -27,8 +27,8 @@ paymaster-core = "0.1.0"
 ### Basic Usage
 
 ```rust
-use fluid_core::{TransactionBuilder, Ed25519Signer, Signer, Keypair};
-use fluid_core::{NetworkPassphrase, PublicKey, TransactionHash, DecoratedSignature};
+use paymaster_core::{TransactionBuilder, Ed25519Signer, Signer, Keypair};
+use paymaster_core::{NetworkPassphrase, PublicKey, TransactionHash, DecoratedSignature};
 
 // Create a signer from a keypair
 let keypair = Keypair::from_raw_keys([1u8; 32], [2u8; 32]);
@@ -57,28 +57,28 @@ let fee_bump_tx = TransactionBuilder::new()
 
 ### Signers
 
-- [`Ed25519Signer`](https://docs.rs/paymaster-core/latest/fluid_core/struct.Ed25519Signer.html) - In-memory Ed25519 signing
-- [`AsyncSigner`](https://docs.rs/paymaster-core/latest/fluid_core/struct.AsyncSigner.html) - Async signing backend
-- [`TestSigner`](https://docs.rs/paymaster-core/latest/fluid_core/struct.TestSigner.html) - Testing only (insecure)
+- [`Ed25519Signer`](https://docs.rs/paymaster-core/latest/paymaster_core/struct.Ed25519Signer.html) - In-memory Ed25519 signing
+- [`AsyncSigner`](https://docs.rs/paymaster-core/latest/paymaster_core/struct.AsyncSigner.html) - Async signing backend
+- [`TestSigner`](https://docs.rs/paymaster-core/latest/paymaster_core/struct.TestSigner.html) - Testing only (insecure)
 
-Implement the [`Signer`](https://docs.rs/paymaster-core/latest/fluid_core/trait.Signer.html) trait for custom backends:
+Implement the [`Signer`](https://docs.rs/paymaster-core/latest/paymaster_core/trait.Signer.html) trait for custom backends:
 
 ```rust
-use fluid_core::{Signer, TransactionHash, DecoratedSignature, PublicKey, FluidError};
+use paymaster_core::{Signer, TransactionHash, DecoratedSignature, PublicKey, PaymasterError};
 
 struct MyHsmSigner { /* ... */ }
 
 impl Signer for MyHsmSigner {
     fn public_key(&self) -> &PublicKey { /* ... */ }
-    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, FluidError> { /* ... */ }
-    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], FluidError> { /* ... */ }
+    fn sign_hash(&self, hash: &TransactionHash) -> Result<DecoratedSignature, PaymasterError> { /* ... */ }
+    fn sign_payload(&self, payload: &[u8]) -> Result<[u8; 64], PaymasterError> { /* ... */ }
 }
 ```
 
 ### Transaction Building
 
 ```rust
-use fluid_core::{TransactionBuilder, FeeConfig, NetworkPassphrase};
+use paymaster_core::{TransactionBuilder, FeeConfig, NetworkPassphrase};
 
 // Configure fees
 let config = FeeConfig::new(100, 2.0); // base_fee=100, multiplier=2.0x
@@ -128,20 +128,20 @@ Demonstrates: full builder API, multiple signatures, error handling.
 ## Security
 
 - **Secret keys** are stored in `Zeroizing` wrappers that automatically clear memory on drop
-- **No panics** - all errors are returned as `Result<T, FluidError>`
+- **No panics** - all errors are returned as `Result<T, PaymasterError>`
 - **TestSigner** is marked as insecure for testing only
 
 ## Error Handling
 
-All operations return `Result<T, FluidError>`:
+All operations return `Result<T, PaymasterError>`:
 
 ```rust
-use fluid_core::FluidError;
+use paymaster_core::PaymasterError;
 
 match result {
-    Err(FluidError::InvalidTransaction(msg)) => println!("Invalid: {}", msg),
-    Err(FluidError::SigningFailed(msg)) => println!("Signing failed: {}", msg),
-    Err(FluidError::AlreadyFeeBumped) => println!("Already fee-bumped!"),
+    Err(PaymasterError::InvalidTransaction(msg)) => println!("Invalid: {}", msg),
+    Err(PaymasterError::SigningFailed(msg)) => println!("Signing failed: {}", msg),
+    Err(PaymasterError::AlreadyFeeBumped) => println!("Already fee-bumped!"),
     _ => {}
 }
 ```

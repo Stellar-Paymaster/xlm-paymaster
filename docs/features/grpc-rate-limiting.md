@@ -150,7 +150,7 @@ All gRPC requests are logged with:
 let limiter = Arc::new(RateLimiter::new(100, 60_000));
 
 // Create gRPC signer with rate limiter
-let signer = FluidSignerGrpc::new(limiter.clone());
+let signer = PaymasterSignerGrpc::new(limiter.clone());
 
 // Start server
 Server::builder()

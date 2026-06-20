@@ -9,11 +9,11 @@ import {
 test("admin guided tour helpers build a stable per-user storage key", () => {
   assert.equal(
     getAdminGuidedTourStorageKey("Alice Admin@example.com"),
-    "fluid-admin-guided-tour:v1:alice-admin-example.com",
+    "paymaster-admin-guided-tour:v1:alice-admin-example.com",
   );
   assert.equal(
     getAdminGuidedTourStorageKey("   "),
-    "fluid-admin-guided-tour:v1:anonymous",
+    "paymaster-admin-guided-tour:v1:anonymous",
   );
 });
 

@@ -55,8 +55,8 @@ const SAMPLE_TENANTS: TenantTierSummary[] = [
 ];
 
 export async function getSubscriptionTierPageData(): Promise<SubscriptionTierPageData> {
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
-  const adminToken = process.env.FLUID_ADMIN_TOKEN?.trim() ?? "";
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "") ?? "";
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN?.trim() ?? "";
 
   if (!serverUrl || !adminToken) {
     return {

@@ -141,7 +141,7 @@ export class IncidentMonitor extends BaseWorker {
 
       if (this.restartPending && horizonOk && this.hasActiveSigners()) {
         await this.resolveIncident("server_restart", {
-          summary: "Fluid server recovered after restart",
+          summary: "Paymaster server recovered after restart",
           severity: "info",
         });
         this.restartPending = false;
@@ -245,7 +245,7 @@ export class IncidentMonitor extends BaseWorker {
 
   private async triggerRestartIncident(): Promise<void> {
     await this.triggerIncident("server_restart", {
-      summary: "Fluid server restarted",
+      summary: "Paymaster server restarted",
       customDetails: {
         pid: process.pid,
       },

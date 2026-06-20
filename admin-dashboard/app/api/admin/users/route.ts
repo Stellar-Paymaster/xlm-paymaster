@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 function getServerConfig() {
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
-  const adminToken = process.env.FLUID_ADMIN_TOKEN?.trim();
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN?.trim();
   if (!serverUrl || !adminToken) {
-    throw new Error("FLUID_SERVER_URL and FLUID_ADMIN_TOKEN must be configured");
+    throw new Error("PAYMASTER_SERVER_URL and PAYMASTER_ADMIN_TOKEN must be configured");
   }
   return { serverUrl, adminToken };
 }
@@ -14,7 +14,7 @@ async function adminHeaders(): Promise<Record<string, string>> {
   const session = await auth();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "x-admin-token": process.env.FLUID_ADMIN_TOKEN?.trim() ?? "",
+    "x-admin-token": process.env.PAYMASTER_ADMIN_TOKEN?.trim() ?? "",
   };
   if (session?.user?.adminJwt) headers["x-admin-jwt"] = session.user.adminJwt;
   return headers;

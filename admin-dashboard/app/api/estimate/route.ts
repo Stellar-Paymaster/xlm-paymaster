@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
 
   if (!serverUrl) {
     return NextResponse.json(
-      { error: "FLUID_SERVER_URL is not configured" },
+      { error: "PAYMASTER_SERVER_URL is not configured" },
       { status: 500 },
     );
   }

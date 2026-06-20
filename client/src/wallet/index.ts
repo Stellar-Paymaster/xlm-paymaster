@@ -1,5 +1,5 @@
 /**
- * Universal wallet signing for the Fluid client.
+ * Universal wallet signing for the Paymaster client.
  *
  * Re-exports the wallet-agnostic signer contract, the WalletConnect standard
  * bindings, and ready-made signer adapters (keypair, SEP-43 browser wallets).

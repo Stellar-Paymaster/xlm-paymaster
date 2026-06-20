@@ -1,7 +1,7 @@
 /**
- * Fluid Admin Dashboard — Design System Tokens
+ * Paymaster Admin Dashboard — Design System Tokens
  *
- * This file documents the brand token values used throughout the Fluid design
+ * This file documents the brand token values used throughout the Paymaster design
  * system.  In Tailwind CSS v4 the runtime theme is configured via CSS
  * (@theme inline) in app/globals.css, but the authoritative palette lives here
  * so TypeScript code can import individual tokens (e.g. for charting libraries
@@ -14,14 +14,14 @@
 
 import type { Config } from "tailwindcss";
 
-// ─── Fluid Brand Palette ─────────────────────────────────────────────────────
+// ─── Paymaster Brand Palette ─────────────────────────────────────────────────────
 
-export const fluidColors = {
-  // Primary — Fluid Blue
+export const paymasterColors = {
+  // Primary — Paymaster Blue
   primary: "hsl(220 91% 54%)",            // #2563EB
   primaryForeground: "hsl(0 0% 98%)",
 
-  // Accent — Fluid Cyan (water / flow)
+  // Accent — Paymaster Cyan (water / flow)
   accent: "hsl(186 94% 41%)",             // #06B6D4
   accentForeground: "hsl(0 0% 98%)",
 
@@ -47,7 +47,7 @@ export const fluidColors = {
 
 // ─── Border Radius ────────────────────────────────────────────────────────────
 
-export const fluidRadius = {
+export const paymasterRadius = {
   base: "0.5rem",  // --radius in globals.css
   sm: "0.3rem",
   md: "0.5rem",

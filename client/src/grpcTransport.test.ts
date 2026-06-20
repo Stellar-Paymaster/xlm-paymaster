@@ -57,5 +57,5 @@ test("grpc status codes map to HTTP semantics", () => {
 });
 
 test("grpc-web paths trim excess slashes", () => {
-  assert.equal(buildGrpcWebPath("/fluid.v1.FeeBumpService/", "/RequestFeeBump/"), "/fluid.v1.FeeBumpService/RequestFeeBump");
+  assert.equal(buildGrpcWebPath("/paymaster.v1.FeeBumpService/", "/RequestFeeBump/"), "/paymaster.v1.FeeBumpService/RequestFeeBump");
 });

@@ -20,7 +20,7 @@ function makeStats(overrides: Partial<DigestStats> = {}): DigestStats {
 describe("renderDigestEmail", () => {
   it("includes the correct date in the subject", () => {
     const { subject } = renderDigestEmail(makeStats());
-    expect(subject).toBe("[Fluid] Daily digest — 2025-06-14");
+    expect(subject).toBe("[Paymaster] Daily digest — 2025-06-14");
   });
 
   it("includes total transactions in HTML and text", () => {
@@ -93,7 +93,7 @@ describe("renderDigestEmail", () => {
 
   it("plain text contains all key fields", () => {
     const { text } = renderDigestEmail(makeStats());
-    expect(text).toContain("Fluid Daily Digest");
+    expect(text).toContain("Paymaster Daily Digest");
     expect(text).toContain("2025-06-14");
     expect(text).toContain("42");
     expect(text).toContain("acme-corp");

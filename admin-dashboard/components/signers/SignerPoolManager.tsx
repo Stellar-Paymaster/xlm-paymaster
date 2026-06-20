@@ -228,7 +228,7 @@ export function SignerPoolManager({
             )}
             {!addEnabled ? (
               <div className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-                Configure `FLUID_SERVER_URL`, `FLUID_ADMIN_TOKEN`, and `FLUID_SIGNER_ENCRYPTION_KEY`
+                Configure `PAYMASTER_SERVER_URL`, `PAYMASTER_ADMIN_TOKEN`, and `PAYMASTER_SIGNER_ENCRYPTION_KEY`
                 to enable live changes.
               </div>
             ) : null}

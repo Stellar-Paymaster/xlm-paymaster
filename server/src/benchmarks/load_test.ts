@@ -33,7 +33,7 @@ interface BenchmarkResult {
 
 class LoadTester {
   public results: BenchmarkResult[] = [];
-  private secretKey = process.env.FLUID_FEE_PAYER_SECRET ?? "";
+  private secretKey = process.env.PAYMASTER_FEE_PAYER_SECRET ?? "";
   private testPayload = Buffer.alloc(100, 1);
 
   async runBenchmark (config: BenchmarkConfig): Promise<BenchmarkResult> {
@@ -43,10 +43,10 @@ class LoadTester {
     await this.initializeNativeSigner();
 
     // Set environment variables for the Rust runtime
-    process.env.FLUID_TOKIO_WORKER_THREADS = config.workerThreads.toString();
-    process.env.FLUID_TOKIO_MAX_BLOCKING_THREADS =
+    process.env.PAYMASTER_TOKIO_WORKER_THREADS = config.workerThreads.toString();
+    process.env.PAYMASTER_TOKIO_MAX_BLOCKING_THREADS =
       config.maxBlockingThreads.toString();
-    process.env.FLUID_TOKIO_STACK_SIZE = config.stackSize.toString();
+    process.env.PAYMASTER_TOKIO_STACK_SIZE = config.stackSize.toString();
 
     const startTime = performance.now();
     const endTime = startTime + config.duration * 1000;

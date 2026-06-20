@@ -100,7 +100,7 @@ export function loadDiscordMilestoneOptionsFromEnv(
   env: NodeJS.ProcessEnv = process.env,
 ): DiscordMilestoneOptions {
   return {
-    serviceName: env.DISCORD_MILESTONE_SERVICE_NAME?.trim() || "Fluid node",
+    serviceName: env.DISCORD_MILESTONE_SERVICE_NAME?.trim() || "Paymaster node",
     thresholds: parseThresholds(env.DISCORD_MILESTONE_THRESHOLDS),
     webhookUrl: env.DISCORD_WEBHOOK_URL?.trim() || undefined,
   };

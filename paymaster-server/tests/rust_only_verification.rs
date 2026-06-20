@@ -157,7 +157,7 @@ async fn rust_server_handles_static_and_api_without_node() {
 
     let mut child = Command::new(server_bin)
         .env("PORT", port)
-        .env("FLUID_FEE_PAYER_SECRET", &fee_payer_secret)
+        .env("PAYMASTER_FEE_PAYER_SECRET", &fee_payer_secret)
         .env(
             "STELLAR_NETWORK_PASSPHRASE",
             "Test SDF Network ; September 2015",
@@ -238,7 +238,7 @@ async fn rust_server_handles_static_and_api_without_node() {
             client
                 .post(format!("http://127.0.0.1:{port}/fee-bump"))
                 .header("content-type", "application/json")
-                .header("x-api-key", "fluid-pro-demo-key")
+                .header("x-api-key", "paymaster-pro-demo-key")
                 .body(
                     serde_json::json!({
                         "xdr": signed_xdr,

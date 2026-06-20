@@ -71,13 +71,13 @@ describe("db read/write splitting", () => {
   });
 
   it("uses DATABASE_REPLICA_URL for the replica client when configured", async () => {
-    process.env.DATABASE_URL = "postgresql://primary:5432/fluid";
-    process.env.DATABASE_REPLICA_URL = "postgresql://replica:5432/fluid";
+    process.env.DATABASE_URL = "postgresql://primary:5432/paymaster";
+    process.env.DATABASE_REPLICA_URL = "postgresql://replica:5432/paymaster";
 
     await import("./db");
 
-    expect(capturedUrls.primary).toBe("postgresql://primary:5432/fluid");
-    expect(capturedUrls.replica).toBe("postgresql://replica:5432/fluid");
+    expect(capturedUrls.primary).toBe("postgresql://primary:5432/paymaster");
+    expect(capturedUrls.replica).toBe("postgresql://replica:5432/paymaster");
   });
 
   it("exports both prisma (primary) and replicaDb", async () => {

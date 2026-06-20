@@ -228,7 +228,7 @@ app.use(express.json({ limit: "256kb" }));
 app.use(soc2RequestLogger);
 
 app.use((_req, res, next) => {
-  res.setHeader("X-Fluid-Region", DEFAULT_REGION);
+  res.setHeader("X-Paymaster-Region", DEFAULT_REGION);
   next();
 });
 
@@ -819,6 +819,6 @@ server = app.listen(PORT, () => {
       port: PORT,
       url: `http://0.0.0.0:${PORT}`,
     },
-    "Fluid server started",
+    "Paymaster server started",
   );
 });

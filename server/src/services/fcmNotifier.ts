@@ -120,7 +120,7 @@ export class FcmNotifier implements FcmNotifierLike {
     this.credentials = credentials;
     this.dashboardUrl =
       options.dashboardUrl ??
-      process.env.FLUID_ALERT_DASHBOARD_URL?.trim() ??
+      process.env.PAYMASTER_ALERT_DASHBOARD_URL?.trim() ??
       undefined;
     this.getTokensFn = options.getTokens ?? this.loadTokensFromDb.bind(this);
     this.loadAdmin = options.loadFirebaseAdmin ?? this.requireFirebaseAdmin.bind(this);
@@ -157,7 +157,7 @@ export class FcmNotifier implements FcmNotifierLike {
       : payload.reason;
 
     return this.sendToAll("server_down", {
-      title: "Fluid server alert",
+      title: "Paymaster server alert",
       body,
       data: {
         type: "server_down",

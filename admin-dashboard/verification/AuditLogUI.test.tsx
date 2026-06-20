@@ -11,8 +11,8 @@ describe('AuditLogUI Component', () => {
 
   it('renders all initial logs', () => {
     render(<AuditLogUI />);
-    assert.ok(screen.getByText('admin@fluid.dev'));
-    assert.ok(screen.getByText('operator@fluid.dev'));
+    assert.ok(screen.getByText('admin@paymaster.dev'));
+    assert.ok(screen.getByText('operator@paymaster.dev'));
     assert.ok(screen.getByText('system'));
   });
 
@@ -22,7 +22,7 @@ describe('AuditLogUI Component', () => {
     
     fireEvent.change(searchInput, { target: { value: 'operator' } });
     
-    assert.ok(screen.getByText('operator@fluid.dev'));
+    assert.ok(screen.getByText('operator@paymaster.dev'));
     assert.equal(screen.queryByText('system'), null);
   });
 

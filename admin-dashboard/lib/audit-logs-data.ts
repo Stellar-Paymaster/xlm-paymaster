@@ -34,7 +34,7 @@ const SAMPLE_AUDIT_LOGS: AuditLogEntry[] = [
   {
     actionCategory: "Tenant",
     id: "al_001",
-    actor: "admin@fluid.dev",
+    actor: "admin@paymaster.dev",
     action: "tenant.create",
     ipAddress: "203.0.113.42",
     target: "tenant_001",
@@ -58,7 +58,7 @@ const SAMPLE_AUDIT_LOGS: AuditLogEntry[] = [
   {
     actionCategory: "Signer",
     id: "al_003",
-    actor: "admin@fluid.dev",
+    actor: "admin@paymaster.dev",
     action: "signer.add",
     ipAddress: "203.0.113.42",
     target: "GABCD...WXYZ",
@@ -70,10 +70,10 @@ const SAMPLE_AUDIT_LOGS: AuditLogEntry[] = [
   {
     actionCategory: "Auth",
     id: "al_004",
-    actor: "operator@fluid.dev",
+    actor: "operator@paymaster.dev",
     action: "auth.login_failed",
     ipAddress: "192.0.2.88",
-    target: "operator@fluid.dev",
+    target: "operator@paymaster.dev",
     metadata: JSON.stringify({ attempts: 5 }),
     aiSummary: "Multiple failed sign-in attempts from a new network",
     createdAt: "2026-04-18T08:45:00Z",
@@ -82,12 +82,12 @@ const SAMPLE_AUDIT_LOGS: AuditLogEntry[] = [
 ];
 
 function getBaseUrl() {
-  const value = process.env.FLUID_SERVER_URL?.trim();
+  const value = process.env.PAYMASTER_SERVER_URL?.trim();
   return value ? value.replace(/\/$/, "") : null;
 }
 
 function getAdminToken() {
-  const value = process.env.FLUID_ADMIN_TOKEN?.trim();
+  const value = process.env.PAYMASTER_ADMIN_TOKEN?.trim();
   return value && value.length > 0 ? value : null;
 }
 

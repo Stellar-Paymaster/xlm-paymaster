@@ -53,7 +53,7 @@ export default defineConfig({
           AUTH_SECRET:
             process.env.AUTH_SECRET ??
             "e2e-test-auth-secret-min-32-chars-long",
-          ADMIN_EMAIL: process.env.ADMIN_EMAIL ?? "e2e-admin@fluid.dev",
+          ADMIN_EMAIL: process.env.ADMIN_EMAIL ?? "e2e-admin@paymaster.dev",
           ADMIN_PASSWORD_HASH:
             process.env.ADMIN_PASSWORD_HASH ?? bcrypt.hashSync(e2ePassword, 4),
         },

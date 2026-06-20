@@ -30,7 +30,7 @@ test gateway_config::tests::finds_demo_api_key_tiers ... ok
 test gateway_config::tests::rejects_unknown_api_keys ... ok
 test gateway_config::tests::rejects_duplicate_api_keys ... ok
 test gateway_config::tests::rejects_zero_global_rate_limit ... ok
-test gateway_config::tests::tier_rate_limits_match_fluid_server_defaults ... ok
+test gateway_config::tests::tier_rate_limits_match_paymaster_server_defaults ... ok
 
 test result: ok. 6 passed; 0 failed
 ```

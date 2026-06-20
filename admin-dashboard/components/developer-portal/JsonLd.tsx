@@ -5,13 +5,13 @@ export function JsonLd() {
   const data = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Fluid Developer Portal",
+    name: "Paymaster Developer Portal",
     description:
-      "Gasless Stellar transactions with Fluid: fee sponsorship, multi-asset flows, and Soroban smart contracts.",
+      "Gasless Stellar transactions with Paymaster: fee sponsorship, multi-asset flows, and Soroban smart contracts.",
     url: siteUrl,
     publisher: {
       "@type": "Organization",
-      name: "Fluid",
+      name: "Paymaster",
     },
   };
 

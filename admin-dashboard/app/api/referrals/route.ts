@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { lookupByCode, recordReferral, getReferralData, getOrCreateCode } from "@/lib/referral-data";
 
-const REF_COOKIE = "fluid_ref";
+const REF_COOKIE = "paymaster_ref";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 /**

@@ -33,7 +33,7 @@ export interface DiscourseConfig {
 export function getDiscourseConfig(): DiscourseConfig {
   return {
     baseUrl: (
-      process.env.NEXT_PUBLIC_DISCOURSE_URL ?? "https://community.fluid.dev"
+      process.env.NEXT_PUBLIC_DISCOURSE_URL ?? "https://community.paymaster.dev"
     ).replace(/\/$/, ""),
     categoryId: Number(process.env.NEXT_PUBLIC_DISCOURSE_CATEGORY_ID ?? "1"),
   };
@@ -160,8 +160,8 @@ export function formatRelativeTime(isoDate: string): string {
 export const SAMPLE_TOPICS: DiscourseTopic[] = [
   {
     id: 1,
-    title: "Getting started with Fluid fee sponsorship",
-    slug: "getting-started-with-fluid-fee-sponsorship",
+    title: "Getting started with Paymaster fee sponsorship",
+    slug: "getting-started-with-paymaster-fee-sponsorship",
     postsCount: 12,
     replyCount: 11,
     views: 430,
@@ -175,8 +175,8 @@ export const SAMPLE_TOPICS: DiscourseTopic[] = [
   },
   {
     id: 2,
-    title: "How to integrate Fluid with a React + Freighter wallet",
-    slug: "fluid-react-freighter-integration",
+    title: "How to integrate Paymaster with a React + Freighter wallet",
+    slug: "paymaster-react-freighter-integration",
     postsCount: 8,
     replyCount: 7,
     views: 215,
@@ -185,13 +185,13 @@ export const SAMPLE_TOPICS: DiscourseTopic[] = [
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     lastPostedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
     pinned: false,
-    excerpt: "Step-by-step guide to wiring up Freighter signing with Fluid fee bumps using fluid-react hooks.",
+    excerpt: "Step-by-step guide to wiring up Freighter signing with Paymaster fee bumps using paymaster-react hooks.",
     tags: ["react", "freighter"],
   },
   {
     id: 3,
-    title: "Soroban contract invocations with Fluid fee bumps",
-    slug: "soroban-contract-invocations-fluid",
+    title: "Soroban contract invocations with Paymaster fee bumps",
+    slug: "soroban-contract-invocations-paymaster",
     postsCount: 5,
     replyCount: 4,
     views: 180,
@@ -200,7 +200,7 @@ export const SAMPLE_TOPICS: DiscourseTopic[] = [
     createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
     lastPostedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
     pinned: false,
-    excerpt: "Combining Soroban RPC simulation with Fluid's fee-bump endpoint for gasless contract calls.",
+    excerpt: "Combining Soroban RPC simulation with Paymaster's fee-bump endpoint for gasless contract calls.",
     tags: ["soroban", "contracts"],
   },
   {
@@ -215,7 +215,7 @@ export const SAMPLE_TOPICS: DiscourseTopic[] = [
     createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
     lastPostedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     pinned: false,
-    excerpt: "How to inject fluid-py into FastAPI dependency injection and handle retries gracefully.",
+    excerpt: "How to inject paymaster-py into FastAPI dependency injection and handle retries gracefully.",
     tags: ["python", "fastapi"],
   },
   {
@@ -230,7 +230,7 @@ export const SAMPLE_TOPICS: DiscourseTopic[] = [
     createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     lastPostedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     pinned: false,
-    excerpt: "A breakdown of Fluid's rate-limit responses and recommended back-off strategies per SDK.",
+    excerpt: "A breakdown of Paymaster's rate-limit responses and recommended back-off strategies per SDK.",
     tags: ["rate-limiting", "errors"],
   },
   {
@@ -245,7 +245,7 @@ export const SAMPLE_TOPICS: DiscourseTopic[] = [
     createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
     lastPostedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     pinned: false,
-    excerpt: "Best practices for using context.Context with fluid-go in production Go services.",
+    excerpt: "Best practices for using context.Context with paymaster-go in production Go services.",
     tags: ["go"],
   },
 ];

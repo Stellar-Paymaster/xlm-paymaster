@@ -33,7 +33,7 @@ describe("updateWebhookHandler", () => {
       name: "Tenant One",
       webhookEventTypes: JSON.stringify(["tx.success", "tx.failed"]),
       webhookSecret: "super-secret",
-      webhookUrl: "https://example.com/webhooks/fluid",
+      webhookUrl: "https://example.com/webhooks/paymaster",
       updatedAt,
     });
 
@@ -41,7 +41,7 @@ describe("updateWebhookHandler", () => {
       body: {
         eventTypes: ["tx.success", "tx.failed"],
         webhookSecret: "super-secret",
-        webhookUrl: "https://example.com/webhooks/fluid",
+        webhookUrl: "https://example.com/webhooks/paymaster",
       },
     };
     const res: any = {
@@ -73,7 +73,7 @@ describe("updateWebhookHandler", () => {
       data: {
         webhookEventTypes: JSON.stringify(["tx.success", "tx.failed"]),
         webhookSecret: "super-secret",
-        webhookUrl: "https://example.com/webhooks/fluid",
+        webhookUrl: "https://example.com/webhooks/paymaster",
       },
       select: {
         id: true,
@@ -91,7 +91,7 @@ describe("updateWebhookHandler", () => {
       tenantName: "Tenant One",
       updatedAt: updatedAt.toISOString(),
       webhookSecretConfigured: true,
-      webhookUrl: "https://example.com/webhooks/fluid",
+      webhookUrl: "https://example.com/webhooks/paymaster",
     });
     expect(next).not.toHaveBeenCalled();
   });
@@ -126,7 +126,7 @@ describe("updateWebhookHandler", () => {
       name: "Tenant One",
       webhookEventTypes: JSON.stringify(["tx.failed"]),
       webhookSecret: "old-secret",
-      webhookUrl: "https://example.com/webhooks/fluid",
+      webhookUrl: "https://example.com/webhooks/paymaster",
       updatedAt,
     });
     mockPrisma.tenant.update.mockResolvedValue({
@@ -134,7 +134,7 @@ describe("updateWebhookHandler", () => {
       name: "Tenant One",
       webhookEventTypes: JSON.stringify(["tx.failed"]),
       webhookSecret: "new-secret",
-      webhookUrl: "https://example.com/webhooks/fluid",
+      webhookUrl: "https://example.com/webhooks/paymaster",
       updatedAt,
     });
 
@@ -160,7 +160,7 @@ describe("updateWebhookHandler", () => {
         data: expect.objectContaining({
           webhookEventTypes: JSON.stringify(["tx.failed"]),
           webhookSecret: "new-secret",
-          webhookUrl: "https://example.com/webhooks/fluid",
+          webhookUrl: "https://example.com/webhooks/paymaster",
         }),
       })
     );
@@ -170,7 +170,7 @@ describe("updateWebhookHandler", () => {
       tenantName: "Tenant One",
       updatedAt: updatedAt.toISOString(),
       webhookSecretConfigured: true,
-      webhookUrl: "https://example.com/webhooks/fluid",
+      webhookUrl: "https://example.com/webhooks/paymaster",
     });
   });
 });

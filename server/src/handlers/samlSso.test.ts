@@ -10,7 +10,7 @@ vi.mock("../services/samlSso", () => {
         getSamlRedirectUrl: vi.fn().mockReturnValue("https://mock-okta.com/sso/saml?SAMLRequest=xyz"),
         handleSamlResponse: vi.fn().mockResolvedValue({
           token: "mock_jwt_token",
-          email: "sso-admin@fluid.com",
+          email: "sso-admin@paymaster.com",
           role: "SUPER_ADMIN",
         }),
       };
@@ -48,7 +48,7 @@ describe("SAML SSO Handlers", () => {
     await samlCallbackHandler(mockReq as Request, mockRes as Response);
     expect(mockRes.json).toHaveBeenCalledWith({
       token: "mock_jwt_token",
-      email: "sso-admin@fluid.com",
+      email: "sso-admin@paymaster.com",
       role: "SUPER_ADMIN",
     });
   });

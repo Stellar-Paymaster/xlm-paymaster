@@ -21,7 +21,7 @@ The collector's signature on the inner transaction proves ownership of the asset
 ## Prerequisites
 
 - A Soroban NFT contract that follows the [SEP-0011 / token standard](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0011.md) or similar
-- A running XLM Paymaster server with `FLUID_FEE_PAYER_SECRET` set to the treasury's key
+- A running XLM Paymaster server with `PAYMASTER_FEE_PAYER_SECRET` set to the treasury's key
 - The XLM Paymaster TypeScript client (`npm install paymaster-client`)
 
 ## Step-by-step
@@ -72,9 +72,9 @@ const signedXdr   = await freighter.signTransaction(tx.toXDR(), { network: "TEST
 ### 3. Request a fee-bump from XLM Paymaster
 
 ```ts
-import { FluidClient } from "paymaster-client";
+import { PaymasterClient } from "paymaster-client";
 
-const xlm-paymaster = new FluidClient({
+const xlm-paymaster = new PaymasterClient({
   serverUrl:         "https://your-paymaster-server.example.com",
   networkPassphrase: NETWORK_PASSPHRASE,
   horizonUrl:        "https://horizon-testnet.stellar.org",
@@ -99,11 +99,11 @@ console.log("Mint hash:", result.hash);
 
 ```ts
 import freighter from "@stellar/freighter-api";
-import { FluidClient } from "paymaster-client";
+import { PaymasterClient } from "paymaster-client";
 import { Contract, TransactionBuilder, Networks, SorobanRpc, Server } from "@stellar/stellar-sdk";
 
 const NETWORK = Networks.TESTNET;
-const FLUID   = new FluidClient({
+const PAYMASTER   = new PaymasterClient({
   serverUrl: "https://your-paymaster-server.example.com",
   networkPassphrase: NETWORK,
   horizonUrl: "https://horizon-testnet.stellar.org",
@@ -121,7 +121,7 @@ export async function gaslessMint(tokenId: string, metadataUri: string) {
     .build();
 
   const signedXdr       = await freighter.signTransaction(tx.toXDR(), { network: "TESTNET" });
-  const { xdr: bumped } = await FLUID.requestFeeBump(signedXdr);
+  const { xdr: bumped } = await PAYMASTER.requestFeeBump(signedXdr);
 
   const horizon = new Server("https://horizon-testnet.stellar.org");
   return horizon.submitTransaction(
@@ -132,6 +132,6 @@ export async function gaslessMint(tokenId: string, metadataUri: string) {
 
 ## Cost estimation
 
-Each gasless mint uses approximately `base_fee × fee_multiplier` stroops of XLM from the XLM Paymaster fee-payer account. At the default `FLUID_BASE_FEE=100` and `FLUID_FEE_MULTIPLIER=2.0`, that is 200 stroops (0.00002 XLM) per mint. A treasury of 1,000 XLM supports ~5 million gasless mints.
+Each gasless mint uses approximately `base_fee × fee_multiplier` stroops of XLM from the XLM Paymaster fee-payer account. At the default `PAYMASTER_BASE_FEE=100` and `PAYMASTER_FEE_MULTIPLIER=2.0`, that is 200 stroops (0.00002 XLM) per mint. A treasury of 1,000 XLM supports ~5 million gasless mints.
 
 Monitor your fee-payer balance via `GET /health` or the XLM Paymaster dashboard.

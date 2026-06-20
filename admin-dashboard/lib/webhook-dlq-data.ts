@@ -7,7 +7,7 @@ const SAMPLE_DLQ_ITEMS: WebhookDlqItem[] = [
     tenantId: "anchor-west",
     tenantName: "Anchor West",
     deliveryId: "del-001",
-    url: "https://anchor-west.example.com/webhooks/fluid",
+    url: "https://anchor-west.example.com/webhooks/paymaster",
     payload: JSON.stringify({ eventType: "tx.failed", hash: "abc123", status: "failed" }),
     lastError: "Connection timeout after 5000ms",
     retryCount: 5,
@@ -19,7 +19,7 @@ const SAMPLE_DLQ_ITEMS: WebhookDlqItem[] = [
     tenantId: "mobile-wallet",
     tenantName: "Mobile Wallet",
     deliveryId: "del-002",
-    url: "https://wallet.example.com/fluid/webhooks",
+    url: "https://wallet.example.com/paymaster/webhooks",
     payload: JSON.stringify({ eventType: "tx.success", hash: "def456", status: "success" }),
     lastError: "HTTP 502 Bad Gateway",
     retryCount: 5,
@@ -34,8 +34,8 @@ export interface WebhookDlqPageData {
 }
 
 export async function getWebhookDlqPageData(): Promise<WebhookDlqPageData> {
-  const serverUrl = process.env.FLUID_SERVER_URL?.replace(/\/$/, "") ?? "";
-  const adminToken = process.env.FLUID_ADMIN_TOKEN ?? "";
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.replace(/\/$/, "") ?? "";
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN ?? "";
 
   if (!serverUrl || !adminToken) {
     return { items: SAMPLE_DLQ_ITEMS, source: "sample" };

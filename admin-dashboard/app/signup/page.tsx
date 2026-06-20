@@ -70,7 +70,7 @@ export default function SignUpPage() {
             <h2 className="text-2xl font-bold text-gray-900">Check your inbox</h2>
             <p className="mt-2 text-gray-600">
               We sent a verification link to <strong>{email}</strong>.<br />
-              Click it to receive your Fluid API key.
+              Click it to receive your Paymaster API key.
             </p>
           </div>
           <p className="text-sm text-gray-500">
@@ -98,7 +98,7 @@ export default function SignUpPage() {
             </svg>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Get started with Fluid
+            Get started with Paymaster
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Create your account and receive an API key instantly.
@@ -152,7 +152,7 @@ export default function SignUpPage() {
           {/* Intended use */}
           <div>
             <label htmlFor="intendedUse" className="block text-sm font-medium text-gray-700 mb-1">
-              How do you plan to use Fluid?
+              How do you plan to use Paymaster?
             </label>
             <textarea
               id="intendedUse"

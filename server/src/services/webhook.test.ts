@@ -79,7 +79,7 @@ describe("WebhookService", () => {
   });
 
   describe("dispatch - successful delivery", () => {
-    it("POSTs JSON payload with the Fluid signature header", async () => {
+    it("POSTs JSON payload with the Paymaster signature header", async () => {
       mockPrisma.tenant.findUnique.mockResolvedValue({
         id: "tenant-1",
         webhookSecret: "tenant-secret",
@@ -96,7 +96,7 @@ describe("WebhookService", () => {
       expect(url).toBe("https://example.com/webhook");
       expect(options.method).toBe("POST");
       expect(options.headers["Content-Type"]).toBe("application/json");
-      expect(options.headers["X-Fluid-Signature-256"]).toBe(
+      expect(options.headers["X-Paymaster-Signature-256"]).toBe(
         signWebhookPayload("tenant-secret", options.body)
       );
 
@@ -168,7 +168,7 @@ describe("WebhookService", () => {
 
             const [, options] = mockFetch.mock.calls[0];
             return (
-              options.headers["X-Fluid-Signature-256"] ===
+              options.headers["X-Paymaster-Signature-256"] ===
               signWebhookPayload(secret, options.body)
             );
           }

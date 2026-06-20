@@ -21,7 +21,7 @@ pub struct Config {
     /// Maximum number of operations allowed inside a single sponsored
     /// transaction envelope. Requests exceeding this limit are rejected
     /// with HTTP 400 before any signing takes place.
-    /// Configured via `FLUID_MAX_OPERATIONS_PER_ENVELOPE` (default: 100).
+    /// Configured via `PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE` (default: 100).
     pub max_operations_per_envelope: usize,
     pub network_passphrase: String,
     pub port: u16,
@@ -30,7 +30,7 @@ pub struct Config {
 
 pub async fn load_config() -> Result<(Config, Vec<String>), AppError> {
     // Attempt to fetch fee payer secrets from Vault when enabled, otherwise
-    // fall back to the FLUID_FEE_PAYER_SECRET environment variable.
+    // fall back to the PAYMASTER_FEE_PAYER_SECRET environment variable.
     let secrets = if std::env::var("VAULT_ENABLED")
         .unwrap_or_default()
         .to_lowercase()
@@ -43,21 +43,21 @@ pub async fn load_config() -> Result<(Config, Vec<String>), AppError> {
             }
         }
     } else {
-        parse_csv_env("FLUID_FEE_PAYER_SECRET").ok_or_else(|| {
+        parse_csv_env("PAYMASTER_FEE_PAYER_SECRET").ok_or_else(|| {
             AppError::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "INTERNAL_ERROR",
-                "FLUID_FEE_PAYER_SECRET environment variable is required",
+                "PAYMASTER_FEE_PAYER_SECRET environment variable is required",
             )
         })?
     };
 
-    let allowed_origins = parse_csv_env("FLUID_ALLOWED_ORIGINS").unwrap_or_default();
-    let base_fee = env_parse("FLUID_BASE_FEE", 100_i64);
-    let fee_multiplier = env_parse("FLUID_FEE_MULTIPLIER", 2.0_f64);
-    let global_rate_limit_max = env_parse("FLUID_RATE_LIMIT_MAX", 5_u32);
-    let global_rate_limit_window_ms = env_parse("FLUID_RATE_LIMIT_WINDOW_MS", 60_000_u64);
-    let max_operations_per_envelope = env_parse("FLUID_MAX_OPERATIONS_PER_ENVELOPE", 100_usize);
+    let allowed_origins = parse_csv_env("PAYMASTER_ALLOWED_ORIGINS").unwrap_or_default();
+    let base_fee = env_parse("PAYMASTER_BASE_FEE", 100_i64);
+    let fee_multiplier = env_parse("PAYMASTER_FEE_MULTIPLIER", 2.0_f64);
+    let global_rate_limit_max = env_parse("PAYMASTER_RATE_LIMIT_MAX", 5_u32);
+    let global_rate_limit_window_ms = env_parse("PAYMASTER_RATE_LIMIT_WINDOW_MS", 60_000_u64);
+    let max_operations_per_envelope = env_parse("PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE", 100_usize);
     let configured_horizon_urls = parse_csv_env("STELLAR_HORIZON_URLS").unwrap_or_default();
     let legacy_horizon_url = std::env::var("STELLAR_HORIZON_URL").ok();
     let horizon_urls = if configured_horizon_urls.is_empty() {
@@ -68,7 +68,7 @@ pub async fn load_config() -> Result<(Config, Vec<String>), AppError> {
     } else {
         configured_horizon_urls
     };
-    let horizon_selection_strategy = match std::env::var("FLUID_HORIZON_SELECTION")
+    let horizon_selection_strategy = match std::env::var("PAYMASTER_HORIZON_SELECTION")
         .unwrap_or_else(|_| "priority".to_string())
         .as_str()
     {
@@ -78,7 +78,7 @@ pub async fn load_config() -> Result<(Config, Vec<String>), AppError> {
     let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
         .unwrap_or_else(|_| "Test SDF Network ; September 2015".to_string());
     let port = env_parse("PORT", 3000_u16);
-    let disable_rate_limits = env_parse("FLUID_DISABLE_RATE_LIMITS", false);
+    let disable_rate_limits = env_parse("PAYMASTER_DISABLE_RATE_LIMITS", false);
 
     Ok((
         Config {
@@ -116,7 +116,7 @@ async fn fetch_secrets_from_vault() -> Result<Vec<String>, AppError> {
     })?;
 
     let secret_path = std::env::var("VAULT_SECRET_PATH")
-        .unwrap_or_else(|_| "secret/data/fluid/fee_payer".to_string());
+        .unwrap_or_else(|_| "secret/data/paymaster/fee_payer".to_string());
     // Build URL for KV v2 by default. If the user sets a direct path, use it as-is.
     let url = if secret_path.starts_with('/') {
         format!("{}v1{}", addr.trim_end_matches('/'), secret_path)
@@ -171,7 +171,7 @@ async fn fetch_secrets_from_vault() -> Result<Vec<String>, AppError> {
     match secret_value {
         Value::Object(map) => {
             // Try common keys first, otherwise serialize values to strings.
-            if let Some(v) = map.get("FLUID_FEE_PAYER_SECRET") {
+            if let Some(v) = map.get("PAYMASTER_FEE_PAYER_SECRET") {
                 if let Some(s) = v.as_str() {
                     secrets = s
                         .split(',')
@@ -276,7 +276,7 @@ mod tests {
     static ENV_LOCK: Mutex<()> = Mutex::new(());
 
     fn unique_key(suffix: &str) -> String {
-        format!("FLUID_TEST_{suffix}_{}", uuid::Uuid::new_v4())
+        format!("PAYMASTER_TEST_{suffix}_{}", uuid::Uuid::new_v4())
     }
 
     #[test]
@@ -307,7 +307,7 @@ mod tests {
     async fn load_config_errors_when_fee_payer_secret_missing() {
         let _lock = ENV_LOCK.lock().unwrap();
         // Ensure the required secret isn't set for this test process.
-        std::env::remove_var("FLUID_FEE_PAYER_SECRET");
+        std::env::remove_var("PAYMASTER_FEE_PAYER_SECRET");
         match load_config().await {
             Ok(_) => panic!("expected missing secret to error"),
             Err(err) => {
@@ -321,17 +321,17 @@ mod tests {
     async fn load_config_happy_path_parses_env_and_defaults() {
         let _lock = ENV_LOCK.lock().unwrap();
         // Required
-        std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-a");
+        std::env::set_var("PAYMASTER_FEE_PAYER_SECRET", "test-secret-a");
 
         // Optional, but set to exercise parsing.
         std::env::set_var(
-            "FLUID_ALLOWED_ORIGINS",
+            "PAYMASTER_ALLOWED_ORIGINS",
             "https://a.example, https://b.example",
         );
-        std::env::set_var("FLUID_BASE_FEE", "150");
-        std::env::set_var("FLUID_FEE_MULTIPLIER", "1.5");
-        std::env::set_var("FLUID_RATE_LIMIT_MAX", "9");
-        std::env::set_var("FLUID_RATE_LIMIT_WINDOW_MS", "120000");
+        std::env::set_var("PAYMASTER_BASE_FEE", "150");
+        std::env::set_var("PAYMASTER_FEE_MULTIPLIER", "1.5");
+        std::env::set_var("PAYMASTER_RATE_LIMIT_MAX", "9");
+        std::env::set_var("PAYMASTER_RATE_LIMIT_WINDOW_MS", "120000");
         std::env::set_var("STELLAR_NETWORK_PASSPHRASE", "Test Network");
         std::env::set_var("PORT", "4242");
 
@@ -341,7 +341,7 @@ mod tests {
             "STELLAR_HORIZON_URLS",
             "https://h1.example,https://h2.example",
         );
-        std::env::set_var("FLUID_HORIZON_SELECTION", "round_robin");
+        std::env::set_var("PAYMASTER_HORIZON_SELECTION", "round_robin");
 
         let (config, secrets) = load_config().await.expect("expected config to load");
         assert_eq!(secrets.len(), 1);
@@ -364,64 +364,64 @@ mod tests {
             HorizonSelectionStrategy::RoundRobin
         ));
 
-        std::env::remove_var("FLUID_FEE_PAYER_SECRET");
-        std::env::remove_var("FLUID_ALLOWED_ORIGINS");
-        std::env::remove_var("FLUID_BASE_FEE");
-        std::env::remove_var("FLUID_FEE_MULTIPLIER");
-        std::env::remove_var("FLUID_RATE_LIMIT_MAX");
-        std::env::remove_var("FLUID_RATE_LIMIT_WINDOW_MS");
+        std::env::remove_var("PAYMASTER_FEE_PAYER_SECRET");
+        std::env::remove_var("PAYMASTER_ALLOWED_ORIGINS");
+        std::env::remove_var("PAYMASTER_BASE_FEE");
+        std::env::remove_var("PAYMASTER_FEE_MULTIPLIER");
+        std::env::remove_var("PAYMASTER_RATE_LIMIT_MAX");
+        std::env::remove_var("PAYMASTER_RATE_LIMIT_WINDOW_MS");
         std::env::remove_var("STELLAR_NETWORK_PASSPHRASE");
         std::env::remove_var("PORT");
         std::env::remove_var("STELLAR_HORIZON_URL");
         std::env::remove_var("STELLAR_HORIZON_URLS");
-        std::env::remove_var("FLUID_HORIZON_SELECTION");
+        std::env::remove_var("PAYMASTER_HORIZON_SELECTION");
     }
 
     #[tokio::test]
     async fn load_config_max_operations_default_and_override() {
         let _lock = ENV_LOCK.lock().unwrap();
-        std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-max-ops");
+        std::env::set_var("PAYMASTER_FEE_PAYER_SECRET", "test-secret-max-ops");
 
         // Default: 100
-        std::env::remove_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE");
+        std::env::remove_var("PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE");
         let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.max_operations_per_envelope, 100);
 
         // Custom value
-        std::env::set_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE", "25");
+        std::env::set_var("PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE", "25");
         let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.max_operations_per_envelope, 25);
 
-        std::env::remove_var("FLUID_FEE_PAYER_SECRET");
-        std::env::remove_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE");
+        std::env::remove_var("PAYMASTER_FEE_PAYER_SECRET");
+        std::env::remove_var("PAYMASTER_MAX_OPERATIONS_PER_ENVELOPE");
     }
 
     #[tokio::test]
     async fn load_config_disable_rate_limits() {
         let _lock = ENV_LOCK.lock().unwrap();
-        std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-c");
+        std::env::set_var("PAYMASTER_FEE_PAYER_SECRET", "test-secret-c");
 
         // Default: false
-        std::env::remove_var("FLUID_DISABLE_RATE_LIMITS");
+        std::env::remove_var("PAYMASTER_DISABLE_RATE_LIMITS");
         let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.disable_rate_limits, false);
 
         // Custom value: true
-        std::env::set_var("FLUID_DISABLE_RATE_LIMITS", "true");
+        std::env::set_var("PAYMASTER_DISABLE_RATE_LIMITS", "true");
         let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.disable_rate_limits, true);
 
-        std::env::remove_var("FLUID_FEE_PAYER_SECRET");
-        std::env::remove_var("FLUID_DISABLE_RATE_LIMITS");
+        std::env::remove_var("PAYMASTER_FEE_PAYER_SECRET");
+        std::env::remove_var("PAYMASTER_DISABLE_RATE_LIMITS");
     }
 
     #[tokio::test]
     async fn load_config_uses_legacy_horizon_url_when_list_empty() {
         let _lock = ENV_LOCK.lock().unwrap();
-        std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-b");
+        std::env::set_var("PAYMASTER_FEE_PAYER_SECRET", "test-secret-b");
         std::env::remove_var("STELLAR_HORIZON_URLS");
         std::env::set_var("STELLAR_HORIZON_URL", "https://legacy.example");
-        std::env::set_var("FLUID_HORIZON_SELECTION", "priority");
+        std::env::set_var("PAYMASTER_HORIZON_SELECTION", "priority");
 
         let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.horizon_urls, vec!["https://legacy.example"]);
@@ -430,8 +430,8 @@ mod tests {
             HorizonSelectionStrategy::Priority
         ));
 
-        std::env::remove_var("FLUID_FEE_PAYER_SECRET");
+        std::env::remove_var("PAYMASTER_FEE_PAYER_SECRET");
         std::env::remove_var("STELLAR_HORIZON_URL");
-        std::env::remove_var("FLUID_HORIZON_SELECTION");
+        std::env::remove_var("PAYMASTER_HORIZON_SELECTION");
     }
 }

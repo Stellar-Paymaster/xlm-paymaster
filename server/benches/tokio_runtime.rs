@@ -3,7 +3,7 @@ use napi::bindgen_prelude::Buffer;
 use tokio::runtime::Runtime;
 
 // Import our libarary's sign
-use fluid_signer::sign_payload;
+use paymaster_signer::sign_payload;
 
 fn create_optimized_runtime(worker_threads: usize, max_blocking: usize, stack_size: usize) -> Runtime {
     tokio::runtime::Builder::new_multi_thread()

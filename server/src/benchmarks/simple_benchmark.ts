@@ -21,7 +21,7 @@ interface BenchmarkResult {
 }
 
 class SimpleBenchmark {
-  private secretKey = process.env.FLUID_FEE_PAYER_SECRET ?? "";
+  private secretKey = process.env.PAYMASTER_FEE_PAYER_SECRET ?? "";
   private testPayload = Buffer.alloc(100, 1);
 
   async runSingleBenchmark (
@@ -43,10 +43,10 @@ class SimpleBenchmark {
     );
 
     // Set environment variables for Rust runtime
-    process.env.FLUID_TOKIO_WORKER_THREADS = workerThreads.toString();
-    process.env.FLUID_TOKIO_MAX_BLOCKING_THREADS =
+    process.env.PAYMASTER_TOKIO_WORKER_THREADS = workerThreads.toString();
+    process.env.PAYMASTER_TOKIO_MAX_BLOCKING_THREADS =
       maxBlockingThreads.toString();
-    process.env.FLUID_TOKIO_STACK_SIZE = stackSize.toString();
+    process.env.PAYMASTER_TOKIO_STACK_SIZE = stackSize.toString();
 
     const startTime = performance.now();
     const endTime = startTime + duration * 1000;

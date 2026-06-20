@@ -37,7 +37,7 @@ function App() {
   // Environment variables
   const sorobanRpcUrl = import.meta.env.VITE_SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
   const nftContractId = import.meta.env.VITE_NFT_CONTRACT_ID;
-  const fluidServerUrl = import.meta.env.VITE_FLUID_SERVER_URL || 'https://testnet.fluid.dev';
+  const paymasterServerUrl = import.meta.env.VITE_PAYMASTER_SERVER_URL || 'https://testnet.paymaster.dev';
   const networkPassphrase = import.meta.env.VITE_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015';
   const stellarExpertUrl = import.meta.env.VITE_STELLAR_EXPERT_URL || 'https://stellar.expert/explorer/testnet';
   const horizonUrl = import.meta.env.VITE_HORIZON_URL || 'https://horizon-testnet.stellar.org';
@@ -147,8 +147,8 @@ function App() {
         networkPassphrase
       );
 
-      // Request fee-bump from Fluid
-      const response = await fetch(`${fluidServerUrl}/fee-bump`, {
+      // Request fee-bump from Paymaster
+      const response = await fetch(`${paymasterServerUrl}/fee-bump`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ function App() {
     <div className="container">
       <div className="card">
         <div className="header">
-          <h1>🖼️ Fluid Gasless NFT Minting</h1>
+          <h1>🖼️ Paymaster Gasless NFT Minting</h1>
           <p>Mint an NFT with zero transaction fees</p>
         </div>
 

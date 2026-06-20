@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
 
 const API_KEYS = new Map<any, any>([
-  ["fluid-free-demo-key", { tier: "free", maxRequests: 2, windowMs: 60000 }],
-  ["fluid-pro-demo-key", { tier: "pro", maxRequests: 5, windowMs: 60000 }],
+  ["paymaster-free-demo-key", { tier: "free", maxRequests: 2, windowMs: 60000 }],
+  ["paymaster-pro-demo-key", { tier: "pro", maxRequests: 5, windowMs: 60000 }],
 ]);
 
 export function authMiddleware(
@@ -28,7 +28,7 @@ export function authMiddleware(
   let apiKeyConfig = API_KEYS.get(providedKey);
 
   if (!apiKeyConfig) {
-    const authorizedKeys = (process.env.FLUID_AUTHORIZED_API_KEYS || "")
+    const authorizedKeys = (process.env.PAYMASTER_AUTHORIZED_API_KEYS || "")
       .split(",")
       .map((k) => k.trim());
 

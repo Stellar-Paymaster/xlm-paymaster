@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const FLUID_SERVER_URL = process.env.FLUID_SERVER_URL ?? "http://localhost:3000";
+const PAYMASTER_SERVER_URL = process.env.PAYMASTER_SERVER_URL ?? "http://localhost:3000";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  const res = await fetch(`${FLUID_SERVER_URL}/create-checkout-session`, {
+  const res = await fetch(`${PAYMASTER_SERVER_URL}/create-checkout-session`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

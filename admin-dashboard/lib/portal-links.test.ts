@@ -30,11 +30,11 @@ test("getPortalLinks returns defaults when public variables are missing", () => 
       const links = getPortalLinks();
 
       assert.equal(links.siteUrl, "http://localhost:3000");
-      assert.equal(links.docs, "https://docs.fluid.dev");
-      assert.equal(links.github, "https://github.com/fluid-org/fluid");
-      assert.equal(links.discord, "https://discord.gg/fluid");
-      assert.equal(links.helpCenter, "https://help.fluid.dev");
-      assert.equal(links.support, "https://support.fluid.dev/tickets");
+      assert.equal(links.docs, "https://docs.paymaster.dev");
+      assert.equal(links.github, "https://github.com/paymaster-org/paymaster");
+      assert.equal(links.discord, "https://discord.gg/paymaster");
+      assert.equal(links.helpCenter, "https://help.paymaster.dev");
+      assert.equal(links.support, "https://support.paymaster.dev/tickets");
     },
   );
 });

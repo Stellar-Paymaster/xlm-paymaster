@@ -1,4 +1,4 @@
-export const THEME_STORAGE_KEY = "fluid-admin-theme";
+export const THEME_STORAGE_KEY = "paymaster-admin-theme";
 
 export const THEME_PREFERENCES = [
   "system",

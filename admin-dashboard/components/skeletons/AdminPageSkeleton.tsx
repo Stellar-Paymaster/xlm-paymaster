@@ -2,7 +2,7 @@ import { TableSkeleton, type TableSkeletonProps } from "./TableSkeleton";
 import { clampToolbars } from "./skeleton-utils";
 
 export interface AdminPageSkeletonProps {
-  /** Displayed in the muted eyebrow over the heading. Defaults to "Fluid Admin". */
+  /** Displayed in the muted eyebrow over the heading. Defaults to "Paymaster Admin". */
   eyebrow?: string;
   /** Approximate width of the title placeholder, Tailwind class. */
   titleWidthClass?: string;

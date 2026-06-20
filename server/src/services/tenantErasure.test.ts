@@ -57,7 +57,7 @@ describe("tenantErasure", () => {
     vi.clearAllMocks();
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, text: async () => "" }));
     vi.stubEnv("RESEND_API_KEY", "resend-test-key");
-    vi.stubEnv("RESEND_EMAIL_FROM", "noreply@fluid.dev");
+    vi.stubEnv("RESEND_EMAIL_FROM", "noreply@paymaster.dev");
 
     mockPrisma.$transaction.mockImplementation(async (callback: (tx: any) => unknown) =>
       callback({

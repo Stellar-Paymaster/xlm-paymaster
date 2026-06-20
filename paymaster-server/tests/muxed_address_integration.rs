@@ -71,7 +71,7 @@ fn build_signed_muxed_transaction_xdr(seed_byte: u8) -> String {
 
 #[tokio::test]
 async fn fee_bump_muxed_address_integration() {
-    let mut mock = fluid_server::mock_horizon::MockHorizonServer::new();
+    let mut mock = paymaster_server::mock_horizon::MockHorizonServer::new();
     let horizon_base = mock.start().await;
     let server = TestServer::spawn(&horizon_base).await;
     let client = Client::new();
@@ -80,7 +80,7 @@ async fn fee_bump_muxed_address_integration() {
 
     let accepted = client
         .post(format!("{}/fee-bump", server.base_url))
-        .header("x-api-key", "fluid-pro-demo-key")
+        .header("x-api-key", "paymaster-pro-demo-key")
         .json(&serde_json::json!({ "xdr": xdr, "submit": false }))
         .send()
         .await
@@ -115,14 +115,14 @@ impl TestServer {
         let mut child = Command::new(env!("CARGO_BIN_EXE_paymaster-server"))
             .env("PORT", http_port.to_string())
             .env("GRPC_PORT", grpc_port.to_string())
-            .env("FLUID_FEE_PAYER_SECRET", secret)
+            .env("PAYMASTER_FEE_PAYER_SECRET", secret)
             .env("STELLAR_HORIZON_URL", horizon_url)
-            .env("FLUID_DISABLE_RATE_LIMITS", "true")
+            .env("PAYMASTER_DISABLE_RATE_LIMITS", "true")
             .env("STELLAR_NETWORK_PASSPHRASE", "Test SDF Network ; September 2015")
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()
-            .expect("fluid-server should start");
+            .expect("paymaster-server should start");
 
         let base_url = format!("http://127.0.0.1:{http_port}");
         for _ in 0..60 {
@@ -139,7 +139,7 @@ impl TestServer {
         }
 
         let _ = child.kill();
-        panic!("fluid-server did not become healthy");
+        panic!("paymaster-server did not become healthy");
     }
 }
 

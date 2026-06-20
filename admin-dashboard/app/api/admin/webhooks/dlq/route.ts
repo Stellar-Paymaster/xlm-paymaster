@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 function getServerConfig() {
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
-  const adminToken = process.env.FLUID_ADMIN_TOKEN?.trim();
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN?.trim();
 
   if (!serverUrl || !adminToken) {
-    throw new Error("FLUID_SERVER_URL and FLUID_ADMIN_TOKEN must be configured");
+    throw new Error("PAYMASTER_SERVER_URL and PAYMASTER_ADMIN_TOKEN must be configured");
   }
 
   return { serverUrl, adminToken };

@@ -18,7 +18,7 @@
           "date": "2026-03-01",
           "changes": [
             "Add `requestFeeBumpBatch` for submitting multiple XDRs in one call",
-            "Expose `FluidClient.healthCheck()` to ping the server before submitting",
+            "Expose `PaymasterClient.healthCheck()` to ping the server before submitting",
             "Reduce bundle size by 18% via tree-shaking improvements"
           ]
         },
@@ -44,7 +44,7 @@
           "date": "2025-09-08",
           "changes": [
             "Support configurable `timeout` per request",
-            "Add `FluidError` typed exception with `statusCode` and `code` fields",
+            "Add `PaymasterError` typed exception with `statusCode` and `code` fields",
             "Publish ESM and CJS builds"
           ]
         }
@@ -67,7 +67,7 @@
           "version": "0.9.2",
           "date": "2026-02-18",
           "changes": [
-            "Fix `FluidClient.close()` not awaiting underlying httpx session",
+            "Fix `PaymasterClient.close()` not awaiting underlying httpx session",
             "Add `py.typed` marker for PEP 561 compatibility"
           ]
         },
@@ -76,8 +76,8 @@
           "date": "2026-01-05",
           "changes": [
             "Add async batch endpoint support",
-            "Django middleware: auto-inject `request.fluid_client`",
-            "FastAPI dependency helper `get_fluid_client()`"
+            "Django middleware: auto-inject `request.paymaster_client`",
+            "FastAPI dependency helper `get_paymaster_client()`"
           ]
         },
         {
@@ -136,7 +136,7 @@
       "id": "react",
       "name": "React SDK",
       "language": "React",
-      "description": "React hooks and context provider for XLM Paymaster. Includes `useFeeBump`, `useFluidClient`, and `useTransactionStatus` with built-in loading and error states.",
+      "description": "React hooks and context provider for XLM Paymaster. Includes `useFeeBump`, `usePaymasterClient`, and `useTransactionStatus` with built-in loading and error states.",
       "installCommand": "npm install xlm-paymaster-react",
       "registry": "npm",
       "packageName": "xlm-paymaster-react",
@@ -151,14 +151,14 @@
           "changes": [
             "React 19 support",
             "New `useTransactionStatus` hook for polling transaction state",
-            "Add `FluidProvider` `onError` prop for global error handling"
+            "Add `PaymasterProvider` `onError` prop for global error handling"
           ]
         },
         {
           "version": "2.0.0",
           "date": "2026-01-20",
           "changes": [
-            "Breaking: rename `useFluid` to `useFluidClient` for clarity",
+            "Breaking: rename `usePaymaster` to `usePaymasterClient` for clarity",
             "Add `useFeeBumpBatch` hook",
             "Tree-shakeable named exports"
           ]
@@ -168,7 +168,7 @@
           "date": "2025-10-01",
           "changes": [
             "Initial stable release",
-            "`FluidProvider`, `useFluidClient`, `useFeeBump` hooks",
+            "`PaymasterProvider`, `usePaymasterClient`, `useFeeBump` hooks",
             "Built-in suspense and error boundary support"
           ]
         }
@@ -178,7 +178,7 @@
       "id": "vue",
       "name": "Vue SDK",
       "language": "Vue",
-      "description": "Vue 3 composables for XLM Paymaster. Drop-in `useFeeBump` and `useFluidClient` with Pinia store integration and automatic retry on network errors.",
+      "description": "Vue 3 composables for XLM Paymaster. Drop-in `useFeeBump` and `usePaymasterClient` with Pinia store integration and automatic retry on network errors.",
       "installCommand": "npm install xlm-paymaster-vue",
       "registry": "npm",
       "packageName": "xlm-paymaster-vue",
@@ -191,7 +191,7 @@
           "version": "1.2.0",
           "date": "2026-02-05",
           "changes": [
-            "Add Pinia plugin for automatic `fluidClient` store injection",
+            "Add Pinia plugin for automatic `paymasterClient` store injection",
             "New `useTransactionStatus` composable",
             "Vue DevTools integration for inspecting fee-bump state"
           ]
@@ -209,7 +209,7 @@
           "date": "2025-09-01",
           "changes": [
             "Initial release",
-            "`useFluidClient` and `useFeeBump` composables",
+            "`usePaymasterClient` and `useFeeBump` composables",
             "Full Vue 3 Composition API support"
           ]
         }

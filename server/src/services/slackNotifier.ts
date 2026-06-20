@@ -121,10 +121,10 @@ export function loadSlackNotifierOptionsFromEnv(
   env: NodeJS.ProcessEnv = process.env,
 ): SlackNotifierOptions {
   return {
-    serviceName: env.SLACK_ALERT_SERVICE_NAME?.trim() || "Fluid server",
+    serviceName: env.SLACK_ALERT_SERVICE_NAME?.trim() || "Paymaster server",
     webhookUrl:
       env.SLACK_WEBHOOK_URL?.trim() ||
-      env.FLUID_ALERT_SLACK_WEBHOOK_URL?.trim() ||
+      env.PAYMASTER_ALERT_SLACK_WEBHOOK_URL?.trim() ||
       undefined,
     toggles: {
       failedTransaction: parseBooleanEnv(
@@ -178,7 +178,7 @@ export class SlackNotifier implements SlackNotifierLike {
   constructor(
     options: SlackNotifierOptions = loadSlackNotifierOptionsFromEnv(),
   ) {
-    this.serviceName = options.serviceName || "Fluid server";
+    this.serviceName = options.serviceName || "Paymaster server";
     this.toggles = {
       ...defaultToggles,
       ...options.toggles,

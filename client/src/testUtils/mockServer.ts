@@ -2,14 +2,14 @@ import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
 /**
- * Preset response types supported by the Fluid mock server.
+ * Preset response types supported by the Paymaster mock server.
  */
 export type MockResponseType = "success" | "bad_request" | "server_error" | "rate_limit";
 
 /**
- * Configuration for the Fluid mock server.
+ * Configuration for the Paymaster mock server.
  */
-export interface FluidMockServerConfig {
+export interface PaymasterMockServerConfig {
   /** The URL to intercept. Defaults to `http://localhost:3000`. */
   serverUrl?: string;
   /** The preset response type. Defaults to `"success"`. */
@@ -45,21 +45,21 @@ const MOCK_RESPONSES: Record<MockResponseType, { status: number; body: object }>
 };
 
 /**
- * Creates a lightweight mock server for testing FluidClient
- * without needing a real Fluid node.
+ * Creates a lightweight mock server for testing PaymasterClient
+ * without needing a real Paymaster node.
  *
  * @param config - Configuration options for the mock server.
  * @returns A configured MSW server instance ready to use in tests.
  *
  * @example
  * ```ts
- * const server = createFluidMockServer({ response: "success" });
+ * const server = createPaymasterMockServer({ response: "success" });
  * server.listen();
  * // run your tests...
  * server.close();
  * ```
  */
-export function createFluidMockServer(config: FluidMockServerConfig = {}) {
+export function createPaymasterMockServer(config: PaymasterMockServerConfig = {}) {
   const {
     serverUrl = "http://localhost:3000",
     response = "success",

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { FluidNode } from "@/lib/node-registry";
+import type { PaymasterNode } from "@/lib/node-registry";
 
 // Leaflet is loaded dynamically so this file is always safe to import server-side.
 // The actual map is mounted only on the client via useEffect.
 
-interface NodeDetails extends FluidNode {
+interface NodeDetails extends PaymasterNode {
   pinging?: boolean;
 }
 
@@ -220,7 +220,7 @@ export function NodeNetworkMap() {
           Public Node Network
         </h2>
         <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-          Fluid nodes registered by operators worldwide. Click a marker to inspect
+          Paymaster nodes registered by operators worldwide. Click a marker to inspect
           an endpoint or test it live.
         </p>
       </div>

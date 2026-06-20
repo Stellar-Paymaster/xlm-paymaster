@@ -42,11 +42,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "xlm-paymaster.postgresSecretName" . }}
                   key: postgres-password
-            - name: FLUID_FEE_PAYER_SECRET
+            - name: PAYMASTER_FEE_PAYER_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ include "xlm-paymaster.secretName" . }}
-                  key: FLUID_FEE_PAYER_SECRET
+                  key: PAYMASTER_FEE_PAYER_SECRET
             {{- with .Values.rustEngine.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

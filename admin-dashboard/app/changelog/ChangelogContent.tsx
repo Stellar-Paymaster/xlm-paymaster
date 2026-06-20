@@ -28,7 +28,7 @@ export function ChangelogContent({ releases }: ChangelogContentProps) {
           Changelog & Release Notes
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Stay updated with the latest changes and improvements to Fluid.
+          Stay updated with the latest changes and improvements to Paymaster.
         </p>
         
         <div className="mt-8 flex justify-center">

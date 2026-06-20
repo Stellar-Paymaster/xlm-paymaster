@@ -35,7 +35,7 @@ When telemetry is enabled, the SDK sends a single daily ping with the following 
 ### How to Enable Telemetry
 
 ```typescript
-const client = new FluidClient({
+const client = new PaymasterClient({
   networkPassphrase: "...",
   enableTelemetry: true, // Enable anonymous telemetry
 });
@@ -50,7 +50,7 @@ When diagnostics are enabled, developers can manually report bugs or errors dire
 ### How to Enable Diagnostics
 
 ```typescript
-const client = new FluidClient({
+const client = new PaymasterClient({
   networkPassphrase: "...",
   enableDiagnostics: true, // Enable diagnostics reporting
 });
@@ -83,7 +83,7 @@ Diagnostics reports include the same base data as telemetry, plus:
 You can optionally specify custom endpoints for both telemetry and diagnostics:
 
 ```typescript
-const client = new FluidClient({
+const client = new PaymasterClient({
   networkPassphrase: "...",
   enableTelemetry: true,
   telemetryEndpoint: "https://your-custom-ping.com",

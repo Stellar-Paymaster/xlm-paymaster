@@ -1,4 +1,4 @@
-//! Shared types for fluid-core operations.
+//! Shared types for paymaster-core operations.
 //!
 //! This module defines types used throughout the crate for representing
 //! Stellar accounts, keys, transactions, and fee-bump configuration.
@@ -13,7 +13,7 @@ use zeroize::Zeroizing;
 /// # Examples
 ///
 /// ```
-/// use fluid_core::PublicKey;
+/// use paymaster_core::PublicKey;
 ///
 /// // Create from bytes
 /// let bytes = [0u8; 32];
@@ -32,7 +32,7 @@ impl PublicKey {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::PublicKey;
+    /// use paymaster_core::PublicKey;
     ///
     /// let bytes = [1u8; 32];
     /// let pk = PublicKey::new(bytes);
@@ -84,7 +84,7 @@ impl AsRef<[u8]> for PublicKey {
 /// # Examples
 ///
 /// ```
-/// use fluid_core::SecretKey;
+/// use paymaster_core::SecretKey;
 ///
 /// // Create from bytes
 /// let bytes = [0u8; 32];
@@ -103,7 +103,7 @@ impl SecretKey {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::SecretKey;
+    /// use paymaster_core::SecretKey;
     ///
     /// let bytes = [1u8; 32];
     /// let sk = SecretKey::new(bytes);
@@ -136,7 +136,7 @@ impl AsRef<[u8]> for SecretKey {
 /// # Examples
 ///
 /// ```
-/// use fluid_core::Keypair;
+/// use paymaster_core::Keypair;
 ///
 /// // Create from raw bytes
 /// let secret = [1u8; 32];
@@ -160,7 +160,7 @@ impl Keypair {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::Keypair;
+    /// use paymaster_core::Keypair;
     ///
     /// let secret = [1u8; 32];
     /// let public = [2u8; 32];
@@ -232,7 +232,7 @@ impl AsRef<str> for AccountId {
 /// # Examples
 ///
 /// ```
-/// use fluid_core::NetworkPassphrase;
+/// use paymaster_core::NetworkPassphrase;
 ///
 /// // Testnet
 /// let testnet = NetworkPassphrase::testnet();
@@ -285,7 +285,7 @@ impl Default for NetworkPassphrase {
 /// # Examples
 ///
 /// ```
-/// use fluid_core::FeeConfig;
+/// use paymaster_core::FeeConfig;
 ///
 /// let config = FeeConfig::new(100, 2.0);
 /// let fee = config.calculate_fee(3); // (3 + 1) * 100 * 2.0 = 800
@@ -420,7 +420,7 @@ impl AsRef<[u8]> for TransactionHash {
 /// # Examples
 ///
 /// ```
-/// use fluid_core::{FeePayerAccount, Keypair};
+/// use paymaster_core::{FeePayerAccount, Keypair};
 ///
 /// // Create a fee payer account (in practice, load from secure storage)
 /// let account = FeePayerAccount::new(

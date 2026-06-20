@@ -1,11 +1,11 @@
 /**
- * React Native Polyfills for Fluid SDK
+ * React Native Polyfills for Paymaster SDK
  *
  * Import this file at the top of your React Native app
- * BEFORE importing the Fluid SDK:
+ * BEFORE importing the Paymaster SDK:
  *
  * import 'react-native-get-random-values';
- * import { FluidClient } from '@fluid-dev/sdk/react-native';
+ * import { PaymasterClient } from '@paymaster-dev/sdk/react-native';
  */
 
 /**

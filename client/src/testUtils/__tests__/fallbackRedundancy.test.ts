@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { FluidClient } from "../../FluidClient";
+import { PaymasterClient } from "../../PaymasterClient";
 
-const PRIMARY_SERVER_URL = "https://primary-fluid.example";
-const SECONDARY_SERVER_URL = "https://secondary-fluid.example";
+const PRIMARY_SERVER_URL = "https://primary-paymaster.example";
+const SECONDARY_SERVER_URL = "https://secondary-paymaster.example";
 const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
 const FAKE_XDR = "AAAAFAKEFAKEFAKE";
 
-describe("FluidClient server fallback redundancy", () => {
+describe("PaymasterClient server fallback redundancy", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -42,7 +42,7 @@ describe("FluidClient server fallback redundancy", () => {
     vi.stubGlobal("fetch", fetchMock);
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const client = new FluidClient({
+    const client = new PaymasterClient({
       serverUrls: [PRIMARY_SERVER_URL, SECONDARY_SERVER_URL],
       networkPassphrase: NETWORK_PASSPHRASE,
     });
@@ -83,13 +83,13 @@ describe("FluidClient server fallback redundancy", () => {
     vi.stubGlobal("fetch", fetchMock);
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const client = new FluidClient({
+    const client = new PaymasterClient({
       serverUrls: [PRIMARY_SERVER_URL, SECONDARY_SERVER_URL],
       networkPassphrase: NETWORK_PASSPHRASE,
     });
 
     await expect(client.requestFeeBump(FAKE_XDR, false)).rejects.toThrow(
-      "Fluid server error",
+      "Paymaster server error",
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(`${PRIMARY_SERVER_URL}/fee-bump`);
@@ -132,7 +132,7 @@ describe("FluidClient server fallback redundancy", () => {
     vi.stubGlobal("fetch", fetchMock);
     vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const client = new FluidClient({
+    const client = new PaymasterClient({
       serverUrls: [PRIMARY_SERVER_URL, SECONDARY_SERVER_URL],
       networkPassphrase: NETWORK_PASSPHRASE,
     });

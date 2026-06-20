@@ -16,19 +16,19 @@ import {
 describe("Interactive Error Codes", () => {
   describe("lookupByCode", () => {
     it("finds entry by exact uppercase code", () => {
-      const entry = lookupByCode("FLUID_001");
+      const entry = lookupByCode("PAYMASTER_001");
       expect(entry).toBeDefined();
       expect(entry?.title).toBe("Invalid Transaction XDR");
     });
 
     it("finds entry by lowercase code", () => {
-      const entry = lookupByCode("fluid_001");
+      const entry = lookupByCode("paymaster_001");
       expect(entry).toBeDefined();
       expect(entry?.title).toBe("Invalid Transaction XDR");
     });
 
     it("returns undefined for non-existent code", () => {
-      const entry = lookupByCode("FLUID_999");
+      const entry = lookupByCode("PAYMASTER_999");
       expect(entry).toBeUndefined();
     });
   });
@@ -50,19 +50,19 @@ describe("Interactive Error Codes", () => {
     it("finds entries by title search", () => {
       const results = searchErrorCodes("Quota");
       expect(results.length).toBe(1);
-      expect(results[0].code).toBe("FLUID_004");
+      expect(results[0].code).toBe("PAYMASTER_004");
     });
 
     it("finds entries by description search", () => {
       const results = searchErrorCodes("unexpected error");
       expect(results.length).toBe(1);
-      expect(results[0].code).toBe("FLUID_008");
+      expect(results[0].code).toBe("PAYMASTER_008");
     });
 
     it("finds entries by cause search", () => {
       const results = searchErrorCodes("sequence number");
       expect(results.length).toBe(1);
-      expect(results[0].code).toBe("FLUID_006");
+      expect(results[0].code).toBe("PAYMASTER_006");
     });
 
     it("returns empty array for query with no matches", () => {
@@ -73,27 +73,27 @@ describe("Interactive Error Codes", () => {
 
   describe("formatErrorHelp", () => {
     it("formats a valid error entry into a helpful string", () => {
-      const output = formatErrorHelp("FLUID_001");
-      expect(output).toContain("FLUID_001");
+      const output = formatErrorHelp("PAYMASTER_001");
+      expect(output).toContain("PAYMASTER_001");
       expect(output).toContain("HTTP 400");
       expect(output).toContain("Invalid Transaction XDR");
       expect(output).toContain("Common Causes");
       expect(output).toContain("Remediation");
-      expect(output).toContain("https://docs.fluid.dev/errors#fluid-001");
+      expect(output).toContain("https://docs.paymaster.dev/errors#paymaster-001");
     });
 
     it("handles unknown codes gracefully", () => {
-      const output = formatErrorHelp("FLUID_999");
-      expect(output).toContain("Unknown error code: FLUID_999");
+      const output = formatErrorHelp("PAYMASTER_999");
+      expect(output).toContain("Unknown error code: PAYMASTER_999");
     });
   });
 
   describe("listAllCodes", () => {
     it("lists all registered codes", () => {
       const output = listAllCodes();
-      expect(output).toContain("All Fluid API Error Codes");
-      expect(output).toContain("FLUID_001");
-      expect(output).toContain("FLUID_010");
+      expect(output).toContain("All Paymaster API Error Codes");
+      expect(output).toContain("PAYMASTER_001");
+      expect(output).toContain("PAYMASTER_010");
     });
   });
 });

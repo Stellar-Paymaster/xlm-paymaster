@@ -31,13 +31,13 @@ const adminUserModel = (prisma as any).adminUser as {
 };
 
 function getJwtSecrets(): string[] {
-  const secretsEnv = process.env.FLUID_ADMIN_JWT_SECRETS;
+  const secretsEnv = process.env.PAYMASTER_ADMIN_JWT_SECRETS;
   if (secretsEnv) {
     const parsed = secretsEnv.split(",").map(s => s.trim()).filter(Boolean);
     if (parsed.length > 0) return parsed;
   }
   
-  return [process.env.FLUID_ADMIN_JWT_SECRET ?? "dev-admin-jwt-secret"];
+  return [process.env.PAYMASTER_ADMIN_JWT_SECRET ?? "dev-admin-jwt-secret"];
 }
 
 export function signAdminJwt(payload: Omit<AdminJwtPayload, "iat" | "exp">): string {
@@ -76,7 +76,7 @@ export function verifyAdminJwt(token: string): AdminJwtPayload | null {
 
 export function isAdminTokenAuthority(req: Request): boolean {
   const token = req.header("x-admin-token");
-  const expected = process.env.FLUID_ADMIN_TOKEN;
+  const expected = process.env.PAYMASTER_ADMIN_TOKEN;
   return Boolean(expected) && token === expected;
 }
 

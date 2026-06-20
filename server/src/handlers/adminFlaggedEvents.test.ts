@@ -31,7 +31,7 @@ vi.mock("../utils/db", () => ({
 }));
 
 // Mock environment variable
-process.env.FLUID_ADMIN_TOKEN = "test-admin-token";
+process.env.PAYMASTER_ADMIN_TOKEN = "test-admin-token";
 
 describe("Admin Flagged Events Handlers", () => {
   let mockRequest: Partial<Request>;

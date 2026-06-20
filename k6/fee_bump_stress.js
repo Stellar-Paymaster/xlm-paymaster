@@ -34,7 +34,7 @@ export default function () {
   const params = {
     headers: {
       'Content-Type': 'application/json',
-      'X-API-Key': __ENV.API_KEY || 'fluid-pro-demo-key',
+      'X-API-Key': __ENV.API_KEY || 'paymaster-pro-demo-key',
     },
   };
 

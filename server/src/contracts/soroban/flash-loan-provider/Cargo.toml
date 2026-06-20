@@ -1,6 +1,6 @@
 [workspace]
 [package]
-name = "fluid-flash-loan-provider"
+name = "paymaster-flash-loan-provider"
 version = "0.1.0"
 edition = "2021"
 

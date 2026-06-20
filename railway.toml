@@ -1,7 +1,7 @@
-# Railway.app Configuration for Fluid Public Testnet Node
+# Railway.app Configuration for Paymaster Public Testnet Node
 
 # Project name
-name = "fluid-public-testnet"
+name = "paymaster-public-testnet"
 
 # Build configuration
 [build]
@@ -21,7 +21,7 @@ memory = "1GB"
 # STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 # HORIZON_URL=https://horizon-testnet.stellar.org
 # SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-# DATABASE_URL=postgresql://user:pass@db:5432/fluid
+# DATABASE_URL=postgresql://user:pass@db:5432/paymaster
 # REDIS_URL=redis://cache:6379
 # NODE_ENV=production
 # LOG_LEVEL=info
@@ -33,5 +33,5 @@ memory = "1GB"
 
 # DNS
 [routes]
-domain = "testnet.fluid.dev"
+domain = "testnet.paymaster.dev"
 https = true

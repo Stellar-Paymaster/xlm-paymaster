@@ -102,8 +102,8 @@ async function main() {
   
   console.log("Measuring current server network conditions...");
   const current = await tester.runTest(
-    Number(process.env.FLUID_NETWORK_LATENCY_MS || 0),
-    Number(process.env.FLUID_NETWORK_PACKET_LOSS_RATE || 0)
+    Number(process.env.PAYMASTER_NETWORK_LATENCY_MS || 0),
+    Number(process.env.PAYMASTER_NETWORK_PACKET_LOSS_RATE || 0)
   );
   
   tester.printReport([current]);

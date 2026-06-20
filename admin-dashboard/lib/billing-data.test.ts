@@ -12,8 +12,8 @@ describe("getBillingPageData", () => {
   });
 
   it("should return sample data when environment variables are missing", async () => {
-    delete process.env.FLUID_SERVER_URL;
-    delete process.env.FLUID_ADMIN_TOKEN;
+    delete process.env.PAYMASTER_SERVER_URL;
+    delete process.env.PAYMASTER_ADMIN_TOKEN;
 
     const { getBillingPageData } = await import("./billing-data");
     const data = await getBillingPageData();
@@ -24,8 +24,8 @@ describe("getBillingPageData", () => {
   });
 
   it("should fetch live data when environment variables are set", async () => {
-    process.env.FLUID_SERVER_URL = "http://test-server";
-    process.env.FLUID_ADMIN_TOKEN = "test-token";
+    process.env.PAYMASTER_SERVER_URL = "http://test-server";
+    process.env.PAYMASTER_ADMIN_TOKEN = "test-token";
 
     const mockPayload = {
       currentBalanceXlm: 5000,
@@ -53,8 +53,8 @@ describe("getBillingPageData", () => {
   });
 
   it("should fallback to sample data when fetch fails", async () => {
-    process.env.FLUID_SERVER_URL = "http://test-server";
-    process.env.FLUID_ADMIN_TOKEN = "test-token";
+    process.env.PAYMASTER_SERVER_URL = "http://test-server";
+    process.env.PAYMASTER_ADMIN_TOKEN = "test-token";
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,

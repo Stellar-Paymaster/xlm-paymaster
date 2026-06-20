@@ -47,7 +47,7 @@ function makeReqRes(overrides: {
 const ADMIN_TOKEN = "test-admin-token";
 
 beforeEach(() => {
-  vi.stubEnv("FLUID_ADMIN_TOKEN", ADMIN_TOKEN);
+  vi.stubEnv("PAYMASTER_ADMIN_TOKEN", ADMIN_TOKEN);
 });
 
 afterEach(() => {

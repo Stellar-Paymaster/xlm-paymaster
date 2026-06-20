@@ -105,7 +105,7 @@ postgres:
   auth:
     username: xlm-paymaster
     password: ""          # Required when existingSecret is empty
-    database: fluid_db
+    database: paymaster_db
 
   storage:
     size: 10Gi
@@ -175,7 +175,7 @@ secrets:
   existingSecret: ""
 
   # Required: Stellar secret key of the fee-payer account.
-  fluidFeePayerSecret: ""
+  paymasterFeePayerSecret: ""
 
   # Required: 32-byte base64 string for database encryption at rest.
   databaseEncryptionKey: ""

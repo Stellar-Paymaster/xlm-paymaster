@@ -13,18 +13,18 @@ The TypeScript SDK now mirrors the Python SDK's error structure, making it easie
 
 | TypeScript Class | Python Class | Description |
 |------------------|--------------|-------------|
-| `FluidError` | `FluidError` | Base class for all SDK errors. |
-| `FluidRequestError` | `FluidRequestError` | Base class for network and server failures. |
-| `FluidNetworkError` | `FluidNetworkError` | Thrown on DNS, connection, or timeout issues. |
-| `FluidServerError` | `FluidServerError` | Thrown on 4xx/5xx responses from XLM Paymaster servers. |
-| `FluidNoAvailableServerError` | `FluidNoAvailableServerError` | Thrown when all configured nodes are exhausted. |
+| `PaymasterError` | `PaymasterError` | Base class for all SDK errors. |
+| `PaymasterRequestError` | `PaymasterRequestError` | Base class for network and server failures. |
+| `PaymasterNetworkError` | `PaymasterNetworkError` | Thrown on DNS, connection, or timeout issues. |
+| `PaymasterServerError` | `PaymasterServerError` | Thrown on 4xx/5xx responses from XLM Paymaster servers. |
+| `PaymasterNoAvailableServerError` | `PaymasterNoAvailableServerError` | Thrown when all configured nodes are exhausted. |
 
 ### 2. Global Request Timeouts
 Both SDKs now support a configurable global timeout for all server requests.
 
-- **TS Configuration**: `new FluidClient({ timeout: 30 })` (seconds)
-- **Python Configuration**: `FluidClientConfig(timeout=30.0)` (seconds)
-- **Behavior**: Requests that exceed this duration are aborted and throw a `FluidNetworkError`.
+- **TS Configuration**: `new PaymasterClient({ timeout: 30 })` (seconds)
+- **Python Configuration**: `PaymasterClientConfig(timeout=30.0)` (seconds)
+- **Behavior**: Requests that exceed this duration are aborted and throw a `PaymasterNetworkError`.
 
 ### 3. URL Normalization & Failover
 The normalization logic is now identical, ensuring that server selection and failover order are deterministic across platforms.
@@ -42,6 +42,6 @@ Compliance has been verified via the following test suites:
 ## Future Parity Roadmap
 
 The following features are slated for the next parity sync:
-- [ ] **FluidMockClient**: Porting the TS mock utility to the Python SDK.
+- [ ] **PaymasterMockClient**: Porting the TS mock utility to the Python SDK.
 - [ ] **waitForConfirmation**: Porting the polling utility to the Python SDK.
 - [ ] **buildSACTransferTx**: Porting Soroban SAC helper logic to the Python SDK.

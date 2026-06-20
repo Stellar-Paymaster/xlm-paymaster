@@ -6,9 +6,9 @@ import { getPortalLinks } from "@/lib/portal-links";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { siteUrl } = getPortalLinks();
-  const title = "Fluid Developer Portal";
+  const title = "Paymaster Developer Portal";
   const description =
-    "Build gasless Stellar applications with Fluid: fee sponsorship, multi-asset support, and Soroban integration via the TypeScript SDK.";
+    "Build gasless Stellar applications with Paymaster: fee sponsorship, multi-asset support, and Soroban integration via the TypeScript SDK.";
 
   return {
     title,
@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "fee bump",
       "gasless",
       "Soroban",
-      "Fluid",
+      "Paymaster",
       "SDK",
       "developer",
     ],
@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       url: siteUrl,
-      siteName: "Fluid",
+      siteName: "Paymaster",
       type: "website",
     },
     twitter: {

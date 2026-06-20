@@ -147,7 +147,7 @@ describe("FcmNotifier", () => {
       await notifier.notifyServerDown({ reason: "Horizon unreachable for over 60 seconds" });
 
       const msg = sendEachForMulticast.mock.calls[0][0];
-      expect(msg.notification.title).toBe("Fluid server alert");
+      expect(msg.notification.title).toBe("Paymaster server alert");
       expect(msg.data.deep_link).toContain("/admin/signers");
       expect(msg.data.type).toBe("server_down");
     });

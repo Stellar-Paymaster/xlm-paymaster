@@ -70,7 +70,7 @@ describe("DiscordMilestoneNotifier", () => {
 
   it("posts a Discord embed with total txs, total XLM, and uptime", async () => {
     const notifier = new DiscordMilestoneNotifier({
-      serviceName: "Fluid node",
+      serviceName: "Paymaster node",
       thresholds: [1000],
       webhookUrl: "https://discord.test/webhook",
     });
@@ -105,7 +105,7 @@ describe("TransactionMilestoneService", () => {
     };
     const service = new TransactionMilestoneService(
       {
-        serviceName: "Fluid node",
+        serviceName: "Paymaster node",
         thresholds: [1000, 10000],
         webhookUrl: "https://discord.test/webhook",
       },
@@ -145,7 +145,7 @@ describe("TransactionMilestoneService", () => {
     };
     const service = new TransactionMilestoneService(
       {
-        serviceName: "Fluid node",
+        serviceName: "Paymaster node",
         thresholds: [1000],
         webhookUrl: "https://discord.test/webhook",
       },

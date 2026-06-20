@@ -9,7 +9,7 @@ export type LocaleCode = "en" | "es" | "fr" | "ja" | "pt" | "zh";
 
 export const SUPPORTED_LOCALES: LocaleCode[] = ["en", "es", "fr", "ja", "pt", "zh"];
 export const DEFAULT_LOCALE: LocaleCode = "en";
-export const LANGUAGE_STORAGE_KEY = "fluid-admin-locale";
+export const LANGUAGE_STORAGE_KEY = "paymaster-admin-locale";
 
 export const LOCALE_MESSAGES = {
   en,

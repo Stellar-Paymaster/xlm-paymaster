@@ -264,8 +264,8 @@ describe("getReferralData", () => {
 
 describe("Referral link construction", () => {
   test("builds full URL when siteUrl is provided", () => {
-    const link = buildReferralLink("https://fluid.example", "ABC123DEF456");
-    assert.equal(link, "https://fluid.example/register?ref=ABC123DEF456");
+    const link = buildReferralLink("https://paymaster.example", "ABC123DEF456");
+    assert.equal(link, "https://paymaster.example/register?ref=ABC123DEF456");
   });
 
   test("falls back to relative path when siteUrl is empty", () => {

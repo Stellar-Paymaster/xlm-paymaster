@@ -6,8 +6,8 @@ import { HorizonLatencyGrid } from "@/components/dashboard/HorizonLatencyGrid";
 import { getHorizonLatencyGridData } from "@/lib/horizon-monitor";
 
 async function fetchChains(): Promise<ChainRecord[]> {
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
-  const adminToken = process.env.FLUID_ADMIN_TOKEN?.trim();
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN?.trim();
 
   if (!serverUrl || !adminToken) {
     return [];
@@ -42,7 +42,7 @@ export default async function AdminChainsPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-sky-600">
-                Fluid Admin
+                Paymaster Admin
               </p>
               <h1 className="mt-2 text-3xl font-bold text-slate-900">
                 Chain Registry

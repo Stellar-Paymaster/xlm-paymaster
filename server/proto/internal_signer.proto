@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fluid.internal.signer.v1;
+package paymaster.internal.signer.v1;
 
 service InternalSigner {
   rpc Health(HealthRequest) returns (HealthResponse);

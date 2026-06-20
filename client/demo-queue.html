@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FluidQueue Offline Demo</title>
+  <title>PaymasterQueue Offline Demo</title>
   <style>
     body { font-family: monospace; background: #0f0f0f; color: #00ff88; padding: 20px; }
     button { background: #00ff88; color: #0f0f0f; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; font-size: 14px; font-weight: bold; border-radius: 4px; }
@@ -14,7 +14,7 @@
   </style>
 </head>
 <body>
-  <h2>⚡ FluidQueue — Offline Mode Demo</h2>
+  <h2>⚡ PaymasterQueue — Offline Mode Demo</h2>
   <div id="status">🟢 Status: <span class="online">ONLINE</span></div>
   <div>Queue size: <span id="qsize">0</span></div>
 
@@ -28,7 +28,7 @@
 
   <script>
     let isOffline = false;
-    let queue = JSON.parse(localStorage.getItem('fluid_queue') || '[]');
+    let queue = JSON.parse(localStorage.getItem('paymaster_queue') || '[]');
     const log = document.getElementById('log');
     const statusEl = document.getElementById('status');
     const qsizeEl = document.getElementById('qsize');
@@ -40,7 +40,7 @@
     }
 
     function updateQueueSize() {
-      queue = JSON.parse(localStorage.getItem('fluid_queue') || '[]');
+      queue = JSON.parse(localStorage.getItem('paymaster_queue') || '[]');
       qsizeEl.textContent = queue.length;
     }
 
@@ -59,7 +59,7 @@
     }
 
     function queueTransaction() {
-      const id = `fluid_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      const id = `paymaster_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
       const item = {
         id,
         xdr: `FAKE_XDR_${Math.random().toString(36).substr(2, 12).toUpperCase()}`,
@@ -68,7 +68,7 @@
         retryCount: 0
       };
       queue.push(item);
-      localStorage.setItem('fluid_queue', JSON.stringify(queue));
+      localStorage.setItem('paymaster_queue', JSON.stringify(queue));
       updateQueueSize();
 
       if (isOffline) {
@@ -80,7 +80,7 @@
     }
 
     async function flushQueue() {
-      queue = JSON.parse(localStorage.getItem('fluid_queue') || '[]');
+      queue = JSON.parse(localStorage.getItem('paymaster_queue') || '[]');
       if (queue.length === 0) {
         addLog('✅ Queue is empty, nothing to flush.');
         return;
@@ -92,7 +92,7 @@
         await new Promise(r => setTimeout(r, 800));
         addLog(`✅ Processed: ${item.id}`);
         queue = queue.filter(i => i.id !== item.id);
-        localStorage.setItem('fluid_queue', JSON.stringify(queue));
+        localStorage.setItem('paymaster_queue', JSON.stringify(queue));
         updateQueueSize();
       }
 
@@ -102,7 +102,7 @@
 
     function clearLog() {
       log.textContent = '';
-      localStorage.removeItem('fluid_queue');
+      localStorage.removeItem('paymaster_queue');
       queue = [];
       updateQueueSize();
       addLog('Log and queue cleared.');

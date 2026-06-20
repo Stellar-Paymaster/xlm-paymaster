@@ -15,7 +15,7 @@ output "api_endpoint" {
 
 output "route53_zone_id" {
   description = "Route 53 hosted zone ID"
-  value       = aws_route53_zone.fluid.zone_id
+  value       = aws_route53_zone.paymaster.zone_id
 }
 
 output "region_a_health_check_id" {

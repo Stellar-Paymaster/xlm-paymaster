@@ -11,7 +11,7 @@ You can query, search, and list all XLM Paymaster API error codes directly from 
 xlm-paymaster errors --list
 
 # Look up details for a specific code
-xlm-paymaster errors FLUID_001
+xlm-paymaster errors PAYMASTER_001
 
 # Search error codes by keyword (e.g. "limit" or "sequence")
 xlm-paymaster errors "rate limit" --search
@@ -23,46 +23,46 @@ xlm-paymaster errors "rate limit" --search
 
 The following error codes are registered in the XLM Paymaster platform:
 
-### `FLUID_001` - Invalid Transaction XDR
+### `PAYMASTER_001` - Invalid Transaction XDR
 - **HTTP Status**: 400
 - **Description**: The submitted transaction XDR could not be decoded or is malformed.
 - **Common Causes**: wrong network passphrase during encoding, corrupted XDR string.
 - **Remediation**: Re-build the transaction using the latest SDK and match the target network.
 
-### `FLUID_002` - Fee Below Minimum
+### `PAYMASTER_002` - Fee Below Minimum
 - **HTTP Status**: 400
 - **Description**: The fee set on the inner transaction is below the Stellar network minimum (100 stroops).
-- **Remediation**: Use `FluidClient.requestFeeBump()` which automatically handles compliance, or pass a baseFee ≥ 100.
+- **Remediation**: Use `PaymasterClient.requestFeeBump()` which automatically handles compliance, or pass a baseFee ≥ 100.
 
-### `FLUID_003` - Missing or Invalid API Key
+### `PAYMASTER_003` - Missing or Invalid API Key
 - **HTTP Status**: 401
 - **Description**: The request did not include a valid XLM Paymaster API key in the headers.
 
-### `FLUID_004` - Tenant Quota Exceeded
+### `PAYMASTER_004` - Tenant Quota Exceeded
 - **HTTP Status**: 403
 - **Description**: The tenant has exceeded their monthly fee-bump quota.
 
-### `FLUID_005` - Transaction Not Found
+### `PAYMASTER_005` - Transaction Not Found
 - **HTTP Status**: 404
 - **Description**: No transaction matching the supplied hash was found on the network.
 
-### `FLUID_006` - Duplicate Transaction
+### `PAYMASTER_006` - Duplicate Transaction
 - **HTTP Status**: 409
 - **Description**: This transaction hash has already been processed by XLM Paymaster.
 
-### `FLUID_007` - Rate Limit Exceeded
+### `PAYMASTER_007` - Rate Limit Exceeded
 - **HTTP Status**: 429
 - **Description**: Too many requests were made to the XLM Paymaster API in a short window.
 
-### `FLUID_008` - Internal Server Error
+### `PAYMASTER_008` - Internal Server Error
 - **HTTP Status**: 500
 - **Description**: An unexpected error occurred on the XLM Paymaster server.
 
-### `FLUID_009` - Stellar Network Unavailable
+### `PAYMASTER_009` - Stellar Network Unavailable
 - **HTTP Status**: 503
 - **Description**: The XLM Paymaster server could not reach the Stellar Horizon or Soroban RPC endpoint.
 
-### `FLUID_010` - Invalid Soroban Contract Invocation
+### `PAYMASTER_010` - Invalid Soroban Contract Invocation
 - **HTTP Status**: 400
 - **Description**: The Soroban contract call included in the transaction is invalid or simulation failed.
 

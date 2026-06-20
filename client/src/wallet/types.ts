@@ -1,5 +1,5 @@
 /**
- * Universal wallet signing types for the Fluid client.
+ * Universal wallet signing types for the Paymaster client.
  *
  * These types describe a wallet-agnostic signing contract that example
  * applications can target regardless of how the underlying wallet is

@@ -6,8 +6,8 @@ services:
     container_name: xlm-paymaster-testnet-postgres
     environment:
       POSTGRES_USER: "${POSTGRES_USER:-xlm-paymaster}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
-      POSTGRES_DB: "${POSTGRES_DB:-fluid_testnet}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-paymaster_pass}"
+      POSTGRES_DB: "${POSTGRES_DB:-paymaster_testnet}"
     ports:
       - "5432:5432"
     volumes:
@@ -16,7 +16,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-xlm-paymaster} -d ${POSTGRES_DB:-fluid_testnet}",
+          "pg_isready -U ${POSTGRES_USER:-xlm-paymaster} -d ${POSTGRES_DB:-paymaster_testnet}",
         ]
       interval: 5s
       timeout: 5s
@@ -49,7 +49,7 @@ services:
       STELLAR_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
       HORIZON_URL: "https://horizon-testnet.stellar.org"
       SOROBAN_RPC_URL: "https://soroban-testnet.stellar.org"
-      DATABASE_URL: "postgresql://xlm-paymaster:fluid_pass@postgres:5432/fluid_testnet"
+      DATABASE_URL: "postgresql://xlm-paymaster:paymaster_pass@postgres:5432/paymaster_testnet"
       REDIS_URL: "redis://redis:6379"
       LOG_LEVEL: "info"
       RATE_LIMIT_ENABLED: "true"

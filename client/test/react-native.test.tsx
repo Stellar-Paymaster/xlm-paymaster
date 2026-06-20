@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { renderHook, act } from "@testing-library/react";
-import { FluidProvider } from "../src/react-native/FluidProvider";
+import { PaymasterProvider } from "../src/react-native/PaymasterProvider";
 import { useGaslessTransaction } from "../src/react-native/hooks/useGaslessTransaction";
-import { FluidClient } from "../src/FluidClient";
+import { PaymasterClient } from "../src/PaymasterClient";
 
-// Mock FluidClient
-vi.mock("../src/FluidClient", () => {
+// Mock PaymasterClient
+vi.mock("../src/PaymasterClient", () => {
   return {
-    FluidClient: vi.fn().mockImplementation(function() {
+    PaymasterClient: vi.fn().mockImplementation(function() {
       return {
         requestFeeBump: vi.fn().mockResolvedValue({
           xdr: "signed_fee_bump_xdr",
@@ -43,7 +43,7 @@ describe("React Native Gasless Boilerplate", () => {
   describe("useGaslessTransaction Hook", () => {
     it("should handle the full gasless flow successfully", async () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
-        <FluidProvider config={config}>{children}</FluidProvider>
+        <PaymasterProvider config={config}>{children}</PaymasterProvider>
       );
 
       const { result } = renderHook(() => useGaslessTransaction(), { wrapper });
@@ -64,7 +64,7 @@ describe("React Native Gasless Boilerplate", () => {
 
     it("should handle signing errors", async () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
-        <FluidProvider config={config}>{children}</FluidProvider>
+        <PaymasterProvider config={config}>{children}</PaymasterProvider>
       );
 
       const { result } = renderHook(() => useGaslessTransaction(), { wrapper });
@@ -84,13 +84,13 @@ describe("React Native Gasless Boilerplate", () => {
     });
   });
 
-  describe("FluidProvider", () => {
-    it("should initialize FluidClient with useWorker: false by default", () => {
+  describe("PaymasterProvider", () => {
+    it("should initialize PaymasterClient with useWorker: false by default", () => {
       renderHook(() => {}, {
-        wrapper: ({ children }) => <FluidProvider config={config}>{children}</FluidProvider>,
+        wrapper: ({ children }) => <PaymasterProvider config={config}>{children}</PaymasterProvider>,
       });
 
-      expect(FluidClient).toHaveBeenCalledWith(
+      expect(PaymasterClient).toHaveBeenCalledWith(
         expect.objectContaining({ useWorker: false })
       );
     });

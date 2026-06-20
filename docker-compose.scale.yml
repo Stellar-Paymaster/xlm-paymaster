@@ -18,11 +18,11 @@ services:
     container_name: xlm-paymaster-postgres-scale
     environment:
       POSTGRES_USER: "${POSTGRES_USER:-xlm-paymaster}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
-      POSTGRES_DB: "${POSTGRES_DB:-fluid_db}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-paymaster_pass}"
+      POSTGRES_DB: "${POSTGRES_DB:-paymaster_db}"
     healthcheck:
       test:
-        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xlm-paymaster} -d ${POSTGRES_DB:-fluid_db}"]
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xlm-paymaster} -d ${POSTGRES_DB:-paymaster_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -60,12 +60,12 @@ services:
       context: ./paymaster-server
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-fluid_pass}@postgres:5432/${POSTGRES_DB:-fluid_db}"
-      FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-paymaster_pass}@postgres:5432/${POSTGRES_DB:-paymaster_db}"
+      PAYMASTER_FEE_PAYER_SECRET: "${PAYMASTER_FEE_PAYER_SECRET}"
       STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
       STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
       PORT: "3000"
-      FLUID_ALLOWED_ORIGINS: "*"
+      PAYMASTER_ALLOWED_ORIGINS: "*"
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,8 +82,8 @@ services:
       DB_HOST: "postgres"
       DB_PORT: "5432"
       DB_USER: "${POSTGRES_USER:-xlm-paymaster}"
-      DB_PASSWORD: "${POSTGRES_PASSWORD:-fluid_pass}"
-      DB_NAME: "${POSTGRES_DB:-fluid_db}"
+      DB_PASSWORD: "${POSTGRES_PASSWORD:-paymaster_pass}"
+      DB_NAME: "${POSTGRES_DB:-paymaster_db}"
       POOL_MODE: "transaction"
       MAX_CLIENT_CONN: "1000"
       DEFAULT_POOL_SIZE: "20"
@@ -110,11 +110,11 @@ services:
       PORT: "3001"
       REDIS_URL: "redis://redis:6379"
       # All replicas share the same PgBouncer pool — no per-replica connection bloat.
-      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-fluid_pass}@pgbouncer:6432/${POSTGRES_DB:-fluid_db}?pgbouncer=true"
-      FLUID_FEE_PAYER_SECRET: "${FLUID_FEE_PAYER_SECRET}"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-xlm-paymaster}:${POSTGRES_PASSWORD:-paymaster_pass}@pgbouncer:6432/${POSTGRES_DB:-paymaster_db}?pgbouncer=true"
+      PAYMASTER_FEE_PAYER_SECRET: "${PAYMASTER_FEE_PAYER_SECRET}"
       STELLAR_HORIZON_URL: "${STELLAR_HORIZON_URL:-https://horizon-testnet.stellar.org}"
       STELLAR_NETWORK_PASSPHRASE: "${STELLAR_NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
-      FLUID_ALLOWED_ORIGINS: "*"
+      PAYMASTER_ALLOWED_ORIGINS: "*"
       SANDBOX_HORIZON_URL: "http://stellar-quickstart:8000"
       # Disable in-memory fallbacks so all state is in Redis.
       # This is mandatory when running more than one replica.

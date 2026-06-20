@@ -29,7 +29,7 @@ export function renderDigestEmail(
     unsubscribeUrl?: string;
   } = {},
 ): DigestEmailContent {
-  const subject = `[Fluid] Daily digest — ${stats.date}`;
+  const subject = `[Paymaster] Daily digest — ${stats.date}`;
 
   const html = buildHtml(stats, options);
   const text = buildText(stats, options);
@@ -113,7 +113,7 @@ function buildHtml(
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fluid Daily Digest — ${escapeHtml(stats.date)}</title>
+  <title>Paymaster Daily Digest — ${escapeHtml(stats.date)}</title>
 </head>
 <body style="margin:0;padding:0;background:#f1f5f9;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 0;">
@@ -125,7 +125,7 @@ function buildHtml(
           <tr>
             <td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);padding:28px 32px;">
               <p style="margin:0;font-family:system-ui,sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;">
-                ⚡ Fluid
+                ⚡ Paymaster
               </p>
               <p style="margin:4px 0 0;font-family:system-ui,sans-serif;font-size:13px;color:rgba(255,255,255,0.75);">
                 Daily activity summary for ${escapeHtml(stats.date)}
@@ -180,7 +180,7 @@ function buildHtml(
           <tr>
             <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 32px;text-align:center;">
               <p style="margin:0;font-family:system-ui,sans-serif;font-size:12px;color:#9ca3af;">
-                Fluid Operator Digest &middot; Sent automatically each day
+                Paymaster Operator Digest &middot; Sent automatically each day
               </p>
               ${unsubscribeFooter ? `<p style="margin:8px 0 0;font-family:system-ui,sans-serif;font-size:12px;">${unsubscribeFooter}</p>` : ""}
             </td>
@@ -204,7 +204,7 @@ function buildText(
 ): string {
   const { dashboardUrl, unsubscribeUrl } = options;
   const lines: string[] = [
-    "Fluid Daily Digest",
+    "Paymaster Daily Digest",
     `Date: ${stats.date}`,
     "",
     `Total transactions sponsored: ${stats.totalTransactions.toLocaleString()}`,

@@ -107,7 +107,7 @@ export function loadWormholeConfig(): WormholeConfig | null {
   const stellarRpcUrl = process.env.STELLAR_RPC_URL;
   const stellarHorizonUrl = process.env.STELLAR_HORIZON_URL;
   const stellarNetworkPassphrase = process.env.STELLAR_NETWORK_PASSPHRASE;
-  const stellarTreasurySecret = process.env.WORMHOLE_TREASURY_STELLAR_SECRET || process.env.FLUID_FEE_PAYER_SECRET;
+  const stellarTreasurySecret = process.env.WORMHOLE_TREASURY_STELLAR_SECRET || process.env.PAYMASTER_FEE_PAYER_SECRET;
   const usdcEvmAddress = process.env.WORMHOLE_USDC_EVM;
   const usdcStellarAddress = process.env.WORMHOLE_USDC_STELLAR;
 

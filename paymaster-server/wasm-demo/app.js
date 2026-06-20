@@ -1,4 +1,4 @@
-import init, { signTransactionXdr } from "../pkg/web/fluid_server.js";
+import init, { signTransactionXdr } from "../pkg/web/paymaster_server.js";
 import * as StellarSdkModule from "https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@11.3.0/+esm";
 import {
   buildUnsignedTransaction,

@@ -1,5 +1,5 @@
 /**
- * Example: universal wallet signing with the Fluid client.
+ * Example: universal wallet signing with the Paymaster client.
  *
  * Demonstrates the standard WalletConnect bindings and the wallet-agnostic
  * signer contract end to end, entirely offline:
@@ -83,7 +83,7 @@ async function signAndReport(label: string, signer: WalletSigner, xdr: string) {
 }
 
 async function main() {
-  console.log("=== Fluid universal wallet signing demo ===");
+  console.log("=== Paymaster universal wallet signing demo ===");
 
   // (1) The namespaces an app requests when opening a WalletConnect session.
   const requiredNamespaces = buildStellarRequiredNamespaces({

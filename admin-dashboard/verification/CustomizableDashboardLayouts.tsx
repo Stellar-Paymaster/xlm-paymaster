@@ -18,7 +18,7 @@ export const CustomizableDashboardLayouts: React.FC = () => {
   const [draggedId, setDraggedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('fluid-dashboard-layout');
+    const saved = localStorage.getItem('paymaster-dashboard-layout');
     if (saved) {
       try {
         setWidgets(JSON.parse(saved));
@@ -32,7 +32,7 @@ export const CustomizableDashboardLayouts: React.FC = () => {
 
   const saveLayout = (newWidgets: Widget[]) => {
     setWidgets(newWidgets);
-    localStorage.setItem('fluid-dashboard-layout', JSON.stringify(newWidgets));
+    localStorage.setItem('paymaster-dashboard-layout', JSON.stringify(newWidgets));
   };
 
   const handleDragStart = (e: React.DragEvent, id: string) => {

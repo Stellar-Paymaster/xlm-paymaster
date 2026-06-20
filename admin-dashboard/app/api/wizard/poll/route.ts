@@ -18,7 +18,7 @@ interface HealthResponse {
  * as detected.
  */
 export async function GET() {
-  const serverUrl = process.env.FLUID_SERVER_URL?.trim().replace(/\/$/, "");
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
 
   if (!serverUrl) {
     return NextResponse.json({ count: 0 });

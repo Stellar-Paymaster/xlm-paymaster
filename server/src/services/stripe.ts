@@ -33,7 +33,7 @@ export async function createCheckoutSession(
         price_data: {
           currency: "usd",
           unit_amount: amountCents,
-          product_data: { name: `Fluid Quota Top-up — ${tier.label}` },
+          product_data: { name: `Paymaster Quota Top-up — ${tier.label}` },
         },
         quantity: 1,
       },

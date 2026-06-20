@@ -16,7 +16,7 @@ interface NativeSignerBinding {
   preflightSoroban(rpcUrl: string, transactionXdr: string): Promise<string>;
 }
 
-const nativeModulePath = join(__dirname, "../../fluid_signer.node");
+const nativeModulePath = join(__dirname, "../../paymaster_signer.node");
 
 function unavailableNativeSigner(reason: string): NativeSignerBinding {
   const fail = async (): Promise<never> => {

@@ -36,18 +36,18 @@ mkcert -client -cert-file server/certs/dev/node-api.pem -key-file server/certs/d
 5. Set the following environment variables:
 
 ```bash
-FLUID_GRPC_ENGINE_ADDRESS=127.0.0.1:50051
-FLUID_GRPC_ENGINE_TLS_SERVER_NAME=xlm-paymaster-grpc-engine.internal
-FLUID_GRPC_ENGINE_CLIENT_CA_PATH=server/certs/dev/rootCA.pem
-FLUID_GRPC_ENGINE_CLIENT_CERT_PATH=server/certs/dev/node-api.pem
-FLUID_GRPC_ENGINE_CLIENT_KEY_PATH=server/certs/dev/node-api-key.pem
-FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256=<server-cert-sha256>
+PAYMASTER_GRPC_ENGINE_ADDRESS=127.0.0.1:50051
+PAYMASTER_GRPC_ENGINE_TLS_SERVER_NAME=xlm-paymaster-grpc-engine.internal
+PAYMASTER_GRPC_ENGINE_CLIENT_CA_PATH=server/certs/dev/rootCA.pem
+PAYMASTER_GRPC_ENGINE_CLIENT_CERT_PATH=server/certs/dev/node-api.pem
+PAYMASTER_GRPC_ENGINE_CLIENT_KEY_PATH=server/certs/dev/node-api-key.pem
+PAYMASTER_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256=<server-cert-sha256>
 
-FLUID_GRPC_ENGINE_LISTEN_ADDR=127.0.0.1:50051
-FLUID_GRPC_ENGINE_TLS_CERT_PATH=server/certs/dev/rust-engine.pem
-FLUID_GRPC_ENGINE_TLS_KEY_PATH=server/certs/dev/rust-engine-key.pem
-FLUID_GRPC_ENGINE_TLS_CLIENT_CA_PATH=server/certs/dev/rootCA.pem
-FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256=<node-client-cert-sha256>
+PAYMASTER_GRPC_ENGINE_LISTEN_ADDR=127.0.0.1:50051
+PAYMASTER_GRPC_ENGINE_TLS_CERT_PATH=server/certs/dev/rust-engine.pem
+PAYMASTER_GRPC_ENGINE_TLS_KEY_PATH=server/certs/dev/rust-engine-key.pem
+PAYMASTER_GRPC_ENGINE_TLS_CLIENT_CA_PATH=server/certs/dev/rootCA.pem
+PAYMASTER_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256=<node-client-cert-sha256>
 ```
 
 Compute a certificate fingerprint with OpenSSL if available:
@@ -62,8 +62,8 @@ The implementation is designed so new connections can pick up rotated certificat
 
 1. Issue replacement Node API and Rust engine certificates before the current certificates expire.
 2. Add both old and new SHA-256 fingerprints to:
-   `FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256`
-   `FLUID_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256`
+   `PAYMASTER_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256`
+   `PAYMASTER_GRPC_ENGINE_PINNED_CLIENT_CERT_SHA256`
 3. Ensure both sides trust an overlapping CA bundle.
    If rotating the CA, publish a bundle containing both the current and next CA certificates.
 4. Replace the PEM files on disk.
@@ -86,7 +86,7 @@ Example cert-manager approach:
 
 - A dedicated internal `Issuer` or `ClusterIssuer` signs both the Rust engine server cert and the Node API client cert.
 - The Rust engine service DNS name (for example `xlm-paymaster-rust-engine.default.svc.cluster.local`) is included in the server certificate SANs.
-- The Node API uses that DNS name as `FLUID_GRPC_ENGINE_TLS_SERVER_NAME`.
+- The Node API uses that DNS name as `PAYMASTER_GRPC_ENGINE_TLS_SERVER_NAME`.
 
 ## Vault PKI
 

@@ -43,11 +43,11 @@ Client → Gateway (Envoy/NGINX) → paymaster-server (Rust)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `FLUID_GATEWAY_GLOBAL_RATE_LIMIT_MAX` | `100` | Max requests per IP per window at the gateway |
-| `FLUID_GATEWAY_GLOBAL_RATE_LIMIT_WINDOW_MS` | `60000` | IP rate limit window (ms) |
-| `FLUID_GATEWAY_TRUSTED_HEADER` | `x-envoy-auth-status` | Header set by gateway after successful auth |
-| `FLUID_GATEWAY_ENFORCE_AUTH` | `false` | When true, reject requests missing the trusted gateway header |
-| `FLUID_DISABLE_RATE_LIMITS` | `false` | Bypass in-process rate limits (load testing only) |
+| `PAYMASTER_GATEWAY_GLOBAL_RATE_LIMIT_MAX` | `100` | Max requests per IP per window at the gateway |
+| `PAYMASTER_GATEWAY_GLOBAL_RATE_LIMIT_WINDOW_MS` | `60000` | IP rate limit window (ms) |
+| `PAYMASTER_GATEWAY_TRUSTED_HEADER` | `x-envoy-auth-status` | Header set by gateway after successful auth |
+| `PAYMASTER_GATEWAY_ENFORCE_AUTH` | `false` | When true, reject requests missing the trusted gateway header |
+| `PAYMASTER_DISABLE_RATE_LIMITS` | `false` | Bypass in-process rate limits (load testing only) |
 
 ## Envoy Deployment
 
@@ -93,7 +93,7 @@ When adding production keys, update **both** the gateway config and `GatewayConf
 
 - Gateway allowlists are appropriate for **basic** key checks only. Rotate keys via your secrets manager and sync gateway configs on deploy.
 - Always terminate TLS at the gateway or load balancer; never expose the Rust process directly.
-- Set `FLUID_GATEWAY_ENFORCE_AUTH=true` in production so requests cannot bypass the gateway by hitting the Rust port directly.
+- Set `PAYMASTER_GATEWAY_ENFORCE_AUTH=true` in production so requests cannot bypass the gateway by hitting the Rust port directly.
 - Rate limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`) are set at both gateway and application layers for observability.
 
 ## Running Tests
@@ -108,5 +108,5 @@ cargo test gateway_config
 - **Empty `x-api-key` header**: Gateway returns 401 before the request reaches Rust.
 - **Unknown key**: Gateway returns 403; no database lookup occurs.
 - **Rate limit burst**: Envoy local rate limit returns 429 with standard headers; clients should honour `Retry-After`.
-- **Gateway bypass**: When `FLUID_GATEWAY_ENFORCE_AUTH=true`, direct requests to the Rust port without `x-envoy-auth-status: allowed` are rejected.
-- **Load testing**: Set `FLUID_DISABLE_RATE_LIMITS=true` on the Rust process and raise gateway limits independently.
+- **Gateway bypass**: When `PAYMASTER_GATEWAY_ENFORCE_AUTH=true`, direct requests to the Rust port without `x-envoy-auth-status: allowed` are rejected.
+- **Load testing**: Set `PAYMASTER_DISABLE_RATE_LIMITS=true` on the Rust process and raise gateway limits independently.

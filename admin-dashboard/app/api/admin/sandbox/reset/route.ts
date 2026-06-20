@@ -1,11 +1,11 @@
 /**
  * Dashboard proxy: POST /api/admin/sandbox/reset
- * Forwards the reset request to the Fluid server using the sandbox API key
+ * Forwards the reset request to the Paymaster server using the sandbox API key
  * supplied in the request body.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { fluidServerUrl } from "@/lib/server-env";
+import { paymasterServerUrl } from "@/lib/server-env";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const upstream = await fetch(`${fluidServerUrl}/sandbox/reset`, {
+  const upstream = await fetch(`${paymasterServerUrl}/sandbox/reset`, {
     method: "POST",
     headers: {
       "x-api-key": sandboxApiKey,

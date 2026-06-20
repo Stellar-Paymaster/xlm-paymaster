@@ -12,7 +12,7 @@ export interface GitHubRelease {
 }
 
 export async function getGitHubReleases(): Promise<GitHubRelease[]> {
-  const repo = "augustine00z/stellar-fluid";
+  const repo = "augustine00z/stellar-paymaster";
   const url = `https://api.github.com/repos/${repo}/releases`;
 
   try {
@@ -20,7 +20,7 @@ export async function getGitHubReleases(): Promise<GitHubRelease[]> {
       next: { revalidate: 3600 }, // Cache for 1 hour
       headers: {
         Accept: "application/vnd.github.v3+json",
-        "User-Agent": "Fluid-Changelog",
+        "User-Agent": "Paymaster-Changelog",
       },
     });
 

@@ -22,15 +22,15 @@ export default defineConfig([
   },
   // Standalone IIFE bundle for CDN / <script> tag usage
   {
-    entry: { fluid: "src/standalone.ts" },
+    entry: { paymaster: "src/standalone.ts" },
     format: ["iife"],
-    globalName: "Fluid",
+    globalName: "Paymaster",
     minify: true,
     sourcemap: false,
     clean: false,
     outDir: "dist",
     platform: "browser",
-    // Rename output from fluid.global.js → fluid.min.js
+    // Rename output from paymaster.global.js → paymaster.min.js
     outExtension: () => ({ js: ".min.js" }),
     // Bundle @stellar/stellar-sdk so the output is fully self-contained
     noExternal: [/.*/],

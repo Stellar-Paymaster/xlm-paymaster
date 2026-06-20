@@ -85,44 +85,44 @@ impl Default for LogAggregationConfig {
             batch_size: DEFAULT_BATCH_SIZE,
             flush_interval: Duration::from_millis(DEFAULT_FLUSH_MS),
             request_timeout: Duration::from_millis(DEFAULT_TIMEOUT_MS),
-            elk_index: "fluid-server-logs".to_string(),
-            service_name: "fluid-server".to_string(),
+            elk_index: "paymaster-server-logs".to_string(),
+            service_name: "paymaster-server".to_string(),
         }
     }
 }
 
 impl LogAggregationConfig {
     pub fn from_env() -> Result<Self, String> {
-        let provider = std::env::var("FLUID_LOG_AGGREGATION_PROVIDER")
+        let provider = std::env::var("PAYMASTER_LOG_AGGREGATION_PROVIDER")
             .unwrap_or_else(|_| "disabled".to_string())
             .parse::<LogProvider>()?;
 
-        let endpoint = std::env::var("FLUID_LOG_AGGREGATION_ENDPOINT")
+        let endpoint = std::env::var("PAYMASTER_LOG_AGGREGATION_ENDPOINT")
             .ok()
             .map(|value| value.trim().to_string())
             .filter(|value| !value.is_empty())
             .or_else(|| provider.default_endpoint().map(ToString::to_string));
 
-        let api_key = std::env::var("FLUID_LOG_AGGREGATION_API_KEY")
+        let api_key = std::env::var("PAYMASTER_LOG_AGGREGATION_API_KEY")
             .ok()
             .map(|value| value.trim().to_string())
             .filter(|value| !value.is_empty());
 
-        let batch_size = env_parse("FLUID_LOG_AGGREGATION_BATCH_SIZE", DEFAULT_BATCH_SIZE)
+        let batch_size = env_parse("PAYMASTER_LOG_AGGREGATION_BATCH_SIZE", DEFAULT_BATCH_SIZE)
             .clamp(1, 1_000);
-        let flush_ms = env_parse("FLUID_LOG_AGGREGATION_FLUSH_MS", DEFAULT_FLUSH_MS).max(100);
+        let flush_ms = env_parse("PAYMASTER_LOG_AGGREGATION_FLUSH_MS", DEFAULT_FLUSH_MS).max(100);
         let timeout_ms =
-            env_parse("FLUID_LOG_AGGREGATION_TIMEOUT_MS", DEFAULT_TIMEOUT_MS).max(100);
-        let elk_index = std::env::var("FLUID_LOG_AGGREGATION_ELK_INDEX")
+            env_parse("PAYMASTER_LOG_AGGREGATION_TIMEOUT_MS", DEFAULT_TIMEOUT_MS).max(100);
+        let elk_index = std::env::var("PAYMASTER_LOG_AGGREGATION_ELK_INDEX")
             .ok()
             .map(|value| value.trim().to_string())
             .filter(|value| !value.is_empty())
-            .unwrap_or_else(|| "fluid-server-logs".to_string());
-        let service_name = std::env::var("FLUID_SERVICE_NAME")
+            .unwrap_or_else(|| "paymaster-server-logs".to_string());
+        let service_name = std::env::var("PAYMASTER_SERVICE_NAME")
             .ok()
             .map(|value| value.trim().to_string())
             .filter(|value| !value.is_empty())
-            .unwrap_or_else(|| "fluid-server".to_string());
+            .unwrap_or_else(|| "paymaster-server".to_string());
 
         let config = Self {
             provider,
@@ -208,7 +208,7 @@ pub fn init_logging_from_env() -> Result<LoggingInitReport, LoggingInitError> {
 
 fn init_logging(config: LogAggregationConfig) -> Result<LoggingInitReport, LoggingInitError> {
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| "fluid_server=info,tower_http=info".into());
+        .unwrap_or_else(|_| "paymaster_server=info,tower_http=info".into());
 
     if config.provider == LogProvider::Disabled {
         tracing_subscriber::registry()
@@ -463,8 +463,8 @@ async fn flush_batch(client: &reqwest::Client, config: &LogAggregationConfig, ba
 /// Write a batch of log records to a local fallback file when the remote
 /// aggregation service is unavailable.
 ///
-/// The file path is controlled by `FLUID_LOG_FALLBACK_PATH` (default:
-/// `fluid-server-fallback.log` in the current working directory).  Each
+/// The file path is controlled by `PAYMASTER_LOG_FALLBACK_PATH` (default:
+/// `paymaster-server-fallback.log` in the current working directory).  Each
 /// record is written as a single JSON line (NDJSON) so the file can be
 /// ingested by any log shipper once the remote service recovers.
 fn flush_batch_to_disk(config: &LogAggregationConfig, batch: &mut Vec<AggregatedLog>) {
@@ -472,9 +472,9 @@ fn flush_batch_to_disk(config: &LogAggregationConfig, batch: &mut Vec<Aggregated
         return;
     }
 
-    let path: PathBuf = std::env::var("FLUID_LOG_FALLBACK_PATH")
+    let path: PathBuf = std::env::var("PAYMASTER_LOG_FALLBACK_PATH")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("fluid-server-fallback.log"));
+        .unwrap_or_else(|_| PathBuf::from("paymaster-server-fallback.log"));
 
     let file_result = OpenOptions::new().create(true).append(true).open(&path);
 
@@ -549,7 +549,7 @@ mod tests {
             level: level.to_string(),
             target: "test".to_string(),
             fields: serde_json::json!({"message": "hello"}),
-            service: "fluid-server".to_string(),
+            service: "paymaster-server".to_string(),
         }
     }
 
@@ -595,7 +595,7 @@ mod tests {
         };
         let payload = build_payload(&config, &[make_record("INFO")]).unwrap();
         assert!(payload.starts_with("["));
-        assert!(payload.contains("\"service\":\"fluid-server\""));
+        assert!(payload.contains("\"service\":\"paymaster-server\""));
     }
 
     #[test]

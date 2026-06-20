@@ -1,7 +1,7 @@
 /**
- * /gallery — Fluid Design System Component Gallery
+ * /gallery — Paymaster Design System Component Gallery
  *
- * Shows every shadcn/ui component installed for the Fluid Admin Dashboard so
+ * Shows every shadcn/ui component installed for the Paymaster Admin Dashboard so
  * that designers, reviewers, and developers can inspect the brand tokens in
  * context.  This page is unauthenticated and purely for visual verification.
  */
@@ -164,14 +164,14 @@ export default function GalleryPage() {
         <div className="flex items-center gap-2">
           <Zap className="h-6 w-6 text-primary" />
           <span className="text-sm font-semibold tracking-widest uppercase text-muted-foreground">
-            Fluid Design System
+            Paymaster Design System
           </span>
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           Component Gallery
         </h1>
         <p className="text-lg text-muted-foreground">
-          Shadcn UI + Tailwind CSS v4 — Fluid brand tokens applied.
+          Shadcn UI + Tailwind CSS v4 — Paymaster brand tokens applied.
         </p>
       </div>
 
@@ -267,7 +267,7 @@ export default function GalleryPage() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4 text-primary" />
-                  <CardTitle className="text-sm">Fluid Blue Accent</CardTitle>
+                  <CardTitle className="text-sm">Paymaster Blue Accent</CardTitle>
                 </div>
                 <CardDescription>
                   Cards can carry brand emphasis via subtle tinting.
@@ -472,7 +472,7 @@ export default function GalleryPage() {
 
         {/* Footer */}
         <footer className="border-t border-border pt-6 text-center text-xs text-muted-foreground">
-          Fluid Design System · Shadcn UI · Tailwind CSS v4 ·{" "}
+          Paymaster Design System · Shadcn UI · Tailwind CSS v4 ·{" "}
           <span className="text-primary font-medium">lucide-react</span>
         </footer>
       </div>

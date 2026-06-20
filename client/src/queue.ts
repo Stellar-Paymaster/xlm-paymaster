@@ -1,4 +1,4 @@
-import { FluidClient, FeeBumpResponse } from "./FluidClient";
+import { PaymasterClient, FeeBumpResponse } from "./PaymasterClient";
 
 /**
  * Represents a single queued transaction waiting to be submitted.
@@ -19,7 +19,7 @@ export interface QueuedTransaction {
 /**
  * Callbacks for monitoring queue activity.
  */
-export interface FluidQueueCallbacks {
+export interface PaymasterQueueCallbacks {
   /** Called when a transaction is successfully processed. */
   onSuccess?: (id: string, response: FeeBumpResponse) => void;
   /** Called when a transaction fails after all retries. */
@@ -29,13 +29,13 @@ export interface FluidQueueCallbacks {
 }
 
 /**
- * FluidQueue manages offline queueing of fee-bump transactions.
+ * PaymasterQueue manages offline queueing of fee-bump transactions.
  * It persists queued XDRs to localStorage and automatically retries
  * them when internet connectivity is restored.
  *
  * @example
  * ```ts
- * const queue = new FluidQueue(client, {
+ * const queue = new PaymasterQueue(client, {
  *   onSuccess: (id, res) => console.log("Sent!", id, res),
  *   onQueueCleared: () => console.log("All transactions sent!"),
  * });
@@ -44,26 +44,26 @@ export interface FluidQueueCallbacks {
  * await queue.add(signedXdr, false);
  * ```
  */
-export class FluidQueue {
-  private client: FluidClient;
+export class PaymasterQueue {
+  private client: PaymasterClient;
   private storageKey: string;
-  private callbacks: FluidQueueCallbacks;
+  private callbacks: PaymasterQueueCallbacks;
   private maxRetries: number;
   private isFlushing: boolean = false;
 
   /**
-   * Creates a new FluidQueue instance and starts listening for
+   * Creates a new PaymasterQueue instance and starts listening for
    * network connectivity events.
    *
-   * @param client - A configured {@link FluidClient} instance.
+   * @param client - A configured {@link PaymasterClient} instance.
    * @param callbacks - Optional callbacks for queue events.
-   * @param storageKey - localStorage key to persist the queue. Defaults to `"fluid_queue"`.
+   * @param storageKey - localStorage key to persist the queue. Defaults to `"paymaster_queue"`.
    * @param maxRetries - Maximum retry attempts per transaction. Defaults to `3`.
    */
   constructor(
-    client: FluidClient,
-    callbacks: FluidQueueCallbacks = {},
-    storageKey: string = "fluid_queue",
+    client: PaymasterClient,
+    callbacks: PaymasterQueueCallbacks = {},
+    storageKey: string = "paymaster_queue",
     maxRetries: number = 3
   ) {
     this.client = client;
@@ -74,7 +74,7 @@ export class FluidQueue {
     // Listen for connectivity restoration
     if (typeof window !== "undefined") {
       window.addEventListener("online", () => {
-        console.log("[FluidQueue] Back online — flushing queue...");
+        console.log("[PaymasterQueue] Back online — flushing queue...");
         this.flush();
       });
     }
@@ -96,7 +96,7 @@ export class FluidQueue {
    */
   async add(xdr: string, submit: boolean = false): Promise<string> {
     const item: QueuedTransaction = {
-      id: `fluid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `paymaster_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       xdr,
       submit,
       queuedAt: Date.now(),
@@ -104,13 +104,13 @@ export class FluidQueue {
     };
 
     this.saveToStorage(item);
-    console.log(`[FluidQueue] Transaction queued: ${item.id}`);
+    console.log(`[PaymasterQueue] Transaction queued: ${item.id}`);
 
     // Try immediately if online
     if (typeof window === "undefined" || window.navigator.onLine) {
       await this.flush();
     } else {
-      console.log("[FluidQueue] Offline — transaction saved for later.");
+      console.log("[PaymasterQueue] Offline — transaction saved for later.");
     }
 
     return item.id;
@@ -140,7 +140,7 @@ export class FluidQueue {
    */
   clear(): void {
     localStorage.removeItem(this.storageKey);
-    console.log("[FluidQueue] Queue cleared.");
+    console.log("[PaymasterQueue] Queue cleared.");
   }
 
   /**
@@ -157,14 +157,14 @@ export class FluidQueue {
       return;
     }
 
-    console.log(`[FluidQueue] Flushing ${queue.length} queued transaction(s)...`);
+    console.log(`[PaymasterQueue] Flushing ${queue.length} queued transaction(s)...`);
 
     for (const item of queue) {
       await this.processItem(item);
     }
 
     if (this.getQueue().length === 0) {
-      console.log("[FluidQueue] Queue cleared!");
+      console.log("[PaymasterQueue] Queue cleared!");
       this.callbacks.onQueueCleared?.();
     }
 
@@ -177,24 +177,24 @@ export class FluidQueue {
     // Check if transaction has expired (Stellar txns expire after ~timeout)
     const AGE_LIMIT_MS = 3 * 60 * 1000; // 3 minutes
     if (Date.now() - item.queuedAt > AGE_LIMIT_MS) {
-      console.warn(`[FluidQueue] Transaction ${item.id} expired, removing.`);
+      console.warn(`[PaymasterQueue] Transaction ${item.id} expired, removing.`);
       this.removeFromStorage(item.id);
       return;
     }
 
     try {
       const response = await this.client.requestFeeBump(item.xdr, item.submit);
-      console.log(`[FluidQueue] Transaction ${item.id} succeeded!`);
+      console.log(`[PaymasterQueue] Transaction ${item.id} succeeded!`);
       this.removeFromStorage(item.id);
       this.callbacks.onSuccess?.(item.id, response);
     } catch (error) {
       item.retryCount++;
       if (item.retryCount >= this.maxRetries) {
-        console.error(`[FluidQueue] Transaction ${item.id} failed after ${this.maxRetries} retries.`);
+        console.error(`[PaymasterQueue] Transaction ${item.id} failed after ${this.maxRetries} retries.`);
         this.removeFromStorage(item.id);
         this.callbacks.onError?.(item.id, error as Error);
       } else {
-        console.warn(`[FluidQueue] Retry ${item.retryCount}/${this.maxRetries} for ${item.id}`);
+        console.warn(`[PaymasterQueue] Retry ${item.retryCount}/${this.maxRetries} for ${item.id}`);
         this.updateInStorage(item);
       }
     }

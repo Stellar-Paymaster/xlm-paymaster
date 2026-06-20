@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   const alertService = new AlertService(config.alerting);
 
   console.log("---------------------------------------------------");
-  console.log("  Fluid - Fee-Payer Low Balance Alert Test         ");
+  console.log("  Paymaster - Fee-Payer Low Balance Alert Test         ");
   console.log("---------------------------------------------------");
   console.log(
     `  Slack configured : ${config.alerting.slackWebhookUrl ? "yes" : "no"}`,
@@ -34,12 +34,12 @@ async function main(): Promise<void> {
 
 function buildTestConfig(): Config {
   const lowBalanceThresholdXlm = parseOptionalNumber(
-    process.env.FLUID_LOW_BALANCE_THRESHOLD_XLM,
+    process.env.PAYMASTER_LOW_BALANCE_THRESHOLD_XLM,
   );
 
-  const emailHost = process.env.FLUID_ALERT_SMTP_HOST?.trim();
-  const emailFrom = process.env.FLUID_ALERT_EMAIL_FROM?.trim();
-  const emailTo = process.env.FLUID_ALERT_EMAIL_TO
+  const emailHost = process.env.PAYMASTER_ALERT_SMTP_HOST?.trim();
+  const emailFrom = process.env.PAYMASTER_ALERT_EMAIL_FROM?.trim();
+  const emailTo = process.env.PAYMASTER_ALERT_EMAIL_TO
     ?.split(",")
     .map((value) => value.trim())
     .filter(Boolean);
@@ -47,22 +47,22 @@ function buildTestConfig(): Config {
   const alerting: AlertingConfig = {
     lowBalanceThresholdXlm,
     checkIntervalMs: parsePositiveInt(
-      process.env.FLUID_LOW_BALANCE_CHECK_INTERVAL_MS,
+      process.env.PAYMASTER_LOW_BALANCE_CHECK_INTERVAL_MS,
       60 * 60 * 1000,
     ),
     cooldownMs: parsePositiveInt(
-      process.env.FLUID_LOW_BALANCE_ALERT_COOLDOWN_MS,
+      process.env.PAYMASTER_LOW_BALANCE_ALERT_COOLDOWN_MS,
       6 * 60 * 60 * 1000,
     ),
-    slackWebhookUrl: process.env.FLUID_ALERT_SLACK_WEBHOOK_URL?.trim() || undefined,
+    slackWebhookUrl: process.env.PAYMASTER_ALERT_SLACK_WEBHOOK_URL?.trim() || undefined,
     email:
       emailHost && emailFrom && emailTo && emailTo.length > 0
         ? {
             host: emailHost,
-            port: parsePositiveInt(process.env.FLUID_ALERT_SMTP_PORT, 587),
-            secure: process.env.FLUID_ALERT_SMTP_SECURE === "true",
-            user: process.env.FLUID_ALERT_SMTP_USER?.trim() || undefined,
-            pass: process.env.FLUID_ALERT_SMTP_PASS?.trim() || undefined,
+            port: parsePositiveInt(process.env.PAYMASTER_ALERT_SMTP_PORT, 587),
+            secure: process.env.PAYMASTER_ALERT_SMTP_SECURE === "true",
+            user: process.env.PAYMASTER_ALERT_SMTP_USER?.trim() || undefined,
+            pass: process.env.PAYMASTER_ALERT_SMTP_PASS?.trim() || undefined,
             from: emailFrom,
             to: emailTo,
           }
@@ -78,10 +78,10 @@ function buildTestConfig(): Config {
       "Test SDF Network ; September 2015",
     horizonUrl: process.env.STELLAR_HORIZON_URL,
     rateLimitWindowMs: parsePositiveInt(
-      process.env.FLUID_RATE_LIMIT_WINDOW_MS,
+      process.env.PAYMASTER_RATE_LIMIT_WINDOW_MS,
       60_000,
     ),
-    rateLimitMax: parsePositiveInt(process.env.FLUID_RATE_LIMIT_MAX, 5),
+    rateLimitMax: parsePositiveInt(process.env.PAYMASTER_RATE_LIMIT_MAX, 5),
     allowedOrigins: [],
     alerting,
   };

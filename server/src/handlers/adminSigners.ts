@@ -8,7 +8,7 @@ import {
 
 function isAuthorized(req: Request): boolean {
   const token = req.header("x-admin-token");
-  const expected = process.env.FLUID_ADMIN_TOKEN;
+  const expected = process.env.PAYMASTER_ADMIN_TOKEN;
   return Boolean(expected) && token === expected;
 }
 

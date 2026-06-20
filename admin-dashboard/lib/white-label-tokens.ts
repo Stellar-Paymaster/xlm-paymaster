@@ -124,7 +124,7 @@ export function tokenToCssVar(key: TokenKey): string {
 }
 
 /**
- * Generates a scoped CSS block that overrides the Fluid design-system tokens
+ * Generates a scoped CSS block that overrides the Paymaster design-system tokens
  * for the given selector (default: `[data-partner]`).
  */
 export function generateCss(
@@ -163,7 +163,7 @@ export function applyTokensToElement(
 
   element.dataset.partner = partnerId;
 
-  const styleId = `fluid-wl-${partnerId}`;
+  const styleId = `paymaster-wl-${partnerId}`;
   let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
   if (!styleEl) {
     styleEl = document.createElement("style");
@@ -183,10 +183,10 @@ export function removeTokensFromElement(
 ): void {
   if (typeof document === "undefined") return;
   delete element.dataset.partner;
-  document.getElementById(`fluid-wl-${partnerId}`)?.remove();
+  document.getElementById(`paymaster-wl-${partnerId}`)?.remove();
 }
 
-// ─── Default (Fluid brand) tokens ────────────────────────────────────────────
+// ─── Default (Paymaster brand) tokens ────────────────────────────────────────────
 
 export const DEFAULT_TOKENS: WhiteLabelTokens = {
   primary: "hsl(220 91% 54%)",
@@ -206,5 +206,5 @@ export const DEFAULT_TOKENS: WhiteLabelTokens = {
   border: "hsl(220 13% 91%)",
   input: "hsl(220 13% 91%)",
   ring: "hsl(220 91% 54%)",
-  partnerName: "Fluid (default)",
+  partnerName: "Paymaster (default)",
 };

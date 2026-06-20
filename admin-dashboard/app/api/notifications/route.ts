@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-const FLUID_SERVER_URL =
-  process.env.FLUID_SERVER_URL?.trim() ?? "http://localhost:3000";
-const FLUID_ADMIN_TOKEN = process.env.FLUID_ADMIN_TOKEN?.trim() ?? "";
+const PAYMASTER_SERVER_URL =
+  process.env.PAYMASTER_SERVER_URL?.trim() ?? "http://localhost:3000";
+const PAYMASTER_ADMIN_TOKEN = process.env.PAYMASTER_ADMIN_TOKEN?.trim() ?? "";
 
 function adminHeaders() {
   return {
     "Content-Type": "application/json",
-    "x-admin-token": FLUID_ADMIN_TOKEN,
+    "x-admin-token": PAYMASTER_ADMIN_TOKEN,
   };
 }
 
-/** GET /api/notifications — proxy to Fluid server */
+/** GET /api/notifications — proxy to Paymaster server */
 export async function GET() {
   const session = await auth();
   if (!session) {
@@ -20,7 +20,7 @@ export async function GET() {
   }
 
   try {
-    const response = await fetch(`${FLUID_SERVER_URL}/admin/notifications`, {
+    const response = await fetch(`${PAYMASTER_SERVER_URL}/admin/notifications`, {
       headers: adminHeaders(),
       cache: "no-store",
     });
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const response = await fetch(`${FLUID_SERVER_URL}/admin/notifications`, {
+    const response = await fetch(`${PAYMASTER_SERVER_URL}/admin/notifications`, {
       method: "POST",
       headers: adminHeaders(),
       body: JSON.stringify(body),

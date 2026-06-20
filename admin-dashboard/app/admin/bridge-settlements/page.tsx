@@ -12,7 +12,7 @@ import {
   RotateCcw,
   Check
 } from "lucide-react";
-import { fluidAdminToken, fluidServerUrl } from "@/lib/server-env";
+import { paymasterAdminToken, paymasterServerUrl } from "@/lib/server-env";
 
 interface Settlement {
   id: string;
@@ -36,8 +36,8 @@ export default function BridgeSettlementsPage() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`${fluidServerUrl}/admin/bridge-settlements`, {
-        headers: { "x-admin-token": fluidAdminToken }
+      const res = await fetch(`${paymasterServerUrl}/admin/bridge-settlements`, {
+        headers: { "x-admin-token": paymasterAdminToken }
       });
       const data = await res.json();
       setSettlements(data.settlements || []);
@@ -58,10 +58,10 @@ export default function BridgeSettlementsPage() {
     if (!confirm(`Are you sure you want to mark this settlement as ${status}?`)) return;
     setActionLoading(id);
     try {
-      await fetch(`${fluidServerUrl}/admin/bridge-settlements/${id}/resolve`, {
+      await fetch(`${paymasterServerUrl}/admin/bridge-settlements/${id}/resolve`, {
         method: "PATCH",
         headers: { 
-          "x-admin-token": fluidAdminToken,
+          "x-admin-token": paymasterAdminToken,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ status })
@@ -78,9 +78,9 @@ export default function BridgeSettlementsPage() {
     if (!confirm("Are you sure you want to refund this settlement?")) return;
     setActionLoading(id);
     try {
-      await fetch(`${fluidServerUrl}/admin/bridge-settlements/${id}/refund`, {
+      await fetch(`${paymasterServerUrl}/admin/bridge-settlements/${id}/refund`, {
         method: "POST",
-        headers: { "x-admin-token": fluidAdminToken }
+        headers: { "x-admin-token": paymasterAdminToken }
       });
       await fetchData();
     } catch (error) {

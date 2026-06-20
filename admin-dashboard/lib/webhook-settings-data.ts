@@ -5,14 +5,14 @@ const SAMPLE_WEBHOOK_SETTINGS: WebhookTenantSettings[] = [
   {
     tenantId: "anchor-west",
     tenantName: "Anchor West",
-    webhookUrl: "https://anchor-west.example.com/webhooks/fluid",
+    webhookUrl: "https://anchor-west.example.com/webhooks/paymaster",
     eventTypes: ["tx.success", "tx.failed", "balance.low"],
     updatedAt: new Date("2026-03-20T09:00:00.000Z").toISOString(),
   },
   {
     tenantId: "mobile-wallet",
     tenantName: "Mobile Wallet",
-    webhookUrl: "https://wallet.example.com/fluid/webhooks",
+    webhookUrl: "https://wallet.example.com/paymaster/webhooks",
     eventTypes: ["tx.success", "tx.failed"],
     updatedAt: new Date("2026-03-21T10:30:00.000Z").toISOString(),
   },
@@ -31,8 +31,8 @@ export interface WebhookSettingsPageData {
 }
 
 export async function getWebhookSettingsPageData(): Promise<WebhookSettingsPageData> {
-  const serverUrl = process.env.FLUID_SERVER_URL?.replace(/\/$/, "") ?? "";
-  const adminToken = process.env.FLUID_ADMIN_TOKEN ?? "";
+  const serverUrl = process.env.PAYMASTER_SERVER_URL?.replace(/\/$/, "") ?? "";
+  const adminToken = process.env.PAYMASTER_ADMIN_TOKEN ?? "";
 
   if (!serverUrl || !adminToken) {
     return { rows: SAMPLE_WEBHOOK_SETTINGS, source: "sample" };

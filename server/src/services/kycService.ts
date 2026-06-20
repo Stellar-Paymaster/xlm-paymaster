@@ -84,7 +84,7 @@ export async function checkKycStatus(
     return {
       allowed: !config.failClosed,
       status: "unknown",
-      reason: "KYC hook is enabled but FLUID_KYC_ENDPOINT_URL is not configured",
+      reason: "KYC hook is enabled but PAYMASTER_KYC_ENDPOINT_URL is not configured",
     };
   }
 

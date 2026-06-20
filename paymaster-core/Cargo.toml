@@ -5,13 +5,13 @@ edition.workspace = true
 description = "Core signing and transaction logic for xlm-paymaster"
 license.workspace = true
 repository.workspace = true
-documentation = "https://docs.rs/fluid-core"
+documentation = "https://docs.rs/paymaster-core"
 keywords = ["stellar", "soroban", "signing", "transaction", "passkey"]
 categories = ["cryptography", "api-bindings"]
 readme = "README.md"
 
 [lib]
-name = "fluid_core"
+name = "paymaster_core"
 
 [dependencies]
 ed25519-dalek.workspace = true

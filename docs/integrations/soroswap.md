@@ -46,9 +46,9 @@ const signedXdr = swapTx.sign(userKeypair).toXDR();
 ### 3. Request a fee-bump from XLM Paymaster
 
 ```ts
-import { FluidClient } from "paymaster-client";
+import { PaymasterClient } from "paymaster-client";
 
-const xlm-paymaster = new FluidClient({
+const xlm-paymaster = new PaymasterClient({
   serverUrl:          "https://your-paymaster-server.example.com",
   networkPassphrase:  "Test SDF Network ; September 2015",
   horizonUrl:         "https://horizon-testnet.stellar.org",
@@ -73,12 +73,12 @@ console.log("Swap hash:", result.hash);
 
 ```ts
 import { SoroswapRouter } from "@soroswap/sdk";
-import { FluidClient } from "paymaster-client";
+import { PaymasterClient } from "paymaster-client";
 import { Keypair, Server, TransactionBuilder } from "@stellar/stellar-sdk";
 
 const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
 const HORIZON_URL        = "https://horizon-testnet.stellar.org";
-const FLUID_URL          = "https://your-paymaster-server.example.com";
+const PAYMASTER_URL          = "https://your-paymaster-server.example.com";
 
 export async function gaslessSwap(
   userSecret: string,
@@ -88,7 +88,7 @@ export async function gaslessSwap(
 ) {
   const userKeypair = Keypair.fromSecret(userSecret);
   const horizon     = new Server(HORIZON_URL);
-  const xlm-paymaster       = new FluidClient({ serverUrl: FLUID_URL, networkPassphrase: NETWORK_PASSPHRASE, horizonUrl: HORIZON_URL });
+  const xlm-paymaster       = new PaymasterClient({ serverUrl: PAYMASTER_URL, networkPassphrase: NETWORK_PASSPHRASE, horizonUrl: HORIZON_URL });
 
   // Build + sign with user key
   const swapTx = await SoroswapRouter.buildSwapTransaction({
@@ -108,11 +108,11 @@ export async function gaslessSwap(
 
 ## Rate limits and cost management
 
-Each call to `xlm-paymaster.requestFeeBump` counts against the XLM Paymaster rate limit configured by `FLUID_RATE_LIMIT_MAX`. For a high-volume DEX, configure a dedicated XLM Paymaster tenant with raised limits:
+Each call to `xlm-paymaster.requestFeeBump` counts against the XLM Paymaster rate limit configured by `PAYMASTER_RATE_LIMIT_MAX`. For a high-volume DEX, configure a dedicated XLM Paymaster tenant with raised limits:
 
 ```bash
-FLUID_RATE_LIMIT_MAX=500
-FLUID_RATE_LIMIT_WINDOW_MS=60000
+PAYMASTER_RATE_LIMIT_MAX=500
+PAYMASTER_RATE_LIMIT_WINDOW_MS=60000
 ```
 
 Monitor XLM consumption via the XLM Paymaster dashboard at `GET /dashboard`.

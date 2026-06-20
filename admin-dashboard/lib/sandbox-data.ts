@@ -1,4 +1,4 @@
-import { fluidServerUrl, fluidAdminToken } from "./server-env";
+import { paymasterServerUrl, paymasterAdminToken } from "./server-env";
 
 export interface SandboxApiKey {
   id: string;
@@ -36,8 +36,8 @@ const SAMPLE_KEYS: SandboxApiKey[] = [
 
 export async function getSandboxPageData(): Promise<SandboxPageData> {
   try {
-    const res = await fetch(`${fluidServerUrl}/admin/api-keys`, {
-      headers: { "x-admin-token": fluidAdminToken },
+    const res = await fetch(`${paymasterServerUrl}/admin/api-keys`, {
+      headers: { "x-admin-token": paymasterAdminToken },
       cache: "no-store",
     });
 

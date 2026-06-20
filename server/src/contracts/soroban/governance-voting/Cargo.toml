@@ -1,6 +1,6 @@
 [workspace]
 [package]
-name = "fluid-governance-voting"
+name = "paymaster-governance-voting"
 version = "0.1.0"
 edition = "2021"
 

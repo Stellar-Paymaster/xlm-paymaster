@@ -15,15 +15,15 @@
 //! # Examples
 //!
 //! ```
-//! use fluid_core::{TransactionBuilder, FeeConfig, NetworkPassphrase};
-//! use fluid_core::{Ed25519Signer, Signer};
+//! use paymaster_core::{TransactionBuilder, FeeConfig, NetworkPassphrase};
+//! use paymaster_core::{Ed25519Signer, Signer};
 //!
 //! // Build a fee-bump transaction (simplified - actual usage requires XDR handling)
 //! let config = FeeConfig::new(100, 2.0);
 //! let network = NetworkPassphrase::testnet();
 //! ```
 
-use crate::error::FluidError;
+use crate::error::PaymasterError;
 use crate::types::{DecoratedSignature, FeeConfig, NetworkPassphrase, PublicKey, TransactionHash};
 use crate::signer::Signer;
 
@@ -35,7 +35,7 @@ use crate::signer::Signer;
 /// # Examples
 ///
 /// ```
-/// use fluid_core::{TransactionBuilder, FeeConfig, NetworkPassphrase};
+/// use paymaster_core::{TransactionBuilder, FeeConfig, NetworkPassphrase};
 ///
 /// // Configure the builder
 /// let builder = TransactionBuilder::new()
@@ -65,7 +65,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::TransactionBuilder;
+    /// use paymaster_core::TransactionBuilder;
     ///
     /// let builder = TransactionBuilder::new();
     /// ```
@@ -90,7 +90,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::TransactionBuilder;
+    /// use paymaster_core::TransactionBuilder;
     ///
     /// let builder = TransactionBuilder::new().base_fee(200);
     /// ```
@@ -110,7 +110,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::TransactionBuilder;
+    /// use paymaster_core::TransactionBuilder;
     ///
     /// let builder = TransactionBuilder::new().fee_multiplier(2.0);
     /// ```
@@ -128,7 +128,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::{TransactionBuilder, NetworkPassphrase};
+    /// use paymaster_core::{TransactionBuilder, NetworkPassphrase};
     ///
     /// let builder = TransactionBuilder::new()
     ///     .network_passphrase(NetworkPassphrase::mainnet());
@@ -149,7 +149,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::TransactionBuilder;
+    /// use paymaster_core::TransactionBuilder;
     ///
     /// let builder = TransactionBuilder::new()
     ///     .inner_xdr("AAAA...".to_string());
@@ -170,7 +170,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::{TransactionBuilder, TransactionHash};
+    /// use paymaster_core::{TransactionBuilder, TransactionHash};
     ///
     /// let hash = TransactionHash::new([0u8; 32]);
     /// let builder = TransactionBuilder::new().inner_hash(hash);
@@ -191,7 +191,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::{TransactionBuilder, DecoratedSignature};
+    /// use paymaster_core::{TransactionBuilder, DecoratedSignature};
     ///
     /// let sig = DecoratedSignature::new([0u8; 4], [0u8; 64]);
     /// let builder = TransactionBuilder::new().add_signature(sig);
@@ -222,7 +222,7 @@ impl TransactionBuilder {
     /// # Examples
     ///
     /// ```
-    /// use fluid_core::{TransactionBuilder, PublicKey};
+    /// use paymaster_core::{TransactionBuilder, PublicKey};
     ///
     /// let fee_payer = PublicKey::new([0u8; 32]);
     /// let builder = TransactionBuilder::new().fee_payer(fee_payer);
@@ -265,23 +265,23 @@ impl TransactionBuilder {
     ///
     /// # Errors
     ///
-    /// Returns [`FluidError::InvalidTransaction`] if:
+    /// Returns [`PaymasterError::InvalidTransaction`] if:
     /// - No inner transaction is set
     /// - No fee payer is set
     /// - The inner transaction has no signatures
-    pub fn validate(&self) -> Result<(), FluidError> {
+    pub fn validate(&self) -> Result<(), PaymasterError> {
         if self.inner_xdr.is_none() && self.inner_hash.is_none() {
-            return Err(FluidError::invalid_tx(
+            return Err(PaymasterError::invalid_tx(
                 "inner transaction XDR or hash must be set",
             ));
         }
 
         if self.fee_payer.is_none() {
-            return Err(FluidError::invalid_tx("fee payer must be set"));
+            return Err(PaymasterError::invalid_tx("fee payer must be set"));
         }
 
         if self.inner_signatures.is_empty() {
-            return Err(FluidError::UnsignedTransaction);
+            return Err(PaymasterError::UnsignedTransaction);
         }
 
         Ok(())
@@ -303,15 +303,15 @@ impl TransactionBuilder {
     ///
     /// # Errors
     ///
-    /// - [`FluidError::InvalidTransaction`] if validation fails
-    /// - [`FluidError::SigningFailed`] if signing fails
-    /// - [`FluidError::UnsignedTransaction`] if inner transaction is unsigned
+    /// - [`PaymasterError::InvalidTransaction`] if validation fails
+    /// - [`PaymasterError::SigningFailed`] if signing fails
+    /// - [`PaymasterError::UnsignedTransaction`] if inner transaction is unsigned
     ///
     /// # Examples
     ///
     /// ```no_run
-    /// use fluid_core::{TransactionBuilder, Ed25519Signer, Signer};
-    /// use fluid_core::{Keypair, PublicKey, TransactionHash};
+    /// use paymaster_core::{TransactionBuilder, Ed25519Signer, Signer};
+    /// use paymaster_core::{Keypair, PublicKey, TransactionHash};
     ///
     /// // Setup (normally you'd have actual keys and XDR)
     /// let fee_payer = Keypair::from_raw_keys([1u8; 32], [2u8; 32]);
@@ -329,17 +329,17 @@ impl TransactionBuilder {
         &self,
         signer: &S,
         operation_count: usize,
-    ) -> Result<FeeBumpTransaction, FluidError> {
+    ) -> Result<FeeBumpTransaction, PaymasterError> {
         self.validate()?;
 
         let fee = self.calculate_fee(operation_count);
         let fee_payer = self.fee_payer.clone().ok_or_else(|| {
-            FluidError::invalid_tx("fee payer not set")
+            PaymasterError::invalid_tx("fee payer not set")
         })?;
 
         // Get the inner transaction hash for signing
         let inner_hash = self.inner_hash.clone().ok_or_else(|| {
-            FluidError::invalid_tx("inner transaction hash not set")
+            PaymasterError::invalid_tx("inner transaction hash not set")
         })?;
 
         // Sign the inner transaction hash with the fee payer
@@ -506,12 +506,12 @@ impl InnerTransaction {
 ///
 /// # Errors
 ///
-/// Returns [`FluidError::Xdr`] if the XDR is malformed.
+/// Returns [`PaymasterError::Xdr`] if the XDR is malformed.
 ///
 /// # Examples
 ///
 /// ```no_run
-/// use fluid_core::{parse_inner_tx, NetworkPassphrase, FluidError};
+/// use paymaster_core::{parse_inner_tx, NetworkPassphrase, PaymasterError};
 ///
 /// // This would work with real XDR:
 /// // let inner = parse_inner_tx("AAAA...", &NetworkPassphrase::testnet())?;
@@ -519,7 +519,7 @@ impl InnerTransaction {
 pub fn parse_inner_tx(
     xdr: &str,
     _network_passphrase: &NetworkPassphrase,
-) -> Result<InnerTransaction, FluidError> {
+) -> Result<InnerTransaction, PaymasterError> {
     // In a full implementation, this would:
     // 1. Decode the base64 XDR
     // 2. Parse the transaction envelope
@@ -548,15 +548,15 @@ pub fn parse_inner_tx(
 ///
 /// # Errors
 ///
-/// Returns [`FluidError::AlreadyFeeBumped`] if the transaction is already
+/// Returns [`PaymasterError::AlreadyFeeBumped`] if the transaction is already
 /// a fee-bump transaction.
-pub fn validate_not_fee_bump(xdr: &str) -> Result<(), FluidError> {
+pub fn validate_not_fee_bump(xdr: &str) -> Result<(), PaymasterError> {
     // In a full implementation, this would decode the XDR and check
     // the envelope type to ensure it's not already a fee-bump transaction.
 
     // Check for fee-bump indicator in XDR (simplified)
     if xdr.starts_with("feeBump:") {
-        return Err(FluidError::AlreadyFeeBumped);
+        return Err(PaymasterError::AlreadyFeeBumped);
     }
 
     Ok(())

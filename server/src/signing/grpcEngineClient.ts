@@ -86,7 +86,7 @@ function createClientConstructor() {
     oneofs: true,
   });
   const loaded = grpc.loadPackageDefinition(packageDefinition) as unknown as {
-    fluid: {
+    paymaster: {
       internal: {
         signer: {
           v1: {
@@ -101,7 +101,7 @@ function createClientConstructor() {
     };
   };
 
-  return loaded.fluid.internal.signer.v1.InternalSigner;
+  return loaded.paymaster.internal.signer.v1.InternalSigner;
 }
 
 const InternalSignerClientConstructor = createClientConstructor();

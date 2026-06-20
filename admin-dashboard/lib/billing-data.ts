@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fluidServerUrl, fluidAdminToken } from "@/lib/server-env";
+import { paymasterServerUrl, paymasterAdminToken } from "@/lib/server-env";
 
 export interface BillingHistoryRow {
   id: string;
@@ -47,8 +47,8 @@ const SAMPLE_HISTORY: BillingHistoryRow[] = [
 ];
 
 export async function getBillingPageData(): Promise<BillingPageData> {
-  const serverUrl = fluidServerUrl.replace(/\/$/, "");
-  const adminToken = fluidAdminToken;
+  const serverUrl = paymasterServerUrl.replace(/\/$/, "");
+  const adminToken = paymasterAdminToken;
 
   if (!serverUrl || !adminToken) {
     return {

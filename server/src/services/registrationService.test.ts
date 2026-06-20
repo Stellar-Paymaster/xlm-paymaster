@@ -34,7 +34,7 @@ describe("registrationService", () => {
     vi.stubEnv("TERMS_OF_SERVICE_VERSION", "2026-03-29");
     vi.stubEnv("REGISTRATION_VERIFY_BASE_URL", "http://localhost:3001");
     vi.stubEnv("RESEND_API_KEY", "");
-    vi.stubEnv("FLUID_ALERT_SMTP_HOST", "");
+    vi.stubEnv("PAYMASTER_ALERT_SMTP_HOST", "");
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
@@ -144,6 +144,6 @@ describe("registrationService", () => {
       }),
     });
     expect(result.tenantId).toBe("tenant-1");
-    expect(result.apiKey.startsWith("fluid_live_")).toBe(true);
+    expect(result.apiKey.startsWith("paymaster_live_")).toBe(true);
   });
 });
