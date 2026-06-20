@@ -30,11 +30,11 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'client/examples/react-classic-payment/package-lock.json'
+          cache-dependency-path: 'client/examples/react-classic-payment/package.json'
 
       - name: Install dependencies
         working-directory: client/examples/react-classic-payment
-        run: npm ci
+        run: npm install
 
       - name: Build project
         working-directory: client/examples/react-classic-payment
