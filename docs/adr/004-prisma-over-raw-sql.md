@@ -20,7 +20,7 @@ Key requirements:
 2. **Schema as the source of truth** — schema changes must generate auditable migration files rather than being applied ad hoc.
 3. **Developer velocity** — contributors should be able to query the database without writing raw SQL for common operations.
 4. **Multi-database support** — local development uses SQLite for zero-setup convenience; production uses PostgreSQL. The ORM must support both without code changes.
-5. **Regional sharding** — Fluid supports US and EU data-residency regions, each backed by a separate database. The data layer must support multiple connections to different database URLs at runtime.
+5. **Regional sharding** — XLM Paymaster supports US and EU data-residency regions, each backed by a separate database. The data layer must support multiple connections to different database URLs at runtime.
 
 Raw SQL (`pg` + `knex`) was eliminated because it provides no compile-time type checking and requires manual maintenance of TypeScript interfaces that mirror the schema. `TypeORM` and `Sequelize` were ruled out because their decorator-based models diverge from the schema file, making migration tracking error-prone.
 

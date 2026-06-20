@@ -22,13 +22,13 @@ mkcert -install
 2. Create a Rust engine server certificate with the internal DNS name used by gRPC:
 
 ```bash
-mkcert -cert-file server/certs/dev/rust-engine.pem -key-file server/certs/dev/rust-engine-key.pem fluid-grpc-engine.internal 127.0.0.1 ::1
+mkcert -cert-file server/certs/dev/rust-engine.pem -key-file server/certs/dev/rust-engine-key.pem xlm-paymaster-grpc-engine.internal 127.0.0.1 ::1
 ```
 
 3. Create a Node API client certificate:
 
 ```bash
-mkcert -client -cert-file server/certs/dev/node-api.pem -key-file server/certs/dev/node-api-key.pem fluid-node-api.internal
+mkcert -client -cert-file server/certs/dev/node-api.pem -key-file server/certs/dev/node-api-key.pem xlm-paymaster-node-api.internal
 ```
 
 4. Export or copy the mkcert root CA PEM to `server/certs/dev/rootCA.pem`.
@@ -37,7 +37,7 @@ mkcert -client -cert-file server/certs/dev/node-api.pem -key-file server/certs/d
 
 ```bash
 FLUID_GRPC_ENGINE_ADDRESS=127.0.0.1:50051
-FLUID_GRPC_ENGINE_TLS_SERVER_NAME=fluid-grpc-engine.internal
+FLUID_GRPC_ENGINE_TLS_SERVER_NAME=xlm-paymaster-grpc-engine.internal
 FLUID_GRPC_ENGINE_CLIENT_CA_PATH=server/certs/dev/rootCA.pem
 FLUID_GRPC_ENGINE_CLIENT_CERT_PATH=server/certs/dev/node-api.pem
 FLUID_GRPC_ENGINE_CLIENT_KEY_PATH=server/certs/dev/node-api-key.pem
@@ -85,7 +85,7 @@ Recommended production pattern:
 Example cert-manager approach:
 
 - A dedicated internal `Issuer` or `ClusterIssuer` signs both the Rust engine server cert and the Node API client cert.
-- The Rust engine service DNS name (for example `fluid-rust-engine.default.svc.cluster.local`) is included in the server certificate SANs.
+- The Rust engine service DNS name (for example `xlm-paymaster-rust-engine.default.svc.cluster.local`) is included in the server certificate SANs.
 - The Node API uses that DNS name as `FLUID_GRPC_ENGINE_TLS_SERVER_NAME`.
 
 ## Vault PKI

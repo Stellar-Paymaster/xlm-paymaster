@@ -1,4 +1,4 @@
-# Fluid Documentation
+# XLM Paymaster Documentation
 
 ## Available Documentation
 

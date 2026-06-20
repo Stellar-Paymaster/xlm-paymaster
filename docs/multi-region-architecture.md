@@ -4,7 +4,7 @@
 
 ## Overview
 
-This document describes the architecture for deploying Fluid in an active-active
+This document describes the architecture for deploying XLM Paymaster in an active-active
 multi-region configuration.  Each region runs a full stack (API + Rust engine +
 database), requests are routed to the nearest region, and data is kept consistent
 through distributed database replication.
@@ -113,9 +113,9 @@ slightly higher write latency for cross-shard transactions.
 
 ```
 Origin Pool A — us-east-1
-  Origin: api-us-east.fluid.example.com  (health check: GET /health)
+  Origin: api-us-east.xlm-paymaster.example.com  (health check: GET /health)
 Origin Pool B — eu-west-1
-  Origin: api-eu-west.fluid.example.com  (health check: GET /health)
+  Origin: api-eu-west.xlm-paymaster.example.com  (health check: GET /health)
 
 Load Balancer Rule:
   Steering policy: Proximity (routes to geographically nearest pool)
@@ -126,8 +126,8 @@ Load Balancer Rule:
 ### AWS Route 53 Latency-Based Routing
 
 ```
-Record: api.fluid.example.com  A  us-east-1  [latency record]
-Record: api.fluid.example.com  A  eu-west-1  [latency record]
+Record: api.xlm-paymaster.example.com  A  us-east-1  [latency record]
+Record: api.xlm-paymaster.example.com  A  eu-west-1  [latency record]
 Health checks: HTTP on /health (threshold: 3 failures → failover)
 ```
 

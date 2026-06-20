@@ -1,6 +1,6 @@
 # Network Latency Simulation
 
-The Fluid server includes a built-in network simulation layer that allows developers to test how their applications and the Fluid SDK behave under sub-optimal network conditions.
+The XLM Paymaster server includes a built-in network simulation layer that allows developers to test how their applications and the XLM Paymaster SDK behave under sub-optimal network conditions.
 
 ## Why use Network Simulation?
 

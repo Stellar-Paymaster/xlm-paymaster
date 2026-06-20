@@ -73,6 +73,6 @@ Returns:
 
 ## Deployment Notes
 
-- Status page can be served from a subdomain (e.g., `status.fluid.network`)
+- Status page can be served from a subdomain (e.g., `status.xlm-paymaster.network`)
 - For static hosting, use the `fetch` endpoint to proxy status API
 - Timeline component renders last 30 days compressed to 30 columns for readability

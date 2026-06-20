@@ -1,6 +1,6 @@
 # Real-time Transaction Feed
 
-The Fluid admin dashboard implements a live, real-time transaction feed allowing administrators to monitor fee-bumps as they occur across the platform using **Server-Sent Events (SSE)**.
+The XLM Paymaster admin dashboard implements a live, real-time transaction feed allowing administrators to monitor fee-bumps as they occur across the platform using **Server-Sent Events (SSE)**.
 
 ## Architecture
 

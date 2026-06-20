@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-Fluid was originally built with a hard dependency on the Stellar network. Expanding to other chains like EVM (Ethereum, etc.) and Solana would require significant rework if the Stellar-specific logic remained coupled to the core API handlers.
+XLM Paymaster was originally built with a hard dependency on the Stellar network. Expanding to other chains like EVM (Ethereum, etc.) and Solana would require significant rework if the Stellar-specific logic remained coupled to the core API handlers.
 
 ## Decision
 We will abstract the fee-sponsorship logic into a `FeeSponsor` interface. This interface defines the core operations required for a "gasless" layer:

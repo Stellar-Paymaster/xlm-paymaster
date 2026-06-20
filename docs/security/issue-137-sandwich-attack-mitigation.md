@@ -6,7 +6,7 @@ This mitigation adds a rule-based settlement analyzer to the Stellar fee sponsor
 
 ## Strategy
 
-The implementation protects the Fluid fee settlement path in two stages:
+The implementation protects the XLM Paymaster fee settlement path in two stages:
 
 1. Settlement validation
    - A settlement payment must target the configured fee payer.

@@ -35,12 +35,12 @@ Full cross-browser matrix (chromium, firefox, webkit, mobile-chrome, mobile-safa
 
 ## #718 — XDR Fuzz Testing
 
-Fuzz targets created under `fluid-server/fuzz/`. Requires nightly Rust toolchain:
+Fuzz targets created under `paymaster-server/fuzz/`. Requires nightly Rust toolchain:
 
 ```bash
 rustup default nightly
 cargo install cargo-fuzz
-cd fluid-server
+cd paymaster-server
 cargo +nightly fuzz run fuzz_parse_xdr_from_bytes -- -max_total_time=30
 ```
 
@@ -50,7 +50,7 @@ cargo +nightly fuzz run fuzz_parse_xdr_from_bytes -- -max_total_time=30
 
 | Issue | Key files |
 |-------|-----------|
-| #728 | `server/src/utils/gcraLeakyBucket.ts`, `gcraBoundary.test.ts`, `redisRateLimitStore.test.ts`, `sandboxGuard.boundary.test.ts`, `fluid-server/src/rate_limiter.rs` |
+| #728 | `server/src/utils/gcraLeakyBucket.ts`, `gcraBoundary.test.ts`, `redisRateLimitStore.test.ts`, `sandboxGuard.boundary.test.ts`, `paymaster-server/src/rate_limiter.rs` |
 | #731 | `server/src/verification/congestionFeeSimulator.ts`, `server/src/utils/feeParity.ts` |
 | #722 | `admin-dashboard/playwright.config.ts`, `e2e/auth.spec.ts`, `e2e/settings.spec.ts`, `e2e/tables.spec.ts`, `e2e/global-setup.ts`, `auth.ts` (syntax fix) |
-| #718 | `fluid-server/fuzz/`, `fluid-server/src/lib.rs` (xdr export) |
+| #718 | `paymaster-server/fuzz/`, `paymaster-server/src/lib.rs` (xdr export) |

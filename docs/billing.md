@@ -1,6 +1,6 @@
 # Integrated Stripe Billing UI
 
-The Fluid Admin Dashboard now includes a professional-grade billing and quota management interface, allowing tenants to monitor their XLM sponsorship balance and purchase top-ups seamlessly via Stripe.
+The XLM Paymaster Admin Dashboard now includes a professional-grade billing and quota management interface, allowing tenants to monitor their XLM sponsorship balance and purchase top-ups seamlessly via Stripe.
 
 ## Features
 
@@ -22,7 +22,7 @@ The Fluid Admin Dashboard now includes a professional-grade billing and quota ma
 
 ### API Integration
 
-The dashboard proxies billing requests to the Fluid backend:
+The dashboard proxies billing requests to the XLM Paymaster backend:
 - `POST /api/billing/create-checkout-session`: Initiates a Stripe Checkout session.
 
 ## Security & Compliance

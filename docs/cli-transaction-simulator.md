@@ -1,20 +1,20 @@
 # CLI Transaction Simulator
 
-The Fluid CLI includes a `simulate` command that allows you to test fee-sponsorship requests directly from your terminal. This is useful for debugging transaction XDRs and verifying configurations. With the latest update, you can run simulations both by communicating with a Fluid server, or completely offline locally using client-side checks.
+The Paymaster CLI includes a `simulate` command that allows you to test fee-sponsorship requests directly from your terminal. This is useful for debugging transaction XDRs and verifying configurations. With the latest update, you can run simulations both by communicating with a XLM Paymaster server, or completely offline locally using client-side checks.
 
 ## Usage
 
 ```bash
-fluid simulate <INNER_TRANSACTION_XDR> [options]
+xlm-paymaster simulate <INNER_TRANSACTION_XDR> [options]
 ```
 
 ### Options
 
 - `<xdr>`: The base64-encoded inner transaction XDR you want to have fee-bumped.
-- `-s, --server <url>`: The URL of the Fluid server (default: `http://localhost:3000`).
+- `-s, --server <url>`: The URL of the XLM Paymaster server (default: `http://localhost:3000`).
 - `-n, --network <passphrase>`: The Stellar network passphrase (default: `Testnet`).
 - `-j, --json`: Output the response as a JSON object (useful for CI/CD or scripting).
-- `-l, --local`: Simulate locally offline without contacting the Fluid server.
+- `-l, --local`: Simulate locally offline without contacting the XLM Paymaster server.
 - `-f, --fee-payer <public-key>`: Specify a custom fee payer public key for offline local simulation.
 - `-b, --base-fee <fee>`: Specify base fee in stroops for offline local simulation (default: `100`).
 
@@ -23,13 +23,13 @@ fluid simulate <INNER_TRANSACTION_XDR> [options]
 ### Human-Readable Output (Server Simulation)
 
 ```bash
-fluid simulate AAAA... --server https://fluid.testnet.dev
+xlm-paymaster simulate AAAA... --server https://xlm-paymaster.testnet.dev
 ```
 
 **Output:**
 ```
 🔍 Simulating fee-bump for transaction...
-   Server: https://fluid.testnet.dev
+   Server: https://xlm-paymaster.testnet.dev
    Network: Test SDF Network ; September 2015
 
 ✅ Fee-bump simulation successful!
@@ -47,7 +47,7 @@ AAAAA...
 ### Local Offline Simulation
 
 ```bash
-fluid simulate AAAA... --local --fee-payer GD... --base-fee 120
+xlm-paymaster simulate AAAA... --local --fee-payer GD... --base-fee 120
 ```
 
 **Output:**
@@ -69,7 +69,7 @@ AAAAA...
 ### JSON Output
 
 ```bash
-fluid simulate AAAA... --json
+xlm-paymaster simulate AAAA... --json
 ```
 
 **Output:**
@@ -87,7 +87,7 @@ fluid simulate AAAA... --json
 The simulator provides detailed error messages for common failure scenarios:
 
 - **Invalid XDR**: If the provided XDR is malformed or not a valid Stellar transaction.
-- **Connection Failed**: If the Fluid server is unreachable.
+- **Connection Failed**: If the XLM Paymaster server is unreachable.
 - **Server Error (4xx/5xx)**: If the server rejects the request (e.g., rate limited, unauthorized, or internal error).
 
 When using the `--json` flag, errors are also returned as JSON objects with the following structure:

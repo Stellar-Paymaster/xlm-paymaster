@@ -2,7 +2,7 @@
 
 ## Overview
 
-`fluid-server` maintains an in-process TTL cache for Soroban smart-contract
+`paymaster-server` maintains an in-process TTL cache for Soroban smart-contract
 definitions and ledger footprint schemas.  Caching these properties avoids
 repeated Horizon/RPC round-trips during gasless smart-contract mint validation,
 reducing median validation latency.
@@ -17,7 +17,7 @@ GET  /contract/cache/stats  →  ContractCache::{definition,footprint}_count
 Background task (every 60 s)  →  ContractCache::evict_expired
 ```
 
-The cache lives in `fluid-server/src/contract_cache.rs` and is owned by
+The cache lives in `paymaster-server/src/contract_cache.rs` and is owned by
 `AppState`.  Each entry carries an `Instant`-based expiry so expired entries
 are invisible to readers immediately and are physically removed by the
 background eviction task.

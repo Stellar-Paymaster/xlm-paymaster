@@ -1,6 +1,6 @@
 # WASM Signing Out-Of-Memory Protections
 
-**Issue #695 | Resilience & Error Handling | `fluid-server`**
+**Issue #695 | Resilience & Error Handling | `paymaster-server`**
 
 ## Overview
 
@@ -10,7 +10,7 @@ allocator capacity and produce an unrecoverable OOM trap instead of a clean
 JavaScript exception.
 
 This document describes the memory threshold enforcement added to
-`fluid-server/src/lib.rs`.
+`paymaster-server/src/lib.rs`.
 
 ## Implementation
 
@@ -20,7 +20,7 @@ A compile-time constant `MAX_XDR_BYTES` (default **64 KiB**) is checked
 **before** any `base64::decode` or `stellar-xdr` parse call:
 
 ```rust
-// fluid-server/src/lib.rs
+// paymaster-server/src/lib.rs
 const MAX_XDR_BYTES: usize = 64 * 1024;
 
 fn check_xdr_size(xdr: &str) -> Result<(), SigningError> {
@@ -62,7 +62,7 @@ This is catchable via a normal `try/catch` and will never produce an OOM trap.
 
 ## Test Coverage
 
-Unit tests live in `fluid-server/src/lib.rs` (`mod tests`):
+Unit tests live in `paymaster-server/src/lib.rs` (`mod tests`):
 
 - `check_xdr_size_accepts_valid_payload`
 - `check_xdr_size_rejects_oversized_payload`
@@ -72,5 +72,5 @@ Unit tests live in `fluid-server/src/lib.rs` (`mod tests`):
 Run with:
 
 ```bash
-cd fluid-server && cargo test
+cd paymaster-server && cargo test
 ```

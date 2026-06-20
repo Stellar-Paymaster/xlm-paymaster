@@ -1,15 +1,15 @@
-name: Dependency Vulnerability Audit (fluid-server)
+name: Dependency Vulnerability Audit (paymaster-server)
 
 on:
   pull_request:
     paths:
-      - "fluid-server/**"
+      - "paymaster-server/**"
       - ".github/workflows/dependency-audit.yml"
   push:
     branches:
       - main
     paths:
-      - "fluid-server/**"
+      - "paymaster-server/**"
       - ".github/workflows/dependency-audit.yml"
   workflow_dispatch:
 
@@ -25,9 +25,9 @@ jobs:
       matrix:
         include:
           - scanner: cargo-audit
-            working-directory: fluid-server
+            working-directory: paymaster-server
           - scanner: npm-audit
-            working-directory: fluid-server/wasm-demo
+            working-directory: paymaster-server/wasm-demo
 
     defaults:
       run:

@@ -1,6 +1,6 @@
-# Fluid Load Testing & Verification Report
+# XLM Paymaster Load Testing & Verification Report
 
-This report documents the load testing results conducted on the Fluid server `/fee-bump` endpoint using **k6** and **Locust** to verify the peak CPU usage and the 1,000 requests/second (RPS) throughput targets.
+This report documents the load testing results conducted on the XLM Paymaster server `/fee-bump` endpoint using **k6** and **Locust** to verify the peak CPU usage and the 1,000 requests/second (RPS) throughput targets.
 
 ---
 
@@ -40,7 +40,7 @@ The k6 test was run using the `constant-arrival-rate` executor targeting exactly
   / __________ \  |__| \__\ \_____/  
 
   execution: local
-     script: fluid-server/k6/fee_bump_stress.js
+     script: paymaster-server/k6/fee_bump_stress.js
      output: -
 
   scenarios: (100.00%) 1 scenario, 2000 max VUs, 3m max duration

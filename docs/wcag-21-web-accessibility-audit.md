@@ -2,7 +2,7 @@
 
 ## Overview
 
-The WCAG 2.1 Web Accessibility Audit framework provides programmatical checks for Fluid Dashboard modules to conform with **WCAG 2.1 Level AA** standards. It is integrated directly into the compliance hook pipeline as `WCAGAccessibilityHook`, enabling automatic screen reader, keyboard, contrast, and structure validation.
+The WCAG 2.1 Web Accessibility Audit framework provides programmatical checks for XLM Paymaster Dashboard modules to conform with **WCAG 2.1 Level AA** standards. It is integrated directly into the compliance hook pipeline as `WCAGAccessibilityHook`, enabling automatic screen reader, keyboard, contrast, and structure validation.
 
 ---
 
@@ -49,7 +49,7 @@ const passesContrast = WCAGAudit.verifyContrast("#767676", "#FFFFFF"); // true (
 
 // 2. Perform programmatical HTML audit
 const auditResult = WCAGAudit.auditHtml(`
-  <h1>Fluid Accessibility</h1>
+  <h1>XLM Paymaster Accessibility</h1>
   <img src="banner.jpg" /> <!-- Violation: Missing Alt attribute -->
 `);
 

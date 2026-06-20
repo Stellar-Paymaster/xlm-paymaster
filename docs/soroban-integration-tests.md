@@ -1,6 +1,6 @@
 # Soroban Smart Contract Execution – Integration Tests
 
-**Issue #726 | Testing, Verification & Fuzzing | `fluid-server`**
+**Issue #726 | Testing, Verification & Fuzzing | `paymaster-server`**
 
 ## Overview
 
@@ -9,7 +9,7 @@ both Testnet and custom network-passphrase configurations.
 
 ## Test File
 
-`fluid-server/tests/soroban_integration.rs`
+`paymaster-server/tests/soroban_integration.rs`
 
 ## Test Cases
 
@@ -25,14 +25,14 @@ both Testnet and custom network-passphrase configurations.
 ## Running
 
 ```bash
-cd fluid-server
+cd paymaster-server
 cargo test --test soroban_integration
 ```
 
 ## Design Notes
 
 - Tests run against the **native** (non-WASM) library surface exposed by
-  `fluid-server` — no live Horizon node or Soroban RPC required.
+  `paymaster-server` — no live Horizon node or Soroban RPC required.
 - The mock inner-transaction XDR is a pre-signed `TransactionV1` envelope
   built offline with the Stellar JS SDK; it is not an actual Soroban
   `InvokeHostFunction` XDR (which requires a full Soroban RPC to construct),

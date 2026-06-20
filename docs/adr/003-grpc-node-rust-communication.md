@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-During the migration from Node.js to Rust, both servers run concurrently. The Node.js API server (`server/`) still handles administrative routes (tenant management, billing, OFAC screening, audit logs) while the Rust engine (`fluid-server/`) owns the performance-critical signing path. Some Node.js handlers need to delegate signing work to the Rust engine to avoid duplicating the signing logic.
+During the migration from Node.js to Rust, both servers run concurrently. The Node.js API server (`server/`) still handles administrative routes (tenant management, billing, OFAC screening, audit logs) while the Rust engine (`paymaster-server/`) owns the performance-critical signing path. Some Node.js handlers need to delegate signing work to the Rust engine to avoid duplicating the signing logic.
 
 Three inter-process communication options were considered:
 

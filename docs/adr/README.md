@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-This directory contains Architecture Decision Records (ADRs) for the Fluid project.
+This directory contains Architecture Decision Records (ADRs) for the XLM Paymaster project.
 
 ## What is an ADR?
 
@@ -8,7 +8,7 @@ An ADR is a short document capturing an important architectural decision made fo
 
 ## Format
 
-Fluid ADRs follow the [MADR (Markdown Architectural Decision Records)](https://adr.github.io/madr/) format. Each record contains:
+XLM Paymaster ADRs follow the [MADR (Markdown Architectural Decision Records)](https://adr.github.io/madr/) format. Each record contains:
 
 - **Title** — a short noun phrase describing the decision
 - **Status** — `Proposed`, `Accepted`, `Deprecated`, or `Superseded by ADR-XXX`

@@ -1,6 +1,6 @@
 # Fuzz Testing the Transaction XDR Parser (#718)
 
-cargo-fuzz targets for `fluid-server/src/xdr.rs` to discover memory leaks and edge cases in XDR parsing.
+cargo-fuzz targets for `paymaster-server/src/xdr.rs` to discover memory leaks and edge cases in XDR parsing.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ cargo install cargo-fuzz
 ## Running
 
 ```bash
-cd fluid-server
+cd paymaster-server
 
 # Run a single target for 60 seconds
 cargo +nightly fuzz run fuzz_parse_xdr_from_bytes -- -max_total_time=60
@@ -33,14 +33,14 @@ done
 
 ## Architecture
 
-The `xdr` module is exposed from `fluid-server` library (`lib.rs`) so fuzz harnesses can depend on it. The binary re-exports via `pub use fluid_server::xdr`.
+The `xdr` module is exposed from `paymaster-server` library (`lib.rs`) so fuzz harnesses can depend on it. The binary re-exports via `pub use fluid_server::xdr`.
 
 All parser functions return `Result` — no panics on malformed input. Fuzzing validates this invariant under arbitrary byte inputs up to 64 KiB.
 
 ## Unit tests (baseline)
 
 ```bash
-cd fluid-server
+cd paymaster-server
 cargo test xdr
 ```
 

@@ -1,14 +1,14 @@
 # Flutter SDK Integration Guide
 
-This guide explains how to integrate the Fluid Flutter SDK into your Flutter mobile application for gasless Stellar transactions.
+This guide explains how to integrate the XLM Paymaster Flutter SDK into your Flutter mobile application for gasless Stellar transactions.
 
 ## Overview
 
-The Flutter Fluid SDK provides a simplified, production-ready interface for integrating gasless Stellar transactions into Flutter mobile applications. It wraps the Fluid JavaScript client with Flutter-friendly APIs, comprehensive error handling, and network resilience.
+The Flutter XLM Paymaster SDK provides a simplified, production-ready interface for integrating gasless Stellar transactions into Flutter mobile applications. It wraps the XLM Paymaster JavaScript client with Flutter-friendly APIs, comprehensive error handling, and network resilience.
 
 ## Installation
 
-Since the Fluid SDK is a JavaScript/TypeScript library, you'll need to integrate it into your Flutter app using one of these approaches:
+Since the XLM Paymaster SDK is a JavaScript/TypeScript library, you'll need to integrate it into your Flutter app using one of these approaches:
 
 ### Approach 1: WebView Integration (Recommended)
 
@@ -26,7 +26,7 @@ Create a native bridge using platform channels to communicate between Dart and J
 
 ```dart
 // Example using method channel
-final platform = MethodChannel('com.your.app/fluid');
+final platform = MethodChannel('com.your.app/xlm-paymaster');
 ```
 
 ### Approach 3: Dart-JS Interop
@@ -47,7 +47,7 @@ import 'package:js/js.dart';
 ```dart
 final client = FlutterFluidClient(
   networkPassphrase: 'Test Network',
-  serverUrl: 'https://your-fluid-server.com',
+  serverUrl: 'https://your-paymaster-server.com',
   horizonUrl: 'https://horizon-testnet.stellar.org',
   sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
   enableAutoRetry: true,
@@ -129,8 +129,8 @@ FlutterFluidClient({
 
 **Parameters:**
 - `networkPassphrase`: Stellar network identifier (e.g., "Test Network")
-- `serverUrl`: Primary Fluid server URL (legacy, use `serverUrls` instead)
-- `serverUrls`: List of Fluid server URLs for redundancy
+- `serverUrl`: Primary XLM Paymaster server URL (legacy, use `serverUrls` instead)
+- `serverUrls`: List of XLM Paymaster server URLs for redundancy
 - `horizonUrl`: Horizon server URL for transaction submission
 - `sorobanRpcUrl`: Soroban RPC URL for token operations
 - `useWorker`: Enable Web Worker for signing (default: false)
@@ -358,9 +358,9 @@ The SDK includes automatic retry logic for improved network resilience:
 final client = FlutterFluidClient(
   networkPassphrase: 'Test Network',
   serverUrls: [
-    'https://fluid-primary.example',
-    'https://fluid-secondary.example',
-    'https://fluid-tertiary.example',
+    'https://xlm-paymaster-primary.example',
+    'https://xlm-paymaster-secondary.example',
+    'https://xlm-paymaster-tertiary.example',
   ],
   enableAutoRetry: true,      // Enable automatic retry
   maxRetries: 3,              // Retry up to 3 times
@@ -375,9 +375,9 @@ The SDK automatically fails over to alternative servers:
 ```dart
 final client = FlutterFluidClient(
   serverUrls: [
-    'https://fluid-primary.example',  // Try first
-    'https://fluid-secondary.example', // Fallback 1
-    'https://fluid-tertiary.example',  // Fallback 2
+    'https://xlm-paymaster-primary.example',  // Try first
+    'https://xlm-paymaster-secondary.example', // Fallback 1
+    'https://xlm-paymaster-tertiary.example',  // Fallback 2
   ],
   networkPassphrase: 'Test Network',
 );
@@ -390,7 +390,7 @@ The SDK checks for required platform features:
 ```dart
 final client = FlutterFluidClient(
   networkPassphrase: 'Test Network',
-  serverUrl: 'https://fluid.example',
+  serverUrl: 'https://xlm-paymaster.example',
 );
 
 final result = await client.initialize();
@@ -448,7 +448,7 @@ if (result.success) {
 // Enable verbose errors for debugging
 final client = FlutterFluidClient(
   networkPassphrase: 'Test Network',
-  serverUrl: 'https://fluid.example',
+  serverUrl: 'https://xlm-paymaster.example',
   verboseErrors: true,  // Only in debug builds
 );
 
@@ -466,7 +466,7 @@ client.reportBug(
 ```dart
 final client = FlutterFluidClient(
   networkPassphrase: 'Test Network',
-  serverUrl: 'https://fluid.example',
+  serverUrl: 'https://xlm-paymaster.example',
   useWorker: true,  // Offload signing to Web Worker
 );
 ```
@@ -486,7 +486,7 @@ final result = await client.signTransactions(
 ```dart
 final client = FlutterFluidClient(
   networkPassphrase: 'Test Network',
-  serverUrl: 'https://fluid.example',
+  serverUrl: 'https://xlm-paymaster.example',
   networkTimeoutMs: 15000,  // 15 second timeout for faster failure
 );
 ```
@@ -518,7 +518,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _initClient() async {
     _client = FlutterFluidClient(
       networkPassphrase: 'Test Network',
-      serverUrl: 'https://fluid.example',
+      serverUrl: 'https://xlm-paymaster.example',
       horizonUrl: 'https://horizon-testnet.stellar.org',
     );
     
@@ -602,7 +602,7 @@ declare var FlutterFluidClient: any;
 class FluidSDK {
   static final _client = FlutterFluidClient({
     networkPassphrase: 'Test Network',
-    serverUrl: 'https://fluid.example',
+    serverUrl: 'https://xlm-paymaster.example',
   });
 
   static Future<void> sendPayment(String recipient, String amount) async {
@@ -664,7 +664,7 @@ class AppErrorHandler {
 Stream<ConfirmationProgress> streamConfirmation(String hash) async* {
   final client = FlutterFluidClient(
     networkPassphrase: 'Test Network',
-    serverUrl: 'https://fluid.example',
+    serverUrl: 'https://xlm-paymaster.example',
   );
 
   await client.waitForConfirmation(
@@ -679,15 +679,15 @@ Stream<ConfirmationProgress> streamConfirmation(String hash) async* {
 ## Resources
 
 - [Stellar Developer Portal](https://developers.stellar.org/)
-- [Fluid Server Documentation](https://fluid.example/docs)
+- [Paymaster Server Documentation](https://xlm-paymaster.example/docs)
 - [Stellar SDK Reference](https://stellar.github.io/js-stellar-sdk/)
 
 ## Support
 
 For issues and questions:
-- Check the [GitHub Issues](https://github.com/your-org/fluid/issues)
+- Check the [GitHub Issues](https://github.com/your-org/xlm-paymaster/issues)
 - Join our [Discord Community](https://discord.gg/your-server)
-- Review [Stack Overflow](https://stackoverflow.com/tags/fluid-sdk)
+- Review [Stack Overflow](https://stackoverflow.com/tags/xlm-paymaster-sdk)
 
 ## License
 

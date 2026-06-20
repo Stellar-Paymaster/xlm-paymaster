@@ -1,4 +1,4 @@
-# Fluid Monthly Transparency Reports
+# XLM Paymaster Monthly Transparency Reports
 
 Historical network activity reports, newest first. Each report is auto-generated
 on the 1st of every month by the [`monthly-report`](../../.github/workflows/monthly-report.yml) workflow.

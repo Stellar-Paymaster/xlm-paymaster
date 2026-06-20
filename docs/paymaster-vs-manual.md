@@ -1,17 +1,17 @@
-# Fluid vs Manual Fee Management
+# XLM Paymaster vs Manual Fee Management
 
-A detailed, honest comparison of using Fluid against implementing fee-bump transactions by hand.
+A detailed, honest comparison of using XLM Paymaster against implementing fee-bump transactions by hand.
 
 ---
 
 ## Comparison table
 
-| Dimension | Manual fee-bump | Fluid |
+| Dimension | Manual fee-bump | XLM Paymaster |
 |---|---|---|
 | **Setup complexity** | High — write signing logic, key management, submission retry, and error handling from scratch | Low — one `npm install`, one server deploy |
 | **Lines of code (per integration)** | ~150–300 (see code comparison below) | ~10–15 |
 | **Fee accuracy** | Error-prone — static `base_fee` gets congested during surges; manual multiplier tuning required | Automatic — `FLUID_FEE_MULTIPLIER` applies dynamically; Horizon failover keeps submissions alive |
-| **Key security** | Fee-payer secret in application code or env; rotation requires code deploy | Secret isolated in the Fluid server process; rotated by updating one env var |
+| **Key security** | Fee-payer secret in application code or env; rotation requires code deploy | Secret isolated in the XLM Paymaster server process; rotated by updating one env var |
 | **Horizon failover** | Not included — single-endpoint submissions fail silently during outages | Built-in — `FLUID_HORIZON_URLS` + `FLUID_HORIZON_SELECTION=priority` retries automatically |
 | **Rate limiting** | None — fee-payer can be drained by runaway clients | Configurable per-route via `FLUID_RATE_LIMIT_MAX` and `FLUID_RATE_LIMIT_WINDOW_MS` |
 | **Multi-tenant support** | Requires custom routing + per-tenant key management | Tenant isolation via API keys with per-tenant billing (Phase 9+) |
@@ -30,7 +30,7 @@ A detailed, honest comparison of using Fluid against implementing fee-bump trans
 A production-ready manual implementation requires error handling, retries, Horizon failover, and sequence number management:
 
 ```ts
-// ~200 lines to do what Fluid does out of the box
+// ~200 lines to do what XLM Paymaster does out of the box
 import {
   Keypair, Server, TransactionBuilder, FeeBumpTransaction,
   Transaction, Networks
@@ -97,33 +97,33 @@ async function checkBalance() {
 // Add token-bucket logic here, or use a Redis-backed middleware...
 ```
 
-### With Fluid (~10 lines)
+### With XLM Paymaster (~10 lines)
 
 ```ts
-import { FluidClient } from "fluid-client";
+import { FluidClient } from "paymaster-client";
 
-const fluid = new FluidClient({
-  serverUrl:         "https://your-fluid-server.example.com",
+const xlm-paymaster = new FluidClient({
+  serverUrl:         "https://your-paymaster-server.example.com",
   networkPassphrase: "Test SDF Network ; September 2015",
   horizonUrl:        "https://horizon-testnet.stellar.org",
 });
 
 // That's it — fee-payer key never touches application code
-const { xdr } = await fluid.requestFeeBump(signedInnerXdr);
+const { xdr } = await xlm-paymaster.requestFeeBump(signedInnerXdr);
 ```
 
-Fluid handles: fee calculation, Horizon failover, retries, balance monitoring, rate limiting, metrics, and key isolation — all via the server configuration.
+XLM Paymaster handles: fee calculation, Horizon failover, retries, balance monitoring, rate limiting, metrics, and key isolation — all via the server configuration.
 
 ---
 
 ## Total cost of ownership
 
-| Cost driver | Manual | Fluid |
+| Cost driver | Manual | XLM Paymaster |
 |---|---|---|
 | Initial implementation | 2–5 engineer-days | < 1 hour |
 | Ongoing maintenance | 2–4 hours/month (monitoring, fee tuning) | ~30 min/month (upgrade, config review) |
 | Incident response | Owner's time for every Horizon outage | Community issue tracker |
-| Infrastructure | App server env var + your own monitoring | Dedicated Fluid server (can share with other tenants) |
+| Infrastructure | App server env var + your own monitoring | Dedicated XLM Paymaster server (can share with other tenants) |
 | Scaling beyond 10 TPS | Re-architect sequence number handling | Update `docker-compose.scale.yml` |
 
 ---
@@ -133,15 +133,15 @@ Fluid handles: fee calculation, Horizon failover, retries, balance monitoring, r
 Manual fee-bumps remain appropriate when:
 
 - You have a single, extremely low-volume integration (< 5 transactions/day) and no plans to scale.
-- You need fine-grained control over the fee-payer keypair lifecycle that conflicts with Fluid's server model.
+- You need fine-grained control over the fee-payer keypair lifecycle that conflicts with XLM Paymaster's server model.
 - Your organisation prohibits running additional services.
 
-In all other cases, Fluid reduces risk and maintenance burden significantly.
+In all other cases, XLM Paymaster reduces risk and maintenance burden significantly.
 
 ---
 
 ## Further reading
 
-- [Fluid README](../README.md) — quick-start and configuration reference
+- [XLM Paymaster README](../README.md) — quick-start and configuration reference
 - [ADR-001: Chain-agnostic fee sponsor](adr/001-chain-agnostic-fee-sponsor.md)
 - [Stellar fee-bump transaction documentation](https://developers.stellar.org/docs/encyclopedia/fee-bump-transactions)

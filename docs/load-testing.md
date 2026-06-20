@@ -1,12 +1,12 @@
-# Fluid Load Testing Guide (k6 and Locust)
+# XLM Paymaster Load Testing Guide (k6 and Locust)
 
-This document provides guidelines and instructions for executing load testing against the Fluid server's `/fee-bump` endpoint. Load testing verifies that the server meets the performance requirement of handling 1,000 requests per second (RPS) under peak CPU and memory conditions.
+This document provides guidelines and instructions for executing load testing against the XLM Paymaster server's `/fee-bump` endpoint. Load testing verifies that the server meets the performance requirement of handling 1,000 requests per second (RPS) under peak CPU and memory conditions.
 
 ---
 
 ## Architecture Overview
 
-Fluid is a high-performance Stellar fee-bump relay server written in Rust. In production, rate limits and daily fee sponsorship quotas protect the system resources:
+XLM Paymaster is a high-performance Stellar fee-bump relay server written in Rust. In production, rate limits and daily fee sponsorship quotas protect the system resources:
 * **IP Rate Limiting**: Limit on the number of requests per IP.
 * **API Key Rate Limiting**: Limit based on the client tier (Free vs. Pro).
 * **Quota Limits**: Daily fee limits per tenant.
@@ -15,7 +15,7 @@ For load testing (e.g. simulating 1,000 RPS), these limits must be bypassed so t
 
 ### Performance Test Mode (`FLUID_DISABLE_RATE_LIMITS`)
 
-Fluid supports a performance-testing configuration flag:
+XLM Paymaster supports a performance-testing configuration flag:
 * **Environment Variable**: `FLUID_DISABLE_RATE_LIMITS=true`
 * **Behavior**: Bypasses the IP rate limiter, API key rate limiter, and daily sponsorship quota checks. All requests from validated API keys proceed to signing.
 
@@ -27,16 +27,16 @@ Fluid supports a performance-testing configuration flag:
 
 ### Execution Script
 The k6 script is located at:
-[fluid-server/k6/fee_bump_stress.js](file:///home/edohwares/Desktop/Room/drips/fluid/fluid-server/k6/fee_bump_stress.js)
+[paymaster-server/k6/fee_bump_stress.js](file:///home/edohwares/Desktop/Room/drips/xlm-paymaster/paymaster-server/k6/fee_bump_stress.js)
 
 ### Running k6
 To run the stress test against a local server:
 ```bash
-# 1. Start the Fluid server with rate limits disabled
+# 1. Start the XLM Paymaster server with rate limits disabled
 FLUID_DISABLE_RATE_LIMITS=true FLUID_FEE_PAYER_SECRET=... cargo run --release
 
 # 2. Run k6 stress test
-k6 run fluid-server/k6/fee_bump_stress.js
+k6 run paymaster-server/k6/fee_bump_stress.js
 ```
 
 ---
@@ -47,16 +47,16 @@ k6 run fluid-server/k6/fee_bump_stress.js
 
 ### Execution Script
 The Locust script is located at:
-[fluid-server/locust/locustfile.py](file:///home/edohwares/Desktop/Room/drips/fluid/fluid-server/locust/locustfile.py)
+[paymaster-server/locust/locustfile.py](file:///home/edohwares/Desktop/Room/drips/xlm-paymaster/paymaster-server/locust/locustfile.py)
 
 ### Running Locust
 To run the Locust test:
 ```bash
-# 1. Start the Fluid server with rate limits disabled
+# 1. Start the XLM Paymaster server with rate limits disabled
 FLUID_DISABLE_RATE_LIMITS=true FLUID_FEE_PAYER_SECRET=... cargo run --release
 
 # 2. Run Locust in headless mode targeting 1000 requests/sec
-locust -f fluid-server/locust/locustfile.py --headless -u 200 -r 50 --run-time 3m --host http://localhost:3000
+locust -f paymaster-server/locust/locustfile.py --headless -u 200 -r 50 --run-time 3m --host http://localhost:3000
 ```
 
 ---

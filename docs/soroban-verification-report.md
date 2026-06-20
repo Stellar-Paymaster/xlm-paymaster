@@ -1,6 +1,6 @@
 # Soroban Smart Contracts Verification Report
 
-This report summarizes the implementation and verification of five new Soroban smart contracts for the Fluid platform.
+This report summarizes the implementation and verification of five new Soroban smart contracts for the XLM Paymaster platform.
 
 ## Contracts Implemented
 

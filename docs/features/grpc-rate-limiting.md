@@ -2,7 +2,7 @@
 
 ## Overview
 
-Implements rate-limiting middleware for gRPC handlers in fluid-server to protect transaction endpoints from rapid-fire spam and ensure service stability.
+Implements rate-limiting middleware for gRPC handlers in paymaster-server to protect transaction endpoints from rapid-fire spam and ensure service stability.
 
 ## Architecture
 
@@ -15,12 +15,12 @@ Implements rate-limiting middleware for gRPC handlers in fluid-server to protect
 
 ### Components
 
-1. **RateLimiter** (`fluid-server/src/rate_limiter.rs`)
+1. **RateLimiter** (`paymaster-server/src/rate_limiter.rs`)
    - Sliding window implementation
    - Thread-safe with RwLock
    - Automatic cleanup of expired requests
 
-2. **gRPC Integration** (`fluid-server/src/grpc.rs`)
+2. **gRPC Integration** (`paymaster-server/src/grpc.rs`)
    - Rate limit check on `sign()` RPC handler
    - Client IP extraction from request metadata
    - Resource exhausted error response
@@ -110,9 +110,9 @@ All gRPC requests are logged with:
 
 ## Files Modified
 
-- `fluid-server/src/lib.rs` - Added rate_limiter module declaration
-- `fluid-server/src/rate_limiter.rs` - New rate limiter implementation
-- `fluid-server/src/grpc.rs` - Integrated rate limiting into sign handler
+- `paymaster-server/src/lib.rs` - Added rate_limiter module declaration
+- `paymaster-server/src/rate_limiter.rs` - New rate limiter implementation
+- `paymaster-server/src/grpc.rs` - Integrated rate limiting into sign handler
 
 ## Features
 

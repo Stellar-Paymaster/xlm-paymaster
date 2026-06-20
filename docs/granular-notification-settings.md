@@ -1,6 +1,6 @@
 # Granular Notification Settings
 
-The Fluid admin dashboard includes a comprehensive interface allowing administrators to manage notification and alert configurations on a highly granular, per-tenant basis.
+The XLM Paymaster admin dashboard includes a comprehensive interface allowing administrators to manage notification and alert configurations on a highly granular, per-tenant basis.
 
 ## Features
 

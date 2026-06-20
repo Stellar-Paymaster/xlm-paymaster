@@ -7,7 +7,7 @@ The `IdentityRegistryDID` contract implements decentralized identity (DID) regis
 ### `register_did(env: Env, identity: Address, did: Symbol, identity_pubkey: BytesN<32>)`
 Directly registers a DID document. Requires identity owner authentication.
 - **identity**: Address of the user registering the identity.
-- **did**: The decentralized identity string representation (e.g. `did:fluid:123`).
+- **did**: The decentralized identity string representation (e.g. `did:xlm-paymaster:123`).
 - **identity_pubkey**: User's public key associated with the DID.
 
 ### `register_did_sponsored(env: Env, identity: Address, did: Symbol, identity_pubkey: BytesN<32>, signature: BytesN<64>)`

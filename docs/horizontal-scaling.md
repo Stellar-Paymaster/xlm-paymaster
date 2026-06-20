@@ -6,7 +6,7 @@ This document explains how to run multiple Node API replicas behind a load balan
 
 A stateful server keeps per-request or per-connection data in process memory. When a load balancer routes successive requests from the same client to different replicas, each replica sees a fresh, empty state and may produce inconsistent results — for example, a rate limit that resets on every hop, or an API key that is valid on replica A but unknown to replica B.
 
-Fluid's Node API eliminates per-instance state by storing all shared data in Redis:
+XLM Paymaster's Node API eliminates per-instance state by storing all shared data in Redis:
 
 | State | Storage |
 |-------|---------|
@@ -82,4 +82,4 @@ Admin endpoints use JWT tokens issued by `/admin/auth/login`. JWT is stateless b
 
 ## Kubernetes
 
-For production Kubernetes deployments see the [Helm chart](../helm/fluid/README.md) in `helm/fluid/`. The chart configures a HorizontalPodAutoscaler that scales the node-api deployment automatically based on CPU utilisation and requests per second.
+For production Kubernetes deployments see the [Helm chart](../helm/xlm-paymaster/README.md) in `helm/xlm-paymaster/`. The chart configures a HorizontalPodAutoscaler that scales the node-api deployment automatically based on CPU utilisation and requests per second.

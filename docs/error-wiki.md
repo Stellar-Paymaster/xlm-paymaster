@@ -1,27 +1,27 @@
-# Fluid Error Wiki
+# XLM Paymaster Error Wiki
 
-Welcome to the central repository for Fluid SDK error codes. This guide helps you understand why an error occurred and how to resolve it. In addition to this static guide, you can use the interactive error lookup library in the client SDK or query them via the CLI.
+Welcome to the central repository for XLM Paymaster SDK error codes. This guide helps you understand why an error occurred and how to resolve it. In addition to this static guide, you can use the interactive error lookup library in the client SDK or query them via the CLI.
 
 ## Interactive CLI Lookup
 
-You can query, search, and list all Fluid API error codes directly from the command line:
+You can query, search, and list all XLM Paymaster API error codes directly from the command line:
 
 ```bash
 # List all registered error codes
-fluid errors --list
+xlm-paymaster errors --list
 
 # Look up details for a specific code
-fluid errors FLUID_001
+xlm-paymaster errors FLUID_001
 
 # Search error codes by keyword (e.g. "limit" or "sequence")
-fluid errors "rate limit" --search
+xlm-paymaster errors "rate limit" --search
 ```
 
 ---
 
 ## Central Error Code Registry
 
-The following error codes are registered in the Fluid platform:
+The following error codes are registered in the XLM Paymaster platform:
 
 ### `FLUID_001` - Invalid Transaction XDR
 - **HTTP Status**: 400
@@ -36,7 +36,7 @@ The following error codes are registered in the Fluid platform:
 
 ### `FLUID_003` - Missing or Invalid API Key
 - **HTTP Status**: 401
-- **Description**: The request did not include a valid Fluid API key in the headers.
+- **Description**: The request did not include a valid XLM Paymaster API key in the headers.
 
 ### `FLUID_004` - Tenant Quota Exceeded
 - **HTTP Status**: 403
@@ -48,19 +48,19 @@ The following error codes are registered in the Fluid platform:
 
 ### `FLUID_006` - Duplicate Transaction
 - **HTTP Status**: 409
-- **Description**: This transaction hash has already been processed by Fluid.
+- **Description**: This transaction hash has already been processed by XLM Paymaster.
 
 ### `FLUID_007` - Rate Limit Exceeded
 - **HTTP Status**: 429
-- **Description**: Too many requests were made to the Fluid API in a short window.
+- **Description**: Too many requests were made to the XLM Paymaster API in a short window.
 
 ### `FLUID_008` - Internal Server Error
 - **HTTP Status**: 500
-- **Description**: An unexpected error occurred on the Fluid server.
+- **Description**: An unexpected error occurred on the XLM Paymaster server.
 
 ### `FLUID_009` - Stellar Network Unavailable
 - **HTTP Status**: 503
-- **Description**: The Fluid server could not reach the Stellar Horizon or Soroban RPC endpoint.
+- **Description**: The XLM Paymaster server could not reach the Stellar Horizon or Soroban RPC endpoint.
 
 ### `FLUID_010` - Invalid Soroban Contract Invocation
 - **HTTP Status**: 400
@@ -69,5 +69,5 @@ The following error codes are registered in the Fluid platform:
 ---
 
 ## Need More Help?
-If your error isn't listed here, please visit our [Discord Community](https://discord.gg/fluid) or open a [Support Ticket](https://support.fluid.dev/tickets).
+If your error isn't listed here, please visit our [Discord Community](https://discord.gg/xlm-paymaster) or open a [Support Ticket](https://support.xlm-paymaster.dev/tickets).
 

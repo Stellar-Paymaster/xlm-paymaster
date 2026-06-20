@@ -39,25 +39,25 @@ jobs:
 
       - name: Install demo dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: fluid-server/wasm-demo
+        working-directory: paymaster-server/wasm-demo
 
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
-        working-directory: fluid-server/wasm-demo
+        working-directory: paymaster-server/wasm-demo
 
       - name: Run Rust unit tests
-        run: cargo test --manifest-path fluid-server/Cargo.toml --lib
+        run: cargo test --manifest-path paymaster-server/Cargo.toml --lib
 
       - name: Build WASM packages
         run: |
           wasm-pack build --release --target web --out-dir pkg/web
           wasm-pack build --release --target nodejs --out-dir pkg/node
-        working-directory: fluid-server
+        working-directory: paymaster-server
 
       - name: Run Node demo validation
         run: pnpm run test:node
-        working-directory: fluid-server/wasm-demo
+        working-directory: paymaster-server/wasm-demo
 
       - name: Run browser demo validation
         run: pnpm run test:browser
-        working-directory: fluid-server/wasm-demo
+        working-directory: paymaster-server/wasm-demo

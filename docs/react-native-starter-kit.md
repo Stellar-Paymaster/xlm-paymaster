@@ -1,6 +1,6 @@
 # React Native Gasless Starter Kit
 
-This guide provides everything mobile developers need to implement gasless Stellar transactions using the Fluid platform in React Native.
+This guide provides everything mobile developers need to implement gasless Stellar transactions using the XLM Paymaster platform in React Native.
 
 ## Features
 
@@ -12,7 +12,7 @@ This guide provides everything mobile developers need to implement gasless Stell
 ## Installation
 
 ```bash
-npm install fluid-client
+npm install paymaster-client
 ```
 
 ### Required Polyfills
@@ -36,10 +36,10 @@ global.Buffer = Buffer;
 Wrap your application with the `FluidProvider`:
 
 ```tsx
-import { ReactNative } from 'fluid-client';
+import { ReactNative } from 'paymaster-client';
 
 const fluidConfig = {
-  serverUrl: "https://your-fluid-server.com",
+  serverUrl: "https://your-paymaster-server.com",
   networkPassphrase: "Test SDF Network ; September 2015",
 };
 
@@ -59,7 +59,7 @@ export default function App() {
 The easiest way to implement sponsorship is using the `SponsorButton` component.
 
 ```tsx
-import { ReactNative } from 'fluid-client';
+import { ReactNative } from 'paymaster-client';
 
 export const MySponsorshipScreen = () => {
   const handleSign = async (xdr: string) => {
@@ -87,7 +87,7 @@ export const MySponsorshipScreen = () => {
 For more control over your UI, use the custom hook:
 
 ```tsx
-import { ReactNative } from 'fluid-client';
+import { ReactNative } from 'paymaster-client';
 
 const { execute, status, isLoading, error, hash } = ReactNative.useGaslessTransaction({
   submit: true,

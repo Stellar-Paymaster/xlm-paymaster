@@ -1,6 +1,6 @@
 # Content Security Policy (CSP)
 
-To comply with high-level security standards, protect the Fluid Admin Dashboard from Cross-Site Scripting (XSS), and prevent arbitrary script injection, the Fluid platform enforces a strict Content Security Policy (CSP).
+To comply with high-level security standards, protect the XLM Paymaster Admin Dashboard from Cross-Site Scripting (XSS), and prevent arbitrary script injection, the XLM Paymaster platform enforces a strict Content Security Policy (CSP).
 
 ---
 

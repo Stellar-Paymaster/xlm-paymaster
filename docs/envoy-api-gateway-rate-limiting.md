@@ -1,18 +1,18 @@
 # NGINX/Envoy API Gateway Rate-Limiting Configuration (#715)
 
 **Issue:** #715  
-**Package:** `fluid-server`
+**Package:** `paymaster-server`
 
 ## Overview
 
-Fluid's Rust server currently performs API key validation and rate limiting in-process. For production deployments, basic checks should be offloaded to an edge gateway (Envoy or NGINX) so the application process focuses on transaction signing and quota accounting.
+XLM Paymaster's Rust server currently performs API key validation and rate limiting in-process. For production deployments, basic checks should be offloaded to an edge gateway (Envoy or NGINX) so the application process focuses on transaction signing and quota accounting.
 
-This guide documents the gateway configuration shipped in `fluid-server/config/` and the Rust validation helpers in `fluid-server/src/gateway_config.rs`.
+This guide documents the gateway configuration shipped in `paymaster-server/config/` and the Rust validation helpers in `paymaster-server/src/gateway_config.rs`.
 
 ## Architecture
 
 ```
-Client → Gateway (Envoy/NGINX) → fluid-server (Rust)
+Client → Gateway (Envoy/NGINX) → paymaster-server (Rust)
            │                           │
            ├─ API key presence         ├─ Quota / fee-bump signing
            ├─ Known-key allowlist      └─ Daily stroop limits
@@ -35,9 +35,9 @@ Client → Gateway (Envoy/NGINX) → fluid-server (Rust)
 
 | File | Purpose |
 |------|---------|
-| `fluid-server/config/envoy.yaml` | Envoy listener with Lua API key validation + local rate limit filters |
-| `fluid-server/config/nginx-rate-limit.conf` | NGINX alternative with `limit_req_zone` and `map`-based key validation |
-| `fluid-server/src/gateway_config.rs` | Typed tier definitions and validation (must stay in sync with `state.rs`) |
+| `paymaster-server/config/envoy.yaml` | Envoy listener with Lua API key validation + local rate limit filters |
+| `paymaster-server/config/nginx-rate-limit.conf` | NGINX alternative with `limit_req_zone` and `map`-based key validation |
+| `paymaster-server/src/gateway_config.rs` | Typed tier definitions and validation (must stay in sync with `state.rs`) |
 
 ## Environment Variables
 
@@ -52,9 +52,9 @@ Client → Gateway (Envoy/NGINX) → fluid-server (Rust)
 ## Envoy Deployment
 
 ```bash
-# Start fluid-server behind Envoy
-docker compose up fluid-server
-envoy -c fluid-server/config/envoy.yaml
+# Start paymaster-server behind Envoy
+docker compose up paymaster-server
+envoy -c paymaster-server/config/envoy.yaml
 
 # Test: missing key → 401
 curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/fee-bump
@@ -62,7 +62,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/fee-bump
 
 # Test: valid key passes gateway
 curl -s -o /dev/null -w "%{http_code}" \
-  -H "x-api-key: fluid-free-demo-key" \
+  -H "x-api-key: xlm-paymaster-free-demo-key" \
   -H "Content-Type: application/json" \
   -d '{"xdr":"..."}' \
   http://localhost:8080/fee-bump
@@ -73,19 +73,19 @@ curl -s -o /dev/null -w "%{http_code}" \
 Include the rate-limit config in your main server block:
 
 ```nginx
-include /etc/nginx/conf.d/fluid-rate-limit.conf;
+include /etc/nginx/conf.d/xlm-paymaster-rate-limit.conf;
 ```
 
-The bundled config listens on port **8080** and proxies to `fluid-server:3000`.
+The bundled config listens on port **8080** and proxies to `paymaster-server:3000`.
 
 ## Tier Definitions
 
-Demo tiers match `fluid-server/src/state.rs`:
+Demo tiers match `paymaster-server/src/state.rs`:
 
 | API Key | Tier | Max Requests | Window |
 |---------|------|--------------|--------|
-| `fluid-free-demo-key` | free | 2 | 60s |
-| `fluid-pro-demo-key` | pro | 5 | 60s |
+| `xlm-paymaster-free-demo-key` | free | 2 | 60s |
+| `xlm-paymaster-pro-demo-key` | pro | 5 | 60s |
 
 When adding production keys, update **both** the gateway config and `GatewayConfig::default_api_key_tiers()`.
 
@@ -99,7 +99,7 @@ When adding production keys, update **both** the gateway config and `GatewayConf
 ## Running Tests
 
 ```bash
-cd fluid-server
+cd paymaster-server
 cargo test gateway_config
 ```
 

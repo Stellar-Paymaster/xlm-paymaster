@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Fluid platform requires professional-grade hardening and reliability standards. To prevent partial writes and inconsistent state during deployments or unexpected terminations, the server implements a graceful shutdown mechanism for all background workers. 
+The XLM Paymaster platform requires professional-grade hardening and reliability standards. To prevent partial writes and inconsistent state during deployments or unexpected terminations, the server implements a graceful shutdown mechanism for all background workers. 
 
 This ensures that active intervals (e.g., Ledger Monitor cycles) are allowed to complete before the process exits.
 

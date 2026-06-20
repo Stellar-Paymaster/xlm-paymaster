@@ -1,15 +1,15 @@
-name: Rust CI (fluid-server)
+name: Rust CI (paymaster-server)
 
 on:
   pull_request:
     paths:
-      - "fluid-server/**"
+      - "paymaster-server/**"
       - ".github/workflows/rust-ci.yml"
   push:
     branches:
       - main
     paths:
-      - "fluid-server/**"
+      - "paymaster-server/**"
       - ".github/workflows/rust-ci.yml"
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: fluid-server
+        working-directory: paymaster-server
 
     steps:
       - uses: actions/checkout@v4

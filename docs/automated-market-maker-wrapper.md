@@ -1,6 +1,6 @@
 # Automated Market Maker (AMM) Wrapper
 
-The AMM Wrapper enables gasless token swaps on Soroban-based AMM contracts. By routing swap calls through Fluid, developers can sponsor transaction fee costs for their end-users.
+The AMM Wrapper enables gasless token swaps on Soroban-based AMM contracts. By routing swap calls through XLM Paymaster, developers can sponsor transaction fee costs for their end-users.
 
 ## Capabilities
 

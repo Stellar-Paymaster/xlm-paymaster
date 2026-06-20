@@ -1,23 +1,23 @@
-# Fluid × Soroswap: Gasless Token Swaps
+# XLM Paymaster × Soroswap: Gasless Token Swaps
 
-This guide shows how to integrate Fluid into [Soroswap](https://soroswap.finance) so your users can swap tokens without holding XLM for network fees.
+This guide shows how to integrate XLM Paymaster into [Soroswap](https://soroswap.finance) so your users can swap tokens without holding XLM for network fees.
 
 ## Why this matters
 
-Soroswap users must hold XLM to pay Stellar network fees even when they only want to swap USDC → BTC. Fluid wraps the swap transaction in a fee-bump so your application pays fees on behalf of users, improving conversion rates and reducing onboarding friction.
+Soroswap users must hold XLM to pay Stellar network fees even when they only want to swap USDC → BTC. XLM Paymaster wraps the swap transaction in a fee-bump so your application pays fees on behalf of users, improving conversion rates and reducing onboarding friction.
 
 ## Prerequisites
 
-- A running Fluid server (see the [README](../../README.md))
+- A running XLM Paymaster server (see the [README](../../README.md))
 - Access to the Soroswap SDK (`@soroswap/sdk` or equivalent)
-- A Stellar account with XLM funded as the Fluid fee-payer
+- A Stellar account with XLM funded as the XLM Paymaster fee-payer
 
 ## Integration steps
 
-### 1. Install the Fluid client
+### 1. Install the XLM Paymaster client
 
 ```bash
-npm install fluid-client
+npm install paymaster-client
 # or load via CDN — see README for script-tag usage
 ```
 
@@ -43,18 +43,18 @@ const swapTx = await SoroswapRouter.buildSwapTransaction({
 const signedXdr = swapTx.sign(userKeypair).toXDR();
 ```
 
-### 3. Request a fee-bump from Fluid
+### 3. Request a fee-bump from XLM Paymaster
 
 ```ts
-import { FluidClient } from "fluid-client";
+import { FluidClient } from "paymaster-client";
 
-const fluid = new FluidClient({
-  serverUrl:          "https://your-fluid-server.example.com",
+const xlm-paymaster = new FluidClient({
+  serverUrl:          "https://your-paymaster-server.example.com",
   networkPassphrase:  "Test SDF Network ; September 2015",
   horizonUrl:         "https://horizon-testnet.stellar.org",
 });
 
-const { xdr: feeBumpXdr } = await fluid.requestFeeBump(signedXdr);
+const { xdr: feeBumpXdr } = await xlm-paymaster.requestFeeBump(signedXdr);
 ```
 
 ### 4. Submit the fee-bump transaction
@@ -73,12 +73,12 @@ console.log("Swap hash:", result.hash);
 
 ```ts
 import { SoroswapRouter } from "@soroswap/sdk";
-import { FluidClient } from "fluid-client";
+import { FluidClient } from "paymaster-client";
 import { Keypair, Server, TransactionBuilder } from "@stellar/stellar-sdk";
 
 const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
 const HORIZON_URL        = "https://horizon-testnet.stellar.org";
-const FLUID_URL          = "https://your-fluid-server.example.com";
+const FLUID_URL          = "https://your-paymaster-server.example.com";
 
 export async function gaslessSwap(
   userSecret: string,
@@ -88,7 +88,7 @@ export async function gaslessSwap(
 ) {
   const userKeypair = Keypair.fromSecret(userSecret);
   const horizon     = new Server(HORIZON_URL);
-  const fluid       = new FluidClient({ serverUrl: FLUID_URL, networkPassphrase: NETWORK_PASSPHRASE, horizonUrl: HORIZON_URL });
+  const xlm-paymaster       = new FluidClient({ serverUrl: FLUID_URL, networkPassphrase: NETWORK_PASSPHRASE, horizonUrl: HORIZON_URL });
 
   // Build + sign with user key
   const swapTx = await SoroswapRouter.buildSwapTransaction({
@@ -100,7 +100,7 @@ export async function gaslessSwap(
   const signedXdr = swapTx.sign(userKeypair).toXDR();
 
   // Wrap in fee-bump
-  const { xdr } = await fluid.requestFeeBump(signedXdr);
+  const { xdr } = await xlm-paymaster.requestFeeBump(signedXdr);
   const tx = TransactionBuilder.fromXDR(xdr, NETWORK_PASSPHRASE);
   return horizon.submitTransaction(tx);
 }
@@ -108,11 +108,11 @@ export async function gaslessSwap(
 
 ## Rate limits and cost management
 
-Each call to `fluid.requestFeeBump` counts against the Fluid rate limit configured by `FLUID_RATE_LIMIT_MAX`. For a high-volume DEX, configure a dedicated Fluid tenant with raised limits:
+Each call to `xlm-paymaster.requestFeeBump` counts against the XLM Paymaster rate limit configured by `FLUID_RATE_LIMIT_MAX`. For a high-volume DEX, configure a dedicated XLM Paymaster tenant with raised limits:
 
 ```bash
 FLUID_RATE_LIMIT_MAX=500
 FLUID_RATE_LIMIT_WINDOW_MS=60000
 ```
 
-Monitor XLM consumption via the Fluid dashboard at `GET /dashboard`.
+Monitor XLM consumption via the XLM Paymaster dashboard at `GET /dashboard`.

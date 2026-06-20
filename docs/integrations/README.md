@@ -1,4 +1,4 @@
-# Fluid Integration Guides for Stellar Ecosystem Projects
+# XLM Paymaster Integration Guides for Stellar Ecosystem Projects
 
 Step-by-step guides for adding gasless transactions to popular Stellar ecosystem projects.
 
@@ -17,10 +17,10 @@ Every integration follows the same three steps regardless of the target protocol
 ```
 1. Build the inner transaction using the target protocol's SDK
 2. Sign with the user's wallet (Freighter, Albedo, Lobstr, etc.)
-3. Send the signed XDR to fluid.requestFeeBump() and submit the result
+3. Send the signed XDR to xlm-paymaster.requestFeeBump() and submit the result
 ```
 
-The user's signature is on the **inner** transaction; the fee-payer's signature is on the **outer** fee-bump envelope. The two signatures are independent — the inner transaction is cryptographically unmodified by Fluid.
+The user's signature is on the **inner** transaction; the fee-payer's signature is on the **outer** fee-bump envelope. The two signatures are independent — the inner transaction is cryptographically unmodified by XLM Paymaster.
 
 ## Adding Your Own Integration Guide
 

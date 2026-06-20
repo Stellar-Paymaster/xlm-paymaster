@@ -1,10 +1,10 @@
 # Python SDK Parity Compliance Report
 
-This report documents the alignment between the TypeScript SDK (`fluid-client`) and the Python SDK (`fluid-py`) following the parity update.
+This report documents the alignment between the TypeScript SDK (`paymaster-client`) and the Python SDK (`paymaster-py`) following the parity update.
 
 ## Overview
 
-The Fluid platform maintains multiple client libraries to support diverse developer ecosystems. This parity update ensures that core features, resilience patterns, and error handling are consistent across languages, allowing for a seamless developer experience when switching between TypeScript (frontend/Node.js) and Python (AI agents/backend).
+The XLM Paymaster platform maintains multiple client libraries to support diverse developer ecosystems. This parity update ensures that core features, resilience patterns, and error handling are consistent across languages, allowing for a seamless developer experience when switching between TypeScript (frontend/Node.js) and Python (AI agents/backend).
 
 ## Key Parity Features
 
@@ -16,7 +16,7 @@ The TypeScript SDK now mirrors the Python SDK's error structure, making it easie
 | `FluidError` | `FluidError` | Base class for all SDK errors. |
 | `FluidRequestError` | `FluidRequestError` | Base class for network and server failures. |
 | `FluidNetworkError` | `FluidNetworkError` | Thrown on DNS, connection, or timeout issues. |
-| `FluidServerError` | `FluidServerError` | Thrown on 4xx/5xx responses from Fluid servers. |
+| `FluidServerError` | `FluidServerError` | Thrown on 4xx/5xx responses from XLM Paymaster servers. |
 | `FluidNoAvailableServerError` | `FluidNoAvailableServerError` | Thrown when all configured nodes are exhausted. |
 
 ### 2. Global Request Timeouts
@@ -37,7 +37,7 @@ The normalization logic is now identical, ensuring that server selection and fai
 
 Compliance has been verified via the following test suites:
 - `client/test/parity.test.ts`: Verifies timeout enforcement, error class hierarchy, and URL normalization order.
-- `fluid-py/tests/test_client.py`: Existing Python test suite used as the baseline for parity requirements.
+- `paymaster-py/tests/test_client.py`: Existing Python test suite used as the baseline for parity requirements.
 
 ## Future Parity Roadmap
 

@@ -1,16 +1,16 @@
-name: Fluid Server Rust Tests
+name: Paymaster Server Rust Tests
 
 on:
   pull_request:
     paths:
-      - "fluid-server/**"
-      - ".github/workflows/fluid-server-tests.yml"
+      - "paymaster-server/**"
+      - ".github/workflows/paymaster-server-tests.yml"
   push:
     branches:
       - main
     paths:
-      - "fluid-server/**"
-      - ".github/workflows/fluid-server-tests.yml"
+      - "paymaster-server/**"
+      - ".github/workflows/paymaster-server-tests.yml"
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: fluid-server
+        working-directory: paymaster-server
 
     steps:
       - uses: actions/checkout@v4
@@ -40,3 +40,4 @@ jobs:
 
       - name: Final-error verification
         run: cargo test does_not_retry_final_submission_errors -- --nocapture
+

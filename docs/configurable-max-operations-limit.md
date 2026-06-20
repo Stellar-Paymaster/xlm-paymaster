@@ -1,6 +1,6 @@
 # Configurable Maximum Operations Limit
 
-**Issue #697 | Resilience & Error Handling | `fluid-server`**
+**Issue #697 | Resilience & Error Handling | `paymaster-server`**
 
 ## Overview
 
@@ -10,7 +10,7 @@ submit pathologically large envelopes that slow the fee-bump relay or exhaust
 signer pool capacity.
 
 This document describes the configurable operation-count limit added to the
-`fluid-server` Rust binary.
+`paymaster-server` Rust binary.
 
 ## Configuration
 
@@ -74,5 +74,5 @@ Unit tests in `config.rs`:
 Run:
 
 ```bash
-cd fluid-server && cargo test config
+cd paymaster-server && cargo test config
 ```

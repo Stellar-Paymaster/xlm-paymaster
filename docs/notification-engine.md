@@ -2,7 +2,7 @@
 
 ## Overview
 
-`fluid-server` routes all alert delivery through an isolated notification
+`paymaster-server` routes all alert delivery through an isolated notification
 engine that runs as a dedicated Tokio background task.  The hot request path
 enqueues events on a bounded channel and returns immediately — backends
 (Slack webhooks, future SMTP gateways, etc.) are invoked asynchronously with
@@ -22,11 +22,11 @@ NotificationEngine (background Tokio task)
     └── Backend::Webhook("...")    → additional backends
 ```
 
-Source: `fluid-server/src/notifications/mod.rs`
+Source: `paymaster-server/src/notifications/mod.rs`
 
 ## Adding a Backend
 
-Register additional backends in `run()` inside `fluid-server/src/main.rs`:
+Register additional backends in `run()` inside `paymaster-server/src/main.rs`:
 
 ```rust
 let notification_engine = notification_engine.register(

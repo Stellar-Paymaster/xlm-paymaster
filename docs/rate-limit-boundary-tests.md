@@ -9,7 +9,7 @@ Precise boundary tests verify rate-limit behavior at window edges — e.g. the 5
 | API key fallback | GCRA leaky bucket | `server/src/utils/gcraBoundary.test.ts` |
 | IP limiter store | Fixed INCR+EXPIRE | `server/src/utils/redisRateLimitStore.test.ts` |
 | Sandbox guard | Fixed window | `server/src/middleware/sandboxGuard.boundary.test.ts` |
-| gRPC rate limiter | Sliding window | `fluid-server/src/rate_limiter.rs` (inline tests) |
+| gRPC rate limiter | Sliding window | `paymaster-server/src/rate_limiter.rs` (inline tests) |
 
 ## Shared GCRA implementation
 
@@ -21,7 +21,7 @@ The pure GCRA function lives in `server/src/utils/gcraLeakyBucket.ts` and is use
 cd server
 npm test -- gcraBoundary redisRateLimitStore sandboxGuard.boundary
 
-cd ../fluid-server
+cd ../paymaster-server
 cargo test rate_limiter
 ```
 

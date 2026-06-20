@@ -1,6 +1,6 @@
 # Rate Limiting & Quotas
 
-The Fluid API enforces rate limits to ensure stability, fair usage, and security across all tenants. Rate limits operate on a per-API-key basis and use a **Leaky Bucket algorithm** backed by Redis.
+The XLM Paymaster API enforces rate limits to ensure stability, fair usage, and security across all tenants. Rate limits operate on a per-API-key basis and use a **Leaky Bucket algorithm** backed by Redis.
 
 ## How the Leaky Bucket Algorithm Works
 Instead of simply counting requests in fixed time windows (which allows harmful "bursts" of traffic precisely at the window boundaries), the server uses the **Generic Cell Rate Algorithm (GCRA)** to implement a continuous "leaky bucket."

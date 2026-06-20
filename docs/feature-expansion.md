@@ -1,9 +1,9 @@
 # Product Expansion & Architectural Upgrades
 
-This document outlines the recent architectural and product expansion changes made to the Fluid platform, covering issues #510, #511, #512, and #514.
+This document outlines the recent architectural and product expansion changes made to the XLM Paymaster platform, covering issues #510, #511, #512, and #514.
 
 ## #510 White-label Platform for Enterprises
-We have introduced a white-label endpoint located at `/admin/enterprise/white-label` to allow large banks and fintechs to utilize Fluid as a managed service, allowing them to provide customized branding for their tenant tenants.
+We have introduced a white-label endpoint located at `/admin/enterprise/white-label` to allow large banks and fintechs to utilize XLM Paymaster as a managed service, allowing them to provide customized branding for their tenant tenants.
 
 ## #511 Mobile Push-Notification Service
 The `fcmNotifier` has been integrated into the main sponsoring flow. Whenever a transaction is successfully sponsored and submitted to the blockchain, a Firebase Cloud Messaging notification is immediately dispatched to configured devices.

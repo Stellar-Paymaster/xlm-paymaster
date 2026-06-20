@@ -1,6 +1,6 @@
 # Database Encryption at Rest (TDE)
 
-The Fluid server implements Transparent Data Encryption (TDE) natively at the Prisma-level for sensitive fields within the database. This ensures that even if the database is compromised, sensitive information remains thoroughly encrypted at rest.
+The XLM Paymaster server implements Transparent Data Encryption (TDE) natively at the Prisma-level for sensitive fields within the database. This ensures that even if the database is compromised, sensitive information remains thoroughly encrypted at rest.
 
 ## How It Works
 

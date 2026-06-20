@@ -1,6 +1,6 @@
 # Sponsorship Quotas
 
-Fluid enforces per-tenant sponsorship quotas to ensure predictable fee sponsorship and avoid runaway XLM spend.
+XLM Paymaster enforces per-tenant sponsorship quotas to ensure predictable fee sponsorship and avoid runaway XLM spend.
 
 ## What is enforced
 
@@ -23,7 +23,7 @@ Fluid enforces per-tenant sponsorship quotas to ensure predictable fee sponsorsh
 
 ## Error response
 
-When a quota is exceeded, Fluid returns a 403 error with a machine-readable code:
+When a quota is exceeded, XLM Paymaster returns a 403 error with a machine-readable code:
 
 ```json
 {

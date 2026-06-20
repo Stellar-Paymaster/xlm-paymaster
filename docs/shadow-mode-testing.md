@@ -1,6 +1,6 @@
 # Shadow-mode Testing ("No-sign" Mode)
 
-Shadow-mode Testing allows developers and administrators to route real production or test traffic through the Fluid server's validation pipelines without submitting transactions to the live network or exposing signing keys.
+Shadow-mode Testing allows developers and administrators to route real production or test traffic through the XLM Paymaster server's validation pipelines without submitting transactions to the live network or exposing signing keys.
 
 ## Features
 
