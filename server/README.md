@@ -1,6 +1,6 @@
-# Fluid Server
+# Paymaster Server
 
-The Fluid server is a Node.js/TypeScript HTTP service that wraps signed Stellar transactions in fee-bump transactions. This allows applications to let users pay with the token they're spending (e.g., USDC) without requiring users to hold XLM for fees or the application to manage gas abstraction.
+The XLM Paymaster server is a Node.js/TypeScript HTTP service that wraps signed Stellar transactions in fee-bump transactions. This allows applications to let users pay with the token they're spending (e.g., USDC) without requiring users to hold XLM for fees or the application to manage gas abstraction.
 
 ## Quick Start
 
@@ -56,7 +56,7 @@ Optional:
 - `FLUID_RATE_LIMIT_MAX` - Max requests per window per IP (default: 5)
 - `FLUID_ALLOWED_ORIGINS` - Comma-separated CORS allowlist
 - `FLUID_GRPC_ENGINE_ADDRESS` - Internal Rust gRPC signer target such as `127.0.0.1:50051`
-- `FLUID_GRPC_ENGINE_TLS_SERVER_NAME` - Expected Rust engine TLS server name / SAN (default: `fluid-grpc-engine.internal`)
+- `FLUID_GRPC_ENGINE_TLS_SERVER_NAME` - Expected Rust engine TLS server name / SAN (default: `xlm-paymaster-grpc-engine.internal`)
 - `FLUID_GRPC_ENGINE_CLIENT_CA_PATH` - PEM bundle for the pinned internal CA trust anchor
 - `FLUID_GRPC_ENGINE_CLIENT_CERT_PATH` / `FLUID_GRPC_ENGINE_CLIENT_KEY_PATH` - Node API client certificate and private key used for mTLS
 - `FLUID_GRPC_ENGINE_PINNED_SERVER_CERT_SHA256` - Optional comma-separated SHA-256 fingerprints for the Rust engine server certificate; include both old and new values during rotation
@@ -65,8 +65,8 @@ Optional:
 - `LOW_BALANCE_ALERT_CHECK_INTERVAL_MS` / `FLUID_LOW_BALANCE_CHECK_INTERVAL_MS` - Balance polling interval (default: 300000 / 5 minutes)
 - `LOW_BALANCE_ALERT_COOLDOWN_MS` / `FLUID_LOW_BALANCE_ALERT_COOLDOWN_MS` - Minimum time between repeated alerts per account (minimum enforced: 3600000 / 1 hour)
 - `PAGERDUTY_ROUTING_KEY` - PagerDuty Events API v2 routing key for P1 incident alerts
-- `PAGERDUTY_SERVICE_NAME` - Service name shown in PagerDuty payloads (default: `Fluid server`)
-- `PAGERDUTY_SOURCE` - PagerDuty payload source (default: `fluid-server`)
+- `PAGERDUTY_SERVICE_NAME` - Service name shown in PagerDuty payloads (default: `XLM Paymaster server`)
+- `PAGERDUTY_SOURCE` - PagerDuty payload source (default: `paymaster-server`)
 - `PAGERDUTY_COMPONENT` - PagerDuty component tag (default: `fee-sponsorship`)
 - `SLACK_WEBHOOK_URL` - Slack incoming webhook URL used for critical ops alerts
 - `SLACK_ALERT_LOW_BALANCE_ENABLED` - Enable or disable low balance Slack alerts (default: `true`)
@@ -92,14 +92,14 @@ Rust gRPC engine env vars:
 
 Mock API keys for local development:
 
-- `fluid-free-demo-key` - Free tier, 2 requests per minute
-- `fluid-pro-demo-key` - Pro tier, 5 requests per minute
+- `xlm-paymaster-free-demo-key` - Free tier, 2 requests per minute
+- `xlm-paymaster-pro-demo-key` - Pro tier, 5 requests per minute
 
 ## API Endpoints
 
 ### Responsible disclosure (security.txt)
 
-Fluid serves an RFC 9116 `security.txt` at:
+XLM Paymaster serves an RFC 9116 `security.txt` at:
 
 - `GET /.well-known/security.txt`
 - `GET /security.txt` (alias)
@@ -134,7 +134,7 @@ Low-balance emails support SMTP and Resend transport configuration. Each fee-pay
 
 ## PagerDuty Incidents
 
-PagerDuty incidents are created via the Events API v2 when `PAGERDUTY_ROUTING_KEY` is configured. Fluid triggers and resolves incidents for:
+PagerDuty incidents are created via the Events API v2 when `PAGERDUTY_ROUTING_KEY` is configured. XLM Paymaster triggers and resolves incidents for:
 
 - zero usable signing accounts
 - Horizon unreachable for more than 60 seconds
@@ -147,20 +147,20 @@ Each incident type uses a stable `dedup_key` so repeated triggers are collapsed 
 Outbound tenant webhooks are signed with `HMAC-SHA256` using the tenant-specific `webhookSecret` stored in the database. Every signed delivery includes:
 
 - `Content-Type: application/json`
-- `X-Fluid-Signature-256: sha256=<hex digest>`
+- `X-XLM Paymaster-Signature-256: sha256=<hex digest>`
 
 Tenants configure webhook delivery with `PATCH /tenant/webhook`:
 
 ```json
 {
-  "webhookUrl": "https://example.com/fluid/webhooks",
+  "webhookUrl": "https://example.com/xlm-paymaster/webhooks",
   "webhookSecret": "replace-with-a-long-random-secret"
 }
 ```
 
 The API never returns the raw secret. It only returns whether a secret is configured.
 
-If a tenant has a webhook URL but no `webhookSecret`, Fluid logs the misconfiguration and refuses to send an unsigned webhook.
+If a tenant has a webhook URL but no `webhookSecret`, XLM Paymaster logs the misconfiguration and refuses to send an unsigned webhook.
 
 ### Verify in Node.js
 
@@ -179,7 +179,7 @@ function verifyFluidWebhook(rawBody, signatureHeader, secret) {
     crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 
   if (!matches) {
-    console.error("Fluid webhook signature validation failed", {
+    console.error("XLM Paymaster webhook signature validation failed", {
       expected,
       received: actual,
     });
@@ -207,7 +207,7 @@ def verify_fluid_webhook(raw_body: bytes, signature_header: str | None, secret: 
 
     if not matches:
         print(
-            "Fluid webhook signature validation failed",
+            "XLM Paymaster webhook signature validation failed",
             {"expected": expected, "received": actual},
         )
 
@@ -241,7 +241,7 @@ Request:
 Headers:
 
 ```http
-x-api-key: fluid-free-demo-key
+x-api-key: xlm-paymaster-free-demo-key
 ```
 
 Response:
@@ -277,7 +277,7 @@ Then send the same request with the pro key:
 ```bash
 curl -X POST http://127.0.0.1:3000/fee-bump \
   -H "Content-Type: application/json" \
-  -H "x-api-key: fluid-pro-demo-key" \
+  -H "x-api-key: xlm-paymaster-pro-demo-key" \
   --data '{"xdr":"AAAA","submit":false}'
 ```
 
@@ -343,7 +343,7 @@ Example JSON log:
 {
   "level": "info",
   "time": "2026-03-25T18:05:41.221Z",
-  "service": "fluid-server",
+  "service": "paymaster-server",
   "env": "production",
   "component": "fee_bump_handler",
   "msg": "Fee bump transaction submitted successfully",

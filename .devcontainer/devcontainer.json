@@ -1,5 +1,5 @@
 {
-  "name": "Fluid Dev Environment",
+  "name": "XLM Paymaster Dev Environment",
   "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
 
   "features": {
@@ -30,14 +30,14 @@
     }
   },
 
-  "postCreateCommand": "cp -n .env.example .env 2>/dev/null || true && cd server && npm install && cd ../fluid-server && cargo build && cd ../fluid-cli && cargo build",
+  "postCreateCommand": "cp -n .env.example .env 2>/dev/null || true && cd server && npm install && cd ../paymaster-server && cargo build && cd ../paymaster-cli && cargo build",
 
   "remoteUser": "vscode",
 
   "forwardPorts": [3000, 5173, 5432],
 
   "portsAttributes": {
-    "3000": { "label": "Fluid API Server", "onAutoForward": "notify" },
+    "3000": { "label": "XLM Paymaster API Server", "onAutoForward": "notify" },
     "5173": { "label": "Frontend Dev Server", "onAutoForward": "notify" },
     "5432": { "label": "PostgreSQL", "onAutoForward": "silent" }
   }

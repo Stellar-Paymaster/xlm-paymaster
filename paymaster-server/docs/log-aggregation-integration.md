@@ -56,8 +56,8 @@ Integration is configured by environment variables and is resilient by default:
 | FLUID_LOG_AGGREGATION_BATCH_SIZE | Batch size for export worker | 50 |
 | FLUID_LOG_AGGREGATION_FLUSH_MS | Flush interval in milliseconds | 3000 |
 | FLUID_LOG_AGGREGATION_TIMEOUT_MS | HTTP timeout in milliseconds | 5000 |
-| FLUID_LOG_AGGREGATION_ELK_INDEX | Bulk index name for ELK | fluid-server-logs |
-| FLUID_SERVICE_NAME | Service name attached to records | fluid-server |
+| FLUID_LOG_AGGREGATION_ELK_INDEX | Bulk index name for ELK | paymaster-server-logs |
+| FLUID_SERVICE_NAME | Service name attached to records | paymaster-server |
 
 ### Provider Presets
 

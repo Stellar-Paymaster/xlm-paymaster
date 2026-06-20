@@ -29,7 +29,7 @@ npx vitest run --reporter=verbose src/db
 Captured output (2026-04-24, vitest v4.1.4):
 
 ```
- RUN  v4.1.4 C:/Users/USER/fluid/server
+ RUN  v4.1.4 C:/Users/USER/xlm-paymaster/server
 
  ✓ src/db/connectionPool.test.ts > ConnectionPool — unit > acquires and releases the same resource 4ms
  ✓ src/db/connectionPool.test.ts > ConnectionPool — unit > reuses idle resources on subsequent acquires 0ms

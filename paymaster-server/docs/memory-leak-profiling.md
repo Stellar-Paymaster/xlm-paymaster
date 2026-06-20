@@ -1,7 +1,7 @@
 # Memory Leak Profiling under 24-Hour Load
 
 **Issue:** #737  
-**Package:** `fluid-server`
+**Package:** `paymaster-server`
 
 ## Overview
 
@@ -13,7 +13,7 @@ Rather than running a literal 24-hour Valgrind session in CI, the test suite use
 
 ## Test File
 
-`fluid-server/src/memory_leak_profiling.rs`
+`paymaster-server/src/memory_leak_profiling.rs`
 
 ## Tests
 
@@ -28,7 +28,7 @@ Rather than running a literal 24-hour Valgrind session in CI, the test suite use
 ## Running Tests
 
 ```bash
-cd fluid-server
+cd paymaster-server
 cargo test memory_leak -- --nocapture
 ```
 
@@ -39,10 +39,10 @@ Use DHAT or Valgrind Massif against the running server binary:
 ```bash
 # DHAT (recommended – lower overhead)
 cargo build --release
-valgrind --tool=dhat ./target/release/fluid-server
+valgrind --tool=dhat ./target/release/paymaster-server
 
 # Massif
-valgrind --tool=massif --pages-as-heap=yes ./target/release/fluid-server
+valgrind --tool=massif --pages-as-heap=yes ./target/release/paymaster-server
 ms_print massif.out.<pid> | head -60
 ```
 

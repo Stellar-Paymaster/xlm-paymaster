@@ -2,16 +2,16 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "fluid.fullname" . }}-node-api
+  name: {{ include "xlm-paymaster.fullname" . }}-node-api
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: node-api
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "fluid.fullname" . }}-node-api
+    name: {{ include "xlm-paymaster.fullname" . }}-node-api
   minReplicas: {{ .Values.hpa.minReplicas }}
   maxReplicas: {{ .Values.hpa.maxReplicas }}
   metrics:
@@ -27,7 +27,7 @@ spec:
     # nginx_ingress_controller_requests from the ingress controller.
     # Install the adapter with:
     #   helm install prometheus-adapter prometheus-community/prometheus-adapter \
-    #     -f helm/fluid/prometheus-adapter-values.yaml
+    #     -f helm/xlm-paymaster/prometheus-adapter-values.yaml
     - type: Pods
       pods:
         metric:

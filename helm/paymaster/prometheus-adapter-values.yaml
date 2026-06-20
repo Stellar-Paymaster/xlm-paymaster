@@ -1,14 +1,14 @@
 # Values for the prometheus-community/prometheus-adapter Helm chart.
 #
 # This file configures the Prometheus Adapter to expose
-# "http_requests_per_second" as a Kubernetes custom metric so that the Fluid
+# "http_requests_per_second" as a Kubernetes custom metric so that the XLM Paymaster
 # node-api HPA can scale on RPS in addition to CPU.
 #
 # Install the adapter once per cluster:
 #   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 #   helm install prometheus-adapter prometheus-community/prometheus-adapter \
 #     --namespace monitoring --create-namespace \
-#     -f helm/fluid/prometheus-adapter-values.yaml
+#     -f helm/xlm-paymaster/prometheus-adapter-values.yaml
 #
 # Prerequisites:
 #   - Prometheus Operator or a standalone Prometheus scraping the nginx ingress controller.
@@ -23,7 +23,7 @@ prometheus:
 
 rules:
   custom:
-    # Derive per-pod RPS for the fluid node-api from nginx ingress metrics.
+    # Derive per-pod RPS for the xlm-paymaster node-api from nginx ingress metrics.
     # The metric name must match hpa.values.yaml -> hpa.rpsTargetPerPod metric name.
     - seriesQuery: 'nginx_ingress_controller_requests{namespace!="",service!=""}'
       resources:

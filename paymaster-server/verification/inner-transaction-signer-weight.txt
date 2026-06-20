@@ -3,12 +3,12 @@ Issue #686 – Pre-flight Validation of Inner Transaction Signer Weight
 
 Implementation
 --------------
-- fluid-server/src/signer_weight.rs
-- fluid-server/src/horizon.rs (fetch_account_auth)
-- fluid-server/src/main.rs (process_fee_bump_request hook)
-- fluid-server/docs/inner-transaction-signer-weight-validation.md
+- paymaster-server/src/signer_weight.rs
+- paymaster-server/src/horizon.rs (fetch_account_auth)
+- paymaster-server/src/main.rs (process_fee_bump_request hook)
+- paymaster-server/docs/inner-transaction-signer-weight-validation.md
 
-Verification (run from fluid-server/)
+Verification (run from paymaster-server/)
 -------------------------------------
 cargo test signer_weight -- --nocapture
 cargo test signer_weight_integration -- --nocapture

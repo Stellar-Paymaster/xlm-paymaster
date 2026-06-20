@@ -1,4 +1,4 @@
-Fluid has been deployed successfully!
+XLM Paymaster has been deployed successfully!
 
 Node API endpoint:
 {{- if .Values.ingress.enabled }}
@@ -6,7 +6,7 @@ Node API endpoint:
   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
 {{- end }}
 {{- else }}
-  kubectl port-forward svc/{{ include "fluid.fullname" . }}-node-api 3001:3001
+  kubectl port-forward svc/{{ include "xlm-paymaster.fullname" . }}-node-api 3001:3001
   then access http://localhost:3001
 {{- end }}
 
@@ -22,9 +22,9 @@ HPA is enabled. The node-api will scale between {{ .Values.hpa.minReplicas }} an
 based on CPU utilisation (target {{ .Values.hpa.cpuTargetUtilizationPercent }}%) and RPS per pod (target {{ .Values.hpa.rpsTargetPerPod }}).
 
 To watch the autoscaler:
-  kubectl get hpa {{ include "fluid.fullname" . }}-node-api -w
+  kubectl get hpa {{ include "xlm-paymaster.fullname" . }}-node-api -w
 
 For custom RPS metrics to work, install the Prometheus Adapter with:
   helm install prometheus-adapter prometheus-community/prometheus-adapter \
-    -f helm/fluid/prometheus-adapter-values.yaml
+    -f helm/xlm-paymaster/prometheus-adapter-values.yaml
 {{- end }}

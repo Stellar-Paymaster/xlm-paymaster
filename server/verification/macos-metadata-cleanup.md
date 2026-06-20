@@ -12,7 +12,7 @@ Confirm that `.DS_Store` files were removed from the server tree and that the cl
 Command:
 
 ```bash
-cd /Users/Michael/fluid/server && find . -name '.DS_Store' -print && printf '\n[.gitignore]\n' && grep -n '\.DS_Store' .gitignore
+cd /Users/Michael/xlm-paymaster/server && find . -name '.DS_Store' -print && printf '\n[.gitignore]\n' && grep -n '\.DS_Store' .gitignore
 ```
 
 Output captured during verification:

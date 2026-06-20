@@ -1,14 +1,14 @@
-# fluid-core
+# paymaster-core
 
-[![Crates.io](https://img.shields.io/crates/v/fluid-core)](https://crates.io/crates/fluid-core)
-[![Documentation](https://docs.rs/fluid-core/badge.svg)](https://docs.rs/fluid-core)
+[![Crates.io](https://img.shields.io/crates/v/paymaster-core)](https://crates.io/crates/paymaster-core)
+[![Documentation](https://docs.rs/paymaster-core/badge.svg)](https://docs.rs/paymaster-core)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 
-Core signing and transaction building logic for [Stellar Fluid](https://github.com/Stellar-Fluid/fluid) - a fee sponsorship protocol for the Stellar network.
+Core signing and transaction building logic for [Stellar XLM Paymaster](https://github.com/Stellar-Paymaster/xlm-paymaster) - a fee sponsorship protocol for the Stellar network.
 
 ## Overview
 
-`fluid-core` provides the foundational types and operations for building and signing Stellar fee-bump transactions. Fee-bump transactions allow a third party (the fee payer) to pay transaction fees on behalf of another account, enabling:
+`paymaster-core` provides the foundational types and operations for building and signing Stellar fee-bump transactions. Fee-bump transactions allow a third party (the fee payer) to pay transaction fees on behalf of another account, enabling:
 
 - **Gasless transactions** for end users
 - **Fee sponsorship** by applications or services
@@ -17,11 +17,11 @@ Core signing and transaction building logic for [Stellar Fluid](https://github.c
 
 ## Quick Start
 
-Add `fluid-core` to your `Cargo.toml`:
+Add `paymaster-core` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-fluid-core = "0.1.0"
+paymaster-core = "0.1.0"
 ```
 
 ### Basic Usage
@@ -57,11 +57,11 @@ let fee_bump_tx = TransactionBuilder::new()
 
 ### Signers
 
-- [`Ed25519Signer`](https://docs.rs/fluid-core/latest/fluid_core/struct.Ed25519Signer.html) - In-memory Ed25519 signing
-- [`AsyncSigner`](https://docs.rs/fluid-core/latest/fluid_core/struct.AsyncSigner.html) - Async signing backend
-- [`TestSigner`](https://docs.rs/fluid-core/latest/fluid_core/struct.TestSigner.html) - Testing only (insecure)
+- [`Ed25519Signer`](https://docs.rs/paymaster-core/latest/fluid_core/struct.Ed25519Signer.html) - In-memory Ed25519 signing
+- [`AsyncSigner`](https://docs.rs/paymaster-core/latest/fluid_core/struct.AsyncSigner.html) - Async signing backend
+- [`TestSigner`](https://docs.rs/paymaster-core/latest/fluid_core/struct.TestSigner.html) - Testing only (insecure)
 
-Implement the [`Signer`](https://docs.rs/fluid-core/latest/fluid_core/trait.Signer.html) trait for custom backends:
+Implement the [`Signer`](https://docs.rs/paymaster-core/latest/fluid_core/trait.Signer.html) trait for custom backends:
 
 ```rust
 use fluid_core::{Signer, TransactionHash, DecoratedSignature, PublicKey, FluidError};
@@ -169,6 +169,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 ## See Also
 
-- [Stellar Fluid](https://github.com/Stellar-Fluid/fluid) - The complete fee sponsorship protocol
+- [Stellar XLM Paymaster](https://github.com/Stellar-Paymaster/xlm-paymaster) - The complete fee sponsorship protocol
 - [Stellar SDK Documentation](https://soroban.stellar.org/)
 - [Stellar Fee Bump Transactions](https://developers.stellar.org/docs/learn/encyclopedia/transactions-specialized/fee-bump-transactions)

@@ -1,10 +1,10 @@
-# Fluid - Stellar Fee Sponsorship Service
+# XLM Paymaster - Stellar Fee Sponsorship Service
 
-Fluid enables gasless Stellar transactions by abstracting network fees. Users sign transactions locally, and Fluid wraps them in fee-bump transactions so applications can sponsor XLM fees while users transact in the asset they actually want to use.
+XLM Paymaster enables gasless Stellar transactions by abstracting network fees. Users sign transactions locally, and XLM Paymaster wraps them in fee-bump transactions so applications can sponsor XLM fees while users transact in the asset they actually want to use.
 
 ## Status
 
-`fluid-server/` is now the primary production backend.
+`paymaster-server/` is now the primary production backend.
 
 `server/` remains in the repository as a Node.js parity server and migration harness while the Rust rollout completes.
 
@@ -20,7 +20,7 @@ Fluid enables gasless Stellar transactions by abstracting network fees. Users si
 
 ```bash
 git clone <repository-url>
-cd fluid/fluid-server
+cd xlm-paymaster/paymaster-server
 cargo build
 cargo run
 ```
@@ -73,14 +73,14 @@ The Rust server handles:
 Rust-only verification:
 
 ```bash
-cd fluid-server
+cd paymaster-server
 cargo test rust_server_handles_static_and_api_without_node --test rust_only_verification -- --nocapture
 ```
 
 Horizon failover verification with reviewer-friendly logs:
 
 ```bash
-cd fluid-server
+cd paymaster-server
 cargo test retries_failed_submission_on_secondary_node_and_logs_statuses -- --nocapture
 ```
 
@@ -98,29 +98,29 @@ The TypeScript client remains in `client/` and can continue targeting the same H
 
 ### CDN / Script-Tag Usage (no build step required)
 
-For projects that don't use a bundler, load Fluid directly from a CDN:
+For projects that don't use a bundler, load XLM Paymaster directly from a CDN:
 
 ```html
 <!-- unpkg (latest) -->
-<script src="https://unpkg.com/fluid-client@latest/dist/fluid.min.js"></script>
+<script src="https://unpkg.com/paymaster-client@latest/dist/xlm-paymaster.min.js"></script>
 
 <!-- jsDelivr (latest) -->
-<script src="https://cdn.jsdelivr.net/npm/fluid-client@latest/dist/fluid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/paymaster-client@latest/dist/xlm-paymaster.min.js"></script>
 
 <!-- pinned version (recommended for production) -->
-<script src="https://unpkg.com/fluid-client@0.1.0/dist/fluid.min.js"></script>
+<script src="https://unpkg.com/paymaster-client@0.1.0/dist/xlm-paymaster.min.js"></script>
 ```
 
-The bundle exposes a global `Fluid` object:
+The bundle exposes a global `XLM Paymaster` object:
 
 ```html
-<script src="https://unpkg.com/fluid-client@latest/dist/fluid.min.js"></script>
+<script src="https://unpkg.com/paymaster-client@latest/dist/xlm-paymaster.min.js"></script>
 <script>
-  // All exports are available under the Fluid namespace
-  console.log(Fluid.VERSION); // "0.1.0"
+  // All exports are available under the XLM Paymaster namespace
+  console.log(XLM Paymaster.VERSION); // "0.1.0"
 
-  const client = new Fluid.FluidClient({
-    serverUrl: 'https://your-fluid-server.example.com',
+  const client = new XLM Paymaster.FluidClient({
+    serverUrl: 'https://your-paymaster-server.example.com',
     networkPassphrase: 'Test SDF Network ; September 2015',
     horizonUrl: 'https://horizon-testnet.stellar.org',
   });
@@ -136,32 +136,32 @@ The bundle exposes a global `Fluid` object:
 ```bash
 cd client
 npm install
-npm run build:standalone   # outputs client/dist/fluid.min.js
+npm run build:standalone   # outputs client/dist/xlm-paymaster.min.js
 ```
 
 A self-contained demo is available at [`client/demo/cdn-demo.html`](client/demo/cdn-demo.html) — open it in a browser after building.
 
 ## 🎯 Community Demo dApps
 
-We provide reference implementations showcasing Fluid across different Stellar use cases:
+We provide reference implementations showcasing XLM Paymaster across different Stellar use cases:
 
 ### Classic Stellar Payments
 **Gasless XLM Payment Demo** - The simplest use case: send XLM with zero fees.
-- **Live**: https://stellar-fluid.github.io/react-classic-payment/
+- **Live**: https://stellar-xlm-paymaster.github.io/react-classic-payment/
 - **Repo**: `client/examples/react-classic-payment/`
-- **Features**: Freighter wallet integration, Fluid fee sponsorship, Stellar Expert confirmation
+- **Features**: Freighter wallet integration, XLM Paymaster fee sponsorship, Stellar Expert confirmation
 - **Deployment**: GitHub Pages (auto-deployed on main branch)
 
 ### Soroban Smart Contracts
 **Gasless NFT Minting** - Mint NFTs on Soroban without paying gas.
-- **Live**: https://fluid-nft-demo.vercel.app/
+- **Live**: https://xlm-paymaster-nft-demo.vercel.app/
 - **Repo**: `client/examples/react-nft-minting/` + `server/src/contracts/soroban/nft-demo/`
 - **Features**: Soroban contract, metadata storage, Freighter signing, gasless execution
 - **Deployment**: Vercel
 
 ### Decentralized Finance
-**Gasless Token Swap** - Trade tokens on Soroswap AMM with Fluid sponsorship.
-- **Live**: https://fluid-swap-demo.vercel.app/
+**Gasless Token Swap** - Trade tokens on Soroswap AMM with XLM Paymaster sponsorship.
+- **Live**: https://xlm-paymaster-swap-demo.vercel.app/
 - **Repo**: `client/examples/react-token-swap/`
 - **Features**: Soroswap integration, price quotes, gasless execution, transaction confirmation
 - **Deployment**: Vercel
@@ -187,34 +187,34 @@ npm run dev
 
 ## 🌐 Public Testnet Node
 
-Access Fluid for free via our managed public testnet endpoint:
+Access XLM Paymaster for free via our managed public testnet endpoint:
 
-**Endpoint**: `https://testnet.fluid.dev`
+**Endpoint**: `https://testnet.xlm-paymaster.dev`
 
 ### Getting Started
 
 1. **Get a Free API Key**
-   - Navigate to https://testnet.fluid.dev/developer
+   - Navigate to https://testnet.xlm-paymaster.dev/developer
    - Sign in or create account
    - Generate free API key (100 bumps/day included)
 
 2. **Use in Your App**
    ```typescript
-   import { FluidClient } from '@fluid-sdk/client';
+   import { FluidClient } from '@xlm-paymaster-sdk/client';
 
-   const fluid = new FluidClient({
-     serverUrl: 'https://testnet.fluid.dev',
+   const xlm-paymaster = new FluidClient({
+     serverUrl: 'https://testnet.xlm-paymaster.dev',
      horizonUrl: 'https://horizon-testnet.stellar.org',
      apiKey: 'your-api-key-here'
    });
 
-   const result = await fluid.requestFeeBump(signedTransactionXdr);
+   const result = await xlm-paymaster.requestFeeBump(signedTransactionXdr);
    ```
 
 3. **Monitor Usage**
-   - Check dashboard: https://testnet.fluid.dev/dashboard
-   - View status: https://testnet.fluid.dev/status
-   - Track uptime: https://testnet.fluid.dev/status/uptime
+   - Check dashboard: https://testnet.xlm-paymaster.dev/dashboard
+   - View status: https://testnet.xlm-paymaster.dev/status
+   - Track uptime: https://testnet.xlm-paymaster.dev/status/uptime
 
 ### Free Tier Limits
 - **Rate**: 100 fee-bump transactions per 24 hours
@@ -222,7 +222,7 @@ Access Fluid for free via our managed public testnet endpoint:
 - **Network**: Stellar testnet only
 
 ### Upgrade for Higher Limits
-Contact us at hello@stellar-fluid.dev for production credentials or increased rate limits.
+Contact us at hello@stellar-xlm-paymaster.dev for production credentials or increased rate limits.
 
 ## Architecture Decisions
 
@@ -234,9 +234,9 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development setup, pull request gui
 
 ## Sponsors
 
-Fluid is free, open-source software. Sponsorships help cover infrastructure costs and sustain active development.
+XLM Paymaster is free, open-source software. Sponsorships help cover infrastructure costs and sustain active development.
 
-[![Sponsor Fluid](https://img.shields.io/badge/Sponsor-Fluid-brightgreen?logo=github-sponsors)](https://github.com/sponsors/Stellar-Fluid)
+[![Sponsor XLM Paymaster](https://img.shields.io/badge/Sponsor-XLM Paymaster-brightgreen?logo=github-sponsors)](https://github.com/sponsors/Stellar-XLM Paymaster)
 
 ### Sponsor tiers
 
@@ -247,7 +247,7 @@ Fluid is free, open-source software. Sponsorships help cover infrastructure cost
 | **Silver** | $100 | Logo in `README.md` + priority issue triage |
 | **Gold** | $500 | Logo, dedicated support channel, and co-marketing |
 
-To sponsor via Stellar directly, send XLM or USDC to the project's public key listed at [stellar-fluid.dev/sponsor](https://stellar-fluid.dev/sponsor).
+To sponsor via Stellar directly, send XLM or USDC to the project's public key listed at [stellar-xlm-paymaster.dev/sponsor](https://stellar-xlm-paymaster.dev/sponsor).
 
 > Sponsor fund usage is published in the [monthly transparency report](docs/reports/).
 

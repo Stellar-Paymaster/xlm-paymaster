@@ -6,10 +6,10 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "fluid.fullname" . }}-ingress-metrics
+  name: {{ include "xlm-paymaster.fullname" . }}-ingress-metrics
   namespace: {{ .Values.serviceMonitor.namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: node-api
 spec:
   namespaceSelector:

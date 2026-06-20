@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "fluid.fullname" . }}-redis
+  name: {{ include "xlm-paymaster.fullname" . }}-redis
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: redis
 spec:
-  serviceName: {{ include "fluid.fullname" . }}-redis
+  serviceName: {{ include "xlm-paymaster.fullname" . }}-redis
   replicas: 1
   selector:
     matchLabels:
-      {{- include "fluid.selectorLabels" (dict "root" . "component" "redis") | nindent 6 }}
+      {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "redis") | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "fluid.selectorLabels" (dict "root" . "component" "redis") | nindent 8 }}
+        {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "redis") | nindent 8 }}
     spec:
       containers:
         - name: redis

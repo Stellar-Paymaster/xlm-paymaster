@@ -26,8 +26,8 @@ jobs:
         include:
           - scanner: cargo-audit
             working-directory: paymaster-server
-          - scanner: npm-audit
-            working-directory: paymaster-server/wasm-demo
+          - scanner: pnpm-audit
+            working-directory: .
 
     defaults:
       run:
@@ -52,18 +52,29 @@ jobs:
           path: ${{ runner.temp }}/cargo-audit-report.json
           if-no-files-found: warn
 
-      - name: npm audit (wasm-demo)
-        if: matrix.scanner == 'npm-audit'
-        run: |
-          npm --version
-          npm ci
-          npm audit --json > "${RUNNER_TEMP}/npm-audit-report.json" || true
-          npm audit --audit-level=high
+      - name: Install pnpm
+        if: matrix.scanner == 'pnpm-audit'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
-      - name: Upload npm-audit report
-        if: matrix.scanner == 'npm-audit' && always()
+      - name: Setup Node.js
+        if: matrix.scanner == 'pnpm-audit'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: pnpm audit
+        if: matrix.scanner == 'pnpm-audit'
+        run: |
+          pnpm audit --json > "${RUNNER_TEMP}/pnpm-audit-report.json" || true
+          pnpm audit --audit-level=high
+
+      - name: Upload pnpm-audit report
+        if: matrix.scanner == 'pnpm-audit' && always()
         uses: actions/upload-artifact@v4
         with:
-          name: npm-audit-report
-          path: ${{ runner.temp }}/npm-audit-report.json
+          name: pnpm-audit-report
+          path: ${{ runner.temp }}/pnpm-audit-report.json
           if-no-files-found: warn

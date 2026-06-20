@@ -1,4 +1,4 @@
-This is the **Fluid Admin Dashboard** - a secure admin interface for managing Stellar fee sponsorship operations.
+This is the **XLM Paymaster Admin Dashboard** - a secure admin interface for managing Stellar fee sponsorship operations.
 
 ## Authentication
 

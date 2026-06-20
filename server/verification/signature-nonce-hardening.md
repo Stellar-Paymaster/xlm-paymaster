@@ -27,7 +27,7 @@ npx vitest run --reporter=verbose src/signing/nonceGuard.test.ts
 Captured output (2026-04-23, vitest v4.1.4):
 
 ```
- RUN  v4.1.4 C:/Users/USER/fluid/server
+ RUN  v4.1.4 C:/Users/USER/xlm-paymaster/server
 
  ✓ src/signing/nonceGuard.test.ts > NonceGuard — unit > accepts strictly increasing nonces and records the high-water mark 7ms
  ✓ src/signing/nonceGuard.test.ts > NonceGuard — unit > rejects replay of the same nonce with NonceReplayError 3ms

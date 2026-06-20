@@ -1,6 +1,6 @@
 # Prisma Database Migrations
 
-This directory contains all database migration files and scripts for the Fluid project. It follows a standardized approach to manage schema changes across all environments (local, staging, production).
+This directory contains all database migration files and scripts for the XLM Paymaster project. It follows a standardized approach to manage schema changes across all environments (local, staging, production).
 
 ## Overview
 

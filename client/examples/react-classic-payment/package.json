@@ -1,7 +1,7 @@
 {
-  "name": "fluid-classic-payment-demo",
+  "name": "xlm-paymaster-classic-payment-demo",
   "version": "1.0.0",
-  "description": "Gasless Stellar Classic XLM Payment Demo powered by Fluid",
+  "description": "Gasless Stellar Classic XLM Payment Demo powered by XLM Paymaster",
   "type": "module",
   "scripts": {
     "dev": "vite",

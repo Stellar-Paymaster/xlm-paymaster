@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fluid.fullname" . }}-node-api
+  name: {{ include "xlm-paymaster.fullname" . }}-node-api
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: node-api
 spec:
   replicas: {{ .Values.nodeApi.replicaCount }}
   selector:
     matchLabels:
-      {{- include "fluid.selectorLabels" (dict "root" . "component" "node-api") | nindent 6 }}
+      {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "node-api") | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "fluid.selectorLabels" (dict "root" . "component" "node-api") | nindent 8 }}
+        {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "node-api") | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "fluid.serviceAccountName" . }}
+      serviceAccountName: {{ include "xlm-paymaster.serviceAccountName" . }}
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -35,26 +35,26 @@ spec:
             - name: STATELESS_MODE
               value: {{ .Values.nodeApi.statelessMode | quote }}
             - name: REDIS_URL
-              value: "redis://{{ include "fluid.fullname" . }}-redis:{{ .Values.redis.port }}"
+              value: "redis://{{ include "xlm-paymaster.fullname" . }}-redis:{{ .Values.redis.port }}"
             - name: DATABASE_URL
-              value: "postgres://{{ .Values.postgres.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "fluid.fullname" . }}-postgres:{{ .Values.postgres.port }}/{{ .Values.postgres.auth.database }}"
+              value: "postgres://{{ .Values.postgres.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "xlm-paymaster.fullname" . }}-postgres:{{ .Values.postgres.port }}/{{ .Values.postgres.auth.database }}"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "fluid.postgresSecretName" . }}
+                  name: {{ include "xlm-paymaster.postgresSecretName" . }}
                   key: postgres-password
             - name: FLUID_FEE_PAYER_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "fluid.secretName" . }}
+                  name: {{ include "xlm-paymaster.secretName" . }}
                   key: FLUID_FEE_PAYER_SECRET
             - name: DATABASE_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "fluid.secretName" . }}
+                  name: {{ include "xlm-paymaster.secretName" . }}
                   key: DATABASE_ENCRYPTION_KEY
             - name: FLUID_GRPC_ENGINE_ADDRESS
-              value: "{{ include "fluid.fullname" . }}-rust-engine:50051"
+              value: "{{ include "xlm-paymaster.fullname" . }}-rust-engine:50051"
             {{- with .Values.nodeApi.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

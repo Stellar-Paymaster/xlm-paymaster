@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluid SDK | Developer Playground</title>
+    <title>XLM Paymaster SDK | Developer Playground</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
@@ -307,11 +307,11 @@
                     </linearGradient>
                 </defs>
             </svg>
-            Fluid SDK
+            XLM Paymaster SDK
         </div>
         <div style="display: flex; align-items: center; gap: 1rem;">
             <div class="badge">Playground (Read-Only)</div>
-            <a href="https://github.com/Stellar-Fluid/fluid" class="cta-button" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Documentation</a>
+            <a href="https://github.com/Stellar-Paymaster/xlm-paymaster" class="cta-button" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Documentation</a>
         </div>
     </header>
 
@@ -345,11 +345,11 @@
                         <span class="badge" style="font-size: 0.6rem;">TypeScript</span>
                     </div>
                     <div class="code-block">
-                        <pre><code><span class="token-keyword">import</span> { FluidClient } <span class="token-keyword">from</span> <span class="token-string">"@stellar-fluid/sdk"</span>;
+                        <pre><code><span class="token-keyword">import</span> { FluidClient } <span class="token-keyword">from</span> <span class="token-string">"@stellar-xlm-paymaster/sdk"</span>;
 
 <span class="token-comment">// 1. Initialize the client</span>
 <span class="token-keyword">const</span> client = <span class="token-keyword">new</span> <span class="token-function">FluidClient</span>({
-  serverUrl: <span class="token-string">"https://api.fluid.dev"</span>,
+  serverUrl: <span class="token-string">"https://api.xlm-paymaster.dev"</span>,
   networkPassphrase: <span class="token-string">"Public Global Stellar Network..."</span>
 });
 

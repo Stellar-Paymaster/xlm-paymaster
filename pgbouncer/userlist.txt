@@ -9,5 +9,5 @@
 # For production deployments, use a secrets manager and inject this file at runtime.
 #
 # Local development placeholder — matches the defaults in docker-compose.yml:
-"fluid" "fluid_pass"
+"xlm-paymaster" "fluid_pass"
 "pgbouncer" "pgbouncer_admin_pass"

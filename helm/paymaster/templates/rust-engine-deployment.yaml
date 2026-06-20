@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fluid.fullname" . }}-rust-engine
+  name: {{ include "xlm-paymaster.fullname" . }}-rust-engine
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: rust-engine
 spec:
   replicas: {{ .Values.rustEngine.replicaCount }}
   selector:
     matchLabels:
-      {{- include "fluid.selectorLabels" (dict "root" . "component" "rust-engine") | nindent 6 }}
+      {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "rust-engine") | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "fluid.selectorLabels" (dict "root" . "component" "rust-engine") | nindent 8 }}
+        {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "rust-engine") | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "fluid.serviceAccountName" . }}
+      serviceAccountName: {{ include "xlm-paymaster.serviceAccountName" . }}
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -36,16 +36,16 @@ spec:
             - name: PORT
               value: {{ .Values.rustEngine.port | quote }}
             - name: DATABASE_URL
-              value: "postgres://{{ .Values.postgres.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "fluid.fullname" . }}-postgres:{{ .Values.postgres.port }}/{{ .Values.postgres.auth.database }}"
+              value: "postgres://{{ .Values.postgres.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "xlm-paymaster.fullname" . }}-postgres:{{ .Values.postgres.port }}/{{ .Values.postgres.auth.database }}"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "fluid.postgresSecretName" . }}
+                  name: {{ include "xlm-paymaster.postgresSecretName" . }}
                   key: postgres-password
             - name: FLUID_FEE_PAYER_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "fluid.secretName" . }}
+                  name: {{ include "xlm-paymaster.secretName" . }}
                   key: FLUID_FEE_PAYER_SECRET
             {{- with .Values.rustEngine.extraEnv }}
             {{- toYaml . | nindent 12 }}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fluid SDK – CDN / Script-Tag Demo</title>
+  <title>XLM Paymaster SDK – CDN / Script-Tag Demo</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; background: #0f172a; color: #e2e8f0; }
     h1 { color: #38bdf8; }
@@ -21,17 +21,17 @@
   </style>
 </head>
 <body>
-  <h1>⚡ Fluid SDK – No-Build Demo</h1>
+  <h1>⚡ XLM Paymaster SDK – No-Build Demo</h1>
   <p>
-    This page loads the Fluid client via a plain <code>&lt;script&gt;</code> tag — no Webpack,
-    Vite, or bundler required. Open the browser console to see the <code>Fluid</code> global.
+    This page loads the XLM Paymaster client via a plain <code>&lt;script&gt;</code> tag — no Webpack,
+    Vite, or bundler required. Open the browser console to see the <code>XLM Paymaster</code> global.
   </p>
 
   <!--
     In production, replace the src with the unpkg / jsDelivr CDN URL, e.g.:
-    https://unpkg.com/fluid-client@latest/dist/fluid.min.js
+    https://unpkg.com/paymaster-client@latest/dist/xlm-paymaster.min.js
   -->
-  <script src="../dist/fluid.min.js"></script>
+  <script src="../dist/xlm-paymaster.min.js"></script>
 
   <h2>SDK Version</h2>
   <pre><code id="version">Loading…</code></pre>
@@ -39,7 +39,7 @@
   <h2>Interactive Test</h2>
   <p>
     The demo below creates a <code>FluidClient</code> instance, then calls the
-    <code>/fee-bump</code> endpoint on a locally running Fluid server
+    <code>/fee-bump</code> endpoint on a locally running XLM Paymaster server
     (<code>http://localhost:3000</code>). Make sure the server is running before clicking
     <em>Run Fee-Bump</em>.
   </p>
@@ -72,18 +72,18 @@
 
     // ─── show SDK version ──────────────────────────────────────────────────────
     document.getElementById('version').textContent =
-      'Fluid.VERSION = ' + Fluid.VERSION;
+      'XLM Paymaster.VERSION = ' + XLM Paymaster.VERSION;
 
-    print('Fluid global available: ' + (typeof Fluid !== 'undefined'), 'ok');
-    print('Fluid.FluidClient: ' + typeof Fluid.FluidClient, 'ok');
-    print('Fluid.VERSION: ' + Fluid.VERSION, 'ok');
+    print('XLM Paymaster global available: ' + (typeof XLM Paymaster !== 'undefined'), 'ok');
+    print('XLM Paymaster.FluidClient: ' + typeof XLM Paymaster.FluidClient, 'ok');
+    print('XLM Paymaster.VERSION: ' + XLM Paymaster.VERSION, 'ok');
 
     // ─── Instantiate client ────────────────────────────────────────────────────
     let client;
 
     document.getElementById('btn-init').addEventListener('click', () => {
       try {
-        client = new Fluid.FluidClient({
+        client = new XLM Paymaster.FluidClient({
           serverUrl: 'http://localhost:3000',
           networkPassphrase: 'Test SDF Network ; September 2015',
           horizonUrl: 'https://horizon-testnet.stellar.org',
@@ -105,7 +105,7 @@
 
       try {
         // 1. Generate a throwaway keypair
-        const StellarSdk = window.StellarSdk || Fluid._StellarSdk;
+        const StellarSdk = window.StellarSdk || XLM Paymaster._StellarSdk;
 
         // The standalone bundle re-exports the Stellar SDK helpers, but for
         // this demo we can also reach it through the browser-global if loaded
@@ -119,7 +119,7 @@
         setStatus('success ✓', 'ok');
       } catch (e) {
         print('Error: ' + e.message, 'err');
-        print('(Is the Fluid server running on http://localhost:3000?)', 'inf');
+        print('(Is the XLM Paymaster server running on http://localhost:3000?)', 'inf');
         setStatus('error', 'err');
       }
     });

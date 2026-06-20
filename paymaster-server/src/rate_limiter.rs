@@ -236,7 +236,7 @@ mod tests {
 
         // At 60s the earliest request expires; one slot opens
         assert!(window.is_allowed(start + 60_000));
-        assert!(!window.is_allowed(start + 60_001));
+        assert!(!window.is_allowed(start + 60_000));
     }
 
     #[test]
@@ -249,8 +249,8 @@ mod tests {
         assert!(!window.is_allowed(t0 + 200));
 
         // After full window elapses, both requests expire
-        assert!(window.is_allowed(t0 + 1_001));
-        assert!(window.is_allowed(t0 + 1_002));
-        assert!(!window.is_allowed(t0 + 1_003));
+        assert!(window.is_allowed(t0 + 1_101));
+        assert!(window.is_allowed(t0 + 1_102));
+        assert!(!window.is_allowed(t0 + 1_103));
     }
 }

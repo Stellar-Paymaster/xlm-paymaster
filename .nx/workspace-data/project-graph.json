@@ -1,11 +1,11 @@
 {
   "nodes": {
-    "fluid-wasm-demo": {
-      "name": "fluid-wasm-demo",
+    "xlm-paymaster-wasm-demo": {
+      "name": "xlm-paymaster-wasm-demo",
       "type": "app",
       "data": {
         "root": "paymaster-server/wasm-demo",
-        "name": "fluid-wasm-demo",
+        "name": "xlm-paymaster-wasm-demo",
         "tags": [
           "npm:private"
         ],
@@ -18,7 +18,7 @@
             ]
           },
           "js": {
-            "packageName": "fluid-wasm-demo",
+            "packageName": "xlm-paymaster-wasm-demo",
             "isInPackageManagerWorkspaces": true
           }
         },
@@ -63,8 +63,8 @@
         "implicitDependencies": []
       }
     },
-    "fluid-server-rust": {
-      "name": "fluid-server-rust",
+    "paymaster-server-rust": {
+      "name": "paymaster-server-rust",
       "type": "app",
       "data": {
         "root": "paymaster-server",
@@ -156,7 +156,7 @@
             "executor": "nx:run-commands",
             "options": {
               "command": "cargo build --release",
-              "cwd": "fluid-server"
+              "cwd": "paymaster-server"
             },
             "cache": true,
             "inputs": [
@@ -165,7 +165,7 @@
               "{workspaceRoot}/Cargo.toml"
             ],
             "outputs": [
-              "{workspaceRoot}/target/release/fluid-server"
+              "{workspaceRoot}/target/release/paymaster-server"
             ],
             "configurations": {},
             "parallelism": true,
@@ -177,7 +177,7 @@
             "executor": "nx:run-commands",
             "options": {
               "command": "cargo test",
-              "cwd": "fluid-server"
+              "cwd": "paymaster-server"
             },
             "cache": true,
             "inputs": [
@@ -189,10 +189,10 @@
             "parallelism": true
           }
         },
-        "name": "fluid-server-rust",
+        "name": "paymaster-server-rust",
         "$schema": "../node_modules/nx/schemas/project-schema.json",
         "projectType": "application",
-        "sourceRoot": "fluid-server/src",
+        "sourceRoot": "paymaster-server/src",
         "tags": [
           "scope:backend",
           "type:app",
@@ -28971,31 +28971,31 @@
     }
   },
   "dependencies": {
-    "fluid-wasm-demo": [
+    "xlm-paymaster-wasm-demo": [
       {
-        "source": "fluid-wasm-demo",
-        "target": "fluid-server-rust",
+        "source": "xlm-paymaster-wasm-demo",
+        "target": "paymaster-server-rust",
         "type": "static"
       },
       {
-        "source": "fluid-wasm-demo",
+        "source": "xlm-paymaster-wasm-demo",
         "target": "npm:playwright",
         "type": "static"
       },
       {
-        "source": "fluid-wasm-demo",
+        "source": "xlm-paymaster-wasm-demo",
         "target": "npm:@stellar/stellar-sdk@11.3.0",
         "type": "static"
       }
     ],
-    "fluid-server-rust": [
+    "paymaster-server-rust": [
       {
-        "source": "fluid-server-rust",
+        "source": "paymaster-server-rust",
         "target": "npm:vitest",
         "type": "static"
       },
       {
-        "source": "fluid-server-rust",
+        "source": "paymaster-server-rust",
         "target": "npm:axios@1.15.0",
         "type": "static"
       }

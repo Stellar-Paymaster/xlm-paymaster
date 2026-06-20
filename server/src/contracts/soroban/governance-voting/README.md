@@ -5,7 +5,7 @@ A gasless voting system for community-led fee sponsorship decisions.
 ## Features
 - **Proposal Creation**: Propose new sponsorship rules with a description and deadline.
 - **One-Address-One-Vote**: Simple and fair voting weight.
-- **Gasless Capability**: Designed to work with Fluid's relayer for sponsored transactions.
+- **Gasless Capability**: Designed to work with XLM Paymaster's relayer for sponsored transactions.
 
 ## Interface
 - `create_proposal(env, description: String, duration_seconds: u64)`: Create a new proposal.

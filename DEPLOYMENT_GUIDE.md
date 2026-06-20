@@ -1,6 +1,6 @@
 # Public Testnet Node Deployment Guide
 
-This guide explains how to deploy and maintain the Fluid public testnet node at `https://testnet.fluid.dev`.
+This guide explains how to deploy and maintain the XLM Paymaster public testnet node at `https://testnet.xlm-paymaster.dev`.
 
 ## Overview
 
@@ -21,7 +21,7 @@ The public testnet node serves:
 1. **Create Railway Project**
    ```bash
    railway link
-   # Select or create "fluid-public-testnet" project
+   # Select or create "xlm-paymaster-public-testnet" project
    ```
 
 2. **Configure Services**
@@ -48,7 +48,7 @@ The public testnet node serves:
 
 4. **Custom Domain**
    - Railway Dashboard → Project Settings → Domains
-   - Add custom domain: `testnet.fluid.dev`
+   - Add custom domain: `testnet.xlm-paymaster.dev`
    - Configure DNS: CNAME to Railway-provided URL
 
 5. **SSL Certificate**
@@ -85,7 +85,7 @@ Use existing Terraform infrastructure in `infra/terraform/multi-region/`.
    ```
 
 4. **Point DNS**
-   - Route 53 Alias Record: `testnet.fluid.dev` → ALB endpoint
+   - Route 53 Alias Record: `testnet.xlm-paymaster.dev` → ALB endpoint
    - TTL: 300 seconds
 
 ## Service Architecture
@@ -97,7 +97,7 @@ Use existing Terraform infrastructure in `infra/terraform/multi-region/`.
 └──────────────┬──────────────────────────┘
                │
 ┌──────────────▼──────────────────────────┐
-│     Fluid API Server (Node.js)          │
+│     XLM Paymaster API Server (Node.js)          │
 │       Port 3000 (internal)              │
 │   - /fee-bump (POST)                    │
 │   - /health (GET)                       │
@@ -266,7 +266,7 @@ GET /metrics
 
 ### Daily Checks
 
-- [ ] Health check: `curl https://testnet.fluid.dev/health`
+- [ ] Health check: `curl https://testnet.xlm-paymaster.dev/health`
 - [ ] Error rate < 1% in logs
 - [ ] Database connection pool healthy
 - [ ] Redis connection pool healthy
@@ -311,7 +311,7 @@ redis-cli --rdb /path/to/dump.rdb
 railway up --force
 
 # AWS ECS
-aws ecs update-service --cluster fluid-testnet --service api --force-new-deployment
+aws ecs update-service --cluster xlm-paymaster-testnet --service api --force-new-deployment
 
 # Docker
 docker-compose -f docker-compose.testnet.yml restart
@@ -376,7 +376,7 @@ async function validateApiKey(key: string): Promise<ApiKeyRecord> {
 railway rollback <previous-deployment-id>
 
 # Or restart with known-good container
-docker pull stellar-fluid/fluid:v0.1.0
+docker pull Stellar-Paymaster/xlm-paymaster:v0.1.0
 docker-compose -f docker-compose.testnet.yml up -d
 ```
 

@@ -85,8 +85,8 @@
 <a href=#85 id=85 data-nosnippet>85</a>            batch_size: DEFAULT_BATCH_SIZE,
 <a href=#86 id=86 data-nosnippet>86</a>            flush_interval: Duration::from_millis(DEFAULT_FLUSH_MS),
 <a href=#87 id=87 data-nosnippet>87</a>            request_timeout: Duration::from_millis(DEFAULT_TIMEOUT_MS),
-<a href=#88 id=88 data-nosnippet>88</a>            elk_index: <span class="string">"fluid-server-logs"</span>.to_string(),
-<a href=#89 id=89 data-nosnippet>89</a>            service_name: <span class="string">"fluid-server"</span>.to_string(),
+<a href=#88 id=88 data-nosnippet>88</a>            elk_index: <span class="string">"paymaster-server-logs"</span>.to_string(),
+<a href=#89 id=89 data-nosnippet>89</a>            service_name: <span class="string">"paymaster-server"</span>.to_string(),
 <a href=#90 id=90 data-nosnippet>90</a>        }
 <a href=#91 id=91 data-nosnippet>91</a>    }
 <a href=#92 id=92 data-nosnippet>92</a>}
@@ -117,12 +117,12 @@
 <a href=#117 id=117 data-nosnippet>117</a>            .ok()
 <a href=#118 id=118 data-nosnippet>118</a>            .map(|value| value.trim().to_string())
 <a href=#119 id=119 data-nosnippet>119</a>            .filter(|value| !value.is_empty())
-<a href=#120 id=120 data-nosnippet>120</a>            .unwrap_or_else(|| <span class="string">"fluid-server-logs"</span>.to_string());
+<a href=#120 id=120 data-nosnippet>120</a>            .unwrap_or_else(|| <span class="string">"paymaster-server-logs"</span>.to_string());
 <a href=#121 id=121 data-nosnippet>121</a>        <span class="kw">let </span>service_name = std::env::var(<span class="string">"FLUID_SERVICE_NAME"</span>)
 <a href=#122 id=122 data-nosnippet>122</a>            .ok()
 <a href=#123 id=123 data-nosnippet>123</a>            .map(|value| value.trim().to_string())
 <a href=#124 id=124 data-nosnippet>124</a>            .filter(|value| !value.is_empty())
-<a href=#125 id=125 data-nosnippet>125</a>            .unwrap_or_else(|| <span class="string">"fluid-server"</span>.to_string());
+<a href=#125 id=125 data-nosnippet>125</a>            .unwrap_or_else(|| <span class="string">"paymaster-server"</span>.to_string());
 <a href=#126 id=126 data-nosnippet>126</a>
 <a href=#127 id=127 data-nosnippet>127</a>        <span class="kw">let </span>config = <span class="self">Self </span>{
 <a href=#128 id=128 data-nosnippet>128</a>            provider,
@@ -464,7 +464,7 @@
 <a href=#464 id=464 data-nosnippet>464</a>/// aggregation service is unavailable.
 <a href=#465 id=465 data-nosnippet>465</a>///
 <a href=#466 id=466 data-nosnippet>466</a>/// The file path is controlled by `FLUID_LOG_FALLBACK_PATH` (default:
-<a href=#467 id=467 data-nosnippet>467</a>/// `fluid-server-fallback.log` in the current working directory).  Each
+<a href=#467 id=467 data-nosnippet>467</a>/// `paymaster-server-fallback.log` in the current working directory).  Each
 <a href=#468 id=468 data-nosnippet>468</a>/// record is written as a single JSON line (NDJSON) so the file can be
 <a href=#469 id=469 data-nosnippet>469</a>/// ingested by any log shipper once the remote service recovers.
 <a href=#470 id=470 data-nosnippet>470</a></span><span class="kw">fn </span>flush_batch_to_disk(config: <span class="kw-2">&amp;</span>LogAggregationConfig, batch: <span class="kw-2">&amp;mut </span>Vec&lt;AggregatedLog&gt;) {
@@ -474,7 +474,7 @@
 <a href=#474 id=474 data-nosnippet>474</a>
 <a href=#475 id=475 data-nosnippet>475</a>    <span class="kw">let </span>path: PathBuf = std::env::var(<span class="string">"FLUID_LOG_FALLBACK_PATH"</span>)
 <a href=#476 id=476 data-nosnippet>476</a>        .map(PathBuf::from)
-<a href=#477 id=477 data-nosnippet>477</a>        .unwrap_or_else(|<span class="kw">_</span>| PathBuf::from(<span class="string">"fluid-server-fallback.log"</span>));
+<a href=#477 id=477 data-nosnippet>477</a>        .unwrap_or_else(|<span class="kw">_</span>| PathBuf::from(<span class="string">"paymaster-server-fallback.log"</span>));
 <a href=#478 id=478 data-nosnippet>478</a>
 <a href=#479 id=479 data-nosnippet>479</a>    <span class="kw">let </span>file_result = OpenOptions::new().create(<span class="bool-val">true</span>).append(<span class="bool-val">true</span>).open(<span class="kw-2">&amp;</span>path);
 <a href=#480 id=480 data-nosnippet>480</a>
@@ -549,7 +549,7 @@
 <a href=#549 id=549 data-nosnippet>549</a>            level: level.to_string(),
 <a href=#550 id=550 data-nosnippet>550</a>            target: <span class="string">"test"</span>.to_string(),
 <a href=#551 id=551 data-nosnippet>551</a>            fields: <span class="macro">serde_json::json!</span>({<span class="string">"message"</span>: <span class="string">"hello"</span>}),
-<a href=#552 id=552 data-nosnippet>552</a>            service: <span class="string">"fluid-server"</span>.to_string(),
+<a href=#552 id=552 data-nosnippet>552</a>            service: <span class="string">"paymaster-server"</span>.to_string(),
 <a href=#553 id=553 data-nosnippet>553</a>        }
 <a href=#554 id=554 data-nosnippet>554</a>    }
 <a href=#555 id=555 data-nosnippet>555</a>
@@ -595,7 +595,7 @@
 <a href=#595 id=595 data-nosnippet>595</a>        };
 <a href=#596 id=596 data-nosnippet>596</a>        <span class="kw">let </span>payload = build_payload(<span class="kw-2">&amp;</span>config, <span class="kw-2">&amp;</span>[make_record(<span class="string">"INFO"</span>)]).unwrap();
 <a href=#597 id=597 data-nosnippet>597</a>        <span class="macro">assert!</span>(payload.starts_with(<span class="string">"["</span>));
-<a href=#598 id=598 data-nosnippet>598</a>        <span class="macro">assert!</span>(payload.contains(<span class="string">"\"service\":\"fluid-server\""</span>));
+<a href=#598 id=598 data-nosnippet>598</a>        <span class="macro">assert!</span>(payload.contains(<span class="string">"\"service\":\"paymaster-server\""</span>));
 <a href=#599 id=599 data-nosnippet>599</a>    }
 <a href=#600 id=600 data-nosnippet>600</a>
 <a href=#601 id=601 data-nosnippet>601</a>    <span class="attr">#[test]

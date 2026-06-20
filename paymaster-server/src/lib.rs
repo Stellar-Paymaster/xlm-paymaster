@@ -34,6 +34,19 @@ fn now() -> u64 {
     }
 }
 
+pub fn reset_heuristics() {
+    if let Some(blocklist) = BLOCKLIST.get() {
+        if let Ok(mut guard) = blocklist.lock() {
+            guard.clear();
+        }
+    }
+    if let Some(tracker) = TRACKER.get() {
+        if let Ok(mut guard) = tracker.lock() {
+            guard.clear();
+        }
+    }
+}
+
 use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
 use stellar_strkey::ed25519::{PrivateKey, PublicKey};
@@ -59,9 +72,27 @@ pub mod grpc;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod logging;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod contract_cache;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod db;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod horizon;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod metrics;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod notifications;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod rate_limiter;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod state;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod signer_weight;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod stellar;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod benchmarks;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod ai_query;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod xdr;
 

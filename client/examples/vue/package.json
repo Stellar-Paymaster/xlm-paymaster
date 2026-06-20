@@ -1,7 +1,7 @@
 {
-  "name": "fluid-vue-example",
+  "name": "xlm-paymaster-vue-example",
   "version": "1.0.1",
-  "description": "Example Vue 3 application demonstrating Fluid SDK composable",
+  "description": "Example Vue 3 application demonstrating XLM Paymaster SDK composable",
   "type": "module",
   "scripts": {
     "dev": "vite",

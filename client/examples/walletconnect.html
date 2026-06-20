@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fluid SDK – WalletConnect Universal Signing Demo</title>
+  <title>XLM Paymaster SDK – WalletConnect Universal Signing Demo</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; background: #0f172a; color: #e2e8f0; }
     h1 { color: #38bdf8; }
@@ -21,9 +21,9 @@
   </style>
 </head>
 <body>
-  <h1>⚡ Fluid SDK – WalletConnect Universal Signing</h1>
+  <h1>⚡ XLM Paymaster SDK – WalletConnect Universal Signing</h1>
   <p>
-    This page loads the Fluid client via a plain <code>&lt;script&gt;</code> tag and
+    This page loads the XLM Paymaster client via a plain <code>&lt;script&gt;</code> tag and
     the Stellar SDK from a CDN. It demonstrates the <strong>standard WalletConnect
     bindings</strong> for universal signing: building the Stellar
     <code>requiredNamespaces</code>, parsing the connected account, and signing a
@@ -39,8 +39,8 @@
 
   <!-- Stellar SDK (browser global: StellarSdk) -->
   <script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@11.3.0/dist/stellar-sdk.min.js"></script>
-  <!-- Fluid standalone bundle (build with: npm run build:standalone) -->
-  <script src="../dist/fluid.min.js"></script>
+  <!-- XLM Paymaster standalone bundle (build with: npm run build:standalone) -->
+  <script src="../dist/xlm-paymaster.min.js"></script>
 
   <p>Status: <span id="status" class="inf">idle</span></p>
   <div>
@@ -65,8 +65,8 @@
     }
     function setStatus(msg, cls) { status.textContent = msg; status.className = cls; }
 
-    print('Fluid global available: ' + (typeof Fluid !== 'undefined'), 'ok');
-    print('Fluid.WalletConnectSigner: ' + typeof Fluid.WalletConnectSigner, 'ok');
+    print('XLM Paymaster global available: ' + (typeof XLM Paymaster !== 'undefined'), 'ok');
+    print('XLM Paymaster.WalletConnectSigner: ' + typeof XLM Paymaster.WalletConnectSigner, 'ok');
     print('StellarSdk available: ' + (typeof StellarSdk !== 'undefined'), 'ok');
 
     // A throwaway keypair stands in for the user's wallet key.
@@ -74,7 +74,7 @@
 
     // (1) The namespaces an app requests when opening a WalletConnect session.
     document.getElementById('btn-namespaces').addEventListener('click', () => {
-      const ns = Fluid.buildStellarRequiredNamespaces({ chains: [Fluid.STELLAR_CHAINS.TESTNET] });
+      const ns = XLM Paymaster.buildStellarRequiredNamespaces({ chains: [XLM Paymaster.STELLAR_CHAINS.TESTNET] });
       print('requiredNamespaces:', 'inf');
       print(JSON.stringify(ns, null, 2), 'ok');
       setStatus('namespaces ready', 'ok');
@@ -115,16 +115,16 @@
           topic: 'demo-topic',
           namespaces: {
             stellar: {
-              accounts: [Fluid.STELLAR_CHAINS.TESTNET + ':' + walletKeypair.publicKey()],
+              accounts: [XLM Paymaster.STELLAR_CHAINS.TESTNET + ':' + walletKeypair.publicKey()],
               methods: ['stellar_signXDR', 'stellar_signAndSubmitXDR'],
               events: [],
             },
           },
         };
 
-        print('Parsed accounts: ' + JSON.stringify(Fluid.parseStellarAccounts(session)), 'inf');
+        print('Parsed accounts: ' + JSON.stringify(XLM Paymaster.parseStellarAccounts(session)), 'inf');
 
-        const signer = Fluid.createWalletConnectSigner(mockProvider, session, {
+        const signer = XLM Paymaster.createWalletConnectSigner(mockProvider, session, {
           networkPassphrase: TESTNET,
         });
 
@@ -140,7 +140,7 @@
         setStatus('signed ✓', 'ok');
 
         // In a real app you would now fee-bump:
-        //   const client = new Fluid.FluidClient({ serverUrl, networkPassphrase: TESTNET });
+        //   const client = new XLM Paymaster.FluidClient({ serverUrl, networkPassphrase: TESTNET });
         //   await client.buildAndRequestFeeBumpWithWallet(signer, unsignedXdr);
       } catch (e) {
         print('Error: ' + e.message, 'err');

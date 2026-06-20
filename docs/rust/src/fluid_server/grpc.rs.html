@@ -96,7 +96,7 @@
 <a href=#96 id=96 data-nosnippet>96</a>}
 <a href=#97 id=97 data-nosnippet>97</a>
 <a href=#98 id=98 data-nosnippet>98</a><span class="kw">pub async fn </span>serve_grpc(addr: SocketAddr) -&gt; <span class="prelude-ty">Result</span>&lt;(), Box&lt;<span class="kw">dyn </span>std::error::Error&gt;&gt; {
-<a href=#99 id=99 data-nosnippet>99</a>    <span class="macro">info!</span>(<span class="string">"Fluid signer gRPC listening on {addr}"</span>);
+<a href=#99 id=99 data-nosnippet>99</a>    <span class="macro">info!</span>(<span class="string">"XLM Paymaster signer gRPC listening on {addr}"</span>);
 <a href=#100 id=100 data-nosnippet>100</a>
 <a href=#101 id=101 data-nosnippet>101</a>    <span class="comment">// Initialize rate limiter: 100 requests per 60 seconds per IP
 <a href=#102 id=102 data-nosnippet>102</a>    </span><span class="kw">let </span>rate_limiter = Arc::new(RateLimiter::new(<span class="number">100</span>, <span class="number">60_000</span>));

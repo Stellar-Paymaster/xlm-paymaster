@@ -1,18 +1,18 @@
 # Vault Local Integration Guide
 
-This guide explains how to enable HashiCorp Vault for storing the fee payer secret used by Fluid's server.
+This guide explains how to enable HashiCorp Vault for storing the fee payer secret used by XLM Paymaster's server.
 
 Prerequisites
 
 - A running Vault server (dev or production).
-- A secret stored in Vault (KV v2) at `secret/data/fluid/fee_payer` or custom path.
+- A secret stored in Vault (KV v2) at `secret/data/xlm-paymaster/fee_payer` or custom path.
 
 Environment variables
 
 - `VAULT_ENABLED=true` — enable Vault usage.
 - `VAULT_ADDR` — base URL for Vault, e.g. `http://127.0.0.1:8200`.
 - `VAULT_TOKEN` — a Vault token with access to the secret path.
-- `VAULT_SECRET_PATH` — optional custom path (defaults to `secret/data/fluid/fee_payer`).
+- `VAULT_SECRET_PATH` — optional custom path (defaults to `secret/data/xlm-paymaster/fee_payer`).
 - `VAULT_TOKEN_RENEW_SECONDS` — optional token renewal frequency in seconds (default 300).
 
 Vault secret format
@@ -31,7 +31,7 @@ vault server -dev -dev-root-token-id="root"
 2. Write a secret (KV v2 namespace `secret/`):
 
 ```bash
-vault kv put secret/fluid/fee_payer FLUID_FEE_PAYER_SECRET="SOME_PRIVATE_KEY"
+vault kv put secret/xlm-paymaster/fee_payer FLUID_FEE_PAYER_SECRET="SOME_PRIVATE_KEY"
 ```
 
 3. Run the server with Vault enabled:
@@ -40,8 +40,8 @@ vault kv put secret/fluid/fee_payer FLUID_FEE_PAYER_SECRET="SOME_PRIVATE_KEY"
 export VAULT_ENABLED=true
 export VAULT_ADDR=http://127.0.0.1:8200
 export VAULT_TOKEN=root
-# optional: export VAULT_SECRET_PATH=secret/data/fluid/fee_payer
-cd fluid-server
+# optional: export VAULT_SECRET_PATH=secret/data/xlm-paymaster/fee_payer
+cd paymaster-server
 cargo run --release
 ```
 

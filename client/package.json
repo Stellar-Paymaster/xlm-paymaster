@@ -4,7 +4,7 @@
   "description": "xlm-paymaster client library for gasless Stellar transactions with Web Worker support",
   "main": "dist/index.js",
   "bin": {
-    "fluid": "./dist/cli.js"
+    "xlm-paymaster": "./dist/cli.js"
   },
   "browser": "dist/index.js",
   "types": "dist/index.d.ts",

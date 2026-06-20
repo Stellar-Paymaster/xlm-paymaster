@@ -1,11 +1,11 @@
 # React Native Compatibility Guide
 
-The Fluid SDK works in React Native with a few small setup steps.
+The XLM Paymaster SDK works in React Native with a few small setup steps.
 
 ## Installation
 
 ```bash
-npm install @fluid-dev/sdk react-native-get-random-values
+npm install @xlm-paymaster-dev/sdk react-native-get-random-values
 ```
 
 ## Setup
@@ -16,16 +16,16 @@ In your entry file (e.g. `index.js`), add this as the **very first import**:
 import 'react-native-get-random-values';
 ```
 
-This must come before any Fluid SDK imports.
+This must come before any XLM Paymaster SDK imports.
 
 ## Usage
 
 ```js
 import 'react-native-get-random-values';
-import { FluidClient } from '@fluid-dev/sdk/react-native';
+import { FluidClient } from '@xlm-paymaster-dev/sdk/react-native';
 
 const client = new FluidClient({
-  serverUrl: 'https://your-fluid-server.com',
+  serverUrl: 'https://your-paymaster-server.com',
   networkPassphrase: 'Test SDF Network ; September 2015',
   horizonUrl: 'https://horizon-testnet.stellar.org',
 });

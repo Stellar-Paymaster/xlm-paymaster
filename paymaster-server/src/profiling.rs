@@ -6,6 +6,10 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 /// A simple allocator wrapper that tracks allocation counts
 pub struct TrackingAllocator;
 
+#[cfg(test)]
+#[global_allocator]
+static ALLOCATOR: TrackingAllocator = TrackingAllocator;
+
 static ALLOCATION_COUNT: AtomicUsize = AtomicUsize::new(0);
 static DEALLOCATION_COUNT: AtomicUsize = AtomicUsize::new(0);
 static BYTES_ALLOCATED: AtomicUsize = AtomicUsize::new(0);

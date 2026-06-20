@@ -1,4 +1,4 @@
-# Fluid NFT Demo Contract
+# XLM Paymaster NFT Demo Contract
 
 A minimal Soroban smart contract for minting NFTs with metadata.
 
@@ -23,7 +23,7 @@ Retrieves the total number of minted NFTs.
 ## Build
 
 ```bash
-cd /Users/aliphatic/Desktop/fluid/server/src/contracts/soroban/nft-demo
+cd /Users/aliphatic/Desktop/xlm-paymaster/server/src/contracts/soroban/nft-demo
 soroban contract build
 ```
 
@@ -53,7 +53,7 @@ const tokenId = await client.call('mint', [
   recipient,
   JSON.stringify({
     name: 'My First NFT',
-    description: 'Minted with Fluid',
+    description: 'Minted with XLM Paymaster',
     image: 'https://example.com/image.png'
   })
 ]);

@@ -1,6 +1,6 @@
 # Universal Wallet Signing (WalletConnect Standard Bindings)
 
-The Fluid client ships a wallet-agnostic signing layer so example applications
+The XLM Paymaster client ships a wallet-agnostic signing layer so example applications
 can sign gasless fee-bump payloads with **any** Stellar wallet — WalletConnect
 sessions, SEP-43 browser wallets (Freighter, Albedo, xBull, the Stellar Wallets
 Kit), or an in-process keypair — behind a single interface.
@@ -55,7 +55,7 @@ import {
   buildStellarRequiredNamespaces,
   createWalletConnectSigner,
   STELLAR_CHAINS,
-} from "fluid-client";
+} from "paymaster-client";
 
 const signClient = await SignClient.init({ projectId: "<your-project-id>" });
 
@@ -103,7 +103,7 @@ await client.buildAndRequestFeeBumpWithWallet(signer, unsignedTx, false, {
 For Node demos, tests, and trusted backends:
 
 ```ts
-import { KeypairSigner } from "fluid-client";
+import { KeypairSigner } from "paymaster-client";
 
 const signer = new KeypairSigner(keypair, StellarSdk.Networks.TESTNET);
 ```
@@ -114,7 +114,7 @@ Adapt any wallet that already speaks the SEP-43 `signTransaction` interface
 (Freighter, the Stellar Wallets Kit, …):
 
 ```ts
-import { Sep43WalletSigner } from "fluid-client";
+import { Sep43WalletSigner } from "paymaster-client";
 
 const signer = new Sep43WalletSigner(window.freighterApi, {
   id: "freighter",

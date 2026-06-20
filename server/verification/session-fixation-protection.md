@@ -22,7 +22,7 @@ added 687 packages, changed 16 packages, and audited 998 packages in 9m
 ### Focused auth test suite
 
 ```text
-RUN  v4.1.5 C:/Users/USER/Downloads/fluid/server
+RUN  v4.1.5 C:/Users/USER/Downloads/xlm-paymaster/server
 
 Test Files  3 passed (3)
 Tests  36 passed (36)

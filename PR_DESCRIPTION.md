@@ -1,11 +1,11 @@
-# Pull Request Description - Fluid Platform Enhancements, Security and Resilience Polish
+# Pull Request Description - XLM Paymaster Platform Enhancements, Security and Resilience Polish
 
 ## Title
 feat: security-limits-congestion-graph-wcag-audit-and-alert-cooldowns
 
 ## Summary
 
-This PR addresses and resolves four distinct key issues across the `server`, `admin-dashboard`, and `fluid-server` directories. All changes are thoroughly tested with zero regressions.
+This PR addresses and resolves four distinct key issues across the `server`, `admin-dashboard`, and `paymaster-server` directories. All changes are thoroughly tested with zero regressions.
 
 ### 1. Express Endpoints Strict Payload Limits (`server/`)
 - Enforces strict request body content-length limits of **256KB** using `express.json({ limit: "256kb" })`.
@@ -22,8 +22,8 @@ This PR addresses and resolves four distinct key issues across the `server`, `ad
 - Supports relative luminance color contrast ratio math, keyboard focusability tabindex checking, screen reader alt tag presence, paired input labels, and structural heading sequence audits.
 - Implemented a standard `ComplianceHook` integration and created full unit test coverage using the native Node test runner.
 
-### 4. Stateful Cooldown & Deduplication for SMTP/Slack Alerts (`fluid-server/`)
-- Hardens the alert system (`fluid-server/src/notifications/alertSystem.ts`) to prevent operator alert flooding during balance drops by enforcing a stateful **6-hour cooldown**.
+### 4. Stateful Cooldown & Deduplication for SMTP/Slack Alerts (`paymaster-server/`)
+- Hardens the alert system (`paymaster-server/src/notifications/alertSystem.ts`) to prevent operator alert flooding during balance drops by enforcing a stateful **6-hour cooldown**.
 - Implemented a **Critical Drop Override** (Catastrophic Bypass) which immediately fires an emergency notification if the balance has plummeted by 50% or more since the last alerted state.
 - Tracks Slack and SMTP channels independently and backed by a comprehensive unit test suite in Vitest.
 
@@ -33,7 +33,7 @@ This PR addresses and resolves four distinct key issues across the `server`, `ad
 
 ### 1. Express Endpoints Payload Limit Tests
 ```bash
- RUN  v4.1.4 C:/Users/U S E R/Drips/Doris/fluid/server
+ RUN  v4.1.4 C:/Users/U S E R/Drips/Doris/xlm-paymaster/server
 
  ✓ src/test/payloadLimit.test.ts (2 tests) 146ms
 
@@ -44,7 +44,7 @@ This PR addresses and resolves four distinct key issues across the `server`, `ad
 
 ### 2. Interactive Congestion Fee Estimator Graph Component Tests
 ```bash
- RUN  v4.1.4 C:/Users/U S E R/Drips/Doris/fluid/admin-dashboard
+ RUN  v4.1.4 C:/Users/U S E R/Drips/Doris/xlm-paymaster/admin-dashboard
 
  ✓ src/fees/__tests__/CongestionFeeEstimatorGraph.test.tsx (4 tests) 993ms
 
@@ -76,9 +76,9 @@ This PR addresses and resolves four distinct key issues across the `server`, `ad
 
 ### 4. Alert Stateful Cooldown and Critical Bypass Tests
 ```bash
- RUN  v4.1.4 C:/Users/U S E R/Drips/Doris/fluid
+ RUN  v4.1.4 C:/Users/U S E R/Drips/Doris/xlm-paymaster
 
- ✓ fluid-server/src/notifications/alertSystem.test.ts (7 tests) 22ms
+ ✓ paymaster-server/src/notifications/alertSystem.test.ts (7 tests) 22ms
 
  Test Files  1 passed (1)
       Tests  7 passed (7)
@@ -106,7 +106,7 @@ admin-dashboard/
 ├── src/fees/components/CongestionFeeEstimatorGraph.tsx [NEW] (Interactive graph and simulator)
 └── src/fees/__tests__/CongestionFeeEstimatorGraph.test.tsx [NEW] (Vitest component tests)
 
-fluid-server/
+paymaster-server/
 ├── src/notifications/alertSystem.ts [NEW] (Stateful cooldown and bypass override)
 └── src/notifications/alertSystem.test.ts [NEW] (Stateful alert system tests)
 

@@ -1,6 +1,6 @@
-# Contributing to Fluid
+# Contributing to XLM Paymaster
 
-Thank you for your interest in contributing to Fluid — the multi-chain fee sponsorship platform for the Stellar network. This guide covers everything you need to go from a fresh clone to an approved pull request.
+Thank you for your interest in contributing to XLM Paymaster — the multi-chain fee sponsorship platform for the Stellar network. This guide covers everything you need to go from a fresh clone to an approved pull request.
 
 ---
 
@@ -22,14 +22,14 @@ Thank you for your interest in contributing to Fluid — the multi-chain fee spo
 ## Repository Layout
 
 ```
-fluid/
-├── fluid-server/        Rust signing engine — primary production backend (Axum + sqlx)
+xlm-paymaster/
+├── paymaster-server/        Rust signing engine — primary production backend (Axum + sqlx)
 ├── server/              Node.js parity server and admin API (Express + Prisma + BullMQ)
 ├── admin-dashboard/     Next.js 15 admin UI (React 19, Tailwind 4)
 ├── client/              TypeScript client library (browser + Node.js)
-├── fluid-cli/           Rust CLI tool
-├── fluid-py/            Python SDK (Maturin/PyO3 bindings)
-├── fluid-go/            Go client library
+├── paymaster-cli/           Rust CLI tool
+├── paymaster-py/            Python SDK (Maturin/PyO3 bindings)
+├── paymaster-go/            Go client library
 ├── proto/               Protocol Buffer definitions (gRPC contract)
 └── docs/                Documentation and Architecture Decision Records
     └── adr/             ADR index and individual records
@@ -72,8 +72,8 @@ Key ADRs to read before contributing:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Stellar-Fluid/fluid.git
-cd fluid
+git clone https://github.com/Stellar-Paymaster/xlm-paymaster.git
+cd xlm-paymaster
 
 # 2. Copy environment variables
 cp .env.example .env
@@ -83,7 +83,7 @@ cp .env.example .env
 pnpm install
 
 # 4. Build the Rust engine
-cd fluid-server && cargo build && cd ..
+cd paymaster-server && cargo build && cd ..
 
 # 5. Start the full local stack (Stellar Quickstart, PostgreSQL, Redis)
 docker compose up
@@ -158,14 +158,14 @@ This project enforces **Conventional Commits** via [commitlint](https://commitli
 ```
 feat(client): add Web Worker signing for offthread performance
 fix(server): handle missing Horizon URL in fee-bump handler
-perf(fluid-server): parallelise XDR serialisation in signing pool
+perf(paymaster-server): parallelise XDR serialisation in signing pool
 docs: comprehensive contributing guide and pr template
 chore(deps): bump stellar-sdk to 14.6.1
 ```
 
 ### Scope
 
-Use the package name as scope when the change is isolated to one sub-package (`client`, `server`, `fluid-server`, `admin-dashboard`, `fluid-cli`, `fluid-py`, `fluid-go`). Omit scope for cross-cutting changes.
+Use the package name as scope when the change is isolated to one sub-package (`client`, `server`, `paymaster-server`, `admin-dashboard`, `paymaster-cli`, `paymaster-py`, `paymaster-go`). Omit scope for cross-cutting changes.
 
 ### Local enforcement
 
@@ -224,7 +224,7 @@ Rules for PRs that introduce new environment variables:
 
 ## Code Style
 
-### Rust (`fluid-server`, `fluid-core`, `fluid-cli`)
+### Rust (`paymaster-server`, `paymaster-core`, `paymaster-cli`)
 
 ```bash
 cargo fmt                          # format
@@ -243,13 +243,13 @@ Follow the ESLint configuration in each sub-package. Key conventions:
 - Prefer `const` over `let`; avoid `var`.
 - Comments only when the *why* is non-obvious — never describe *what* the code does.
 
-### Python (`fluid-py`)
+### Python (`paymaster-py`)
 
 ```bash
 ruff check .
 ```
 
-### Go (`fluid-go`)
+### Go (`paymaster-go`)
 
 ```bash
 go fmt ./...
@@ -264,7 +264,7 @@ go vet ./...
 
 ```bash
 # Rust engine
-cd fluid-server && cargo test
+cd paymaster-server && cargo test
 
 # Node API
 cd server && npm test

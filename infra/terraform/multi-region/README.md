@@ -1,6 +1,6 @@
-# Fluid Multi-Region Terraform
+# XLM Paymaster Multi-Region Terraform
 
-Provisions an active-active two-region Fluid deployment on AWS.
+Provisions an active-active two-region XLM Paymaster deployment on AWS.
 
 ## Prerequisites
 
@@ -52,7 +52,7 @@ multi-region/
 ├── outputs.tf        # Root outputs
 ├── staging.tfvars    # Staging variable values
 └── modules/
-    └── fluid-region/ # Reusable per-region module (VPC, ECS, Redis, ALB)
+    └── xlm-paymaster-region/ # Reusable per-region module (VPC, ECS, Redis, ALB)
         ├── main.tf
         ├── variables.tf
         └── outputs.tf

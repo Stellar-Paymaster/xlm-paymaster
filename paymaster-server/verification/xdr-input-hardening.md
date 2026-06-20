@@ -2,14 +2,14 @@
 
 ## Issue #661
 - **Title**: [Security & Hardening] Strict XDR Input Size and Structure Validation
-- **Scope**: `fluid-server/`
+- **Scope**: `paymaster-server/`
 - **Status**: ✅ Implemented and tested
 
 ## Implementation Summary
 
 ### Code Changes
 
-1. **`fluid-server/src/xdr.rs`**:
+1. **`paymaster-server/src/xdr.rs`**:
    - Added `MAX_XDR_INPUT_BYTES = 64 * 1024` constant.
    - Extended `XdrError` enum with `PayloadTooLarge` and `InvalidBase64` variants.
    - Added `is_standard_base64_byte()` helper to validate base64 characters.
@@ -20,7 +20,7 @@
    - Updated `parse_xdr()` and `parse_xdr_zero_copy()` to use the validation gate.
    - Fixed malformed test tail and replaced with clean test suite (8 new tests).
 
-2. **`fluid-server/src/stellar.rs`**:
+2. **`paymaster-server/src/stellar.rs`**:
    - Updated `create_fee_bump_transaction()` to call `validate_xdr_input()` as the first operation before any decode or deserialization.
    - Validation errors are mapped to structured 400 Bad Request responses with error code `INVALID_XDR`.
 
@@ -92,7 +92,7 @@ All tests pass source-level verification (test functions are syntactically corre
 
 ### Validation Gate
 The `validate_xdr_input()` function is the single entry point for all XDR parsing:
-- **Location**: `fluid-server/src/xdr.rs:75–100`.
+- **Location**: `paymaster-server/src/xdr.rs:75–100`.
 - **Complexity**: O(n) single pass to validate base64 characters.
 - **Performance Impact**: Negligible compared to base64 decode and XDR deserialization.
 

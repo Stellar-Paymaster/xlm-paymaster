@@ -2,8 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx vitest *)",
-      "Bash(ls /Users/ik/Documents/fluid/admin-dashboard/*.config.*)",
-      "Bash(ls /Users/ik/Documents/fluid/admin-dashboard/*.config.js)"
+      "Bash(ls /Users/ik/Documents/xlm-paymaster/admin-dashboard/*.config.*)",
+      "Bash(ls /Users/ik/Documents/xlm-paymaster/admin-dashboard/*.config.js)"
     ]
   }
 }

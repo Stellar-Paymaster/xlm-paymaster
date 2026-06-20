@@ -7,10 +7,10 @@ Workflow
 
 Matrix scanners
 ---------------
-- cargo-audit (fluid-server/)
-- npm audit (fluid-server/wasm-demo/)
+- cargo-audit (paymaster-server/)
+- npm audit (paymaster-server/wasm-demo/)
 
-Local verification (from fluid-server/)
+Local verification (from paymaster-server/)
 -----------------------------------------
 cargo install cargo-audit --locked
 cargo audit
@@ -19,7 +19,7 @@ cd wasm-demo && npm ci && npm audit --audit-level=high
 
 CI behavior
 -----------
-- Runs on pull requests and pushes touching fluid-server/**
+- Runs on pull requests and pushes touching paymaster-server/**
 - Uploads JSON audit reports as workflow artifacts
 - Fails the job on high/critical Rust advisories (`cargo audit --deny warnings`)
 - Fails the job on high+ npm vulnerabilities (`npm audit --audit-level=high`)

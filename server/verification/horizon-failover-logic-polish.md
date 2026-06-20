@@ -19,15 +19,15 @@ Timestamp: `2026-04-25T17:39:58Z`
 ```text
 $ npm test -- --run src/horizon/failoverClient.test.ts src/workers/ledgerMonitor.failover.test.ts
 
-> fluid-server-ts@0.1.1 test
+> paymaster-server-ts@0.1.1 test
 > vitest --run src/horizon/failoverClient.test.ts src/workers/ledgerMonitor.failover.test.ts
 
 sh: vitest: command not found
 npm error Lifecycle script `test` failed with error:
 npm error code 127
-npm error path /Users/ik/Documents/fluid/server
-npm error workspace fluid-server-ts@0.1.1
-npm error location /Users/ik/Documents/fluid/server
+npm error path /Users/ik/Documents/xlm-paymaster/server
+npm error workspace paymaster-server-ts@0.1.1
+npm error location /Users/ik/Documents/xlm-paymaster/server
 npm error command failed
 npm error command sh -c vitest --run src/horizon/failoverClient.test.ts src/workers/ledgerMonitor.failover.test.ts
 ```

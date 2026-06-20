@@ -1,7 +1,7 @@
-# Chaos Engineering — Fluid Fault Injection
+# Chaos Engineering — XLM Paymaster Fault Injection
 
 This directory contains chaos experiment definitions and helper scripts for
-validating Fluid's resilience under partial failure conditions (issue #241).
+validating XLM Paymaster's resilience under partial failure conditions (issue #241).
 
 ## Experiments
 
@@ -27,7 +27,7 @@ npx vitest run src/chaos/faultInjection.test.ts
 Live experiments require:
 - [Toxiproxy](https://github.com/Shopify/toxiproxy) — `brew install toxiproxy`
 - `toxiproxy-server` running on `localhost:8474`
-- A running Fluid stack (docker-compose or equivalent)
+- A running XLM Paymaster stack (docker-compose or equivalent)
 
 ```bash
 # Start the Toxiproxy server

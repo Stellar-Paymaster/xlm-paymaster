@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "fluid.fullname" . }}-dashboard
+  name: {{ include "xlm-paymaster.fullname" . }}-dashboard
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: dashboard
 spec:
   type: {{ .Values.dashboard.service.type }}
   selector:
-    {{- include "fluid.selectorLabels" (dict "root" . "component" "dashboard") | nindent 4 }}
+    {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "dashboard") | nindent 4 }}
   ports:
     - name: http
       protocol: TCP

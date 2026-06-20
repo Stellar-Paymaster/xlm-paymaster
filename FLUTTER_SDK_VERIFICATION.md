@@ -1,7 +1,7 @@
 # Flutter SDK Support - Implementation Verification Report
 
 ## Task Summary
-Implemented production-ready Flutter SDK support for the Fluid client package.
+Implemented production-ready Flutter SDK support for the XLM Paymaster client package.
 
 ## Directory
 `client/` - All changes confined to the client package
@@ -175,8 +175,8 @@ interface FlutterResult<T> {
 final client = FlutterFluidClient(
   networkPassphrase: 'Test Network',
   serverUrls: [
-    'https://fluid-primary.example',
-    'https://fluid-secondary.example',
+    'https://xlm-paymaster-primary.example',
+    'https://xlm-paymaster-secondary.example',
   ],
   horizonUrl: 'https://horizon-testnet.stellar.org',
   enableAutoRetry: true,

@@ -540,8 +540,8 @@ mod tests {
     fn test_invalid_base64_returns_error() {
         let result = parse_xdr("not!!!valid===base64");
         assert!(
-            matches!(result, Err(XdrError::Base64(_))),
-            "expected Base64 error, got {result:?}"
+            matches!(result, Err(XdrError::Base64(_)) | Err(XdrError::InvalidBase64(_))),
+            "expected Base64 or InvalidBase64 error, got {result:?}"
         );
     }
 

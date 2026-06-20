@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Fluid server hardens XDR transaction input processing against memory-exhaustion attacks by validating payload shape before expensive deserialization and heap allocation.
+The XLM Paymaster server hardens XDR transaction input processing against memory-exhaustion attacks by validating payload shape before expensive deserialization and heap allocation.
 
 ## Attack Surface
 
@@ -21,7 +21,7 @@ The attack occurs between the HTTP router and the `xdr::parse_xdr` function:
 
 ### Input Validation Gate
 
-The `validate_xdr_input` function in `fluid-server/src/xdr.rs` performs a **cheap preflight check** before any decode or deserialization work:
+The `validate_xdr_input` function in `paymaster-server/src/xdr.rs` performs a **cheap preflight check** before any decode or deserialization work:
 
 ```rust
 pub fn validate_xdr_input(base64_string: &str) -> Result<&str, XdrError> {
@@ -51,15 +51,15 @@ pub fn validate_xdr_input(base64_string: &str) -> Result<&str, XdrError> {
 
 ### Deployment Locations
 
-1. **`fluid-server/src/xdr.rs`**:
+1. **`paymaster-server/src/xdr.rs`**:
    - `validate_xdr_input`: The validation gate.
    - `parse_xdr`: Called via the gate and uses the validated, trimmed string.
    - `parse_xdr_zero_copy`: Also includes inline size/base64 validation.
 
-2. **`fluid-server/src/stellar.rs`**:
+2. **`paymaster-server/src/stellar.rs`**:
    - `create_fee_bump_transaction`: Calls `validate_xdr_input` as the first operation, before attempting any decode or XDR deserialization.
 
-3. **`fluid-server/src/main.rs`**:
+3. **`paymaster-server/src/main.rs`**:
    - `process_fee_bump_request`: Routes XDR input to `create_fee_bump_transaction`, which now validates before deserializing.
 
 ### Error Responses

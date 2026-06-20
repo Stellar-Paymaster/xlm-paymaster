@@ -1,6 +1,6 @@
-# Fluid Server Load Testing Report
+# Paymaster Server Load Testing Report
 
-This report documents the results of the high-stress load testing performed on the `/fee-bump` endpoint of the Fluid server. The purpose of this test was to establish the system's performance boundaries and determine response times, error rates, and throughput behavior under peak concurrency levels.
+This report documents the results of the high-stress load testing performed on the `/fee-bump` endpoint of the XLM Paymaster server. The purpose of this test was to establish the system's performance boundaries and determine response times, error rates, and throughput behavior under peak concurrency levels.
 
 ---
 
@@ -98,4 +98,4 @@ Below is the verified stdout result from the performance test runner:
 
 ## Conclusion & Recommendations
 
-The Fluid server is fully capable of handling 1,000 concurrent Virtual Users and sustained throughput of over 800 TPS. No immediate code changes are necessary in the signature pipeline, and the current Redis cache cluster configuration is sufficient.
+The XLM Paymaster server is fully capable of handling 1,000 concurrent Virtual Users and sustained throughput of over 800 TPS. No immediate code changes are necessary in the signature pipeline, and the current Redis cache cluster configuration is sufficient.

@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "fluid.fullname" . }}-redis
+  name: {{ include "xlm-paymaster.fullname" . }}-redis
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: redis
 spec:
   type: ClusterIP
   clusterIP: None
   selector:
-    {{- include "fluid.selectorLabels" (dict "root" . "component" "redis") | nindent 4 }}
+    {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "redis") | nindent 4 }}
   ports:
     - name: redis
       protocol: TCP

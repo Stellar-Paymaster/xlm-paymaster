@@ -25,6 +25,6 @@ Validation runs when at least one Horizon URL is configured (`STELLAR_HORIZON_UR
 
 ## Implementation
 
-- `fluid-server/src/signer_weight.rs` – pure validation + unit tests
-- `fluid-server/src/horizon.rs` – `fetch_account_auth`
-- `fluid-server/src/main.rs` – invoked in `process_fee_bump_request` before signing
+- `paymaster-server/src/signer_weight.rs` – pure validation + unit tests
+- `paymaster-server/src/horizon.rs` – `fetch_account_auth`
+- `paymaster-server/src/main.rs` – invoked in `process_fee_bump_request` before signing

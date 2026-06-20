@@ -11,6 +11,10 @@ impl RequestTracker {
         }
     }
 
+    pub fn clear(&mut self) {
+        self.map.clear();
+    }
+
     pub fn is_suspicious(&mut self, key: &str, now: u64) -> bool {
         let timestamps = self.map.entry(key.to_string()).or_default();
 

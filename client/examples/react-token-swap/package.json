@@ -1,7 +1,7 @@
 {
-  "name": "fluid-token-swap-demo",
+  "name": "xlm-paymaster-token-swap-demo",
   "version": "1.0.0",
-  "description": "Gasless Soroswap Token Swap Demo powered by Fluid",
+  "description": "Gasless Soroswap Token Swap Demo powered by XLM Paymaster",
   "type": "module",
   "scripts": {
     "dev": "vite",

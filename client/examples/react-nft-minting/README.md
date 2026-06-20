@@ -1,10 +1,10 @@
-# Fluid Gasless NFT Minting Demo
+# XLM Paymaster Gasless NFT Minting Demo
 
-A React demo showing gasless Soroban NFT minting powered by Fluid.
+A React demo showing gasless Soroban NFT minting powered by XLM Paymaster.
 
 ## Features
 
-- 💧 **Gasless Minting**: Fluid sponsors all transaction fees
+- 💧 **Gasless Minting**: XLM Paymaster sponsors all transaction fees
 - 👛 **Freighter Integration**: Connect your Stellar wallet
 - 🎨 **NFT Metadata**: Add name, description, and image
 - 🔗 **Instant Settlement**: See your transaction on Stellar Expert
@@ -21,7 +21,7 @@ A React demo showing gasless Soroban NFT minting powered by Fluid.
 ```
 VITE_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 VITE_NFT_CONTRACT_ID=<deployed-contract-id>
-VITE_FLUID_SERVER_URL=https://testnet.fluid.dev
+VITE_FLUID_SERVER_URL=https://testnet.xlm-paymaster.dev
 VITE_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 VITE_STELLAR_EXPERT_URL=https://stellar.expert/explorer/testnet
 VITE_HORIZON_URL=https://horizon-testnet.stellar.org
@@ -49,12 +49,12 @@ npm run deploy
 2. **Enter NFT Details**: Specify name, description, and optional image URL
 3. **Preview**: See how your NFT will appear
 4. **Sign Transaction**: Freighter wallet prompts for transaction signature
-5. **Fluid Sponsorship**: Fluid wraps your transaction in a fee-bump, covering all fees
+5. **XLM Paymaster Sponsorship**: XLM Paymaster wraps your transaction in a fee-bump, covering all fees
 6. **Confirmation**: View your confirmed transaction on Stellar Expert
 
 ## Deployment
 
-Deployed to Vercel: https://fluid-nft-demo.vercel.app/
+Deployed to Vercel: https://xlm-paymaster-nft-demo.vercel.app/
 
 Set environment variables in Vercel dashboard:
 - `VITE_SOROBAN_RPC_URL`
@@ -84,7 +84,7 @@ Set environment variables in Vercel dashboard:
 - **Stellar SDK**: Blockchain integration
 - **Freighter API**: Wallet connection
 - **Soroban**: Smart contract platform
-- **Fluid SDK**: Fee-bump sponsorship
+- **XLM Paymaster SDK**: Fee-bump sponsorship
 
 ## Contract Integration
 
@@ -102,5 +102,5 @@ get_total_supply() -> u32
 For issues or questions:
 1. Check [Freighter docs](https://github.com/stellar/freighter)
 2. Review [Soroban docs](https://soroban.stellar.org/)
-3. Check [Fluid SDK docs](https://github.com/stellar-fluid/fluid)
+3. Check [XLM Paymaster SDK docs](https://github.com/Stellar-Paymaster/xlm-paymaster)
 4. Check [Stellar documentation](https://developers.stellar.org/)

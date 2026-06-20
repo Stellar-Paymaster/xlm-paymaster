@@ -1,6 +1,6 @@
 # Anonymous Usage Telemetry & Diagnostics
 
-The Fluid SDK includes an optional, anonymous telemetry and diagnostics system to help maintainers understand SDK usage patterns and improve the library.
+The XLM Paymaster SDK includes an optional, anonymous telemetry and diagnostics system to help maintainers understand SDK usage patterns and improve the library.
 
 ## Overview
 
@@ -118,5 +118,5 @@ A: Yes! Each feature has its own independent opt-in flag (`enableTelemetry` and 
 
 ## License
 
-The telemetry and diagnostics system is part of the Fluid SDK and is licensed under the same terms as the SDK.
+The telemetry and diagnostics system is part of the XLM Paymaster SDK and is licensed under the same terms as the SDK.
 

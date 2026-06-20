@@ -3,7 +3,7 @@
 ## Issue: #460 [Hardening & Reliability] Redis Cluster Support
 
 ### Description
-Architecture for multi-node Redis to handle global rate limiting for the Fluid platform.
+Architecture for multi-node Redis to handle global rate limiting for the XLM Paymaster platform.
 
 ### Acceptance Criteria Met
 1. ✅ Implement redis cluster support logic in the server package

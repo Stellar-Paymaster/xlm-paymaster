@@ -18,7 +18,7 @@
   ],
   "fileMap": {
     "projectFileMap": {
-      "fluid-server-rust": [
+      "paymaster-server-rust": [
         {
           "file": "paymaster-server/.cargo/config.toml",
           "hash": "14745244630651384018"
@@ -6331,12 +6331,12 @@
           ]
         }
       ],
-      "fluid-wasm-demo": [
+      "xlm-paymaster-wasm-demo": [
         {
           "file": "paymaster-server/wasm-demo/app.js",
           "hash": "911622975405772552",
           "deps": [
-            "fluid-server-rust"
+            "paymaster-server-rust"
           ]
         },
         {
@@ -6351,7 +6351,7 @@
           "hash": "8615043807585123300",
           "deps": [
             "npm:@stellar/stellar-sdk@11.3.0",
-            "fluid-server-rust"
+            "paymaster-server-rust"
           ]
         },
         {
@@ -6626,11 +6626,11 @@
         "hash": "6127868296565305518"
       },
       {
-        "file": "docs/brand/assets/fluid-logo-dark.svg",
+        "file": "docs/brand/assets/xlm-paymaster-logo-dark.svg",
         "hash": "4466048448039694629"
       },
       {
-        "file": "docs/brand/assets/fluid-logo-light.svg",
+        "file": "docs/brand/assets/xlm-paymaster-logo-light.svg",
         "hash": "5154517019864574834"
       },
       {
@@ -7014,15 +7014,15 @@
         "hash": "3645367970183380439"
       },
       {
-        "file": "infra/terraform/multi-region/modules/fluid-region/main.tf",
+        "file": "infra/terraform/multi-region/modules/xlm-paymaster-region/main.tf",
         "hash": "10047779707240783367"
       },
       {
-        "file": "infra/terraform/multi-region/modules/fluid-region/outputs.tf",
+        "file": "infra/terraform/multi-region/modules/xlm-paymaster-region/outputs.tf",
         "hash": "14783536491370954108"
       },
       {
-        "file": "infra/terraform/multi-region/modules/fluid-region/variables.tf",
+        "file": "infra/terraform/multi-region/modules/xlm-paymaster-region/variables.tf",
         "hash": "189952400960255432"
       },
       {
@@ -7070,11 +7070,11 @@
         "hash": "3244421341483603138"
       },
       {
-        "file": "paymaster-cli/fluid-cli-fund.png",
+        "file": "paymaster-cli/paymaster-cli-fund.png",
         "hash": "12819704563267636424"
       },
       {
-        "file": "paymaster-cli/fluid-cli-help.png",
+        "file": "paymaster-cli/paymaster-cli-help.png",
         "hash": "7489258875935734802"
       },
       {

@@ -511,7 +511,7 @@
 <a href=#511 id=511 data-nosnippet>511</a>            [<span class="number">0x3A</span>, <span class="number">0x78</span>, <span class="number">0xEA</span>, <span class="number">0x3C</span>]
 <a href=#512 id=512 data-nosnippet>512</a>        );
 <a href=#513 id=513 data-nosnippet>513</a>        <span class="macro">assert_eq!</span>(
-<a href=#514 id=514 data-nosnippet>514</a>            hex::encode(sha256(<span class="string">"fluid"</span>)),
+<a href=#514 id=514 data-nosnippet>514</a>            hex::encode(sha256(<span class="string">"xlm-paymaster"</span>)),
 <a href=#515 id=515 data-nosnippet>515</a>            <span class="string">"5e0502adfb96f1f1544d24f00c99b269c12570acfd994666ffb86424e0835370"
 <a href=#516 id=516 data-nosnippet>516</a>        </span>);
 <a href=#517 id=517 data-nosnippet>517</a>    }
@@ -567,7 +567,7 @@
 <a href=#567 id=567 data-nosnippet>567</a>
 <a href=#568 id=568 data-nosnippet>568</a>    <span class="attr">#[test]
 <a href=#569 id=569 data-nosnippet>569</a>    </span><span class="kw">fn </span>verify_api_key_accepts_an_exact_match() {
-<a href=#570 id=570 data-nosnippet>570</a>        <span class="kw">let </span>key = <span class="string">"fluid-pro-demo-key"</span>;
+<a href=#570 id=570 data-nosnippet>570</a>        <span class="kw">let </span>key = <span class="string">"xlm-paymaster-pro-demo-key"</span>;
 <a href=#571 id=571 data-nosnippet>571</a>        <span class="macro">assert!</span>(verify_api_key(key, key));
 <a href=#572 id=572 data-nosnippet>572</a>        <span class="macro">assert!</span>(verify_api_key(
 <a href=#573 id=573 data-nosnippet>573</a>            <span class="string">"sk_live_0123456789abcdef"</span>,
@@ -603,14 +603,14 @@
 <a href=#603 id=603 data-nosnippet>603</a>            <span class="string">"\0"</span>.to_string(),
 <a href=#604 id=604 data-nosnippet>604</a>            <span class="string">"\0\0\0"</span>.to_string(),
 <a href=#605 id=605 data-nosnippet>605</a>            <span class="string">"sk_live_0123456789abcdef\0"</span>.to_string(),
-<a href=#606 id=606 data-nosnippet>606</a>            <span class="string">"fluid\nkey"</span>.to_string(),
-<a href=#607 id=607 data-nosnippet>607</a>            <span class="string">"fluid\r\nx-api-key: injected"</span>.to_string(),
-<a href=#608 id=608 data-nosnippet>608</a>            <span class="string">"fluid\tkey"</span>.to_string(),
+<a href=#606 id=606 data-nosnippet>606</a>            <span class="string">"xlm-paymaster\nkey"</span>.to_string(),
+<a href=#607 id=607 data-nosnippet>607</a>            <span class="string">"xlm-paymaster\r\nx-api-key: injected"</span>.to_string(),
+<a href=#608 id=608 data-nosnippet>608</a>            <span class="string">"xlm-paymaster\tkey"</span>.to_string(),
 <a href=#609 id=609 data-nosnippet>609</a>            <span class="string">"   sk_live_0123456789abcdef   "</span>.to_string(),
 <a href=#610 id=610 data-nosnippet>610</a>            <span class="string">"sk_live_\u{202e}fedcba9876543210"</span>.to_string(),
 <a href=#611 id=611 data-nosnippet>611</a>            <span class="string">"sk_live_\u{200d}\u{fe0f}"</span>.to_string(),
 <a href=#612 id=612 data-nosnippet>612</a>            <span class="string">"🔑"</span>.to_string(),
-<a href=#613 id=613 data-nosnippet>613</a>            <span class="string">"fluid-🔐-demo-key"</span>.to_string(),
+<a href=#613 id=613 data-nosnippet>613</a>            <span class="string">"xlm-paymaster-🔐-demo-key"</span>.to_string(),
 <a href=#614 id=614 data-nosnippet>614</a>            <span class="string">"密钥"</span>.to_string(),
 <a href=#615 id=615 data-nosnippet>615</a>            <span class="string">"مفتاح"</span>.to_string(),
 <a href=#616 id=616 data-nosnippet>616</a>            <span class="string">"कुंजी"</span>.to_string(),

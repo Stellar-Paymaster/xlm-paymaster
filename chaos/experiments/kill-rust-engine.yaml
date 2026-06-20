@@ -35,13 +35,13 @@ method:
 
   - type: action
     name: kill-rust-engine
-    description: Send SIGKILL to the fluid-server process
+    description: Send SIGKILL to the paymaster-server process
     provider:
       type: process
       path: bash
       arguments:
         - -c
-        - "pkill -9 -f 'fluid-server' || true"
+        - "pkill -9 -f 'paymaster-server' || true"
 
   - type: probe
     name: api-returns-503-or-500-not-hang
@@ -58,13 +58,13 @@ method:
 
   - type: action
     name: restart-rust-engine
-    description: Restart the fluid-server binary
+    description: Restart the paymaster-server binary
     provider:
       type: process
       path: bash
       arguments:
         - -c
-        - "cargo run --manifest-path fluid-server/Cargo.toml &"
+        - "cargo run --manifest-path paymaster-server/Cargo.toml &"
 
   - type: action
     name: wait-for-engine-recovery
@@ -85,4 +85,4 @@ rollbacks:
       path: bash
       arguments:
         - -c
-        - "pgrep -f 'fluid-server' || (cargo run --manifest-path fluid-server/Cargo.toml &)"
+        - "pgrep -f 'paymaster-server' || (cargo run --manifest-path paymaster-server/Cargo.toml &)"

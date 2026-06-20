@@ -1,6 +1,6 @@
-# Fluid Helm Chart
+# XLM Paymaster Helm Chart
 
-Deploys the complete Fluid stack on Kubernetes: node-api, rust-engine, PostgreSQL, Redis, and the admin dashboard.
+Deploys the complete XLM Paymaster stack on Kubernetes: node-api, rust-engine, PostgreSQL, Redis, and the admin dashboard.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ postgres:
     password: "changeme"
 ingress:
   hosts:
-    - host: fluid.localhost
+    - host: xlm-paymaster.localhost
       paths:
         - path: /
           pathType: Prefix
@@ -33,7 +33,7 @@ ingress:
 EOF
 
 # 2. Install
-helm install fluid ./helm/fluid -f my-values.yaml
+helm install xlm-paymaster ./helm/xlm-paymaster -f my-values.yaml
 
 # 3. Watch pods come up
 kubectl get pods -w
@@ -70,7 +70,7 @@ The RPS metric requires the Prometheus Adapter. Install it once per cluster:
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus-adapter prometheus-community/prometheus-adapter \
   --namespace monitoring --create-namespace \
-  -f helm/fluid/prometheus-adapter-values.yaml
+  -f helm/xlm-paymaster/prometheus-adapter-values.yaml
 ```
 
 Then enable the ServiceMonitor in your values:
@@ -88,5 +88,5 @@ For production use the External Secrets Operator or Vault Agent Injector instead
 ## Upgrading
 
 ```bash
-helm upgrade fluid ./helm/fluid -f my-values.yaml
+helm upgrade xlm-paymaster ./helm/xlm-paymaster -f my-values.yaml
 ```

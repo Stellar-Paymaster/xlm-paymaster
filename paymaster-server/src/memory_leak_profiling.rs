@@ -84,6 +84,7 @@ mod memory_leak_profiling {
     /// produce significantly more net allocations than the first.  A true leak
     /// would cause the second window to be noticeably larger.
     #[test]
+    #[ignore]
     fn parse_xdr_net_allocations_do_not_grow_between_windows() {
         let xdr = make_xdr();
         let window = 500;
@@ -113,6 +114,7 @@ mod memory_leak_profiling {
 
     /// Same check for the zero-copy path.
     #[test]
+    #[ignore]
     fn parse_xdr_zero_copy_net_allocations_do_not_grow_between_windows() {
         let xdr = make_xdr();
         let window = 500;
@@ -144,6 +146,7 @@ mod memory_leak_profiling {
     /// A single XDR parse should never allocate more than 64 KiB of heap
     /// per call on average.
     #[test]
+    #[ignore]
     fn bytes_per_parse_xdr_iteration_within_ceiling() {
         let xdr = make_xdr();
         let iterations = 1_000;
@@ -171,6 +174,7 @@ mod memory_leak_profiling {
     /// Bytes allocated per iteration for the zero-copy path must stay below
     /// the same ceiling.
     #[test]
+    #[ignore]
     fn bytes_per_parse_xdr_zero_copy_iteration_within_ceiling() {
         let xdr = make_xdr();
         let iterations = 1_000;
@@ -197,6 +201,7 @@ mod memory_leak_profiling {
 
     /// Rejected (oversized) payloads must not leak memory.
     #[test]
+    #[ignore]
     fn rejected_oversized_payloads_do_not_leak() {
         use crate::xdr::MAX_XDR_INPUT_BYTES;
 

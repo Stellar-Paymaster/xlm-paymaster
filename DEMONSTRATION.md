@@ -1,7 +1,7 @@
 # Redis Cluster Support Demonstration
 
 ## Overview
-This demonstration shows the Redis Cluster implementation for global rate limiting in the Fluid platform.
+This demonstration shows the Redis Cluster implementation for global rate limiting in the XLM Paymaster platform.
 
 ## Implementation Details
 

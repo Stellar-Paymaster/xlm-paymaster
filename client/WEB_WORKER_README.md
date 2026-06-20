@@ -1,6 +1,6 @@
-# Fluid Client - Web Worker Integration
+# XLM Paymaster Client - Web Worker Integration
 
-This document describes the Web Worker integration for the Fluid Client, which enables off-thread cryptographic operations to maintain UI responsiveness during heavy signing operations.
+This document describes the Web Worker integration for the XLM Paymaster Client, which enables off-thread cryptographic operations to maintain UI responsiveness during heavy signing operations.
 
 ## Overview
 
@@ -34,11 +34,11 @@ FluidClient                   signingWorker.ts
 ### Basic Usage with Web Worker
 
 ```typescript
-import { FluidClient } from 'fluid-client';
+import { FluidClient } from 'paymaster-client';
 import StellarSdk from '@stellar/stellar-sdk';
 
 const client = new FluidClient({
-  serverUrl: 'https://your-fluid-server.com',
+  serverUrl: 'https://your-paymaster-server.com',
   networkPassphrase: StellarSdk.Networks.PUBLIC,
   horizonUrl: 'https://horizon.stellar.org',
   useWorker: true // Enable Web Worker
@@ -55,7 +55,7 @@ If the Web Worker fails to initialize or encounters an error, the client automat
 ```typescript
 // Worker failure is handled automatically
 const client = new FluidClient({
-  serverUrl: 'https://your-fluid-server.com',
+  serverUrl: 'https://your-paymaster-server.com',
   networkPassphrase: StellarSdk.Networks.PUBLIC,
   useWorker: true // Will fallback to false if worker fails
 });
@@ -64,7 +64,7 @@ const client = new FluidClient({
 ### Performance Testing
 
 ```typescript
-import { PerformanceTest } from 'fluid-client/performance/test';
+import { PerformanceTest } from 'paymaster-client/performance/test';
 
 const test = new PerformanceTest(true); // true = use worker
 const metrics = await test.runPerformanceTest(100); // 100 transactions

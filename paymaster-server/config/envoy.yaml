@@ -1,4 +1,4 @@
-# Envoy API gateway configuration for Fluid (#715)
+# Envoy API gateway configuration for XLM Paymaster (#715)
 #
 # Offloads basic API key validation and rate limiting from the Rust process.
 # Run: envoy -c /path/to/envoy.yaml
@@ -50,8 +50,8 @@ static_resources:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
                       inline_code: |
                         local ALLOWED_KEYS = {
-                          ["fluid-free-demo-key"] = { max = 2, tier = "free" },
-                          ["fluid-pro-demo-key"] = { max = 5, tier = "pro" },
+                          ["xlm-paymaster-free-demo-key"] = { max = 2, tier = "free" },
+                          ["xlm-paymaster-pro-demo-key"] = { max = 5, tier = "pro" },
                         }
 
                         function envoy_on_request(request_handle)
@@ -107,5 +107,5 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: fluid-server
+                      address: paymaster-server
                       port_value: 3000

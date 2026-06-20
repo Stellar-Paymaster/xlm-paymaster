@@ -1,6 +1,6 @@
-# Fluid Client
+# XLM Paymaster Client
 
-TypeScript client library for interacting with Fluid servers.
+TypeScript client library for interacting with XLM Paymaster servers.
 
 ## Installation
 
@@ -11,7 +11,7 @@ npm install
 ## Usage
 
 ```typescript
-import { FluidClient } from "fluid-client";
+import { FluidClient } from "paymaster-client";
 import StellarSdk from "@stellar/stellar-sdk";
 
 const client = new FluidClient({
@@ -77,11 +77,11 @@ For latency-sensitive deployments, the client can speak gRPC-web instead of JSON
 
 ```ts
 const client = new FluidClient({
-  serverUrl: "https://grpc.fluid.example",
+  serverUrl: "https://grpc.xlm-paymaster.example",
   networkPassphrase: StellarSdk.Networks.TESTNET,
   transport: "grpc-web",
   grpc: {
-    serviceName: "fluid.v1.FeeBumpService",
+    serviceName: "xlm-paymaster.v1.FeeBumpService",
   },
 });
 ```
@@ -125,7 +125,7 @@ new FluidClient(config: {
 For unit testing without network calls:
 
 ```typescript
-import { FluidMockClient } from "fluid-client";
+import { FluidMockClient } from "paymaster-client";
 
 const mockClient = new FluidMockClient();
 mockClient.setMockResponse("requestFeeBump", { status: "success", hash: "mock-hash" });
@@ -136,7 +136,7 @@ console.log(result.hash); // "mock-hash"
 
 ## Anonymous Usage Telemetry & Diagnostics
 
-The Fluid SDK includes optional, anonymous telemetry and diagnostics to help improve the library.
+The XLM Paymaster SDK includes optional, anonymous telemetry and diagnostics to help improve the library.
 
 **Both features are disabled by default (opt-in).**
 
@@ -160,7 +160,7 @@ npm run demo:sac-transfer-xdr
 
 ## Local Sandbox Docker Compose
 
-Use one command to spin up a local sandbox with Fluid server, PostgreSQL, and a mock Horizon endpoint:
+Use one command to spin up a local sandbox with XLM Paymaster server, PostgreSQL, and a mock Horizon endpoint:
 
 ```bash
 npm run sandbox:up

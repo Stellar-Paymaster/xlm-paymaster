@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Affiliate Referral Program allows existing Fluid tenants to invite new developers to the platform. Each tenant receives a unique referral link. When a referred developer signs up, verifies their email, and completes their first successful fee-sponsorship bump, the referring tenant earns a 1 000-stroop XLM quota bonus. Tenants can view their referral history and bonus credits from a dedicated page in the developer portal.
+The Affiliate Referral Program allows existing XLM Paymaster tenants to invite new developers to the platform. Each tenant receives a unique referral link. When a referred developer signs up, verifies their email, and completes their first successful fee-sponsorship bump, the referring tenant earns a 1 000-stroop XLM quota bonus. Tenants can view their referral history and bonus credits from a dedicated page in the developer portal.
 
 This feature is part of Phase 9: Developer Portal and is implemented entirely within the Next.js 15 admin-dashboard, following the existing in-memory data-store pattern (no Prisma in the dashboard). The dashboard proxies quota-credit operations to the backend via `FLUID_SERVER_URL`.
 

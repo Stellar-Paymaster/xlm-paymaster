@@ -30,7 +30,7 @@
     {
       "id": "multi-network",
       "title": "Multi-network support (Futurenet / custom)",
-      "description": "Allow a single Fluid deployment to sponsor fees across Testnet, Futurenet, and custom Stellar networks simultaneously.",
+      "description": "Allow a single XLM Paymaster deployment to sponsor fees across Testnet, Futurenet, and custom Stellar networks simultaneously.",
       "status": "planned",
       "category": "Infrastructure",
       "votes": 74,
@@ -48,7 +48,7 @@
     {
       "id": "go-sdk-v2",
       "title": "Go SDK v2 with context propagation",
-      "description": "Rewrite fluid-go with full context.Context support, structured logging hooks, and OpenTelemetry trace propagation.",
+      "description": "Rewrite paymaster-go with full context.Context support, structured logging hooks, and OpenTelemetry trace propagation.",
       "status": "planned",
       "category": "SDK",
       "votes": 55,

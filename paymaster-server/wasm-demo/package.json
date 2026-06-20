@@ -1,5 +1,5 @@
 {
-  "name": "fluid-wasm-demo",
+  "name": "xlm-paymaster-wasm-demo",
   "private": true,
   "type": "module",
   "scripts": {

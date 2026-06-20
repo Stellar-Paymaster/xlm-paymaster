@@ -6,7 +6,7 @@ Verified the first-login guided tour implementation for the admin dashboard, inc
 
 ## Executed Checks
 
-- `cd /Users/Michael/fluid/admin-dashboard && node --test --experimental-strip-types lib/admin-guided-tour.test.ts verification/InteractiveGuidedTour.integration.test.ts`
+- `cd /Users/Michael/xlm-paymaster/admin-dashboard && node --test --experimental-strip-types lib/admin-guided-tour.test.ts verification/InteractiveGuidedTour.integration.test.ts`
 - Result: passed (`6` tests, `0` failures)
 
 ## Browser Verification

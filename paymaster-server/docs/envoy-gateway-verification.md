@@ -2,13 +2,13 @@
 
 ## Deliverables Met
 
-### 1. Code Implementation in `fluid-server/src`
-- **`fluid-server/src/gateway_config.rs`**: Typed tier definitions, validation, and API key lookup matching `state.rs` demo keys.
-- **`fluid-server/config/envoy.yaml`**: Envoy listener with Lua API key validation + local rate limit filters.
-- **`fluid-server/config/nginx-rate-limit.conf`**: NGINX alternative with `limit_req_zone` and `map`-based key validation.
+### 1. Code Implementation in `paymaster-server/src`
+- **`paymaster-server/src/gateway_config.rs`**: Typed tier definitions, validation, and API key lookup matching `state.rs` demo keys.
+- **`paymaster-server/config/envoy.yaml`**: Envoy listener with Lua API key validation + local rate limit filters.
+- **`paymaster-server/config/nginx-rate-limit.conf`**: NGINX alternative with `limit_req_zone` and `map`-based key validation.
 
 ### 2. Full Test Coverage
-- **`fluid-server/src/gateway_config.rs`** (inline `#[cfg(test)]` module): 6 unit tests:
+- **`paymaster-server/src/gateway_config.rs`** (inline `#[cfg(test)]` module): 6 unit tests:
   - Default config validation
   - Demo tier lookup
   - Unknown key rejection
@@ -22,7 +22,7 @@
 ## Local Verification Output
 
 ```bash
-$ cd fluid-server && cargo test gateway_config
+$ cd paymaster-server && cargo test gateway_config
 
 running 6 tests
 test gateway_config::tests::default_config_validates ... ok

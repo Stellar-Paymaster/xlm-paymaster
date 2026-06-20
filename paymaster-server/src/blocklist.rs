@@ -39,6 +39,10 @@ impl Blocklist {
         }
     }
 
+    pub fn clear(&mut self) {
+        self.entries.clear();
+    }
+
     pub fn add(&mut self, key: String, reason: String, now: u64) {
         let normalized = normalize_address(&key);
         println!("[BLOCKLIST] {} → {}", normalized, reason);

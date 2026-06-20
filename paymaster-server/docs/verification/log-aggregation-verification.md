@@ -2,7 +2,7 @@
 
 Date: 2026-04-23
 Issue: #463 Hardening & Reliability - Log Aggregation Integration
-Repository: Stellar-Fluid/fluid
+Repository: Stellar-Paymaster/xlm-paymaster
 Scope: server package only
 
 ## Implementation Verification

@@ -1,6 +1,6 @@
-# Fluid Vue Example
+# XLM Paymaster Vue Example
 
-This is a basic Vue 3 example application demonstrating how to use the Fluid SDK with the `useFluid` composable.
+This is a basic Vue 3 example application demonstrating how to use the XLM Paymaster SDK with the `useFluid` composable.
 
 ## Features
 
@@ -12,7 +12,7 @@ This is a basic Vue 3 example application demonstrating how to use the Fluid SDK
 ## Prerequisites
 
 - Node.js 18+
-- A running Fluid server (default: http://localhost:3000)
+- A running XLM Paymaster server (default: http://localhost:3000)
 
 ## Installation
 
@@ -38,10 +38,10 @@ npm run build
 
 The example demonstrates:
 
-1. Creating a Fluid client instance
+1. Creating a XLM Paymaster client instance
 2. Using the `useFluid` composable to get reactive state
 3. Creating and signing a Stellar transaction
-4. Requesting a fee bump from the Fluid server
+4. Requesting a fee bump from the XLM Paymaster server
 5. Displaying the result with reactive updates
 
 ### Key Components
@@ -62,8 +62,8 @@ The `useFluid` composable returns:
 
 ```vue
 <script setup lang="ts">
-import { FluidClient } from "fluid-client";
-import { useFluid } from "fluid-client/vue";
+import { FluidClient } from "paymaster-client";
+import { useFluid } from "paymaster-client/vue";
 
 const client = new FluidClient({
   serverUrl: "http://localhost:3000",

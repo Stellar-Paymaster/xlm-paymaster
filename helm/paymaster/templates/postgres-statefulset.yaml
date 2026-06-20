@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "fluid.fullname" . }}-postgres
+  name: {{ include "xlm-paymaster.fullname" . }}-postgres
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluid.labels" . | nindent 4 }}
+    {{- include "xlm-paymaster.labels" . | nindent 4 }}
     app.kubernetes.io/component: postgres
 spec:
-  serviceName: {{ include "fluid.fullname" . }}-postgres
+  serviceName: {{ include "xlm-paymaster.fullname" . }}-postgres
   replicas: 1
   selector:
     matchLabels:
-      {{- include "fluid.selectorLabels" (dict "root" . "component" "postgres") | nindent 6 }}
+      {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "postgres") | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "fluid.selectorLabels" (dict "root" . "component" "postgres") | nindent 8 }}
+        {{- include "xlm-paymaster.selectorLabels" (dict "root" . "component" "postgres") | nindent 8 }}
     spec:
       containers:
         - name: postgres
@@ -32,7 +32,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "fluid.postgresSecretName" . }}
+                  name: {{ include "xlm-paymaster.postgresSecretName" . }}
                   key: postgres-password
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata

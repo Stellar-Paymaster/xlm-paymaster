@@ -1,10 +1,10 @@
-# Fluid Gasless Token Swap Demo
+# XLM Paymaster Gasless Token Swap Demo
 
-A React demo showing gasless token swaps on Soroswap DEX powered by Fluid.
+A React demo showing gasless token swaps on Soroswap DEX powered by XLM Paymaster.
 
 ## Features
 
-- 💧 **Gasless Swaps**: Fluid sponsors all transaction fees
+- 💧 **Gasless Swaps**: XLM Paymaster sponsors all transaction fees
 - 👛 **Freighter Integration**: Connect your Stellar wallet
 - 💱 **AMM Powered**: Uses Soroswap liquidity pools
 - 🔗 **Instant Settlement**: See your transaction on Stellar Expert
@@ -22,7 +22,7 @@ A React demo showing gasless token swaps on Soroswap DEX powered by Fluid.
 VITE_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 VITE_SOROSWAP_ROUTER_CONTRACT=<router-contract-id>
 VITE_USDC_CONTRACT=<usdc-contract-id>
-VITE_FLUID_SERVER_URL=https://testnet.fluid.dev
+VITE_FLUID_SERVER_URL=https://testnet.xlm-paymaster.dev
 VITE_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 VITE_STELLAR_EXPERT_URL=https://stellar.expert/explorer/testnet
 VITE_HORIZON_URL=https://horizon-testnet.stellar.org
@@ -50,12 +50,12 @@ npm run deploy
 2. **Enter Amount**: Specify how much USDC you want to swap
 3. **See Quote**: View the XLM quote from Soroswap
 4. **Execute Swap**: Sign transaction with Freighter
-5. **Fluid Sponsorship**: Fluid wraps transaction in fee-bump, covering all fees
+5. **XLM Paymaster Sponsorship**: XLM Paymaster wraps transaction in fee-bump, covering all fees
 6. **Confirmation**: View your confirmed swap on Stellar Expert
 
 ## Deployment
 
-Deployed to Vercel: https://fluid-swap-demo.vercel.app/
+Deployed to Vercel: https://xlm-paymaster-swap-demo.vercel.app/
 
 Set environment variables in Vercel dashboard:
 - `VITE_SOROBAN_RPC_URL`
@@ -86,14 +86,14 @@ Set environment variables in Vercel dashboard:
 - **Freighter API**: Wallet connection
 - **Soroban**: Smart contract platform
 - **Soroswap SDK**: AMM integration
-- **Fluid SDK**: Fee-bump sponsorship
+- **XLM Paymaster SDK**: Fee-bump sponsorship
 
 ## Soroswap Integration
 
 The demo uses Soroswap contracts for:
 - `swap_exact_tokens_for_tokens` - Swap USDC for XLM with slippage protection
 - Automatic price discovery from liquidity pools
-- Fee-less execution through Fluid sponsorship
+- Fee-less execution through XLM Paymaster sponsorship
 
 ## Support
 
@@ -101,4 +101,4 @@ For issues or questions:
 1. Check [Freighter docs](https://github.com/stellar/freighter)
 2. Review [Soroswap docs](https://soroswap.soroban.stellar.org/)
 3. Check [Stellar documentation](https://developers.stellar.org/)
-4. Check [Fluid SDK docs](https://github.com/stellar-fluid/fluid)
+4. Check [XLM Paymaster SDK docs](https://github.com/Stellar-Paymaster/xlm-paymaster)
