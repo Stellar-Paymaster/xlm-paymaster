@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["LogProvider","LoggingInitError"],"fn":["init_logging_from_env"],"struct":["LogAggregationConfig","LoggingInitReport"]};

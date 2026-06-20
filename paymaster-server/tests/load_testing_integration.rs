@@ -72,7 +72,7 @@ fn build_signed_transaction_xdr() -> String {
 #[tokio::test]
 async fn test_rate_limits_enforced_by_default() {
     let port = "3233";
-    let server_bin = env!("CARGO_BIN_EXE_fluid-server");
+    let server_bin = env!("CARGO_BIN_EXE_paymaster-server");
     let fee_payer_secret = build_secret(5);
     let signed_xdr = build_signed_transaction_xdr();
 
@@ -141,7 +141,7 @@ async fn test_rate_limits_enforced_by_default() {
 #[tokio::test]
 async fn test_rate_limits_bypassed_when_configured() {
     let port = "3234";
-    let server_bin = env!("CARGO_BIN_EXE_fluid-server");
+    let server_bin = env!("CARGO_BIN_EXE_paymaster-server");
     let fee_payer_secret = build_secret(6);
     let signed_xdr = build_signed_transaction_xdr();
 

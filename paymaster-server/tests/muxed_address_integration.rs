@@ -13,6 +13,7 @@ use stellar_xdr::curr::{
 fn build_secret(seed_byte: u8) -> String {
     Strkey::PrivateKeyEd25519(ed25519::PrivateKey([seed_byte; 32]))
         .to_string()
+        .to_string()
 }
 
 fn build_signed_muxed_transaction_xdr(seed_byte: u8) -> String {
@@ -111,7 +112,7 @@ impl TestServer {
             listener.local_addr().unwrap().port()
         };
 
-        let mut child = Command::new(env!("CARGO_BIN_EXE_fluid-server"))
+        let mut child = Command::new(env!("CARGO_BIN_EXE_paymaster-server"))
             .env("PORT", http_port.to_string())
             .env("GRPC_PORT", grpc_port.to_string())
             .env("FLUID_FEE_PAYER_SECRET", secret)

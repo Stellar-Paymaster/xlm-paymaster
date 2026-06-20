@@ -1,13 +1,13 @@
 {
   "entryPoints": ["src/index.ts"],
   "out": "docs",
-  "name": "Fluid SDK",
+  "name": "XLM Paymaster SDK",
   "readme": "README.md",
   "includeVersion": true,
   "searchInComments": true,
   "skipErrorChecking": true,
   "navigationLinks": {
-    "GitHub": "https://github.com/Stellar-Fluid/fluid",
+    "GitHub": "https://github.com/Stellar-Paymaster/xlm-paymaster",
     "REST API Reference": "./api.html"
   }
 }

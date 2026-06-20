@@ -1,5 +1,0 @@
-# cargo-audit configuration for fluid-server (#674).
-# Document known, reviewed advisories here so CI stays green while tracking debt.
-
-[advisories]
-ignore = []

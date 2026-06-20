@@ -41,7 +41,6 @@ use fluid_server::grpc::serve_grpc;
 use horizon::HorizonNodeStatus;
 use notifications::{Backend, NotificationEngine, WebhookBackend};
 use logging::init_logging_from_env;
-use notifications::{Backend, NotificationEngine, WebhookBackend};
 use sqlx::postgres::PgPool;
 use state::{
     iso_now, utc_day_start_ms, ApiKeyConfig, AppState, HealthFeePayer, RateLimitEntry,
@@ -602,7 +601,8 @@ async fn fee_bump_batch(
 
     let api_key = extract_api_key(&headers)?;
     let api_key_config = find_api_key(&api_key)?;
-    let (ip_limit, api_limit) = if state.config.read().unwrap().disable_rate_limits {
+    let disable_rate_limits = state.config.read().unwrap().disable_rate_limits;
+    let (ip_limit, api_limit) = if disable_rate_limits {
         (
             RateLimitResult {
                 limit: 999_999_999,
@@ -661,6 +661,17 @@ async fn process_fee_bump_request(
         ));
     }
 
+    let (network_passphrase, base_fee, fee_multiplier, max_operations_per_envelope, has_horizon_urls) = {
+        let cfg = state.config.read().unwrap();
+        (
+            cfg.network_passphrase.clone(),
+            cfg.base_fee,
+            cfg.fee_multiplier,
+            cfg.max_operations_per_envelope,
+            !cfg.horizon_urls.is_empty(),
+        )
+    };
+
     // #697 – Configurable Maximum Operations Limit
     // Validate operation count before acquiring a signer lease to avoid
     // holding a resource slot while performing a cheap structural check.
@@ -679,7 +690,7 @@ async fn process_fee_bump_request(
             });
 
         if let Some(count) = op_count {
-            let limit = state.config.read().unwrap().max_operations_per_envelope;
+            let limit = max_operations_per_envelope;
             if count > limit {
                 return Err(AppError::new(
                     axum::http::StatusCode::BAD_REQUEST,
@@ -694,7 +705,7 @@ async fn process_fee_bump_request(
     }
 
     // #686 – Pre-flight validation: inner tx signature weight vs source med_threshold.
-    if !state.config.read().unwrap().horizon_urls.is_empty() {
+    if has_horizon_urls {
         use base64::{engine::general_purpose::STANDARD, Engine as _};
         use stellar_xdr::curr::{Limits, ReadXdr, TransactionEnvelope};
 
@@ -708,7 +719,7 @@ async fn process_fee_bump_request(
                             if let Err(err) = signer_weight::validate_inner_envelope_signer_weight(
                                 inner,
                                 &account_auth,
-                            ) {
+                             ) {
                                 return Err(err.into_app_error());
                             }
                         }
@@ -726,9 +737,9 @@ async fn process_fee_bump_request(
 
     let result = match stellar::create_fee_bump_transaction(
         &xdr,
-        &state.config.read().unwrap().network_passphrase,
-        state.config.read().unwrap().base_fee,
-        state.config.read().unwrap().fee_multiplier,
+        &network_passphrase,
+        base_fee,
+        fee_multiplier,
         &signer_lease.account.secret,
         &signer_lease.account.public_key_bytes,
     ) {

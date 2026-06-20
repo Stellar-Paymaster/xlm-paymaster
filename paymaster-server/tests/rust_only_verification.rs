@@ -151,7 +151,7 @@ fn node_process_count_in_tree(root_pid: u32) -> usize {
 #[tokio::test]
 async fn rust_server_handles_static_and_api_without_node() {
     let port = "3222";
-    let server_bin = env!("CARGO_BIN_EXE_fluid-server");
+    let server_bin = env!("CARGO_BIN_EXE_paymaster-server");
     let fee_payer_secret = build_secret(4);
     let signed_xdr = build_signed_transaction_xdr();
 

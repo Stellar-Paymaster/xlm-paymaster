@@ -160,7 +160,7 @@ impl TestServer {
             listener.local_addr().unwrap().port()
         };
 
-        let mut child = Command::new(env!("CARGO_BIN_EXE_fluid-server"))
+        let mut child = Command::new(env!("CARGO_BIN_EXE_paymaster-server"))
             .env("PORT", http_port.to_string())
             .env("GRPC_PORT", grpc_port.to_string())
             .env("FLUID_FEE_PAYER_SECRET", secret)

@@ -2,12 +2,12 @@
   "entryPoints": ["app", "lib", "components", "types"],
   "entryPointStrategy": "expand",
   "out": "docs",
-  "name": "Fluid Admin Dashboard",
+  "name": "XLM Paymaster Admin Dashboard",
   "readme": "README.md",
   "includeVersion": true,
   "searchInComments": true,
   "skipErrorChecking": true,
   "navigationLinks": {
-    "GitHub": "https://github.com/Stellar-Fluid/fluid"
+    "GitHub": "https://github.com/Stellar-Paymaster/xlm-paymaster"
   }
 }

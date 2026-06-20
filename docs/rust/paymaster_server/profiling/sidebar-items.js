@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["benchmark_xdr_parsing"],"static":["ALLOCATION_COUNT","BYTES_ALLOCATED","DEALLOCATION_COUNT"],"struct":["MemoryStats","TrackingAllocator"]};

@@ -61,6 +61,8 @@ pub mod logging;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod rate_limiter;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod state;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod xdr;
 
 const MAX_SIGNATURES: usize = 20;

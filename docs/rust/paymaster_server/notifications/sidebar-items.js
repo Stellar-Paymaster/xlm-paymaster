@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Backend","NotificationSeverity"],"struct":["NotificationEngine","NotificationEvent","NotificationHandle","WebhookBackend"]};

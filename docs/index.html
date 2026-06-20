@@ -127,8 +127,6 @@
             transform: translateY(-6px);
             background: var(--card-hover-bg);
             border-color: var(--border-hover);
-            box-shadow: 0 20px 25px -5px rgba(2, 132, 199, 0.1), 
-                        0 8px 10px -6px rgba(2, 132, 199, 0.1);
         }
 
         .card h2 {
@@ -160,14 +158,19 @@
             border-radius: 12px;
             background: rgba(2, 132, 199, 0.1);
             color: #38bdf8;
-            font-size: 1.75rem;
             border: 1px solid rgba(2, 132, 199, 0.15);
             transition: all 0.3s ease;
+        }
+
+        .icon svg {
+            width: 24px;
+            height: 24px;
         }
 
         .card:hover .icon {
             background: rgba(2, 132, 199, 0.2);
             transform: scale(1.05);
+            color: #38bdf8;
         }
 
         footer {
@@ -201,22 +204,45 @@
 
         <div class="grid">
             <a href="client/index.html" class="card">
-                <div class="icon">📦</div>
+                <div class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
                 <h2>Client SDK</h2>
                 <p>TypeScript library for seamless client-side Stellar fee sponsorship integration.</p>
             </a>
             <a href="server/index.html" class="card">
-                <div class="icon">☁️</div>
+                <div class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                    </svg>
+                </div>
                 <h2>Server API</h2>
                 <p>Backend API specification, endpoint controllers, and transaction signers.</p>
             </a>
             <a href="dashboard/index.html" class="card">
-                <div class="icon">📊</div>
+                <div class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </div>
                 <h2>Admin Dashboard</h2>
                 <p>Enterprise console for usage charts, key rotations, and quota management.</p>
             </a>
-            <a href="rust/xlm_paymaster_core/index.html" class="card">
-                <div class="icon">🦀</div>
+            <a href="rust/fluid_server/index.html" class="card">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                        <line x1="6" y1="8" x2="10" y2="8"></line>
+                        <line x1="6" y1="12" x2="18" y2="12"></line>
+                        <line x1="6" y1="16" x2="14" y2="16"></line>
+                    </svg>
+                </div>
                 <h2>Rust Core</h2>
                 <p>Performance-critical ledger state caching and cryptographic validation modules.</p>
             </a>

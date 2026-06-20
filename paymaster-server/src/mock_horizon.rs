@@ -128,7 +128,7 @@ impl MockHorizonServer {
 
         let state = self.state.clone();
         let app = Router::new()
-            .route("/{*path}", any(handle_request))
+            .route("/*path", any(handle_request))
             .route("/", any(handle_request))
             .with_state(state);
 
