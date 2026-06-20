@@ -32,28 +32,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install Dependencies
+        run: pnpm install
+
       - name: Generate Client Docs
-        run: |
-          cd client
-          npm install --legacy-peer-deps
-          npm run docs
+        run: pnpm --filter client run docs
 
       - name: Generate Server Docs
-        run: |
-          cd server
-          npm install --legacy-peer-deps
-          npm run docs
+        run: pnpm --filter server run docs
 
       - name: Generate Dashboard Docs
-        run: |
-          cd admin-dashboard
-          npm install --legacy-peer-deps
-          npm run docs
+        run: pnpm --filter admin-dashboard run docs
 
       - name: Generate Rust Docs
         run: |
