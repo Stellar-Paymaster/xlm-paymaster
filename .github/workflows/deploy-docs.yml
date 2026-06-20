@@ -27,6 +27,48 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate Client Docs
+        run: |
+          cd client
+          npm install --legacy-peer-deps
+          npm run docs
+
+      - name: Generate Server Docs
+        run: |
+          cd server
+          npm install --legacy-peer-deps
+          npm run docs
+
+      - name: Generate Dashboard Docs
+        run: |
+          cd admin-dashboard
+          npm install --legacy-peer-deps
+          npm run docs
+
+      - name: Generate Rust Docs
+        run: |
+          cd paymaster-server
+          cargo doc --no-deps
+
+      - name: Assemble Docs
+        run: |
+          rm -rf docs/client docs/server docs/dashboard docs/rust
+          mkdir -p docs/client docs/server docs/dashboard docs/rust
+          cp -r client/docs/* docs/client/ || true
+          cp -r server/docs/* docs/server/ || true
+          cp -r admin-dashboard/docs/* docs/dashboard/ || true
+          cp -r paymaster-server/target/doc/* docs/rust/ || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
