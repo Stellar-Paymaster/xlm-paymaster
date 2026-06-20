@@ -71,8 +71,7 @@ describe("IncidentMonitor", () => {
       maxXdrSize: 10240,
       maxOperations: 100,
       stellarRpcUrl: undefined,
-      vault: undefined,
-    };
+    } as any;
   };
 
   beforeEach(() => {

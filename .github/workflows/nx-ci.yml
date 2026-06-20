@@ -12,6 +12,7 @@ env:
   # Settings → Secrets and variables → Actions → New repository secret
   NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
   NX_NO_CLOUD: true
+  PUPPETEER_SKIP_DOWNLOAD: "true"
 
 jobs:
   nx-ci:

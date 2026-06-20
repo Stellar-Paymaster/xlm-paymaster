@@ -1,8 +1,8 @@
 [package]
-name = "fluid-server"
+name = "paymaster-server"
 version = "0.1.0"
 edition = "2021"
-description = "High-performance Rust backend for Fluid (Stellar fee-bump relay)"
+description = "High-performance Rust backend for XLM Paymaster (Stellar fee-bump relay)"
 
 [dependencies]
 ed25519-dalek = "2.2"
@@ -31,14 +31,14 @@ getrandom04 = { package = "getrandom", version = "0.4", features = ["wasm_js"] }
 
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-axum = "0.8"
+axum = "0.7"
 prost = "0.13"
 reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 tonic = { version = "0.12", features = ["transport"] }
-tower-http = { version = "0.6", features = ["cors"] }
+tower-http = { version = "0.5", features = ["cors"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "macros", "chrono", "uuid"] }
@@ -48,6 +48,7 @@ protoc-bin-vendored = "3"
 tonic-build = "0.12"
 
 [lib]
+name = "fluid_server"
 crate-type = ["cdylib", "rlib"]
 
 [package.metadata.wasm-pack.profile.release]

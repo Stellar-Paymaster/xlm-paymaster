@@ -165,10 +165,10 @@ pub fn muxed_account_to_account_id(
 ) -> Result<String, SignerWeightError> {
     use stellar_xdr::curr::MuxedAccount;
     match account {
-        MuxedAccount::Ed25519(key) => Ok(Strkey::PublicKeyEd25519(PublicKey(key.0)).to_string()),
+        MuxedAccount::Ed25519(key) => Ok(Strkey::PublicKeyEd25519(PublicKey(key.0)).to_string().as_str().to_string()),
         MuxedAccount::MuxedEd25519(muxed) => {
             // Extract the underlying 32-byte ed25519 key from the muxed account.
-            Ok(Strkey::PublicKeyEd25519(PublicKey(muxed.ed25519.0)).to_string())
+            Ok(Strkey::PublicKeyEd25519(PublicKey(muxed.ed25519.0)).to_string().as_str().to_string())
         }
     }
 }
@@ -378,7 +378,7 @@ mod tests {
         // The resolved id must be a valid G... address.
         assert!(account_id.starts_with('G'), "expected G... address, got {account_id}");
         // And it must match the underlying ed25519 key.
-        let expected = Strkey::PublicKeyEd25519(PublicKey(public_bytes)).to_string();
+        let expected = Strkey::PublicKeyEd25519(PublicKey(public_bytes)).to_string().as_str().to_string();
         assert_eq!(account_id, expected);
     }
 

@@ -15,7 +15,7 @@ fn normalize_address(address: &str) -> String {
     // Attempt to parse as a muxed account (M...).
     if let Ok(Strkey::MuxedAccountEd25519(muxed)) = Strkey::from_string(address) {
         // Return the underlying G... account id.
-        return Strkey::PublicKeyEd25519(PublicKey(muxed.ed25519)).to_string();
+        return Strkey::PublicKeyEd25519(PublicKey(muxed.ed25519)).to_string().as_str().to_string();
     }
 
     address.to_string()

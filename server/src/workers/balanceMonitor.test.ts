@@ -38,9 +38,7 @@ describe("BalanceMonitor", () => {
         networkPassphrase: "Testnet",
       } as never,
       alertService as never,
-    ) as BalanceMonitor & {
-      getNativeBalance: (publicKey: string) => Promise<number>;
-    };
+    ) as any;
 
     monitor.getNativeBalance = vi.fn().mockResolvedValue(7);
 

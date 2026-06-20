@@ -8,7 +8,7 @@ vi.mock("../utils/memoryProfiler", () => ({
   MemoryProfiler: vi.fn().mockImplementation(class {
     start = vi.fn();
     stop = vi.fn();
-  }),
+  } as any),
 }));
 
 import { LedgerMonitor } from "./ledgerMonitor";
@@ -94,7 +94,7 @@ describe("LedgerMonitor", () => {
     expect((monitor as any).batchSize).toBe(12);
   });
 
-  it("initializes and controls the memory profiler when enabled in config", () => {
+  it("initializes and controls the memory profiler when enabled in config", async () => {
     const config = {
       horizonSelectionStrategy: "priority",
       horizonUrls: ["https://horizon-testnet.stellar.org"],

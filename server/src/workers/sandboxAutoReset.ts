@@ -8,7 +8,7 @@
 import { createLogger } from "../utils/logger";
 import { autoResetStaleSandboxKeys } from "../handlers/sandbox";
 
-const logger = createLogger("sandboxAutoReset");
+const logger = createLogger({ component: "sandboxAutoReset" });
 
 const INTERVAL_MS = Number(
   process.env.SANDBOX_AUTO_RESET_INTERVAL_MS ?? String(24 * 60 * 60 * 1000),

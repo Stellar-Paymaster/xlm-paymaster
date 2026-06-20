@@ -303,12 +303,12 @@ mod tests {
         std::env::remove_var(&invalid);
     }
 
-    #[test]
-    fn load_config_errors_when_fee_payer_secret_missing() {
+    #[tokio::test]
+    async fn load_config_errors_when_fee_payer_secret_missing() {
         let _lock = ENV_LOCK.lock().unwrap();
         // Ensure the required secret isn't set for this test process.
         std::env::remove_var("FLUID_FEE_PAYER_SECRET");
-        match load_config() {
+        match load_config().await {
             Ok(_) => panic!("expected missing secret to error"),
             Err(err) => {
                 assert_eq!(err.code, "INTERNAL_ERROR");
@@ -317,8 +317,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn load_config_happy_path_parses_env_and_defaults() {
+    #[tokio::test]
+    async fn load_config_happy_path_parses_env_and_defaults() {
         let _lock = ENV_LOCK.lock().unwrap();
         // Required
         std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-a");
@@ -343,7 +343,7 @@ mod tests {
         );
         std::env::set_var("FLUID_HORIZON_SELECTION", "round_robin");
 
-        let (config, secrets) = load_config().expect("expected config to load");
+        let (config, secrets) = load_config().await.expect("expected config to load");
         assert_eq!(secrets.len(), 1);
         assert_eq!(
             config.allowed_origins,
@@ -377,53 +377,53 @@ mod tests {
         std::env::remove_var("FLUID_HORIZON_SELECTION");
     }
 
-    #[test]
-    fn load_config_max_operations_default_and_override() {
+    #[tokio::test]
+    async fn load_config_max_operations_default_and_override() {
         let _lock = ENV_LOCK.lock().unwrap();
         std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-max-ops");
 
         // Default: 100
         std::env::remove_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE");
-        let (config, _) = load_config().expect("expected config to load");
+        let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.max_operations_per_envelope, 100);
 
         // Custom value
         std::env::set_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE", "25");
-        let (config, _) = load_config().expect("expected config to load");
+        let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.max_operations_per_envelope, 25);
 
         std::env::remove_var("FLUID_FEE_PAYER_SECRET");
         std::env::remove_var("FLUID_MAX_OPERATIONS_PER_ENVELOPE");
     }
 
-    #[test]
-    fn load_config_disable_rate_limits() {
+    #[tokio::test]
+    async fn load_config_disable_rate_limits() {
         let _lock = ENV_LOCK.lock().unwrap();
         std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-c");
 
         // Default: false
         std::env::remove_var("FLUID_DISABLE_RATE_LIMITS");
-        let (config, _) = load_config().expect("expected config to load");
+        let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.disable_rate_limits, false);
 
         // Custom value: true
         std::env::set_var("FLUID_DISABLE_RATE_LIMITS", "true");
-        let (config, _) = load_config().expect("expected config to load");
+        let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.disable_rate_limits, true);
 
         std::env::remove_var("FLUID_FEE_PAYER_SECRET");
         std::env::remove_var("FLUID_DISABLE_RATE_LIMITS");
     }
 
-    #[test]
-    fn load_config_uses_legacy_horizon_url_when_list_empty() {
+    #[tokio::test]
+    async fn load_config_uses_legacy_horizon_url_when_list_empty() {
         let _lock = ENV_LOCK.lock().unwrap();
         std::env::set_var("FLUID_FEE_PAYER_SECRET", "test-secret-b");
         std::env::remove_var("STELLAR_HORIZON_URLS");
         std::env::set_var("STELLAR_HORIZON_URL", "https://legacy.example");
         std::env::set_var("FLUID_HORIZON_SELECTION", "priority");
 
-        let (config, _) = load_config().expect("expected config to load");
+        let (config, _) = load_config().await.expect("expected config to load");
         assert_eq!(config.horizon_urls, vec!["https://legacy.example"]);
         assert!(matches!(
             config.horizon_selection_strategy,

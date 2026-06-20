@@ -1,4 +1,4 @@
-import cron from "node-cron";
+import cron, { ScheduledTask } from "node-cron";
 import { logger as globalLogger } from "../utils/logger";
 import { TenantUsageTracker } from "../services/tenantUsageTracker";
 import { IntelligentRateLimiter } from "../services/intelligentRateLimiter";
@@ -7,7 +7,7 @@ import { BaseWorker } from "./baseWorker";
 export class DailyScoringWorker extends BaseWorker {
   private usageTracker: TenantUsageTracker;
   private rateLimiter: IntelligentRateLimiter;
-  private task: cron.ScheduledTask | null = null;
+  private task: ScheduledTask | null = null;
 
   constructor() {
     super();

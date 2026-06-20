@@ -393,8 +393,8 @@ async fn shutdown_signal() {
 
     let ctrl_c = async {
         signal::ctrl_c()
-            .expect("failed to install CTRL+C handler")
-            .await;
+            .await
+            .expect("failed to install CTRL+C handler");
     };
 
     #[cfg(unix)]
@@ -517,6 +517,7 @@ async fn list_transactions(State(state): State<AppState>) -> Json<TransactionsRe
     Json(TransactionsResponse { transactions })
 }
 
+#[axum::debug_handler]
 async fn fee_bump(
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     State(state): State<AppState>,
@@ -589,6 +590,7 @@ async fn fee_bump(
     }
 }
 
+#[axum::debug_handler]
 async fn fee_bump_batch(
     State(state): State<AppState>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
