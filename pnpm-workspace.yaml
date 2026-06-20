@@ -3,4 +3,4 @@ packages:
   - 'client/examples/vue'
   - 'server'
   - 'admin-dashboard'
-  - 'fluid-server/wasm-demo'
+  - 'paymaster-server/wasm-demo'

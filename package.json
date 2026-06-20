@@ -9,7 +9,7 @@
     "server",
     "frontend",
     "admin-dashboard",
-    "fluid-server/wasm-demo"
+    "paymaster-server/wasm-demo"
   ],
   "repository": {
     "type": "git",

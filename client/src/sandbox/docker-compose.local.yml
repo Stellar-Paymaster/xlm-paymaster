@@ -1,32 +1,32 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: fluid-sandbox-postgres
+    container_name: paymaster-sandbox-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: fluid
-      POSTGRES_USER: fluid
-      POSTGRES_PASSWORD: fluid
+      POSTGRES_DB: paymaster
+      POSTGRES_USER: paymaster
+      POSTGRES_PASSWORD: paymaster
     ports:
       - "55432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fluid -d fluid"]
+      test: ["CMD-SHELL", "pg_isready -U paymaster -d paymaster"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   mock-horizon:
     image: ealen/echo-server:0.9.2
-    container_name: fluid-sandbox-mock-horizon
+    container_name: paymaster-sandbox-mock-horizon
     restart: unless-stopped
     ports:
       - "18080:80"
 
-  fluid:
+  paymaster:
     build:
-      context: ../../fluid-server
+      context: ../../paymaster-server
       dockerfile: Dockerfile
-    container_name: fluid-sandbox-server
+    container_name: paymaster-sandbox-server
     restart: unless-stopped
     depends_on:
       postgres:
@@ -34,9 +34,9 @@ services:
       mock-horizon:
         condition: service_started
     environment:
-      FLUID_SERVER_PORT: "8080"
-      FLUID_DATABASE_URL: "postgres://fluid:fluid@postgres:5432/fluid"
-      FLUID_HORIZON_URL: "http://mock-horizon"
-      FLUID_ADMIN_TOKEN: "local-dev-admin-token"
+      PAYMASTER_SERVER_PORT: "8080"
+      PAYMASTER_DATABASE_URL: "postgres://paymaster:paymaster@postgres:5432/paymaster"
+      PAYMASTER_HORIZON_URL: "http://mock-horizon"
+      PAYMASTER_ADMIN_TOKEN: "local-dev-admin-token"
     ports:
       - "18081:8080"
