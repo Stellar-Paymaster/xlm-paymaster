@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "@stellar/stellar-sdk": "^11.3.0",
-    "fluid-client": "file:../.."
+    "xlm-paymaster-client": "file:../.."
   }
 }

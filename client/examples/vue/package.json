@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "vue": "^3.4.0",
-    "fluid-client": "workspace:*",
+    "xlm-paymaster-client": "workspace:*",
     "@stellar/stellar-sdk": "^11.3.0"
   },
   "devDependencies": {

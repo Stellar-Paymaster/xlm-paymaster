@@ -33,7 +33,14 @@ import {
   FluidNoAvailableServerError,
   FluidServerError,
   FluidWalletError,
+  FluidRequestError,
 } from "./errors";
+import {
+  WalletSigner,
+  TransactionInput,
+  SignTransactionOptions,
+  SignedTransaction,
+} from "./wallet/types";
 
 export interface FluidClientConfig {
   serverUrl?: string;
@@ -274,7 +281,7 @@ export class FluidClient {
     path: string,
     grpcMethod: string,
     body: unknown,
-    encodeGrpcRequest: ((request: unknown) => Uint8Array) | undefined,
+    encodeGrpcRequest: ((request: any) => Uint8Array) | undefined,
     decodeGrpcResponse: ((payload: Uint8Array) => TResponse) | undefined,
   ): Promise<TResponse> {
     if (this.transportMode === "grpc-web") {
@@ -355,7 +362,7 @@ export class FluidClient {
     path: string,
     grpcMethod: string,
     body: unknown,
-    encodeGrpcRequest?: (request: unknown) => Uint8Array,
+    encodeGrpcRequest?: (request: any) => Uint8Array,
     decodeGrpcResponse?: (payload: Uint8Array) => T,
   ): Promise<T> {
     const orderedServerUrls = this.getOrderedServerUrls();
@@ -397,6 +404,10 @@ export class FluidClient {
           await this.sleep(retryDelayMs);
         }
       }
+    }
+
+    if (lastError instanceof FluidServerError) {
+      throw lastError;
     }
 
     throw new FluidNoAvailableServerError(

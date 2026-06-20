@@ -40,7 +40,7 @@ describe('Telemetry', () => {
 
     // Mock fetch
     fetchMock = vi.fn(() => Promise.resolve());
-    global.fetch = fetchMock;
+    global.fetch = fetchMock as any;
 
     // Mock Image
     global.Image = class {
@@ -60,7 +60,9 @@ describe('Telemetry', () => {
       const config = getTelemetryConfig();
       expect(config).toEqual({
         enabled: false,
-        endpoint: 'https://telemetry.fluid.dev/ping',
+        diagnosticsEnabled: false,
+        endpoint: 'https://telemetry.xlm-paymaster.com/ping',
+        diagnosticsEndpoint: 'https://telemetry.xlm-paymaster.com/report',
       });
     });
 
@@ -71,7 +73,9 @@ describe('Telemetry', () => {
       });
       expect(config).toEqual({
         enabled: true,
+        diagnosticsEnabled: false,
         endpoint: 'https://custom.endpoint.com/ping',
+        diagnosticsEndpoint: 'https://telemetry.xlm-paymaster.com/report',
       });
     });
 
@@ -79,7 +83,9 @@ describe('Telemetry', () => {
       const config = getTelemetryConfig({ enabled: true });
       expect(config).toEqual({
         enabled: true,
-        endpoint: 'https://telemetry.fluid.dev/ping',
+        diagnosticsEnabled: false,
+        endpoint: 'https://telemetry.xlm-paymaster.com/ping',
+        diagnosticsEndpoint: 'https://telemetry.xlm-paymaster.com/report',
       });
     });
   });
@@ -145,7 +151,7 @@ describe('Telemetry', () => {
 
       expect(sendBeaconMock).toHaveBeenCalled();
       const callArgs = sendBeaconMock.mock.calls[0];
-      expect(callArgs[0]).toBe('https://telemetry.fluid.dev/ping');
+      expect(callArgs[0]).toBe('https://telemetry.xlm-paymaster.com/ping');
       
       // Check that the second argument is a Blob
       expect(callArgs[1]).toBeInstanceOf(Blob);

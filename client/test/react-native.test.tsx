@@ -8,14 +8,16 @@ import { FluidClient } from "../src/FluidClient";
 // Mock FluidClient
 vi.mock("../src/FluidClient", () => {
   return {
-    FluidClient: vi.fn().mockImplementation(() => ({
-      requestFeeBump: vi.fn().mockResolvedValue({
-        xdr: "signed_fee_bump_xdr",
-        status: "submitted",
-        hash: "tx_hash",
-      }),
-      terminate: vi.fn(),
-    })),
+    FluidClient: vi.fn().mockImplementation(function() {
+      return {
+        requestFeeBump: vi.fn().mockResolvedValue({
+          xdr: "signed_fee_bump_xdr",
+          status: "submitted",
+          hash: "tx_hash",
+        }),
+        terminate: vi.fn(),
+      };
+    }),
   };
 });
 

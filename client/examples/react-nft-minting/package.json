@@ -15,7 +15,7 @@
     "@freighter/api": "^0.12.0",
     "stellar-sdk": "^11.3.0",
     "soroban-client": "^20.5.0",
-    "@fluid-sdk/client": "file:../..",
+    "xlm-paymaster-client": "file:../..",
     "axios": "^1.6.0"
   },
   "devDependencies": {

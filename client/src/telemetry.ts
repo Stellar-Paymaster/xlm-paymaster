@@ -33,13 +33,13 @@ export interface TelemetryConfig {
 
   /**
    * Custom telemetry endpoint URL.
-   * Default: 'https://telemetry.fluid.dev/ping'
+   * Default: 'https://telemetry.xlm-paymaster.com/ping'
    */
   endpoint?: string;
 
   /**
    * Custom diagnostics endpoint URL.
-   * Default: 'https://telemetry.fluid.dev/report'
+   * Default: 'https://telemetry.xlm-paymaster.com/report'
    */
   diagnosticsEndpoint?: string;
 }
@@ -206,7 +206,7 @@ export function collectTelemetry(
   };
 
   // Determine endpoint
-  const endpoint = config.endpoint || 'https://telemetry.fluid.dev/ping';
+  const endpoint = config.endpoint || 'https://telemetry.xlm-paymaster.com/ping';
 
   // Send telemetry data (fire-and-forget)
   sendToCollector(endpoint, data);
@@ -242,7 +242,7 @@ export function reportDiagnostic(
     context
   };
 
-  const endpoint = config.diagnosticsEndpoint || 'https://telemetry.fluid.dev/report';
+  const endpoint = config.diagnosticsEndpoint || 'https://telemetry.xlm-paymaster.com/report';
   sendToCollector(endpoint, data);
 }
 
@@ -276,8 +276,8 @@ export function getTelemetryConfig(config?: Partial<TelemetryConfig>): Telemetry
   return {
     enabled: config?.enabled ?? false,
     diagnosticsEnabled: config?.diagnosticsEnabled ?? false,
-    endpoint: config?.endpoint ?? 'https://telemetry.fluid.dev/ping',
-    diagnosticsEndpoint: config?.diagnosticsEndpoint ?? 'https://telemetry.fluid.dev/report',
+    endpoint: config?.endpoint ?? 'https://telemetry.xlm-paymaster.com/ping',
+    diagnosticsEndpoint: config?.diagnosticsEndpoint ?? 'https://telemetry.xlm-paymaster.com/report',
   };
 }
 

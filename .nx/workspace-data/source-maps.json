@@ -208,6 +208,146 @@
       "admin-dashboard/package.json",
       "nx/core/package-json"
     ],
+    "targets.test": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.executor": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options.script": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.scriptContent": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.runCommand": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:unit": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:unit.executor": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:unit.options": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:unit.metadata": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:unit.options.script": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:unit.metadata.scriptContent": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:unit.metadata.runCommand": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:integration": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:integration.executor": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:integration.options": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:integration.metadata": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:integration.options.script": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:integration.metadata.scriptContent": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:integration.metadata.runCommand": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e:chromium": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e:chromium.executor": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e:chromium.options": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e:chromium.metadata": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e:chromium.options.script": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e:chromium.metadata.scriptContent": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e:chromium.metadata.runCommand": [
+      "admin-dashboard/package.json",
+      "nx/core/package-json"
+    ],
     "targets.docs": [
       "admin-dashboard/package.json",
       "nx/core/package-json"
@@ -444,6 +584,18 @@
       "admin-dashboard/project.json",
       "nx/core/project-json"
     ],
+    "targets.test.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
     "targets.build.dependsOn": [
       "nx.json",
       "nx/target-defaults"
@@ -461,249 +613,249 @@
       "nx/target-defaults"
     ]
   },
-  "fluid-server": {
+  "paymaster-server": {
     "root": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "metadata.targetGroups": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "metadata.targetGroups.Docker": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "metadata.targetGroups.Docker.0": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "metadata.targetGroups.Docker.1": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "metadata.targetGroups.Docker.2": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.dependsOn": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.options": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.inputs": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.metadata": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.executor": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.options.cwd": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.options.args": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.options.command": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.metadata.technologies": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.metadata.technologies.0": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.metadata.description": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.metadata.help": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.metadata.help.command": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:build.metadata.help.example": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.dependsOn": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.options": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.inputs": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.metadata": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.executor": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.options.cwd": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.options.command": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.metadata.technologies": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.metadata.technologies.0": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.metadata.description": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.metadata.help": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.metadata.help.command": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.docker:run.metadata.help.example": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.nx-release-publish": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "targets.nx-release-publish.executor": [
-      "fluid-server/Dockerfile",
+      "paymaster-server/Dockerfile",
       "@nx/docker"
     ],
     "name": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "$schema": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "projectType": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "sourceRoot": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "tags": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "tags.scope:backend": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "tags.type:app": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "tags.lang:rust": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.executor": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.options": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.cache": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.inputs": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.outputs": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.options.command": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.options.cwd": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.test": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.test.executor": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.test.options": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.test.cache": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.test.inputs": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.test.options.command": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.test.options.cwd": [
-      "fluid-server/project.json",
+      "paymaster-server/project.json",
       "nx/core/project-json"
     ],
     "targets.build.dependsOn": [
@@ -1024,6 +1176,90 @@
       "server/package.json",
       "nx/core/package-json"
     ],
+    "targets.benchmark:migration": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:migration.executor": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:migration.options": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:migration.metadata": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:migration.options.script": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:migration.metadata.scriptContent": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:migration.metadata.runCommand": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:network": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:network.executor": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:network.options": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:network.metadata": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:network.options.script": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:network.metadata.scriptContent": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.benchmark:network.metadata.runCommand": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.parity:errors": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.parity:errors.executor": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.parity:errors.options": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.parity:errors.metadata": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.parity:errors.options.script": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.parity:errors.metadata.scriptContent": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.parity:errors.metadata.runCommand": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
     "targets.parity:rust": [
       "server/package.json",
       "nx/core/package-json"
@@ -1245,6 +1481,62 @@
       "nx/core/package-json"
     ],
     "targets.watch.metadata.runCommand": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.congestion:simulate": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.congestion:simulate.executor": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.congestion:simulate.options": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.congestion:simulate.metadata": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.congestion:simulate.options.script": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.congestion:simulate.metadata.scriptContent": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.congestion:simulate.metadata.runCommand": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.audit:prisma-indexes": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.audit:prisma-indexes.executor": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.audit:prisma-indexes.options": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.audit:prisma-indexes.metadata": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.audit:prisma-indexes.options.script": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.audit:prisma-indexes.metadata.scriptContent": [
+      "server/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.audit:prisma-indexes.metadata.runCommand": [
       "server/package.json",
       "nx/core/package-json"
     ],
@@ -1690,6 +1982,30 @@
       "client/package.json",
       "nx/core/package-json"
     ],
+    "metadata.targetGroups.NPM Scripts.11": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.12": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.13": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.14": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.15": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.16": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.description": [
       "client/package.json",
       "nx/core/package-json"
@@ -1862,6 +2178,146 @@
       "client/package.json",
       "nx/core/package-json"
     ],
+    "targets.sandbox:write-compose": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:write-compose.executor": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:write-compose.options": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:write-compose.metadata": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:write-compose.options.script": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:write-compose.metadata.scriptContent": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:write-compose.metadata.runCommand": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:up": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:up.executor": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:up.options": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:up.metadata": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:up.options.script": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:up.metadata.scriptContent": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:up.metadata.runCommand": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:down": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:down.executor": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:down.options": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:down.metadata": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:down.options.script": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:down.metadata.scriptContent": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:down.metadata.runCommand": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:logs": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:logs.executor": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:logs.options": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:logs.metadata": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:logs.options.script": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:logs.metadata.scriptContent": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:logs.metadata.runCommand": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:ps": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:ps.executor": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:ps.options": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:ps.metadata": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:ps.options.script": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:ps.metadata.scriptContent": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sandbox:ps.metadata.runCommand": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
     "targets.demo": [
       "client/package.json",
       "nx/core/package-json"
@@ -1915,6 +2371,34 @@
       "nx/core/package-json"
     ],
     "targets.demo:sac-transfer-xdr.metadata.runCommand": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.demo:wallet-connect": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.demo:wallet-connect.executor": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.demo:wallet-connect.options": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.demo:wallet-connect.metadata": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.demo:wallet-connect.options.script": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.demo:wallet-connect.metadata.scriptContent": [
+      "client/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.demo:wallet-connect.metadata.runCommand": [
       "client/package.json",
       "nx/core/package-json"
     ],
@@ -2205,6 +2689,144 @@
     "targets.format:check.parallelism": [
       "nx.json",
       "nx/target-defaults"
+    ]
+  },
+  "paymaster-server/wasm-demo": {
+    "root": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.serve": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.serve.executor": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.serve.options": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.serve.metadata": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.serve.options.script": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.serve.metadata.scriptContent": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.serve.metadata.runCommand": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:browser": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:browser.executor": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:browser.options": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:browser.metadata": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:browser.options.script": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:browser.metadata.scriptContent": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:browser.metadata.runCommand": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:node": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:node.executor": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:node.options": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:node.metadata": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:node.options.script": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:node.metadata.scriptContent": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:node.metadata.runCommand": [
+      "paymaster-server/wasm-demo/package.json",
+      "nx/core/package-json"
     ]
   }
 }

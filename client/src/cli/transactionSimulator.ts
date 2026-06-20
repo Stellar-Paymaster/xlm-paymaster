@@ -5,7 +5,7 @@
  * Simulates fee-bump transactions from the command line without submitting.
  */
 
-import StellarSdk from "@stellar/stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
 
 export interface SimulateFeeBumpOptions {
   innerXdr: string;

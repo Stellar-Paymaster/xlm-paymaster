@@ -651,7 +651,7 @@ export async function performGrpcWebUnary<TRequest, TResponse>(
         "x-grpc-web": "1",
         ...options.headers,
       },
-      body: encodeGrpcWebFrame(options.encodeRequest(options.request)),
+      body: encodeGrpcWebFrame(options.encodeRequest(options.request)) as any,
       signal: controller.signal,
     });
 

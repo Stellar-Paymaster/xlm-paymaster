@@ -20,7 +20,7 @@ const loggerOptions: LoggerOptions = {
     level: defaultLevel,
     timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
     base: {
-        service: "fluid-server",
+        service: "paymaster-server",
         env: process.env.NODE_ENV ?? "development",
     },
     messageKey: "event",

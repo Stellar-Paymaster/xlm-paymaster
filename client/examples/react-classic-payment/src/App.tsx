@@ -4,7 +4,7 @@ import {
   signTransactionWithFreighter,
   isFreighterAvailable
 } from '../../src/freighter';
-import { FluidClient } from '@fluid-sdk/client';
+import { FluidClient } from 'xlm-paymaster-client';
 import * as StellarSdk from 'stellar-sdk';
 import './App.css';
 

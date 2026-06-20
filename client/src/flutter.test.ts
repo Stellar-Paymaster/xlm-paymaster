@@ -367,7 +367,7 @@ describe('FlutterFluidClient', () => {
   describe('error code constants', () => {
     it('should export error codes', async () => {
       // Use dynamic import to avoid module resolution issues
-      const mod = await import('./flutter.ts');
+      const mod = await import('./flutter');
       const { FlutterSDKErrorCodes } = mod;
 
       expect(FlutterSDKErrorCodes.CONFIGURATION_ERROR).toBe('CONFIGURATION_ERROR');

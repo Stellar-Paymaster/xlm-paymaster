@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import http from "node:http";
-import test from "node:test";
+import { test } from "vitest";
 import {
   decodeFeeBumpRequest,
   decodeFeeBumpResponse,
@@ -10,7 +10,7 @@ import {
   encodeGrpcWebTrailers,
   performGrpcWebUnary,
   type GrpcFeeBumpRequest,
-} from "./grpcTransport.ts";
+} from "./grpcTransport";
 
 function createGrpcWebBody(response: object): Uint8Array {
   return new Uint8Array([

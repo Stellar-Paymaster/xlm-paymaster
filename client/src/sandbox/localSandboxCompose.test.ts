@@ -6,20 +6,20 @@ import {
 } from "./localSandboxCompose";
 
 describe("localSandboxCompose", () => {
-  it("builds compose with postgres, mock horizon, and fluid services", () => {
+  it("builds compose with postgres, mock horizon, and paymaster services", () => {
     const compose = buildLocalSandboxCompose();
 
     expect(compose).toContain("postgres:");
     expect(compose).toContain("mock-horizon:");
-    expect(compose).toContain("fluid:");
-    expect(compose).toContain("FLUID_HORIZON_URL: \"http://mock-horizon\"");
+    expect(compose).toContain("paymaster:");
+    expect(compose).toContain("PAYMASTER_HORIZON_URL: \"http://mock-horizon\"");
   });
 
   it("supports custom host ports", () => {
     const compose = buildLocalSandboxCompose({
       postgresPort: 6000,
       horizonPort: 6001,
-      fluidPort: 6002,
+      paymasterPort: 6002,
     });
 
     expect(compose).toContain("\"6000:5432\"");

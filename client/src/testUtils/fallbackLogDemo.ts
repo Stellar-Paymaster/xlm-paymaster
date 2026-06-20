@@ -1,4 +1,4 @@
-import { FluidClient } from "../FluidClient.ts";
+import { FluidClient } from "../FluidClient";
 
 const PRIMARY_SERVER_URL = "https://primary-fluid.example";
 const SECONDARY_SERVER_URL = "https://secondary-fluid.example";

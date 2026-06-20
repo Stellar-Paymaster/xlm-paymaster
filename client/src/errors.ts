@@ -31,6 +31,10 @@ export class FluidRequestError extends FluidError {
     Object.setPrototypeOf(this, FluidRequestError.prototype);
   }
 
+  public get status(): number | undefined {
+    return this.statusCode;
+  }
+
   public toString(): string {
     const help = this.helpUrl ? ` [Docs: ${this.helpUrl}]` : "";
     return `${this.name}(message=${JSON.stringify(this.message)}, status_code=${this.statusCode}, server_url=${JSON.stringify(this.serverUrl)})${help}`;
@@ -107,7 +111,7 @@ export class FluidWalletError extends FluidError {
 /**
  * Mapping of error names and codes to documentation fragments.
  */
-const HELP_BASE_URL = "https://docs.fluid.dev/errors";
+const HELP_BASE_URL = "https://docs.xlm-paymaster.com/errors";
 
 function getHelpUrl(code: string): string {
   const fragment = code

@@ -26,8 +26,8 @@ export function loadPagerDutyNotifierOptionsFromEnv(
 ): PagerDutyNotifierOptions {
   return {
     routingKey: env.PAGERDUTY_ROUTING_KEY?.trim(),
-    serviceName: env.PAGERDUTY_SERVICE_NAME?.trim() || "Fluid server",
-    source: env.PAGERDUTY_SOURCE?.trim() || "fluid-server",
+    serviceName: env.PAGERDUTY_SERVICE_NAME?.trim() || "XLM Paymaster server",
+    source: env.PAGERDUTY_SOURCE?.trim() || "paymaster-server",
     component: env.PAGERDUTY_COMPONENT?.trim() || "fee-sponsorship",
   };
 }
@@ -42,8 +42,8 @@ export class PagerDutyNotifier {
     options: PagerDutyNotifierOptions = loadPagerDutyNotifierOptionsFromEnv(),
   ) {
     this.routingKey = options.routingKey?.trim() || undefined;
-    this.serviceName = options.serviceName || "Fluid server";
-    this.source = options.source || "fluid-server";
+    this.serviceName = options.serviceName || "XLM Paymaster server";
+    this.source = options.source || "paymaster-server";
     this.component = options.component || "fee-sponsorship";
   }
 
@@ -66,7 +66,7 @@ export class PagerDutyNotifier {
   }
 
   private buildDedupKey(type: PagerDutyEventType): string {
-    return `fluid:${type}`;
+    return `paymaster:${type}`;
   }
 
   private async sendEvent(

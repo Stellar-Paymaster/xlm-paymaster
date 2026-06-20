@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import {
   buildGrpcWebPath,
   decodeFeeBumpBatchResponse,
@@ -14,7 +14,7 @@ import {
   encodeGrpcWebFrame,
   encodeGrpcWebTrailers,
   mapGrpcStatusToHttpStatus,
-} from "./grpcTransport.ts";
+} from "./grpcTransport";
 
 test("grpc-web codecs round-trip fee-bump payloads", () => {
   const request = { xdr: "AAAAAA==", submit: true };

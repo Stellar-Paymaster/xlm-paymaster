@@ -16,7 +16,7 @@
     "stellar-sdk": "^11.3.0",
     "soroban-client": "^20.5.0",
     "@soroswap/core": "^0.1.0",
-    "@fluid-sdk/client": "file:../..",
+    "xlm-paymaster-client": "file:../..",
     "axios": "^1.6.0",
     "decimal.js": "^10.4.3"
   },

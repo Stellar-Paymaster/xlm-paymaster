@@ -14,7 +14,7 @@
     "react-dom": "^18.2.0",
     "@freighter/api": "^0.12.0",
     "stellar-sdk": "^11.3.0",
-    "@fluid-sdk/client": "file:../..",
+    "xlm-paymaster-client": "file:../..",
     "axios": "^1.6.0"
   },
   "devDependencies": {
