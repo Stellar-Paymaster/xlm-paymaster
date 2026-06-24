@@ -13,13 +13,14 @@ async function adminHeaders(): Promise<Record<string, string>> {
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const resolvedParams = await params;
     const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
     if (!serverUrl) throw new Error("PAYMASTER_SERVER_URL not configured");
     const body = await req.json();
-    const response = await fetch(`${serverUrl}/admin/users/${params.id}/role`, {
+    const response = await fetch(`${serverUrl}/admin/users/${resolvedParams.id}/role`, {
       method: "PATCH",
       headers: await adminHeaders(),
       body: JSON.stringify(body),

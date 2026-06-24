@@ -12,12 +12,13 @@ async function adminHeaders(): Promise<Record<string, string>> {
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const resolvedParams = await params;
     const serverUrl = process.env.PAYMASTER_SERVER_URL?.trim().replace(/\/$/, "");
     if (!serverUrl) throw new Error("PAYMASTER_SERVER_URL not configured");
-    const response = await fetch(`${serverUrl}/admin/users/${params.id}`, {
+    const response = await fetch(`${serverUrl}/admin/users/${resolvedParams.id}`, {
       method: "DELETE",
       headers: await adminHeaders(),
     });
