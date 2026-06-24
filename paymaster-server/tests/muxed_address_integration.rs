@@ -70,7 +70,7 @@ fn build_signed_muxed_transaction_xdr(seed_byte: u8) -> String {
 }
 
 #[tokio::test]
-async fn fee_bump_muxed_address_integration() {
+async fn fee_bump_muxed_destination_integration() {
     let mut mock = paymaster_server::mock_horizon::MockHorizonServer::new();
     let horizon_base = mock.start().await;
     let server = TestServer::spawn(&horizon_base).await;
@@ -93,6 +93,80 @@ async fn fee_bump_muxed_address_integration() {
     mock.stop().await;
 }
 
+fn build_signed_muxed_source_transaction_xdr(seed_byte: u8) -> String {
+    let secret = [seed_byte; 32];
+    let signing_key = SigningKey::from_bytes(&secret);
+    let source = signing_key.verifying_key().to_bytes();
+    let destination = [7_u8; 32];
+
+    let tx = Transaction {
+        source_account: MuxedAccount::MuxedEd25519(MuxedAccountMed25519 {
+            id: 999999999,
+            ed25519: Uint256(source),
+        }),
+        fee: 100,
+        seq_num: SequenceNumber(42),
+        cond: Preconditions::None,
+        memo: Memo::None,
+        operations: vec![Operation {
+            source_account: None,
+            body: OperationBody::Payment(PaymentOp {
+                destination: MuxedAccount::Ed25519(Uint256(destination)),
+                asset: Asset::Native,
+                amount: 10_000_000,
+            }),
+        }]
+        .try_into()
+        .unwrap(),
+        ext: TransactionExt::V0,
+    };
+
+    let network_hash: [u8; 32] =
+        Sha256::digest("Test SDF Network ; September 2015".as_bytes()).into();
+    let payload = TransactionSignaturePayload {
+        network_id: Hash(network_hash),
+        tagged_transaction: TransactionSignaturePayloadTaggedTransaction::Tx(tx.clone()),
+    };
+    let payload_xdr = payload.to_xdr(Limits::none()).unwrap();
+    let tx_hash: [u8; 32] = Sha256::digest(payload_xdr).into();
+    let signature = signing_key.sign(&tx_hash).to_bytes();
+
+    let envelope = TransactionEnvelope::Tx(TransactionV1Envelope {
+        tx,
+        signatures: vec![DecoratedSignature {
+            hint: SignatureHint([source[28], source[29], source[30], source[31]]),
+            signature: Signature(signature.to_vec().try_into().unwrap()),
+        }]
+        .try_into()
+        .unwrap(),
+    });
+
+    base64::engine::general_purpose::STANDARD.encode(envelope.to_xdr(Limits::none()).unwrap())
+}
+
+#[tokio::test]
+async fn fee_bump_muxed_source_integration() {
+    let mut mock = paymaster_server::mock_horizon::MockHorizonServer::new();
+    let horizon_base = mock.start().await;
+    let server = TestServer::spawn(&horizon_base).await;
+    let client = Client::new();
+
+    let xdr = build_signed_muxed_source_transaction_xdr(2);
+
+    let accepted = client
+        .post(format!("{}/fee-bump", server.base_url))
+        .header("x-api-key", "paymaster-pro-demo-key")
+        .json(&serde_json::json!({ "xdr": xdr, "submit": false }))
+        .send()
+        .await
+        .expect("fee-bump request should complete");
+
+    assert_eq!(accepted.status(), 200);
+    let accepted_body: serde_json::Value = accepted.json().await.unwrap();
+    assert_eq!(accepted_body["status"], "ready");
+
+    mock.stop().await;
+}
 struct TestServer {
     base_url: String,
     child: std::process::Child,
