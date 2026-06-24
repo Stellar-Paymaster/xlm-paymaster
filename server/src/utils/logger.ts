@@ -1,4 +1,5 @@
 import pino, { type Bindings, type Logger, type LoggerOptions } from "pino";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 type SerializableError = {
     type?: string;
@@ -10,6 +11,16 @@ type SerializableError = {
     response_status?: unknown;
     response_data?: unknown;
 };
+
+type LogContext = {
+    trace_id?: string;
+    span_id?: string;
+    user_id?: string;
+    tenant_id?: string;
+    [key: string]: unknown;
+};
+
+export const loggerContext = new AsyncLocalStorage<LogContext>();
 
 const defaultLevel = process.env.LOG_LEVEL ??
     (process.env.NODE_ENV === "production" ? "info" : "debug");
@@ -24,6 +35,16 @@ const loggerOptions: LoggerOptions = {
         env: process.env.NODE_ENV ?? "development",
     },
     messageKey: "event",
+    mixin() {
+        const context = loggerContext.getStore();
+        if (!context) return {};
+        // Standard Datadog trace correlation attributes
+        return {
+            ...context,
+            ...(context.trace_id ? { "dd.trace_id": context.trace_id } : {}),
+            ...(context.span_id ? { "dd.span_id": context.span_id } : {}),
+        };
+    },
     formatters: {
         level: (level) => ({ level }),
         log: (log) => {
