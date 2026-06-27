@@ -38,6 +38,16 @@ Closes #<!-- issue number -->
 
 ---
 
+## Security & Performance
+
+<!-- REQUIRED for any backend/smart-contract or high-throughput changes -->
+- [ ] This PR does NOT expose any sensitive credentials or environment variables.
+- [ ] I have considered the potential rate-limiting implications of these changes.
+- [ ] I have evaluated the impact on CPU/Memory usage under load.
+- [ ] Any new dependencies have been audited for known vulnerabilities (`npm audit` / `cargo audit`).
+
+---
+
 ## Evidence
 
 <!-- REQUIRED for any PR that changes runtime behaviour.
