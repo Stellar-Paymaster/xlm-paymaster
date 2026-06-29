@@ -71,6 +71,71 @@ fn build_signed_transaction_xdr(seed_byte: u8, med_threshold: u32) -> (String, S
     (xdr, account_id)
 }
 
+fn build_multi_signed_transaction_xdr(seed_byte_1: u8, seed_byte_2: u8) -> (String, String, String) {
+    let secret1 = [seed_byte_1; 32];
+    let secret2 = [seed_byte_2; 32];
+    let signing_key_1 = SigningKey::from_bytes(&secret1);
+    let signing_key_2 = SigningKey::from_bytes(&secret2);
+    let source = signing_key_1.verifying_key().to_bytes();
+    let account_id_1 = Strkey::PublicKeyEd25519(stellar_strkey::ed25519::PublicKey(source))
+        .to_string()
+        .to_string();
+    let source_2 = signing_key_2.verifying_key().to_bytes();
+    let account_id_2 = Strkey::PublicKeyEd25519(stellar_strkey::ed25519::PublicKey(source_2))
+        .to_string()
+        .to_string();
+    let destination = [7_u8; 32];
+
+    let tx = Transaction {
+        source_account: MuxedAccount::Ed25519(Uint256(source)),
+        fee: 100,
+        seq_num: SequenceNumber(42),
+        cond: Preconditions::None,
+        memo: Memo::None,
+        operations: vec![Operation {
+            source_account: None,
+            body: OperationBody::Payment(PaymentOp {
+                destination: MuxedAccount::Ed25519(Uint256(destination)),
+                asset: Asset::Native,
+                amount: 10_000_000,
+            }),
+        }]
+        .try_into()
+        .unwrap(),
+        ext: TransactionExt::V0,
+    };
+
+    let network_hash: [u8; 32] =
+        Sha256::digest("Test SDF Network ; September 2015".as_bytes()).into();
+    let payload = TransactionSignaturePayload {
+        network_id: Hash(network_hash),
+        tagged_transaction: TransactionSignaturePayloadTaggedTransaction::Tx(tx.clone()),
+    };
+    let payload_xdr = payload.to_xdr(Limits::none()).unwrap();
+    let tx_hash: [u8; 32] = Sha256::digest(payload_xdr).into();
+    let signature_1 = signing_key_1.sign(&tx_hash).to_bytes();
+    let signature_2 = signing_key_2.sign(&tx_hash).to_bytes();
+
+    let envelope = TransactionEnvelope::Tx(TransactionV1Envelope {
+        tx,
+        signatures: vec![
+            DecoratedSignature {
+                hint: SignatureHint([source[28], source[29], source[30], source[31]]),
+                signature: Signature(signature_1.to_vec().try_into().unwrap()),
+            },
+            DecoratedSignature {
+                hint: SignatureHint([source_2[28], source_2[29], source_2[30], source_2[31]]),
+                signature: Signature(signature_2.to_vec().try_into().unwrap()),
+            }
+        ]
+        .try_into()
+        .unwrap(),
+    });
+
+    let xdr = base64::engine::general_purpose::STANDARD.encode(envelope.to_xdr(Limits::none()).unwrap());
+    (xdr, account_id_1, account_id_2)
+}
+
 #[tokio::test]
 async fn fee_bump_preflight_signer_weight_integration() {
     let mut mock = paymaster_server::mock_horizon::MockHorizonServer::new();
@@ -137,6 +202,43 @@ async fn fee_bump_preflight_signer_weight_integration() {
     assert_eq!(accepted.status(), 200);
     let accepted_body: serde_json::Value = accepted.json().await.unwrap();
     assert_eq!(accepted_body["status"], "ready");
+
+    // Multi-sig: med_threshold 3. Signer 1 has weight 1, Signer 2 has weight 2.
+    let (multi_sig_xdr, multi_sig_account_1, multi_sig_account_2) = build_multi_signed_transaction_xdr(11, 12);
+    mock.set_account_auth(
+        &multi_sig_account_1,
+        serde_json::json!({
+            "thresholds": {
+                "low_threshold": 0,
+                "med_threshold": 3,
+                "high_threshold": 5
+            },
+            "signers": [
+                {
+                    "weight": 1,
+                    "key": multi_sig_account_1,
+                    "type": "ed25519_public_key"
+                },
+                {
+                    "weight": 2,
+                    "key": multi_sig_account_2,
+                    "type": "ed25519_public_key"
+                }
+            ]
+        }),
+    );
+
+    let multi_accepted = client
+        .post(format!("{}/fee-bump", server.base_url))
+        .header("x-api-key", "paymaster-pro-demo-key")
+        .json(&serde_json::json!({ "xdr": multi_sig_xdr, "submit": false }))
+        .send()
+        .await
+        .expect("fee-bump request should complete");
+
+    assert_eq!(multi_accepted.status(), 200);
+    let multi_accepted_body: serde_json::Value = multi_accepted.json().await.unwrap();
+    assert_eq!(multi_accepted_body["status"], "ready");
 
     mock.stop().await;
 }
