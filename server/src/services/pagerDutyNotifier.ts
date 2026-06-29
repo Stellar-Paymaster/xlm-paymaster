@@ -5,7 +5,9 @@ const logger = createLogger({ component: "pagerduty_notifier" });
 export type PagerDutyEventType =
   | "signer_pool_empty"
   | "horizon_unreachable"
-  | "server_restart";
+  | "server_restart"
+  | "rate_limit_surge"
+  | "database_failure";
 
 export interface PagerDutyNotifierOptions {
   routingKey?: string;
@@ -56,6 +58,18 @@ export class PagerDutyNotifier {
     details: PagerDutyEventDetails,
   ): Promise<boolean> {
     return this.sendEvent("trigger", type, details);
+  }
+
+  async triggerCritical(
+    type: PagerDutyEventType,
+    summary: string,
+    customDetails?: Record<string, unknown>,
+  ): Promise<boolean> {
+    return this.trigger(type, {
+      summary,
+      severity: "critical",
+      customDetails: { ...customDetails, critical_alert: true },
+    });
   }
 
   async resolve(
