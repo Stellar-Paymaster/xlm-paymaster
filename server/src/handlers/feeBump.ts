@@ -41,6 +41,7 @@ import { persistTransactionAsync } from "../utils/asyncDbPersist";
 import {
   markTransactionHashProcessed,
 } from "../utils/redis";
+import { validateInnerTransactionSequence } from "../services/sequenceValidator";
 
 const FEEBUMP_JOB_TIMEOUT_MS = parseInt(
   process.env.FEEBUMP_JOB_TIMEOUT_MS ?? "30000",
@@ -328,6 +329,8 @@ export async function processFeeBump(
       "QUOTA_EXCEEDED",
     );
   }
+  await validateInnerTransactionSequence(prepared.innerTransaction, config);
+
   const transactionRecord = createPendingTransactionRecord(
     tenant.id,
     prepared,
@@ -527,6 +530,7 @@ export async function feeBumpHandler(
       }
 
       const prepared = prepareFeeBump(effectiveXdr, config);
+      await validateInnerTransactionSequence(prepared.innerTransaction, config);
       const quotaCheck = await checkTenantDailyQuota(
         tenant,
         prepared.feeAmount,
@@ -669,6 +673,11 @@ export async function feeBumpBatchHandler(
 
     const preparedFeeBumps = body.xdrs.map((xdr) =>
       prepareFeeBump(xdr, config),
+    );
+    await Promise.all(
+      preparedFeeBumps.map((prepared) =>
+        validateInnerTransactionSequence(prepared.innerTransaction, config),
+      ),
     );
     const totalFeeStroops = preparedFeeBumps.reduce(
       (sum, prepared) => sum + prepared.feeAmount,
