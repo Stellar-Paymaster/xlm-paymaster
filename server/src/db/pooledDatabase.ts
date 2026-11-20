@@ -15,6 +15,12 @@ import {
   ConnectionPoolOptions,
   ConnectionPoolSnapshot,
 } from "./connectionPool";
+import {
+  createReconnectManager,
+  ReconnectManager,
+  ReconnectManagerOptions,
+  ConnectionState,
+} from "./prismaReconnect";
 
 type PrismaLike = {
   $queryRaw: (
@@ -22,6 +28,7 @@ type PrismaLike = {
     ...values: unknown[]
   ) => Promise<unknown>;
   $disconnect?: () => Promise<void>;
+  $connect?: () => Promise<void>;
 };
 
 export interface PooledDatabase<TPrisma extends PrismaLike> {
@@ -29,12 +36,21 @@ export interface PooledDatabase<TPrisma extends PrismaLike> {
   snapshot(): ConnectionPoolSnapshot;
   drain(): Promise<void>;
   warmup(): Promise<void>;
+  /** Current reconnection state of the shared client (for health probes). */
+  connectionState(): ConnectionState;
+  /** The reconnect manager backing this pool, if any. */
+  reconnectManager(): ReconnectManager<TPrisma> | undefined;
 }
 
 export interface PooledDatabaseOptions<TPrisma extends PrismaLike>
   extends Partial<Omit<ConnectionPoolOptions<TPrisma>, "factory" | "destroy">> {
   client: TPrisma;
   maxSize: number;
+  /**
+   * Reconnection tuning. Pass `false` to disable the reconnect manager
+   * entirely (useful in tests that want raw error propagation).
+   */
+  reconnect?: Partial<ReconnectManagerOptions> | false;
 }
 
 /**
@@ -46,7 +62,12 @@ export interface PooledDatabaseOptions<TPrisma extends PrismaLike>
 export function createPooledDatabase<TPrisma extends PrismaLike>(
   options: PooledDatabaseOptions<TPrisma>,
 ): PooledDatabase<TPrisma> {
-  const { client, ...poolOptions } = options;
+  const { client, reconnect, ...poolOptions } = options;
+
+  const manager =
+    reconnect === false
+      ? undefined
+      : createReconnectManager<TPrisma>(client, reconnect ?? {});
 
   const pool = new ConnectionPool<TPrisma>({
     name: options.name ?? "prisma",
@@ -56,7 +77,7 @@ export function createPooledDatabase<TPrisma extends PrismaLike>(
     reapIntervalMs: options.reapIntervalMs,
     maxSize: options.maxSize,
     minSize: options.minSize,
-    validate: options.validate ?? defaultValidate(client),
+    validate: options.validate ?? defaultValidate(client, manager),
     factory: () => client,
     // The client is shared — destroying a lease must not disconnect it,
     // or every expired lease would kill the singleton.
@@ -64,15 +85,21 @@ export function createPooledDatabase<TPrisma extends PrismaLike>(
   });
 
   return {
-    withConnection: (fn) => pool.withConnection(fn),
+    withConnection: (fn) =>
+      manager
+        ? manager.withResilientConnection(() => pool.withConnection(fn))
+        : pool.withConnection(fn),
     snapshot: () => pool.snapshot(),
     drain: () => pool.drain(),
     warmup: () => pool.warmup(),
+    connectionState: () => manager?.state() ?? "connected",
+    reconnectManager: () => manager,
   };
 }
 
 function defaultValidate<TPrisma extends PrismaLike>(
   client: TPrisma,
+  manager: ReconnectManager<TPrisma> | undefined,
 ): (resource: TPrisma) => Promise<boolean> {
   // Validation probes the shared client, not the lease, because the lease is
   // just a token. Ran only on acquire, so this is a light `SELECT 1`.
@@ -80,7 +107,13 @@ function defaultValidate<TPrisma extends PrismaLike>(
     try {
       await client.$queryRaw`SELECT 1`;
       return true;
-    } catch {
+    } catch (err) {
+      // A connection-loss error means the pool should not hand out a lease
+      // until the reconnect manager has healed the client.
+      if (manager && manager.isConnectionLoss(err)) {
+        manager.noteFailure(err);
+        return false;
+      }
       return false;
     }
   };
@@ -125,5 +158,28 @@ export function loadPooledDatabaseFromEnv<TPrisma extends PrismaLike>(
     ),
     idleTimeoutMs: parseOptionalPositiveInt(process.env.PAYMASTER_DB_POOL_IDLE_TIMEOUT),
     maxLifetimeMs: parseOptionalPositiveInt(process.env.PAYMASTER_DB_POOL_MAX_LIFETIME),
+    reconnect: {
+      maxAttempts: parsePositiveInt(
+        process.env.PAYMASTER_DB_RECONNECT_MAX_ATTEMPTS,
+        5,
+      ),
+      baseDelayMs: parsePositiveInt(
+        process.env.PAYMASTER_DB_RECONNECT_BASE_DELAY,
+        100,
+      ),
+      maxDelayMs: parsePositiveInt(
+        process.env.PAYMASTER_DB_RECONNECT_MAX_DELAY,
+        5_000,
+      ),
+      jitterRatio: parseJitter(process.env.PAYMASTER_DB_RECONNECT_JITTER, 0.2),
+      retryIdempotentQueries:
+        process.env.PAYMASTER_DB_RECONNECT_RETRY_QUERIES !== "false",
+    },
   });
+}
+
+function parseJitter(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed >= 0 && parsed <= 1 ? parsed : fallback;
 }

@@ -103,6 +103,21 @@ export interface WorkerConfig {
   };
 }
 
+export interface HorizonPoolConfig {
+  /** Set to false via PAYMASTER_HORIZON_POOL_ENABLED=false to disable dynamic refresh. */
+  enabled: boolean;
+  /** Interval between live SDF validator list refreshes (ms). */
+  refreshIntervalMs: number;
+  /** Per-candidate health probe timeout (ms). */
+  probeTimeoutMs: number;
+  /** Overall bound on a single refresh cycle (ms). */
+  refreshTimeoutMs: number;
+  /** Maximum number of secondary failover endpoints retained. */
+  maxSecondaryNodes: number;
+  /** Live SDF validator list endpoints queried on each refresh. */
+  validatorListUrls: string[];
+}
+
 export interface Config {
   allowedOrigins: string[];
   alerting: AlertingConfig;
@@ -112,9 +127,11 @@ export interface Config {
   feeMultiplier: number;
   feePayerAccounts: FeePayerAccount[];
   grpcEngine?: GrpcEngineConfig;
+  horizonPool: HorizonPoolConfig;
   horizonSelectionStrategy: HorizonSelectionStrategy;
   horizonUrl?: string;
   horizonUrls: string[];
+=======
   ipAllowlist: string[];
   ipDenylist: string[];
   maxOperations: number;
@@ -372,6 +389,41 @@ function loadWorkerConfig(): WorkerConfig {
   };
 }
 
+function loadHorizonPoolConfig(): HorizonPoolConfig {
+  const defaultValidatorListUrls = [
+    "https://raw.githubusercontent.com/stellar/stellar-validator-list/main/validators.toml",
+  ];
+  const configuredValidatorListUrls = parseCommaSeparatedList(
+    process.env.PAYMASTER_HORIZON_VALIDATOR_LIST_URLS,
+  );
+
+  return {
+    enabled: parseBoolean(process.env.PAYMASTER_HORIZON_POOL_ENABLED, true),
+    refreshIntervalMs: parsePositiveInt(
+      process.env.PAYMASTER_HORIZON_POOL_REFRESH_INTERVAL_MS,
+      5 * 60 * 1000,
+    ),
+    probeTimeoutMs: parsePositiveInt(
+      process.env.PAYMASTER_HORIZON_POOL_PROBE_TIMEOUT_MS,
+      3_000,
+    ),
+    refreshTimeoutMs: parsePositiveInt(
+      process.env.PAYMASTER_HORIZON_POOL_REFRESH_TIMEOUT_MS,
+      15_000,
+    ),
+    maxSecondaryNodes: parseBoundedPositiveInt(
+      process.env.PAYMASTER_HORIZON_POOL_MAX_SECONDARY_NODES,
+      8,
+      1,
+      64,
+    ),
+    validatorListUrls:
+      configuredValidatorListUrls.length > 0
+        ? configuredValidatorListUrls
+        : defaultValidatorListUrls,
+  };
+}
+
 function loadNetworkSimulationConfig(): NetworkSimulationConfig {
   return {
     latencyMs: parsePositiveInt(process.env.PAYMASTER_NETWORK_LATENCY_MS, 0),
@@ -439,6 +491,7 @@ export function loadConfig(): Config {
     digest: loadDigestConfig(),
     baseFee,
     feeMultiplier: Number.isFinite(feeMultiplier) ? feeMultiplier : 2,
+    horizonPool: loadHorizonPoolConfig(),
     horizonSelectionStrategy,
     horizonUrl: horizonUrls[0],
     horizonUrls,
